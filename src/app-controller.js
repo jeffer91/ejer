@@ -1,0 +1,345 @@
+/*
+  Nombre completo: app-controller.js
+  Ruta o ubicación: src/app-controller.js
+
+  Función:
+    - Controlar el flujo principal de FitJeff con módulos separados.
+    - Cargar y guardar estado local.
+    - Conectar layout, router, vistas, formularios, PWA, actualizaciones, exportación y sincronización.
+    - Reemplazar la lógica monolítica inicial de src/app.js cuando hagamos la actualización final.
+
+  Se conecta con:
+    - src/app.js
+    - src/storage/local-storage.service.js
+    - src/ui/router.js
+    - src/ui/layout.js
+    - src/ui/modal.js
+    - src/vistas/*.view.js
+    - src/peso/peso.service.js
+    - src/entrenamiento/entrenamiento.service.js
+    - src/recomendaciones/recomendaciones.service.js
+    - src/sincronizacion/sincronizacion.service.js
+    - src/pwa/pwa.service.js
+    - src/actualizaciones/actualizaciones.service.js
+*/
+
+import { cargarEstadoLocal, guardarEstadoLocal, borrarEstadoLocal } from "./storage/local-storage.service.js";
+import { renderizarLayout, renderizarEnVista, actualizarEstadoSincronizacion } from "./ui/layout.js";
+import { activarRouterDelegado, navegarA, registrarVistas, restaurarVistaGuardada, VISTAS_APP } from "./ui/router.js";
+import { asegurarEstilosModal, mostrarConfirmacion, mostrarMensaje } from "./ui/modal.js";
+import { leerFormulario, leerBooleano, leerNumero } from "./ui/helpers.js";
+import { renderInicioView } from "./vistas/inicio.view.js";
+import { renderEntrenarView } from "./vistas/entrenar.view.js";
+import { renderPesoView } from "./vistas/peso.view.js";
+import { renderEstadisticasView } from "./vistas/estadisticas.view.js";
+import { renderRecomendacionesView } from "./vistas/recomendaciones.view.js";
+import { renderAjustesView } from "./vistas/ajustes.view.js";
+import { crearRegistroPeso } from "./peso/peso.service.js";
+import { normalizarEntrenamiento, calcularSiguienteDiaRutina } from "./entrenamiento/entrenamiento.service.js";
+import { TIPOS_EJERCICIO } from "./data/rutina-base.js";
+import { crearRegistroRecomendacionLocal, prepararSolicitudGemini } from "./recomendaciones/recomendaciones.service.js";
+import { sincronizarEstadoConFirebase } from "./sincronizacion/sincronizacion.service.js";
+import { guardarEstadisticasEnFirebase } from "./estadisticas/estadisticas.service.js";
+import { inicializarPWA, instalarPWA, aplicarActualizacionPWA, escucharEstadoPWA } from "./pwa/pwa.service.js";
+import { actualizarApp, revisarActualizacion } from "./actualizaciones/actualizaciones.service.js";
+import { exportarDatosCompletos } from "./exportacion/exportacion.service.js";
+
+export const APP_VERSION = "0.1.0";
+
+let estado = cargarEstadoLocal();
+
+export async function iniciarFitJeff() {
+  asegurarEstilosModal();
+
+  renderizarLayout({
+    version: APP_VERSION,
+    estadoSync: estado.ajustes?.usarFirebase ? "local" : "solo local"
+  });
+
+  registrarVistas({
+    [VISTAS_APP.INICIO]: () => renderizarVista(renderInicioView),
+    [VISTAS_APP.ENTRENAR]: () => renderizarVista(renderEntrenarView),
+    [VISTAS_APP.PESO]: () => renderizarVista(renderPesoView),
+    [VISTAS_APP.ESTADISTICAS]: () => renderizarVista(renderEstadisticasView),
+    [VISTAS_APP.RECOMENDACIONES]: () => renderizarVista(renderRecomendacionesView),
+    [VISTAS_APP.AJUSTES]: () => renderizarVista(renderAjustesView)
+  });
+
+  activarRouterDelegado(document.body);
+  activarEventosApp();
+  activarPWA();
+
+  const vistaInicial = restaurarVistaGuardada();
+  navegarA(vistaInicial);
+
+  if (estado.ajustes?.sincronizarAutomaticamente) {
+    sincronizarSilencioso();
+  }
+}
+
+export function obtenerEstadoFitJeff() {
+  return estado;
+}
+
+export function reemplazarEstadoFitJeff(nuevoEstado) {
+  estado = nuevoEstado;
+  guardarEstadoLocal(estado);
+  navegarA(restaurarVistaGuardada());
+  return estado;
+}
+
+function renderizarVista(render) {
+  renderizarEnVista(render(estado));
+}
+
+function activarEventosApp() {
+  document.body.addEventListener("click", async (event) => {
+    const accion = event.target.closest("[data-action]")?.dataset.action;
+
+    if (!accion) {
+      return;
+    }
+
+    if (accion === "guardar-peso") await accionGuardarPeso();
+    if (accion === "guardar-entrenamiento") await accionGuardarEntrenamiento();
+    if (accion === "guardar-ajustes") await accionGuardarAjustes();
+    if (accion === "generar-recomendacion-local") await accionGenerarRecomendacionLocal();
+    if (accion === "preparar-gemini") await accionPrepararGemini();
+    if (accion === "sincronizar-ahora") await accionSincronizarAhora();
+    if (accion === "guardar-estadisticas") await accionGuardarEstadisticas();
+    if (accion === "revisar-actualizacion") await accionRevisarActualizacion();
+    if (accion === "actualizar-app") await accionActualizarApp();
+    if (accion === "instalar-pwa") await accionInstalarPWA();
+    if (accion === "aplicar-actualizacion-pwa") await accionAplicarActualizacionPWA();
+    if (accion === "exportar-datos") accionExportarDatos();
+    if (accion === "borrar-datos-locales") accionBorrarDatosLocales();
+  });
+
+  document.body.addEventListener("change", (event) => {
+    if (event.target.matches("#selector-dia-entrenamiento")) {
+      estado.diaSeleccionado = Number(event.target.value || 1);
+      guardarEstadoLocal(estado);
+      navegarA(VISTAS_APP.ENTRENAR);
+    }
+  });
+}
+
+async function activarPWA() {
+  escucharEstadoPWA((tipo, payload) => {
+    if (tipo === "actualizacion-disponible") {
+      mostrarMensaje("Actualización disponible", payload.mensaje || "Hay una nueva versión lista.", "ok");
+    }
+  });
+
+  await inicializarPWA();
+}
+
+async function accionGuardarPeso() {
+  const datos = leerFormulario("#form-peso");
+  const resultado = crearRegistroPeso(datos);
+
+  if (!resultado.ok) {
+    mostrarMensaje("Peso no guardado", resultado.errores.join("\n"), "error");
+    return;
+  }
+
+  estado.pesos.unshift(resultado.registro);
+  estado.usuario.perfil.pesoActualKg = resultado.registro.pesoKg;
+  guardarEstadoLocal(estado);
+  await sincronizarSilencioso();
+  mostrarMensaje("Peso guardado", "El registro de peso quedó guardado correctamente.", "ok");
+  navegarA(VISTAS_APP.PESO);
+}
+
+async function accionGuardarEntrenamiento() {
+  const form = document.getElementById("form-entrenamiento");
+
+  if (!form) {
+    mostrarMensaje("Sin formulario", "No se encontró el formulario de entrenamiento.", "error");
+    return;
+  }
+
+  const datos = leerFormulario(form);
+  const dia = estado.rutina.dias.find((item) => Number(item.numero) === Number(datos.diaRutina));
+
+  if (!dia) {
+    mostrarMensaje("Día no válido", "No se encontró el día de rutina seleccionado.", "error");
+    return;
+  }
+
+  const entrenamiento = normalizarEntrenamiento({
+    id: `entrenamiento_${Date.now()}`,
+    fecha: datos.fecha,
+    diaRutina: Number(datos.diaRutina),
+    nombreDia: datos.nombreDia || dia.nombre,
+    estado: datos.estado,
+    duracionMin: leerNumero(datos.duracionMin, dia.duracionEstimadaMin),
+    energiaInicial: datos.energiaInicial,
+    energiaFinal: datos.energiaFinal,
+    esfuerzoGeneral: datos.esfuerzoGeneral,
+    dolor: datos.dolor === "si",
+    zonaDolor: datos.zonaDolor || "",
+    observacion: datos.observacion || "",
+    ejercicios: dia.ejercicios.map((ejercicio) => leerEjercicioDesdeFormulario(ejercicio, datos)),
+    creadoEn: new Date().toISOString(),
+    sincronizado: false
+  });
+
+  estado.entrenamientos.unshift(entrenamiento);
+  estado.rutina.diaActual = calcularSiguienteDiaRutina(entrenamiento.diaRutina);
+  estado.diaSeleccionado = estado.rutina.diaActual;
+  guardarEstadoLocal(estado);
+  await sincronizarSilencioso();
+  mostrarMensaje("Entrenamiento guardado", "El entrenamiento quedó registrado correctamente.", "ok");
+  navegarA(VISTAS_APP.INICIO);
+}
+
+function leerEjercicioDesdeFormulario(ejercicio, datos) {
+  if (ejercicio.tipoRegistro === TIPOS_EJERCICIO.CARDIO) {
+    return {
+      id: ejercicio.id,
+      nombre: ejercicio.nombre,
+      tipoRegistro: ejercicio.tipoRegistro,
+      minutosObjetivo: ejercicio.minutosObjetivo,
+      minutosCompletados: leerNumero(datos[`ex_${ejercicio.id}_minutos`], 0),
+      intensidadReal: datos[`ex_${ejercicio.id}_intensidad`] || "media",
+      seDetuvo: datos[`ex_${ejercicio.id}_detencion`] === "si"
+    };
+  }
+
+  if (ejercicio.tipoRegistro === TIPOS_EJERCICIO.HIIT) {
+    return {
+      id: ejercicio.id,
+      nombre: ejercicio.nombre,
+      tipoRegistro: ejercicio.tipoRegistro,
+      rondasObjetivo: ejercicio.rondasObjetivo,
+      rondasCompletadas: leerNumero(datos[`ex_${ejercicio.id}_rondas`], 0),
+      intensidadReal: datos[`ex_${ejercicio.id}_intensidad`] || "alta",
+      seDetuvo: datos[`ex_${ejercicio.id}_detencion`] === "si"
+    };
+  }
+
+  const series = Array.from({ length: ejercicio.seriesObjetivo || 3 }, (_, index) => {
+    const numero = index + 1;
+    return {
+      numero,
+      valor: leerNumero(datos[`ex_${ejercicio.id}_serie_${numero}`], 0),
+      unidad: ejercicio.unidad,
+      falloTecnico: leerBooleano(datos[`ex_${ejercicio.id}_fallo_${numero}`])
+    };
+  });
+
+  return {
+    id: ejercicio.id,
+    nombre: ejercicio.nombre,
+    tipoRegistro: ejercicio.tipoRegistro,
+    unidad: ejercicio.unidad,
+    series
+  };
+}
+
+async function accionGuardarAjustes() {
+  const datos = leerFormulario("#form-ajustes");
+
+  estado.ajustes = {
+    ...estado.ajustes,
+    usarFirebase: leerBooleano(datos.usarFirebase),
+    usarGemini: leerBooleano(datos.usarGemini),
+    guardarLocalAutomatico: leerBooleano(datos.guardarLocalAutomatico),
+    sincronizarAutomaticamente: leerBooleano(datos.sincronizarAutomaticamente),
+    mostrarRecomendaciones: leerBooleano(datos.mostrarRecomendaciones),
+    mostrarEstadisticas: leerBooleano(datos.mostrarEstadisticas)
+  };
+
+  guardarEstadoLocal(estado);
+  mostrarMensaje("Ajustes guardados", "La configuración quedó actualizada.", "ok");
+  navegarA(VISTAS_APP.AJUSTES);
+}
+
+async function accionGenerarRecomendacionLocal() {
+  const datos = leerFormulario("#form-recomendacion");
+  const registro = crearRegistroRecomendacionLocal(estado, datos.observacionUsuario || "");
+
+  estado.recomendaciones.unshift(registro);
+  guardarEstadoLocal(estado);
+  await sincronizarSilencioso();
+  mostrarMensaje("Recomendación guardada", "Se generó una recomendación local con tus datos actuales.", "ok");
+  navegarA(VISTAS_APP.RECOMENDACIONES);
+}
+
+async function accionPrepararGemini() {
+  const datos = leerFormulario("#form-recomendacion");
+  const solicitud = prepararSolicitudGemini(estado, datos.observacionUsuario || "");
+  mostrarMensaje("Solicitud Gemini preparada", solicitud.prompt.slice(0, 1000), "ok");
+}
+
+async function accionSincronizarAhora() {
+  const resultado = await sincronizarEstadoConFirebase({
+    estado,
+    guardarLocal: () => guardarEstadoLocal(estado),
+    onCambio: (resumen) => actualizarEstadoSincronizacion({ estado: resumen.estado })
+  });
+
+  actualizarEstadoSincronizacion({ estado: resultado.estado });
+  mostrarMensaje(resultado.ok ? "Sincronización lista" : "Sincronización pendiente", resultado.errores?.join("\n") || "Proceso finalizado.", resultado.ok ? "ok" : "error");
+}
+
+async function sincronizarSilencioso() {
+  if (!estado.ajustes?.usarFirebase || !estado.ajustes?.sincronizarAutomaticamente) {
+    return null;
+  }
+
+  const resultado = await sincronizarEstadoConFirebase({
+    estado,
+    guardarLocal: () => guardarEstadoLocal(estado),
+    onCambio: (resumen) => actualizarEstadoSincronizacion({ estado: resumen.estado })
+  });
+
+  actualizarEstadoSincronizacion({ estado: resultado.estado });
+  return resultado;
+}
+
+async function accionGuardarEstadisticas() {
+  const resultado = await guardarEstadisticasEnFirebase(estado);
+  mostrarMensaje("Estadísticas guardadas", resultado.ok ? "Resumen enviado a Firebase." : "No se pudo guardar.", resultado.ok ? "ok" : "error");
+}
+
+async function accionRevisarActualizacion() {
+  const resultado = await revisarActualizacion();
+  mostrarMensaje("Actualización", resultado.mensaje, resultado.ok ? "ok" : "error");
+}
+
+async function accionActualizarApp() {
+  const resultado = await actualizarApp();
+  if (resultado?.ok === false) {
+    mostrarMensaje("Actualización", resultado.mensaje || "No se pudo actualizar.", "error");
+  }
+}
+
+async function accionInstalarPWA() {
+  const resultado = await instalarPWA();
+  mostrarMensaje("Instalación", resultado.mensaje, resultado.ok ? "ok" : "error");
+}
+
+async function accionAplicarActualizacionPWA() {
+  await aplicarActualizacionPWA();
+}
+
+function accionExportarDatos() {
+  const resultado = exportarDatosCompletos(estado);
+  mostrarMensaje("Exportación lista", `Archivos generados: ${resultado.archivos.join(", ")}`, "ok");
+}
+
+function accionBorrarDatosLocales() {
+  mostrarConfirmacion({
+    titulo: "Borrar datos locales",
+    mensaje: "Esto eliminará los datos guardados en este dispositivo. Exporta antes si necesitas respaldo.",
+    textoAceptar: "Borrar",
+    textoCancelar: "Cancelar",
+    onAceptar: () => {
+      estado = borrarEstadoLocal();
+      guardarEstadoLocal(estado);
+      navegarA(VISTAS_APP.INICIO);
+    }
+  });
+}
