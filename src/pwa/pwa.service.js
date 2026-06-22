@@ -3,13 +3,13 @@
   Ruta o ubicación: src/pwa/pwa.service.js
 
   Función:
-    - Registrar el service worker de FitJeff.
+    - Registrar el service worker de FitJeff desde la raíz del proyecto.
     - Detectar si la app puede instalarse en celular o navegador.
     - Controlar el evento de instalación PWA.
     - Comunicar actualizaciones disponibles al usuario.
 
   Se conecta con:
-    - public/service-worker.js
+    - service-worker.js
     - public/manifest.json
     - public/version.json
     - src/actualizaciones/actualizaciones.service.js
@@ -20,6 +20,7 @@
 let eventoInstalacionPendiente = null;
 let registroServiceWorker = null;
 let listeners = [];
+let eventosEscuchados = false;
 
 export const ESTADOS_PWA = {
   SOPORTADA: "soportada",
@@ -32,8 +33,7 @@ export const ESTADOS_PWA = {
 };
 
 export async function inicializarPWA() {
-  escucharEventoInstalacion();
-  escucharAppInstalada();
+  escucharEventosPWAUnaVez();
 
   const sw = await registrarServiceWorker();
 
@@ -46,7 +46,7 @@ export async function inicializarPWA() {
 }
 
 export function esPWASoportada() {
-  return "serviceWorker" in navigator;
+  return typeof navigator !== "undefined" && "serviceWorker" in navigator;
 }
 
 export function estaInstaladaComoPWA() {
@@ -64,8 +64,15 @@ export async function registrarServiceWorker() {
     return null;
   }
 
+  if (location.protocol === "file:") {
+    notificar(ESTADOS_PWA.SW_ERROR, {
+      mensaje: "El service worker no funciona con archivo local. Usa Live Server, Firebase Hosting o HTTPS."
+    });
+    return null;
+  }
+
   try {
-    registroServiceWorker = await navigator.serviceWorker.register("./public/service-worker.js", {
+    registroServiceWorker = await navigator.serviceWorker.register("./service-worker.js", {
       scope: "./"
     });
 
@@ -125,7 +132,7 @@ export async function instalarPWA() {
 }
 
 export async function aplicarActualizacionPWA() {
-  const registro = registroServiceWorker || (await navigator.serviceWorker?.getRegistration?.());
+  const registro = registroServiceWorker || (await navigator.serviceWorker?.getRegistration?.("./"));
 
   if (!registro) {
     window.location.reload();
@@ -170,7 +177,13 @@ export function obtenerResumenPWA() {
   };
 }
 
-function escucharEventoInstalacion() {
+function escucharEventosPWAUnaVez() {
+  if (eventosEscuchados) {
+    return;
+  }
+
+  eventosEscuchados = true;
+
   window.addEventListener("beforeinstallprompt", (event) => {
     event.preventDefault();
     eventoInstalacionPendiente = event;
@@ -179,9 +192,7 @@ function escucharEventoInstalacion() {
       mensaje: "FitJeff está lista para instalarse."
     });
   });
-}
 
-function escucharAppInstalada() {
   window.addEventListener("appinstalled", () => {
     eventoInstalacionPendiente = null;
 
