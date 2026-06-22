@@ -9,7 +9,7 @@
     ],
     "seConectaCon": [
       "src/actualizaciones/actualizaciones.service.js",
-      "public/service-worker.js",
+      "service-worker.js",
       "src/pwa/pwa.service.js",
       "index.html"
     ],
@@ -18,14 +18,16 @@
   "app": "FitJeff",
   "version": "0.1.0",
   "appVersion": "0.1.0",
-  "build": 1,
+  "build": 3,
   "fechaPublicacion": "2026-06-22",
   "forzarActualizacion": false,
-  "notas": "Versión inicial con registro local, estructura Firebase, estadísticas, recomendaciones y base PWA.",
+  "notas": "Corrección de arranque: se agregaron usuario-base.js, rutina-base.js, service-worker raíz y rutas de actualización.",
   "archivosCriticos": [
     "index.html",
     "src/app.js",
-    "public/service-worker.js",
+    "src/data/usuario-base.js",
+    "src/data/rutina-base.js",
+    "service-worker.js",
     "public/manifest.json"
   ]
 }
