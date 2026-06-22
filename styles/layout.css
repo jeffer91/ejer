@@ -1,0 +1,109 @@
+/*
+  Nombre completo: layout.css
+  Ruta o ubicación: styles/layout.css
+
+  Función:
+    - Definir la estructura visual principal de FitJeff.
+    - Controlar header, navegación, contenedor principal y grillas.
+    - Mantener una base responsive para Live Server, Electron y celular.
+
+  Se conecta con:
+    - index.html
+    - styles/base.css
+    - styles/componentes.css
+    - styles/responsive.css
+*/
+
+.fit-shell {
+  min-height: 100vh;
+  display: grid;
+  grid-template-rows: auto 1fr;
+}
+
+.fit-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--fit-line);
+}
+
+.fit-header-inner {
+  width: 100%;
+  max-width: var(--fit-max-width);
+  margin: 0 auto;
+  padding: 14px 16px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.fit-brand {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.fit-brand strong {
+  font-size: 1.1rem;
+  line-height: 1.2;
+}
+
+.fit-brand span {
+  color: var(--fit-muted);
+  font-size: 0.85rem;
+}
+
+.fit-nav {
+  width: 100%;
+  max-width: var(--fit-max-width);
+  margin: 0 auto;
+  padding: 10px 16px 14px;
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.fit-main {
+  width: 100%;
+  max-width: var(--fit-max-width);
+  margin: 0 auto;
+  padding: 18px 16px 40px;
+}
+
+.grid {
+  display: grid;
+  gap: 14px;
+}
+
+.grid-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.grid-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.section-space {
+  margin-top: 14px;
+}
+
+.acciones {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.stack {
+  display: grid;
+  gap: 12px;
+}
+
+.center {
+  display: grid;
+  place-items: center;
+}
