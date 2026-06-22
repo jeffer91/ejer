@@ -5,8 +5,8 @@
   Función:
     - Controlar el flujo principal de FitJeff con módulos separados.
     - Cargar y guardar estado local.
-    - Conectar layout, router, vistas, formularios, PWA, actualizaciones, exportación y sincronización.
-    - Reemplazar la lógica monolítica inicial de src/app.js cuando hagamos la actualización final.
+    - Conectar layout, router, vistas, formularios, PWA, actualizaciones, exportación, diagnóstico y sincronización.
+    - Evitar que un error de Firebase, PWA o actualización rompa el arranque principal.
 
   Se conecta con:
     - src/app.js
@@ -21,9 +21,16 @@
     - src/sincronizacion/sincronizacion.service.js
     - src/pwa/pwa.service.js
     - src/actualizaciones/actualizaciones.service.js
+    - src/diagnostico/arranque-check.service.js
 */
 
-import { cargarEstadoLocal, guardarEstadoLocal, borrarEstadoLocal } from "./storage/local-storage.service.js";
+import {
+  cargarEstadoLocal,
+  guardarEstadoLocal,
+  borrarEstadoLocal,
+  marcarErrorSincronizacionLocal,
+  marcarSincronizacionLocal
+} from "./storage/local-storage.service.js";
 import { renderizarLayout, renderizarEnVista, actualizarEstadoSincronizacion } from "./ui/layout.js";
 import { activarRouterDelegado, navegarA, registrarVistas, restaurarVistaGuardada, VISTAS_APP } from "./ui/router.js";
 import { asegurarEstilosModal, mostrarConfirmacion, mostrarMensaje } from "./ui/modal.js";
@@ -43,13 +50,16 @@ import { guardarEstadisticasEnFirebase } from "./estadisticas/estadisticas.servi
 import { inicializarPWA, instalarPWA, aplicarActualizacionPWA, escucharEstadoPWA } from "./pwa/pwa.service.js";
 import { actualizarApp, revisarActualizacion } from "./actualizaciones/actualizaciones.service.js";
 import { exportarDatosCompletos } from "./exportacion/exportacion.service.js";
+import { imprimirDiagnosticoArranque } from "./diagnostico/arranque-check.service.js";
 
 export const APP_VERSION = "0.1.0";
 
 let estado = cargarEstadoLocal();
+let eventosActivos = false;
 
 export async function iniciarFitJeff() {
   asegurarEstilosModal();
+  imprimirDiagnosticoArranque();
 
   renderizarLayout({
     version: APP_VERSION,
@@ -67,12 +77,12 @@ export async function iniciarFitJeff() {
 
   activarRouterDelegado(document.body);
   activarEventosApp();
-  activarPWA();
+  activarPWAConProteccion();
 
-  const vistaInicial = restaurarVistaGuardada();
+  const vistaInicial = obtenerVistaInicial();
   navegarA(vistaInicial);
 
-  if (estado.ajustes?.sincronizarAutomaticamente) {
+  if (estado.ajustes?.usarFirebase && estado.ajustes?.sincronizarAutomaticamente) {
     sincronizarSilencioso();
   }
 }
@@ -93,6 +103,12 @@ function renderizarVista(render) {
 }
 
 function activarEventosApp() {
+  if (eventosActivos) {
+    return;
+  }
+
+  eventosActivos = true;
+
   document.body.addEventListener("click", async (event) => {
     const accion = event.target.closest("[data-action]")?.dataset.action;
 
@@ -100,19 +116,24 @@ function activarEventosApp() {
       return;
     }
 
-    if (accion === "guardar-peso") await accionGuardarPeso();
-    if (accion === "guardar-entrenamiento") await accionGuardarEntrenamiento();
-    if (accion === "guardar-ajustes") await accionGuardarAjustes();
-    if (accion === "generar-recomendacion-local") await accionGenerarRecomendacionLocal();
-    if (accion === "preparar-gemini") await accionPrepararGemini();
-    if (accion === "sincronizar-ahora") await accionSincronizarAhora();
-    if (accion === "guardar-estadisticas") await accionGuardarEstadisticas();
-    if (accion === "revisar-actualizacion") await accionRevisarActualizacion();
-    if (accion === "actualizar-app") await accionActualizarApp();
-    if (accion === "instalar-pwa") await accionInstalarPWA();
-    if (accion === "aplicar-actualizacion-pwa") await accionAplicarActualizacionPWA();
-    if (accion === "exportar-datos") accionExportarDatos();
-    if (accion === "borrar-datos-locales") accionBorrarDatosLocales();
+    try {
+      if (accion === "guardar-peso") await accionGuardarPeso();
+      if (accion === "guardar-entrenamiento") await accionGuardarEntrenamiento();
+      if (accion === "guardar-ajustes") await accionGuardarAjustes();
+      if (accion === "generar-recomendacion-local") await accionGenerarRecomendacionLocal();
+      if (accion === "preparar-gemini") await accionPrepararGemini();
+      if (accion === "sincronizar-ahora") await accionSincronizarAhora();
+      if (accion === "guardar-estadisticas") await accionGuardarEstadisticas();
+      if (accion === "revisar-actualizacion") await accionRevisarActualizacion();
+      if (accion === "actualizar-app") await accionActualizarApp();
+      if (accion === "instalar-pwa") await accionInstalarPWA();
+      if (accion === "aplicar-actualizacion-pwa") await accionAplicarActualizacionPWA();
+      if (accion === "exportar-datos") accionExportarDatos();
+      if (accion === "borrar-datos-locales") accionBorrarDatosLocales();
+    } catch (error) {
+      console.error(`Error ejecutando acción ${accion}.`, error);
+      mostrarMensaje("Acción no completada", error.message || "Ocurrió un error.", "error");
+    }
   });
 
   document.body.addEventListener("change", (event) => {
@@ -124,14 +145,18 @@ function activarEventosApp() {
   });
 }
 
-async function activarPWA() {
-  escucharEstadoPWA((tipo, payload) => {
-    if (tipo === "actualizacion-disponible") {
-      mostrarMensaje("Actualización disponible", payload.mensaje || "Hay una nueva versión lista.", "ok");
-    }
-  });
+async function activarPWAConProteccion() {
+  try {
+    escucharEstadoPWA((tipo, payload) => {
+      if (tipo === "actualizacion-disponible") {
+        mostrarMensaje("Actualización disponible", payload.mensaje || "Hay una nueva versión lista.", "ok");
+      }
+    });
 
-  await inicializarPWA();
+    await inicializarPWA();
+  } catch (error) {
+    console.warn("PWA no se pudo activar, pero la app sigue funcionando.", error);
+  }
 }
 
 async function accionGuardarPeso() {
@@ -240,18 +265,20 @@ function leerEjercicioDesdeFormulario(ejercicio, datos) {
 
 async function accionGuardarAjustes() {
   const datos = leerFormulario("#form-ajustes");
+  const usarFirebase = leerBooleano(datos.usarFirebase);
 
   estado.ajustes = {
     ...estado.ajustes,
-    usarFirebase: leerBooleano(datos.usarFirebase),
+    usarFirebase,
     usarGemini: leerBooleano(datos.usarGemini),
     guardarLocalAutomatico: leerBooleano(datos.guardarLocalAutomatico),
-    sincronizarAutomaticamente: leerBooleano(datos.sincronizarAutomaticamente),
+    sincronizarAutomaticamente: usarFirebase && leerBooleano(datos.sincronizarAutomaticamente),
     mostrarRecomendaciones: leerBooleano(datos.mostrarRecomendaciones),
     mostrarEstadisticas: leerBooleano(datos.mostrarEstadisticas)
   };
 
   guardarEstadoLocal(estado);
+  actualizarEstadoSincronizacion({ estado: usarFirebase ? "firebase activo" : "solo local" });
   mostrarMensaje("Ajustes guardados", "La configuración quedó actualizada.", "ok");
   navegarA(VISTAS_APP.AJUSTES);
 }
@@ -274,14 +301,31 @@ async function accionPrepararGemini() {
 }
 
 async function accionSincronizarAhora() {
-  const resultado = await sincronizarEstadoConFirebase({
-    estado,
-    guardarLocal: () => guardarEstadoLocal(estado),
-    onCambio: (resumen) => actualizarEstadoSincronizacion({ estado: resumen.estado })
-  });
+  if (!estado.ajustes?.usarFirebase) {
+    mostrarMensaje("Sincronización desactivada", "Firebase está desactivado en Ajustes. Tus datos siguen guardados localmente.", "error");
+    return;
+  }
 
-  actualizarEstadoSincronizacion({ estado: resultado.estado });
-  mostrarMensaje(resultado.ok ? "Sincronización lista" : "Sincronización pendiente", resultado.errores?.join("\n") || "Proceso finalizado.", resultado.ok ? "ok" : "error");
+  try {
+    const resultado = await sincronizarEstadoConFirebase({
+      estado,
+      guardarLocal: () => guardarEstadoLocal(estado),
+      onCambio: (resumen) => actualizarEstadoSincronizacion({ estado: resumen.estado })
+    });
+
+    if (resultado.ok) {
+      estado = marcarSincronizacionLocal(estado);
+    } else {
+      estado = marcarErrorSincronizacionLocal(estado, resultado.errores?.join("\n") || "Sincronización pendiente.");
+    }
+
+    actualizarEstadoSincronizacion({ estado: resultado.estado });
+    mostrarMensaje(resultado.ok ? "Sincronización lista" : "Sincronización pendiente", resultado.errores?.join("\n") || "Proceso finalizado.", resultado.ok ? "ok" : "error");
+  } catch (error) {
+    estado = marcarErrorSincronizacionLocal(estado, error.message);
+    actualizarEstadoSincronizacion({ estado: "error" });
+    mostrarMensaje("Sincronización no completada", error.message || "Firebase no respondió.", "error");
+  }
 }
 
 async function sincronizarSilencioso() {
@@ -289,19 +333,41 @@ async function sincronizarSilencioso() {
     return null;
   }
 
-  const resultado = await sincronizarEstadoConFirebase({
-    estado,
-    guardarLocal: () => guardarEstadoLocal(estado),
-    onCambio: (resumen) => actualizarEstadoSincronizacion({ estado: resumen.estado })
-  });
+  try {
+    const resultado = await sincronizarEstadoConFirebase({
+      estado,
+      guardarLocal: () => guardarEstadoLocal(estado),
+      onCambio: (resumen) => actualizarEstadoSincronizacion({ estado: resumen.estado })
+    });
 
-  actualizarEstadoSincronizacion({ estado: resultado.estado });
-  return resultado;
+    if (resultado.ok) {
+      estado = marcarSincronizacionLocal(estado);
+    } else {
+      estado = marcarErrorSincronizacionLocal(estado, resultado.errores?.join("\n"));
+    }
+
+    actualizarEstadoSincronizacion({ estado: resultado.estado });
+    return resultado;
+  } catch (error) {
+    estado = marcarErrorSincronizacionLocal(estado, error.message);
+    actualizarEstadoSincronizacion({ estado: "local" });
+    console.warn("Sincronización silenciosa no completada.", error);
+    return null;
+  }
 }
 
 async function accionGuardarEstadisticas() {
-  const resultado = await guardarEstadisticasEnFirebase(estado);
-  mostrarMensaje("Estadísticas guardadas", resultado.ok ? "Resumen enviado a Firebase." : "No se pudo guardar.", resultado.ok ? "ok" : "error");
+  if (!estado.ajustes?.usarFirebase) {
+    mostrarMensaje("Firebase desactivado", "Activa Firebase en Ajustes antes de guardar estadísticas en la nube.", "error");
+    return;
+  }
+
+  try {
+    const resultado = await guardarEstadisticasEnFirebase(estado);
+    mostrarMensaje("Estadísticas guardadas", resultado.ok ? "Resumen enviado a Firebase." : "No se pudo guardar.", resultado.ok ? "ok" : "error");
+  } catch (error) {
+    mostrarMensaje("Estadísticas no guardadas", error.message || "No se pudo guardar en Firebase.", "error");
+  }
 }
 
 async function accionRevisarActualizacion() {
@@ -311,6 +377,7 @@ async function accionRevisarActualizacion() {
 
 async function accionActualizarApp() {
   const resultado = await actualizarApp();
+
   if (resultado?.ok === false) {
     mostrarMensaje("Actualización", resultado.mensaje || "No se pudo actualizar.", "error");
   }
@@ -342,4 +409,14 @@ function accionBorrarDatosLocales() {
       navegarA(VISTAS_APP.INICIO);
     }
   });
+}
+
+function obtenerVistaInicial() {
+  const hash = String(location.hash || "").replace("#", "").trim();
+
+  if (Object.values(VISTAS_APP).includes(hash)) {
+    return hash;
+  }
+
+  return restaurarVistaGuardada();
 }
