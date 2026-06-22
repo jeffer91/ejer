@@ -1,0 +1,33 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isJeffProfile(usuarioId) {
+      return usuarioId == "jeff";
+    }
+
+    function canUseFitJeff(usuarioId) {
+      return signedIn() && isJeffProfile(usuarioId);
+    }
+
+    match /usuarios/{usuarioId} {
+      allow get, list: if canUseFitJeff(usuarioId);
+      allow create, update, delete: if canUseFitJeff(usuarioId);
+
+      match /{collectionId}/{documentId} {
+        allow get, list: if canUseFitJeff(usuarioId);
+        allow create, update, delete: if canUseFitJeff(usuarioId);
+      }
+    }
+
+    match /{document=**} {
+      allow get, list: if false;
+      allow create, update, delete: if false;
+    }
+  }
+}
