@@ -4,7 +4,7 @@
     "rutaUbicacion": "public/manifest.json",
     "funcionFunciones": [
       "Permitir que FitJeff se instale como PWA en celular y navegador compatible.",
-      "Definir nombre, iconos, tema, orientación y modo de visualización.",
+      "Definir nombre, icono, tema, orientación y modo de visualización.",
       "Preparar la app para funcionar como aplicación instalada con actualización controlada."
     ],
     "seConectaCon": [
@@ -15,12 +15,12 @@
     ],
     "nota": "JSON no permite comentarios reales; esta metadata documenta el archivo sin romper el formato."
   },
-  "id": "/",
+  "id": "../index.html",
   "name": "FitJeff",
   "short_name": "FitJeff",
   "description": "App personal para registrar entrenamientos, peso, estadísticas y recomendaciones.",
-  "start_url": "./index.html",
-  "scope": "./",
+  "start_url": "../index.html",
+  "scope": "../",
   "display": "standalone",
   "orientation": "portrait-primary",
   "background_color": "#f5f7fb",
@@ -34,15 +34,9 @@
   "dir": "ltr",
   "icons": [
     {
-      "src": "./assets/icons/icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "./assets/icons/icon-512.png",
+      "src": "../assets/icons/icon.svg",
       "sizes": "512x512",
-      "type": "image/png",
+      "type": "image/svg+xml",
       "purpose": "any maskable"
     }
   ],
@@ -51,19 +45,19 @@
       "name": "Entrenar",
       "short_name": "Entrenar",
       "description": "Registrar entrenamiento de hoy",
-      "url": "./index.html#entrenar"
+      "url": "../index.html#entrenar"
     },
     {
       "name": "Registrar peso",
       "short_name": "Peso",
       "description": "Registrar peso actual",
-      "url": "./index.html#peso"
+      "url": "../index.html#peso"
     },
     {
       "name": "Estadísticas",
       "short_name": "Stats",
       "description": "Ver progreso y rendimiento",
-      "url": "./index.html#estadisticas"
+      "url": "../index.html#estadisticas"
     }
   ]
 }
