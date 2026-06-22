@@ -1,0 +1,70 @@
+{
+  "projectNotes": {
+    "nombreCompleto": "firebase.json",
+    "rutaUbicacion": "firebase.json",
+    "funcionFunciones": [
+      "Configurar Firebase Hosting para publicar FitJeff.",
+      "Configurar Firebase Functions para recomendaciones con Gemini.",
+      "Configurar Firestore Rules para proteger la base de datos."
+    ],
+    "seConectaCon": [
+      "firestore.rules",
+      "functions/index.js",
+      "functions/package.json",
+      "index.html",
+      "public/service-worker.js"
+    ],
+    "nota": "JSON no permite comentarios reales; esta metadata documenta el archivo sin romper el formato."
+  },
+  "hosting": {
+    "public": ".",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**",
+      "functions/**",
+      "README.md"
+    ],
+    "headers": [
+      {
+        "source": "**/*.@(js|css|html|json)",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache"
+          }
+        ]
+      },
+      {
+        "source": "public/service-worker.js",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache, no-store, must-revalidate"
+          }
+        ]
+      }
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  },
+  "firestore": {
+    "rules": "firestore.rules"
+  },
+  "functions": [
+    {
+      "source": "functions",
+      "codebase": "default",
+      "ignore": [
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log"
+      ]
+    }
+  ]
+}
