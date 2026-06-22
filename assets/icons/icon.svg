@@ -1,0 +1,25 @@
+<!--
+  Nombre completo: icon.svg
+  Ruta o ubicación: assets/icons/icon.svg
+
+  Función:
+    - Servir como icono principal vectorial de FitJeff.
+    - Usarse como base para generar icon-192.png e icon-512.png cuando se creen los binarios finales.
+    - Identificar visualmente la app en navegador, PWA y Electron.
+
+  Se conecta con:
+    - public/manifest.json cuando se actualice.
+    - index.html cuando se conecte favicon.
+    - main.js cuando se conecte icono de Electron.
+-->
+
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="512" height="512" rx="120" fill="#111827"/>
+  <circle cx="256" cy="256" r="176" fill="#F5F7FB"/>
+  <path d="M164 292C164 241.19 205.19 200 256 200C306.81 200 348 241.19 348 292" stroke="#111827" stroke-width="34" stroke-linecap="round"/>
+  <path d="M180 326H332" stroke="#111827" stroke-width="34" stroke-linecap="round"/>
+  <path d="M206 178L256 130L306 178" stroke="#111827" stroke-width="34" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="184" cy="292" r="20" fill="#111827"/>
+  <circle cx="328" cy="292" r="20" fill="#111827"/>
+  <text x="256" y="407" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="62" font-weight="800" fill="#111827">FJ</text>
+</svg>
