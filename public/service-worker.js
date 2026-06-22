@@ -16,27 +16,52 @@
     - index.html
 */
 
-const FITJEFF_CACHE_VERSION = "fitjeff-v0.1.0";
-const FITJEFF_RUNTIME_CACHE = "fitjeff-runtime-v0.1.0";
+const FITJEFF_CACHE_VERSION = "fitjeff-v0.1.0-build-2";
+const FITJEFF_RUNTIME_CACHE = "fitjeff-runtime-v0.1.0-build-2";
 
 const ARCHIVOS_APP = [
   "./",
-  "./index.html",
-  "./public/manifest.json",
-  "./public/version.json",
-  "./styles/base.css",
-  "./styles/layout.css",
-  "./styles/componentes.css",
-  "./styles/responsive.css",
-  "./src/app.js",
-  "./src/data/usuario-base.js",
-  "./src/data/rutina-base.js",
-  "./src/ui/helpers.js",
-  "./src/ui/router.js",
-  "./src/ui/layout.js",
-  "./src/ui/menu.js",
-  "./src/ui/modal.js",
-  "./src/actualizaciones/actualizaciones.service.js"
+  "../",
+  "../index.html",
+  "../package.json",
+  "../assets/icons/icon.svg",
+  "./manifest.json",
+  "./version.json",
+  "../styles/base.css",
+  "../styles/layout.css",
+  "../styles/componentes.css",
+  "../styles/responsive.css",
+  "../src/app.js",
+  "../src/app-controller.js",
+  "../src/data/usuario-base.js",
+  "../src/data/rutina-base.js",
+  "../src/storage/local-storage.service.js",
+  "../src/exportacion/exportacion.service.js",
+  "../src/firebase/firebase.config.js",
+  "../src/firebase/firebase.app.js",
+  "../src/firebase/firestore.service.js",
+  "../src/sincronizacion/sincronizacion.service.js",
+  "../src/perfil/perfil.service.js",
+  "../src/peso/peso.service.js",
+  "../src/entrenamiento/entrenamiento.service.js",
+  "../src/estadisticas/estadisticas.calculos.js",
+  "../src/estadisticas/estadisticas.service.js",
+  "../src/recomendaciones/recomendaciones.prompt.js",
+  "../src/recomendaciones/recomendaciones.service.js",
+  "../src/actualizaciones/actualizaciones.service.js",
+  "../src/pwa/pwa.service.js",
+  "../src/ui/helpers.js",
+  "../src/ui/router.js",
+  "../src/ui/layout.js",
+  "../src/ui/menu.js",
+  "../src/ui/modal.js",
+  "../src/vistas/componentes.view.js",
+  "../src/vistas/inicio.view.js",
+  "../src/vistas/entrenar.view.js",
+  "../src/vistas/peso.view.js",
+  "../src/vistas/estadisticas.view.js",
+  "../src/vistas/recomendaciones.view.js",
+  "../src/vistas/ajustes.view.js"
 ];
 
 self.addEventListener("install", (event) => {
@@ -95,6 +120,11 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
+  if (url.pathname.endsWith(".js") || url.pathname.endsWith(".css") || url.pathname.endsWith(".html")) {
+    event.respondWith(networkFirst(request));
+    return;
+  }
+
   event.respondWith(cacheFirst(request));
 });
 
@@ -114,11 +144,11 @@ async function responderNavegacion(request) {
   try {
     const respuestaRed = await fetch(request);
     const cache = await caches.open(FITJEFF_RUNTIME_CACHE);
-    cache.put("./index.html", respuestaRed.clone());
+    cache.put("../index.html", respuestaRed.clone());
     return respuestaRed;
   } catch (error) {
     const cache = await caches.open(FITJEFF_CACHE_VERSION);
-    return (await cache.match("./index.html")) || Response.error();
+    return (await cache.match("../index.html")) || Response.error();
   }
 }
 
