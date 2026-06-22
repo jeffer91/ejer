@@ -3,14 +3,14 @@
   Ruta o ubicación: src/actualizaciones/actualizaciones.service.js
 
   Función:
-    - Revisar la versión local de FitJeff contra un archivo version.json.
+    - Revisar la versión local de FitJeff contra public/version.json.
     - Preparar actualización en PWA mediante service worker.
     - Preparar actualización en Electron mediante el puente seguro de preload.js.
     - Permitir un botón "Actualizar app" para celular, navegador y escritorio.
 
   Se conecta con:
-    - public/version.json cuando se cree.
-    - public/service-worker.js cuando se cree.
+    - public/version.json
+    - service-worker.js
     - preload.js
     - main.js
     - src/ui/modal.js
@@ -27,7 +27,7 @@ export const ESTADOS_ACTUALIZACION = {
   NO_CONFIGURADO: "no-configurado"
 };
 
-const VERSION_URL = "./version.json";
+const VERSION_URLS = ["./public/version.json", "./version.json"];
 const STORAGE_ULTIMA_REVISION = "fitjeff_ultima_revision_actualizacion";
 
 export async function revisarActualizacion() {
@@ -49,13 +49,12 @@ export async function revisarActualizacion() {
         ...resultado,
         ok: false,
         estado: ESTADOS_ACTUALIZACION.NO_CONFIGURADO,
-        mensaje:
-          "Todavía no existe version.json. Se creará en el bloque de PWA."
+        mensaje: "No se encontró public/version.json."
       };
     }
 
     const versionRemota = remoto.version || remoto.appVersion || null;
-    const hayActualizacion = compararVersiones(versionRemota, VERSION_APP) > 0;
+    const hayActualizacion = compararVersiones(versionRemota, VERSION_APP) > 0 || Boolean(remoto.forzarActualizacion);
 
     guardarUltimaRevision();
 
@@ -65,6 +64,7 @@ export async function revisarActualizacion() {
         ? ESTADOS_ACTUALIZACION.DISPONIBLE
         : ESTADOS_ACTUALIZACION.ACTUALIZADO,
       versionRemota,
+      build: remoto.build || null,
       hayActualizacion,
       notas: remoto.notas || "",
       fechaPublicacion: remoto.fechaPublicacion || null,
@@ -90,7 +90,7 @@ export async function aplicarActualizacionWeb() {
       await Promise.all(registros.map((registro) => registro.update()));
     }
 
-    limpiarCacheNavegadorBasico();
+    await limpiarCacheNavegadorBasico();
     guardarUltimaRevision();
     window.location.reload();
 
@@ -156,16 +156,20 @@ export function crearResumenActualizacion() {
 }
 
 async function leerVersionRemota() {
-  const url = `${VERSION_URL}?t=${Date.now()}`;
-  const respuesta = await fetch(url, {
-    cache: "no-store"
-  });
+  for (const baseUrl of VERSION_URLS) {
+    try {
+      const url = `${baseUrl}?t=${Date.now()}`;
+      const respuesta = await fetch(url, { cache: "no-store" });
 
-  if (!respuesta.ok) {
-    return null;
+      if (respuesta.ok) {
+        return respuesta.json();
+      }
+    } catch (error) {
+      console.warn(`No se pudo leer ${baseUrl}.`, error);
+    }
   }
 
-  return respuesta.json();
+  return null;
 }
 
 function compararVersiones(versionA, versionB) {
@@ -181,28 +185,22 @@ function compararVersiones(versionA, versionB) {
     const parteA = a[i] || 0;
     const parteB = b[i] || 0;
 
-    if (parteA > parteB) {
-      return 1;
-    }
-
-    if (parteA < parteB) {
-      return -1;
-    }
+    if (parteA > parteB) return 1;
+    if (parteA < parteB) return -1;
   }
 
   return 0;
 }
 
-function limpiarCacheNavegadorBasico() {
+async function limpiarCacheNavegadorBasico() {
   if (!("caches" in window)) {
     return;
   }
 
-  caches.keys().then((keys) => {
-    keys
-      .filter((key) => key.startsWith("fitjeff-"))
-      .forEach((key) => caches.delete(key));
-  });
+  const keys = await caches.keys();
+  await Promise.all(
+    keys.filter((key) => key.startsWith("fitjeff-")).map((key) => caches.delete(key))
+  );
 }
 
 function guardarUltimaRevision() {
