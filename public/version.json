@@ -1,0 +1,31 @@
+{
+  "projectNotes": {
+    "nombreCompleto": "version.json",
+    "rutaUbicacion": "public/version.json",
+    "funcionFunciones": [
+      "Publicar la versión actual disponible de FitJeff.",
+      "Permitir que la app compare versión local contra versión remota.",
+      "Activar el botón Actualizar app en PWA, navegador y Electron."
+    ],
+    "seConectaCon": [
+      "src/actualizaciones/actualizaciones.service.js",
+      "public/service-worker.js",
+      "src/pwa/pwa.service.js",
+      "index.html"
+    ],
+    "nota": "Cada vez que se suba una versión importante, este archivo debe actualizarse."
+  },
+  "app": "FitJeff",
+  "version": "0.1.0",
+  "appVersion": "0.1.0",
+  "build": 1,
+  "fechaPublicacion": "2026-06-22",
+  "forzarActualizacion": false,
+  "notas": "Versión inicial con registro local, estructura Firebase, estadísticas, recomendaciones y base PWA.",
+  "archivosCriticos": [
+    "index.html",
+    "src/app.js",
+    "public/service-worker.js",
+    "public/manifest.json"
+  ]
+}
