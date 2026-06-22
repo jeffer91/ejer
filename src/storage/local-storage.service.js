@@ -40,20 +40,21 @@ export function crearEstadoBase() {
     ajustes: crearAjustesBase(),
     diaSeleccionado: 1,
     meta: {
-      versionDatos: 1,
+      versionDatos: 2,
       creadoEn: new Date().toISOString(),
       actualizadoEn: new Date().toISOString(),
-      ultimaSincronizacion: null
+      ultimaSincronizacion: null,
+      ultimoErrorSincronizacion: null
     }
   };
 }
 
 export function crearAjustesBase() {
   return {
-    usarFirebase: true,
+    usarFirebase: false,
     usarGemini: true,
     guardarLocalAutomatico: true,
-    sincronizarAutomaticamente: true,
+    sincronizarAutomaticamente: false,
     mostrarConsejosSeguridad: true,
     mostrarRecomendaciones: true,
     mostrarEstadisticas: true,
@@ -63,29 +64,16 @@ export function crearAjustesBase() {
 
 export function cargarEstadoLocal() {
   const base = crearEstadoBase();
-  const usuario = leerLocalJSON(STORAGE_KEYS.PERFIL, base.usuario);
-  const rutina = leerLocalJSON(STORAGE_KEYS.RUTINA, base.rutina);
-  const entrenamientos = leerLocalJSON(STORAGE_KEYS.ENTRENAMIENTOS, base.entrenamientos);
-  const pesos = leerLocalJSON(STORAGE_KEYS.PESOS, base.pesos);
-  const recomendaciones = leerLocalJSON(STORAGE_KEYS.RECOMENDACIONES, base.recomendaciones);
-  const ajustes = leerLocalJSON(STORAGE_KEYS.AJUSTES, base.ajustes);
-  const meta = leerLocalJSON(STORAGE_KEYS.META, base.meta);
 
   return normalizarEstadoLocal({
     ...base,
-    usuario,
-    rutina,
-    entrenamientos,
-    pesos,
-    recomendaciones,
-    ajustes: {
-      ...base.ajustes,
-      ...ajustes
-    },
-    meta: {
-      ...base.meta,
-      ...meta
-    }
+    usuario: leerLocalJSON(STORAGE_KEYS.PERFIL, base.usuario),
+    rutina: leerLocalJSON(STORAGE_KEYS.RUTINA, base.rutina),
+    entrenamientos: leerLocalJSON(STORAGE_KEYS.ENTRENAMIENTOS, []),
+    pesos: leerLocalJSON(STORAGE_KEYS.PESOS, []),
+    recomendaciones: leerLocalJSON(STORAGE_KEYS.RECOMENDACIONES, []),
+    ajustes: leerLocalJSON(STORAGE_KEYS.AJUSTES, base.ajustes),
+    meta: leerLocalJSON(STORAGE_KEYS.META, base.meta)
   });
 }
 
@@ -97,7 +85,7 @@ export function guardarEstadoLocal(estado) {
   const copia = normalizarEstadoLocal(estado);
   copia.meta.actualizadoEn = new Date().toISOString();
 
-  const resultados = [
+  return [
     guardarLocalJSON(STORAGE_KEYS.PERFIL, copia.usuario),
     guardarLocalJSON(STORAGE_KEYS.RUTINA, copia.rutina),
     guardarLocalJSON(STORAGE_KEYS.ENTRENAMIENTOS, copia.entrenamientos),
@@ -105,9 +93,7 @@ export function guardarEstadoLocal(estado) {
     guardarLocalJSON(STORAGE_KEYS.RECOMENDACIONES, copia.recomendaciones),
     guardarLocalJSON(STORAGE_KEYS.AJUSTES, copia.ajustes),
     guardarLocalJSON(STORAGE_KEYS.META, copia.meta)
-  ];
-
-  return resultados.every(Boolean);
+  ].every(Boolean);
 }
 
 export function guardarParteEstado(clave, valor) {
@@ -133,21 +119,34 @@ export function obtenerResumenAlmacenamientoLocal(estado = cargarEstadoLocal()) 
     pesos: estado.pesos?.length || 0,
     recomendaciones: estado.recomendaciones?.length || 0,
     ajustes: Boolean(estado.ajustes),
+    firebaseActivo: Boolean(estado.ajustes?.usarFirebase),
+    sincronizacionAutomatica: Boolean(estado.ajustes?.sincronizarAutomaticamente),
     ultimaActualizacion: estado.meta?.actualizadoEn || null,
-    ultimaSincronizacion: estado.meta?.ultimaSincronizacion || null
+    ultimaSincronizacion: estado.meta?.ultimaSincronizacion || null,
+    ultimoErrorSincronizacion: estado.meta?.ultimoErrorSincronizacion || null
   };
 }
 
 export function marcarSincronizacionLocal(estado, fecha = new Date().toISOString()) {
   const copia = normalizarEstadoLocal(estado);
   copia.meta.ultimaSincronizacion = fecha;
+  copia.meta.ultimoErrorSincronizacion = null;
   copia.meta.actualizadoEn = fecha;
+  guardarEstadoLocal(copia);
+  return copia;
+}
+
+export function marcarErrorSincronizacionLocal(estado, mensaje) {
+  const copia = normalizarEstadoLocal(estado);
+  copia.meta.ultimoErrorSincronizacion = String(mensaje || "Error de sincronización");
+  copia.meta.actualizadoEn = new Date().toISOString();
   guardarEstadoLocal(copia);
   return copia;
 }
 
 export function normalizarEstadoLocal(estado = crearEstadoBase()) {
   const base = crearEstadoBase();
+  const ajustesEntrada = estado.ajustes || {};
 
   return {
     ...base,
@@ -170,7 +169,9 @@ export function normalizarEstadoLocal(estado = crearEstadoBase()) {
     recomendaciones: Array.isArray(estado.recomendaciones) ? estado.recomendaciones : [],
     ajustes: {
       ...base.ajustes,
-      ...(estado.ajustes || {})
+      ...ajustesEntrada,
+      sincronizarAutomaticamente:
+        ajustesEntrada.usarFirebase === true && ajustesEntrada.sincronizarAutomaticamente === true
     },
     meta: {
       ...base.meta,
