@@ -1,0 +1,20 @@
+{
+  "projectNotes": {
+    "nombreCompleto": ".firebaserc",
+    "rutaUbicacion": ".firebaserc",
+    "funcionFunciones": [
+      "Vincular el proyecto local FitJeff con el proyecto Firebase Jeff.",
+      "Definir el projectId por defecto para deploy.",
+      "Evitar seleccionar manualmente el proyecto en cada despliegue."
+    ],
+    "seConectaCon": [
+      "firebase.json",
+      "src/firebase/firebase.config.js",
+      "functions/index.js"
+    ],
+    "nota": "JSON no permite comentarios reales; esta metadata documenta el archivo sin romper el formato."
+  },
+  "projects": {
+    "default": "jeff-2f92d"
+  }
+}
