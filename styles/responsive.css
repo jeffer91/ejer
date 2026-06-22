@@ -5,7 +5,7 @@
   Función:
     - Ajustar FitJeff para celular, tablet, navegador y Electron.
     - Evitar interfaces apretadas en pantallas pequeñas.
-    - Mantener botones grandes y formularios fáciles de tocar.
+    - Mantener botones grandes, navegación horizontal y formularios fáciles de tocar.
 
   Se conecta con:
     - index.html
@@ -29,6 +29,10 @@
     flex-direction: column;
   }
 
+  .fit-header-actions {
+    width: 100%;
+  }
+
   .fit-main {
     padding: 14px 12px 34px;
   }
@@ -36,6 +40,13 @@
   .fit-nav {
     padding-left: 12px;
     padding-right: 12px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x proximity;
+  }
+
+  .fit-nav button {
+    scroll-snap-align: start;
   }
 
   .grid-2,
@@ -51,7 +62,8 @@
     width: 100%;
   }
 
-  .acciones .btn {
+  .acciones .btn,
+  .acciones button {
     flex: 1 1 180px;
   }
 
@@ -61,6 +73,46 @@
 
   .metric strong {
     font-size: 1.55rem;
+  }
+
+  .tabla-simple {
+    min-width: 620px;
+  }
+}
+
+@media (max-width: 520px) {
+  .fit-shell {
+    min-height: 100dvh;
+  }
+
+  .fit-brand {
+    width: 100%;
+  }
+
+  .fit-header-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .fit-header-actions .pill {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .fit-header-actions .btn,
+  .fit-header-actions button {
+    width: 100%;
+  }
+
+  .fit-modal-overlay {
+    align-items: end;
+    padding: 10px;
+  }
+
+  .fit-modal {
+    width: 100%;
+    border-radius: 18px 18px 10px 10px;
   }
 }
 
@@ -87,6 +139,10 @@
 
   .ejercicio {
     border-radius: 14px;
+  }
+
+  .metric strong {
+    font-size: 1.42rem;
   }
 }
 
