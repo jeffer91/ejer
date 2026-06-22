@@ -1,0 +1,105 @@
+/*
+  Nombre completo: responsive.css
+  Ruta o ubicación: styles/responsive.css
+
+  Función:
+    - Ajustar FitJeff para celular, tablet, navegador y Electron.
+    - Evitar interfaces apretadas en pantallas pequeñas.
+    - Mantener botones grandes y formularios fáciles de tocar.
+
+  Se conecta con:
+    - index.html
+    - styles/base.css
+    - styles/layout.css
+    - styles/componentes.css
+*/
+
+@media (max-width: 900px) {
+  .fit-header-inner {
+    align-items: flex-start;
+  }
+
+  .grid-3 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .fit-header-inner {
+    flex-direction: column;
+  }
+
+  .fit-main {
+    padding: 14px 12px 34px;
+  }
+
+  .fit-nav {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .grid-2,
+  .grid-3 {
+    grid-template-columns: 1fr;
+  }
+
+  .serie-row {
+    grid-template-columns: 1fr;
+  }
+
+  .acciones {
+    width: 100%;
+  }
+
+  .acciones .btn {
+    flex: 1 1 180px;
+  }
+
+  .card {
+    padding: 14px;
+  }
+
+  .metric strong {
+    font-size: 1.55rem;
+  }
+}
+
+@media (max-width: 420px) {
+  .fit-brand strong {
+    font-size: 1rem;
+  }
+
+  .fit-brand span {
+    font-size: 0.78rem;
+  }
+
+  .btn,
+  .fit-nav button,
+  .campo input,
+  .campo select,
+  .campo textarea {
+    min-height: 46px;
+  }
+
+  .card {
+    border-radius: 15px;
+  }
+
+  .ejercicio {
+    border-radius: 14px;
+  }
+}
+
+@media (display-mode: standalone) {
+  body {
+    overscroll-behavior-y: contain;
+  }
+
+  .fit-header {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  .fit-main {
+    padding-bottom: calc(34px + env(safe-area-inset-bottom));
+  }
+}
