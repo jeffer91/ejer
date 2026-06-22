@@ -1,0 +1,69 @@
+{
+  "projectNotes": {
+    "nombreCompleto": "manifest.json",
+    "rutaUbicacion": "public/manifest.json",
+    "funcionFunciones": [
+      "Permitir que FitJeff se instale como PWA en celular y navegador compatible.",
+      "Definir nombre, iconos, tema, orientación y modo de visualización.",
+      "Preparar la app para funcionar como aplicación instalada con actualización controlada."
+    ],
+    "seConectaCon": [
+      "index.html",
+      "public/service-worker.js",
+      "public/version.json",
+      "src/pwa/pwa.service.js"
+    ],
+    "nota": "JSON no permite comentarios reales; esta metadata documenta el archivo sin romper el formato."
+  },
+  "id": "/",
+  "name": "FitJeff",
+  "short_name": "FitJeff",
+  "description": "App personal para registrar entrenamientos, peso, estadísticas y recomendaciones.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#f5f7fb",
+  "theme_color": "#111827",
+  "categories": [
+    "health",
+    "fitness",
+    "productivity"
+  ],
+  "lang": "es-EC",
+  "dir": "ltr",
+  "icons": [
+    {
+      "src": "./assets/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./assets/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Entrenar",
+      "short_name": "Entrenar",
+      "description": "Registrar entrenamiento de hoy",
+      "url": "./index.html#entrenar"
+    },
+    {
+      "name": "Registrar peso",
+      "short_name": "Peso",
+      "description": "Registrar peso actual",
+      "url": "./index.html#peso"
+    },
+    {
+      "name": "Estadísticas",
+      "short_name": "Stats",
+      "description": "Ver progreso y rendimiento",
+      "url": "./index.html#estadisticas"
+    }
+  ]
+}
