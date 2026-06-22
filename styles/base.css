@@ -1,0 +1,96 @@
+/*
+  Nombre completo: base.css
+  Ruta o ubicación: styles/base.css
+
+  Función:
+    - Definir variables globales de diseño.
+    - Normalizar estilos base de la app.
+    - Mantener FitJeff limpio, minimalista y usable en navegador, Electron y celular.
+
+  Se conecta con:
+    - index.html
+    - styles/layout.css
+    - styles/componentes.css
+    - styles/responsive.css
+*/
+
+:root {
+  --fit-bg: #f5f7fb;
+  --fit-card: #ffffff;
+  --fit-text: #111827;
+  --fit-muted: #6b7280;
+  --fit-line: #e5e7eb;
+  --fit-primary: #111827;
+  --fit-primary-soft: #eef2ff;
+  --fit-danger: #991b1b;
+  --fit-danger-soft: #fee2e2;
+  --fit-ok: #166534;
+  --fit-ok-soft: #dcfce7;
+  --fit-warning: #92400e;
+  --fit-warning-soft: #fef3c7;
+  --fit-radius-sm: 10px;
+  --fit-radius-md: 14px;
+  --fit-radius-lg: 18px;
+  --fit-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+  --fit-header-height: 72px;
+  --fit-max-width: 1100px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  min-height: 100%;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100%;
+  background: var(--fit-bg);
+  color: var(--fit-text);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button {
+  border: 0;
+  cursor: pointer;
+}
+
+a {
+  color: inherit;
+}
+
+img,
+svg {
+  max-width: 100%;
+}
+
+.hidden,
+[hidden] {
+  display: none !important;
+}
+
+.muted {
+  color: var(--fit-muted);
+}
+
+.text-danger {
+  color: var(--fit-danger);
+}
+
+.text-ok {
+  color: var(--fit-ok);
+}
+
+.text-warning {
+  color: var(--fit-warning);
+}
