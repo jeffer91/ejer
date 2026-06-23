@@ -4,7 +4,7 @@
 
   Función:
     - Definir componentes reutilizables de FitJeff.
-    - Estilizar tarjetas, botones, formularios, métricas, alertas, barras, tablas, modales, ejercicios y Jarvis.
+    - Estilizar tarjetas, botones, formularios, métricas, alertas, barras, tablas, modales, ejercicios, Jarvis y entrenamiento guiado.
     - Mantener la app minimalista, clara y rápida de usar.
 
   Se conecta con:
@@ -14,6 +14,7 @@
     - src/ui/modal.js
     - src/vistas/componentes.view.js
     - src/vistas/jarvis.view.js
+    - src/vistas/entrenamiento-guiado.view.js
     - styles/base.css
     - styles/layout.css
     - styles/responsive.css
@@ -242,12 +243,14 @@
   color: var(--fit-muted);
 }
 
-.jarvis-panel-principal {
+.jarvis-panel-principal,
+.guiado-panel {
   position: relative;
   overflow: hidden;
 }
 
-.jarvis-panel-principal::after {
+.jarvis-panel-principal::after,
+.guiado-panel::after {
   content: "";
   position: absolute;
   width: 210px;
@@ -336,6 +339,46 @@
 
 .jarvis-mensaje.warning {
   background: var(--fit-warning-soft);
+}
+
+.guiado-paso,
+.guiado-paso-vacio {
+  position: relative;
+  z-index: 1;
+  margin-top: 16px;
+  padding: 18px;
+  border-radius: 18px;
+  background: #ffffff;
+  border: 1px solid var(--fit-line);
+}
+
+.guiado-paso h1 {
+  font-size: clamp(1.8rem, 5vw, 3.2rem);
+  margin: 8px 0;
+  line-height: 1.05;
+}
+
+.guiado-paso p {
+  font-size: 1.02rem;
+  color: var(--fit-muted);
+}
+
+.guiado-paso.descanso {
+  background: var(--fit-primary-soft);
+}
+
+.guiado-paso.calentamiento {
+  background: var(--fit-ok-soft);
+}
+
+.guiado-timer {
+  margin-top: 16px;
+  font-size: clamp(2.4rem, 12vw, 5rem);
+  font-weight: 900;
+  letter-spacing: -0.06em;
+  color: var(--fit-primary);
+  text-align: center;
+  line-height: 1;
 }
 
 .fit-modal-overlay {
