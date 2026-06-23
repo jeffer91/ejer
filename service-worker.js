@@ -4,8 +4,8 @@
 
   Función:
     - Permitir que FitJeff controle toda la app como PWA desde la raíz.
-    - Evitar el error de scope causado por registrar un service worker dentro de /public.
     - Guardar archivos principales en caché y permitir actualización controlada.
+    - Incluir Jarvis y entrenamiento guiado base en la instalación offline.
 
   Se conecta con:
     - src/pwa/pwa.service.js
@@ -14,8 +14,8 @@
     - index.html
 */
 
-const FITJEFF_CACHE_VERSION = "fitjeff-root-v0.1.0-build-3";
-const FITJEFF_RUNTIME_CACHE = "fitjeff-runtime-v0.1.0-build-3";
+const FITJEFF_CACHE_VERSION = "fitjeff-root-v0.1.0-build-4";
+const FITJEFF_RUNTIME_CACHE = "fitjeff-runtime-v0.1.0-build-4";
 
 const ARCHIVOS_APP = [
   "./",
@@ -40,12 +40,21 @@ const ARCHIVOS_APP = [
   "./src/perfil/perfil.service.js",
   "./src/peso/peso.service.js",
   "./src/entrenamiento/entrenamiento.service.js",
+  "./src/entrenamiento-guiado/guiado.config.js",
+  "./src/entrenamiento-guiado/guiado.estado.js",
+  "./src/entrenamiento-guiado/guiado.timer.service.js",
   "./src/estadisticas/estadisticas.calculos.js",
   "./src/estadisticas/estadisticas.service.js",
   "./src/recomendaciones/recomendaciones.prompt.js",
   "./src/recomendaciones/recomendaciones.service.js",
   "./src/actualizaciones/actualizaciones.service.js",
   "./src/pwa/pwa.service.js",
+  "./src/jarvis/jarvis.config.js",
+  "./src/jarvis/jarvis.estado.js",
+  "./src/jarvis/jarvis.comandos.js",
+  "./src/jarvis/jarvis.voz.service.js",
+  "./src/jarvis/jarvis.entrenamiento.js",
+  "./src/jarvis/jarvis.notas.service.js",
   "./src/ui/helpers.js",
   "./src/ui/router.js",
   "./src/ui/layout.js",
@@ -57,6 +66,7 @@ const ARCHIVOS_APP = [
   "./src/vistas/peso.view.js",
   "./src/vistas/estadisticas.view.js",
   "./src/vistas/recomendaciones.view.js",
+  "./src/vistas/jarvis.view.js",
   "./src/vistas/ajustes.view.js"
 ];
 
