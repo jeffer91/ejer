@@ -4,18 +4,8 @@
 
   Función:
     - Sincronizar datos locales de FitJeff con Firebase Firestore.
-    - Subir perfil, rutina, ajustes, entrenamientos, pesos y recomendaciones pendientes.
-    - Descargar datos existentes desde Firestore para reconstruir el estado local.
-    - Trabajar con modo offline: si no hay internet, no rompe la app y deja los datos pendientes.
-
-  Se conecta con:
-    - src/firebase/firestore.service.js
-    - src/app.js cuando se integre el flujo final.
-    - src/perfil/perfil.service.js
-    - src/peso/peso.service.js
-    - src/entrenamiento/entrenamiento.service.js
-    - src/estadisticas/estadisticas.service.js
-    - src/recomendaciones/recomendaciones.service.js cuando se cree.
+    - Trabajar local primero y no romper la app si Firebase falla.
+    - Usar la estructura Firestore: fitjeff / jeff.
 */
 
 import {
@@ -24,6 +14,7 @@ import {
   guardarEntrenamientoFirestore,
   guardarPesoFirestore,
   guardarRecomendacionFirestore,
+  guardarSincronizacionFirestore,
   leerPerfilFirestore,
   leerRutinaFirestore,
   leerAjustesFirestore,
@@ -32,6 +23,13 @@ import {
   listarPesosFirestore,
   listarRecomendacionesFirestore
 } from "../firebase/firestore.service.js";
+
+import {
+  crearPayloadBaseFitJeff,
+  marcarItemSincronizado,
+  mezclarItemsFitJeff,
+  normalizarItemsRemotosFitJeff
+} from "./sync-fitjeff.mapper.js";
 
 export const ESTADOS_SINCRONIZACION = {
   LISTO: "listo",
@@ -60,19 +58,16 @@ export function crearResumenSincronizacion() {
     recomendacionesSubidas: 0,
     errores: [],
     iniciadoEn: new Date().toISOString(),
-    terminadoEn: null
+    terminadoEn: null,
+    estructuraFirestore: "fitjeff/jeff"
   };
 }
 
-export async function sincronizarEstadoConFirebase({
-  estado,
-  guardarLocal,
-  onCambio
-}) {
+export async function sincronizarEstadoConFirebase({ estado, guardarLocal, onCambio }) {
   const resumen = crearResumenSincronizacion();
 
   if (!estado || typeof estado !== "object") {
-    return finalizarConError(resumen, "Estado local inválido para sincronizar.");
+    return finalizarConError(resumen, "Estado local invalido para sincronizar.");
   }
 
   if (!puedeUsarFirebase(estado.ajustes)) {
@@ -85,7 +80,7 @@ export async function sincronizarEstadoConFirebase({
   if (!estaOnline()) {
     resumen.estado = ESTADOS_SINCRONIZACION.OFFLINE;
     resumen.ok = false;
-    resumen.errores.push("Sin conexión a internet. Los datos quedan pendientes.");
+    resumen.errores.push("Sin conexion a internet. Los datos quedan pendientes.");
     resumen.terminadoEn = new Date().toISOString();
     return resumen;
   }
@@ -96,43 +91,51 @@ export async function sincronizarEstadoConFirebase({
 
     await prepararFirestore();
 
+    const payload = crearPayloadBaseFitJeff(estado);
+
     await sincronizarBaseFirestore({
-      usuario: estado.usuario,
-      rutina: estado.rutina,
-      ajustes: estado.ajustes
+      usuario: payload.usuario,
+      rutina: payload.rutina,
+      ajustes: payload.ajustes
     });
 
-    resumen.perfil = Boolean(estado.usuario?.perfil);
-    resumen.rutina = Boolean(estado.rutina);
-    resumen.ajustes = Boolean(estado.ajustes);
+    resumen.perfil = Boolean(payload.perfil);
+    resumen.rutina = Boolean(payload.rutina);
+    resumen.ajustes = Boolean(payload.ajustes);
 
     resumen.entrenamientosSubidos = await subirPendientes({
-      items: estado.entrenamientos,
+      items: payload.entrenamientos,
       guardarItem: guardarEntrenamientoFirestore,
       tipo: "entrenamiento"
     });
 
     resumen.pesosSubidos = await subirPendientes({
-      items: estado.pesos,
+      items: payload.pesos,
       guardarItem: guardarPesoFirestore,
       tipo: "peso"
     });
 
     resumen.recomendacionesSubidas = await subirPendientes({
-      items: estado.recomendaciones,
+      items: payload.recomendaciones,
       guardarItem: guardarRecomendacionFirestore,
       tipo: "recomendacion"
     });
 
-    if (estado.usuario?.control) {
-      estado.usuario.control.ultimaSincronizacion = new Date().toISOString();
-    }
-
-    guardarLocal?.();
-
     resumen.estado = ESTADOS_SINCRONIZACION.LISTO;
     resumen.ok = true;
     resumen.terminadoEn = new Date().toISOString();
+
+    if (estado.usuario?.control) {
+      estado.usuario.control.ultimaSincronizacion = resumen.terminadoEn;
+    }
+
+    if (estado.meta) {
+      estado.meta.ultimaSincronizacion = resumen.terminadoEn;
+      estado.meta.ultimoErrorSincronizacion = null;
+    }
+
+    await guardarSincronizacionFirestore(resumen);
+    guardarLocal?.();
     onCambio?.(resumen);
 
     return resumen;
@@ -179,9 +182,9 @@ export async function descargarEstadoDesdeFirebase() {
         rutina,
         ajustes,
         resumenEstadisticas,
-        entrenamientos: normalizarRemotos(entrenamientos),
-        pesos: normalizarRemotos(pesos),
-        recomendaciones: normalizarRemotos(recomendaciones)
+        entrenamientos: normalizarItemsRemotosFitJeff(entrenamientos),
+        pesos: normalizarItemsRemotosFitJeff(pesos),
+        recomendaciones: normalizarItemsRemotosFitJeff(recomendaciones)
       }
     };
   } catch (error) {
@@ -195,9 +198,7 @@ export async function descargarEstadoDesdeFirebase() {
 }
 
 export function aplicarDatosFirebaseEnEstado(estado, datosFirebase) {
-  if (!estado || !datosFirebase) {
-    return estado;
-  }
+  if (!estado || !datosFirebase) return estado;
 
   const copia = structuredClone(estado);
 
@@ -205,60 +206,47 @@ export function aplicarDatosFirebaseEnEstado(estado, datosFirebase) {
     copia.usuario = copia.usuario || {};
     copia.usuario.perfil = {
       ...copia.usuario.perfil,
-      ...limpiarMetadataFirebase(datosFirebase.perfil)
+      ...datosFirebase.perfil
     };
   }
 
   if (datosFirebase.rutina) {
-    copia.rutina = limpiarMetadataFirebase(datosFirebase.rutina);
+    copia.rutina = datosFirebase.rutina;
   }
 
   if (datosFirebase.ajustes) {
     copia.ajustes = {
       ...copia.ajustes,
-      ...limpiarMetadataFirebase(datosFirebase.ajustes)
+      ...datosFirebase.ajustes
     };
   }
 
   if (Array.isArray(datosFirebase.entrenamientos)) {
-    copia.entrenamientos = mezclarListasPorId(
-      copia.entrenamientos || [],
-      datosFirebase.entrenamientos
-    );
+    copia.entrenamientos = mezclarItemsFitJeff(copia.entrenamientos || [], datosFirebase.entrenamientos);
   }
 
   if (Array.isArray(datosFirebase.pesos)) {
-    copia.pesos = mezclarListasPorId(copia.pesos || [], datosFirebase.pesos);
+    copia.pesos = mezclarItemsFitJeff(copia.pesos || [], datosFirebase.pesos);
   }
 
   if (Array.isArray(datosFirebase.recomendaciones)) {
-    copia.recomendaciones = mezclarListasPorId(
-      copia.recomendaciones || [],
-      datosFirebase.recomendaciones
-    );
+    copia.recomendaciones = mezclarItemsFitJeff(copia.recomendaciones || [], datosFirebase.recomendaciones);
   }
 
   return copia;
 }
 
 async function subirPendientes({ items, guardarItem, tipo }) {
-  if (!Array.isArray(items) || typeof guardarItem !== "function") {
-    return 0;
-  }
+  if (!Array.isArray(items) || typeof guardarItem !== "function") return 0;
 
   let subidos = 0;
 
   for (const item of items) {
-    if (item.sincronizado === true || item.idFirestore) {
-      continue;
-    }
+    if (item.sincronizado === true || item.idFirestore) continue;
 
     try {
       const respuesta = await guardarItem(item);
-      item.sincronizado = true;
-      item.idFirestore = respuesta.id || respuesta.idFirestore || null;
-      item.rutaFirestore = respuesta.ruta || null;
-      item.sincronizadoEn = new Date().toISOString();
+      Object.assign(item, marcarItemSincronizado(item, respuesta));
       subidos += 1;
     } catch (error) {
       item.sincronizado = false;
@@ -270,52 +258,6 @@ async function subirPendientes({ items, guardarItem, tipo }) {
   return subidos;
 }
 
-function normalizarRemotos(items) {
-  if (!Array.isArray(items)) {
-    return [];
-  }
-
-  return items.map((item) => ({
-    ...limpiarMetadataFirebase(item),
-    id: item.id || item.idFirestore,
-    idFirestore: item.idFirestore || item.id || null,
-    sincronizado: true
-  }));
-}
-
-function mezclarListasPorId(locales, remotos) {
-  const mapa = new Map();
-
-  for (const item of remotos) {
-    const clave = obtenerClaveItem(item);
-    mapa.set(clave, item);
-  }
-
-  for (const item of locales) {
-    const clave = obtenerClaveItem(item);
-    mapa.set(clave, {
-      ...mapa.get(clave),
-      ...item
-    });
-  }
-
-  return Array.from(mapa.values()).sort((a, b) => {
-    const fechaA = new Date(a.creadoEn || a.fecha || 0).getTime();
-    const fechaB = new Date(b.creadoEn || b.fecha || 0).getTime();
-    return fechaB - fechaA;
-  });
-}
-
-function obtenerClaveItem(item) {
-  return item.id || item.idFirestore || item.rutaFirestore || JSON.stringify(item);
-}
-
-function limpiarMetadataFirebase(data) {
-  const copia = { ...data };
-  delete copia.actualizadoEn;
-  return copia;
-}
-
 function finalizarConError(resumen, error) {
   resumen.estado = ESTADOS_SINCRONIZACION.ERROR;
   resumen.ok = false;
@@ -325,13 +267,7 @@ function finalizarConError(resumen, error) {
 }
 
 function obtenerMensajeError(error) {
-  if (!error) {
-    return "Error desconocido.";
-  }
-
-  if (typeof error === "string") {
-    return error;
-  }
-
+  if (!error) return "Error desconocido.";
+  if (typeof error === "string") return error;
   return error.message || "Error desconocido.";
 }
