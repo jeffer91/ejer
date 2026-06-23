@@ -23,6 +23,11 @@ export const MENU_PRINCIPAL = [
     descripcion: "Entrenamiento visual"
   },
   {
+    id: VISTAS_APP.HIIT,
+    texto: "HIIT",
+    descripcion: "Intervalos sonoros"
+  },
+  {
     id: VISTAS_APP.RUTINAS,
     texto: "Rutinas",
     descripcion: "Importar y editar"
