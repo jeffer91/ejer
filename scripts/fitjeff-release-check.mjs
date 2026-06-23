@@ -74,6 +74,7 @@ function main() {
   revisarBuild();
   revisarServiceWorker();
   revisarRedisenio();
+  revisarControladorIntegracion();
   revisarFirestoreFitJeff();
   imprimirResultado();
 
@@ -167,6 +168,17 @@ function revisarRedisenio() {
   agregarRevisionTexto("redisenio", "menu.js", menu, "VISTAS_APP.PROGRESO", "Menú usa Progreso.");
   agregarRevisionTexto("redisenio", "menu.js", menu, "VISTAS_APP.ASISTENTE", "Menú usa Asistente.");
   agregarRevisionTexto("redisenio", "index.html", index, "./public/fit-redesign.css", "Index carga estilos de rediseño.");
+}
+
+function revisarControladorIntegracion() {
+  const controller = leerArchivo("src/app-controller.js");
+
+  agregarRevisionTexto("integracion", "app-controller.js", controller, "renderRegistrarView", "Controlador importa o registra Registrar.");
+  agregarRevisionTexto("integracion", "app-controller.js", controller, "renderProgresoView", "Controlador importa o registra Progreso.");
+  agregarRevisionTexto("integracion", "app-controller.js", controller, "renderAsistenteView", "Controlador importa o registra Asistente.");
+  agregarRevisionTexto("integracion", "app-controller.js", controller, "obtenerVistaRetornoPeso", "Guardar peso respeta vista Registrar.");
+  agregarRevisionTexto("integracion", "app-controller.js", controller, "obtenerVistaRetornoAsistente", "Acciones de Jarvis respetan vista Asistente.");
+  agregarRevisionTexto("integracion", "app-controller.js", controller, "obtenerVistaActual", "Controlador puede detectar la vista actual.");
 }
 
 function revisarFirestoreFitJeff() {
