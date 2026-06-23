@@ -1,16 +1,6 @@
 /*
   Nombre completo: menu.js
   Ruta o ubicación: src/ui/menu.js
-
-  Función:
-    - Definir y renderizar el menú principal de FitJeff.
-    - Mantener navegación simple y consistente entre pantallas.
-    - Permitir que el router marque la vista activa sin generar encabezados duplicados.
-
-  Se conecta con:
-    - src/ui/router.js
-    - src/ui/layout.js
-    - src/app.js
 */
 
 import { VISTAS_APP } from "./router.js";
@@ -31,6 +21,11 @@ export const MENU_PRINCIPAL = [
     id: VISTAS_APP.GUIADO,
     texto: "Guiado",
     descripcion: "Entrenamiento visual"
+  },
+  {
+    id: VISTAS_APP.RUTINAS,
+    texto: "Rutinas",
+    descripcion: "Importar y editar"
   },
   {
     id: VISTAS_APP.JARVIS,
@@ -105,9 +100,7 @@ export function filtrarMenuPorAjustes(ajustes = {}) {
 export function reemplazarMenu(items = MENU_PRINCIPAL) {
   const nav = document.querySelector(".fit-nav");
 
-  if (!nav) {
-    return;
-  }
+  if (!nav) return;
 
   nav.innerHTML = items.map(crearItemMenu).join("");
 }
