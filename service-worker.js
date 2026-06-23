@@ -3,8 +3,8 @@
   Ruta o ubicación: service-worker.js
 */
 
-const FITJEFF_CACHE_VERSION = "fitjeff-root-v0.1.0-build-12";
-const FITJEFF_RUNTIME_CACHE = "fitjeff-runtime-v0.1.0-build-12";
+const FITJEFF_CACHE_VERSION = "fitjeff-root-v0.1.0-build-13";
+const FITJEFF_RUNTIME_CACHE = "fitjeff-runtime-v0.1.0-build-13";
 
 const ARCHIVOS_APP = [
   "./",
@@ -20,10 +20,16 @@ const ARCHIVOS_APP = [
   "./src/app-controller.js",
   "./src/audio/audio.config.js",
   "./src/audio/audio.speech.service.js",
+  "./src/audio/audio.remote.schema.js",
+  "./src/audio/audio.remote.storage.service.js",
+  "./src/audio/audio.comandos.service.js",
+  "./src/audio/audio.remote.firebase.service.js",
+  "./src/audio/audio.remote.receiver.service.js",
   "./src/hiit/hiit.rutinas.js",
   "./src/hiit/hiit.timer.service.js",
   "./src/hiit/hiit.storage.service.js",
   "./src/vistas/hiit.view.js",
+  "./src/vistas/audio-remoto.view.js",
   "./src/data/usuario-base.js",
   "./src/data/rutina-base.js",
   "./src/storage/local-storage.service.js",
