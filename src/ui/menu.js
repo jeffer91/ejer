@@ -28,6 +28,11 @@ export const MENU_PRINCIPAL = [
     descripcion: "Importar y editar"
   },
   {
+    id: VISTAS_APP.MEDIDAS,
+    texto: "Medidas",
+    descripcion: "Registro semanal"
+  },
+  {
     id: VISTAS_APP.JARVIS,
     texto: "Jarvis",
     descripcion: "Asistente de voz"
