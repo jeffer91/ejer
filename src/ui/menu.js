@@ -33,6 +33,11 @@ export const MENU_PRINCIPAL = [
     descripcion: "Registro semanal"
   },
   {
+    id: VISTAS_APP.REPORTES,
+    texto: "Reportes",
+    descripcion: "Historial y exportación"
+  },
+  {
     id: VISTAS_APP.JARVIS,
     texto: "Jarvis",
     descripcion: "Asistente de voz"
