@@ -6,6 +6,7 @@
     - Ajustar FitJeff para celular, tablet, navegador y Electron.
     - Evitar interfaces apretadas en pantallas pequeñas.
     - Mantener botones grandes, navegación horizontal y formularios fáciles de tocar.
+    - Adaptar Jarvis para uso rápido desde celular.
 
   Se conecta con:
     - index.html
@@ -67,6 +68,10 @@
     flex: 1 1 180px;
   }
 
+  .acciones-grid {
+    grid-template-columns: 1fr;
+  }
+
   .card {
     padding: 14px;
   }
@@ -77,6 +82,11 @@
 
   .tabla-simple {
     min-width: 620px;
+  }
+
+  .jarvis-orb {
+    width: 126px;
+    height: 126px;
   }
 }
 
@@ -103,6 +113,20 @@
   .fit-header-actions .btn,
   .fit-header-actions button {
     width: 100%;
+  }
+
+  .jarvis-panel-principal {
+    text-align: left;
+  }
+
+  .jarvis-orb {
+    width: 118px;
+    height: 118px;
+    margin: 14px auto;
+  }
+
+  .jarvis-mensaje {
+    padding: 10px;
   }
 
   .fit-modal-overlay {
