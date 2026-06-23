@@ -1,1 +1,1 @@
-export function ok(){return true;}
+export const a = 1;
