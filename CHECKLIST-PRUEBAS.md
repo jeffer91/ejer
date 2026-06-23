@@ -1,226 +1,235 @@
 # CHECKLIST DE PRUEBAS - FITJEFF
 
-## 1. Prueba de arranque en Live Server
+## 1. Arranque
 
-- [ ] Abrir el proyecto en VS Code.
-- [ ] Abrir `index.html`.
-- [ ] Ejecutar **Open with Live Server**.
-- [ ] Ver pantalla principal sin error rojo.
+```txt
+Objetivo: confirmar que la app abre sin errores.
+```
+
+- [ ] Abrir `index.html` desde servidor local.
+- [ ] Confirmar que aparece Inicio.
+- [ ] Confirmar que el menú aparece arriba.
 - [ ] Revisar consola.
-- [ ] Confirmar mensaje: `FitJeff diagnóstico de arranque OK`.
+- [ ] Confirmar que no hay errores rojos de importación.
 
 Resultado esperado:
 
 ```txt
-La app abre en Inicio.
-El menú aparece arriba.
-No hay error de imports faltantes.
+FitJeff inicia correctamente.
 ```
 
-## 2. Prueba de navegación
+## 2. Navegación principal
 
-- [ ] Clic en Inicio.
-- [ ] Clic en Entrenar.
-- [ ] Clic en Jarvis.
-- [ ] Clic en Peso.
-- [ ] Clic en Estadísticas.
-- [ ] Clic en Recomendaciones.
-- [ ] Clic en Ajustes.
+- [ ] Inicio.
+- [ ] Entrenar.
+- [ ] Guiado.
+- [ ] Rutinas.
+- [ ] Medidas.
+- [ ] Reportes.
+- [ ] Jarvis.
+- [ ] Peso.
+- [ ] Estadísticas.
+- [ ] Recomendaciones.
+- [ ] Diagnóstico.
+- [ ] Ajustes.
 
 Resultado esperado:
 
 ```txt
-Cada pantalla carga sin recargar la página.
-El botón activo del menú se marca correctamente.
-La última vista queda guardada.
+Cada pantalla carga sin recargar toda la página.
+El botón activo se marca correctamente.
 ```
 
-## 3. Prueba de entrenamiento
+## 3. Entrenamiento
 
 - [ ] Entrar en Entrenar.
-- [ ] Seleccionar Día 1.
-- [ ] Llenar algunas series.
-- [ ] Marcar fallo técnico en una serie.
+- [ ] Seleccionar día.
+- [ ] Registrar series.
+- [ ] Marcar energía inicial y final.
 - [ ] Guardar entrenamiento.
-- [ ] Confirmar mensaje de guardado.
 - [ ] Volver a Inicio.
 
 Resultado esperado:
 
 ```txt
 El entrenamiento queda guardado localmente.
-El próximo día sugerido cambia.
-Estadísticas empiezan a mostrar datos.
+Inicio y Estadísticas actualizan datos.
 ```
 
-## 4. Prueba de Jarvis básico
+## 4. Entrenamiento guiado
 
-- [ ] Entrar en Jarvis desde el menú.
-- [ ] Confirmar que aparece la pantalla de Jarvis.
-- [ ] Clic en Activar Jarvis.
-- [ ] Confirmar mensaje hablado o visual.
-- [ ] Clic en Iniciar entrenamiento.
-- [ ] Confirmar que Jarvis guía el primer paso.
-- [ ] Usar botón Sí / hecho.
-- [ ] Usar botón Repetir.
-- [ ] Usar botón Pausar.
-- [ ] Usar botón Continuar.
-- [ ] Usar botón Terminar.
+- [ ] Entrar en Guiado.
+- [ ] Iniciar sesión.
+- [ ] Avanzar ejercicio.
+- [ ] Pausar.
+- [ ] Continuar.
+- [ ] Finalizar.
+- [ ] Revisar resumen.
 
 Resultado esperado:
 
 ```txt
-Jarvis funciona localmente.
-No necesita Gemini.
-Si la voz no está disponible, los botones manuales siguen funcionando.
+El guiado funciona sin bloquear la app.
 ```
 
-## 5. Prueba de micrófono
+## 5. Rutinas
 
-- [ ] Entrar en Jarvis.
-- [ ] Clic en Escuchar.
-- [ ] Permitir micrófono si el navegador lo pide.
-- [ ] Decir: Jarvis inicia entrenamiento.
-- [ ] Confirmar que la app interpreta el comando.
+- [ ] Entrar en Rutinas.
+- [ ] Copiar formato para IA.
+- [ ] Pegar una rutina en formato FitJeff.
+- [ ] Validar.
+- [ ] Aplicar.
+- [ ] Revisar entrenamiento.
 
 Resultado esperado:
 
 ```txt
-Si el navegador soporta reconocimiento de voz, Jarvis recibe el comando.
-Si no lo soporta, aparece un mensaje y se puede usar control manual.
+La rutina importada se puede validar y aplicar.
 ```
 
-## 6. Prueba de nota rápida Jarvis
+## 6. Medidas
+
+- [ ] Entrar en Medidas.
+- [ ] Registrar fecha.
+- [ ] Registrar peso o medida.
+- [ ] Guardar.
+- [ ] Revisar historial.
+- [ ] Revisar mini gráfico.
+
+Resultado esperado:
+
+```txt
+Las medidas quedan guardadas localmente.
+```
+
+## 7. Reportes
+
+- [ ] Entrar en Reportes.
+- [ ] Generar semanal.
+- [ ] Generar mensual.
+- [ ] Generar completo.
+- [ ] Guardar reporte.
+- [ ] Exportar TXT.
+- [ ] Exportar JSON.
+- [ ] Exportar CSV.
+
+Resultado esperado:
+
+```txt
+Los reportes se generan y descargan.
+```
+
+## 8. Jarvis
 
 - [ ] Entrar en Jarvis.
-- [ ] Escribir una observación.
-- [ ] Clic en Guardar nota.
+- [ ] Activar Jarvis.
+- [ ] Probar botones manuales.
+- [ ] Probar consulta escrita.
+- [ ] Probar sugerencias.
 - [ ] Revisar mensajes recientes.
 
 Resultado esperado:
 
 ```txt
-La nota queda guardada localmente.
-No se pierde al navegar.
+Jarvis responde localmente.
+Si Firebase y Gemini están activos, puede responder por servicio remoto.
 ```
 
-## 7. Prueba de peso
+## 9. Peso
 
 - [ ] Entrar en Peso.
-- [ ] Guardar un peso.
-- [ ] Guardar un segundo peso con otra fecha.
-- [ ] Revisar resumen y gráfica.
+- [ ] Guardar peso.
+- [ ] Guardar segundo peso.
+- [ ] Revisar tendencia.
 
 Resultado esperado:
 
 ```txt
-Los pesos quedan guardados.
-La tendencia aparece cuando hay al menos dos registros.
+El registro de peso sigue funcionando.
 ```
 
-## 8. Prueba de recomendaciones
+## 10. Estadísticas
 
-- [ ] Entrar en Recomendaciones.
-- [ ] Escribir una observación.
-- [ ] Clic en Guardar recomendación local.
-- [ ] Revisar historial.
+- [ ] Entrar en Estadísticas.
+- [ ] Revisar tarjetas.
+- [ ] Revisar gráficos.
+- [ ] Revisar rendimiento por ejercicio.
+- [ ] Revisar entrenamientos recientes.
 
 Resultado esperado:
 
 ```txt
-La recomendación local se guarda.
-No necesita Gemini para funcionar.
+El dashboard visual carga sin errores.
 ```
 
-## 9. Prueba de exportación
+## 11. Diagnóstico
 
-- [ ] Entrar en Ajustes.
-- [ ] Clic en Exportar datos.
-- [ ] Confirmar descarga de JSON.
-- [ ] Confirmar descarga de TXT.
+- [ ] Entrar en Diagnóstico.
+- [ ] Ejecutar diagnóstico.
+- [ ] Copiar JSON.
+- [ ] Copiar texto.
 
 Resultado esperado:
 
 ```txt
-Se descargan dos archivos de respaldo.
+Se muestra diagnóstico completo por áreas.
 ```
 
-## 10. Prueba PWA
+## 12. PWA
 
-- [ ] Abrir la app desde Live Server o Hosting.
-- [ ] Revisar consola.
-- [ ] Confirmar que no aparezca error de scope del service worker.
-- [ ] Entrar en Ajustes.
-- [ ] Clic en Buscar actualización.
-- [ ] Clic en Actualizar app.
+- [ ] Ejecutar servidor local.
+- [ ] Confirmar service worker.
+- [ ] Confirmar manifest.
+- [ ] Instalar app si el navegador lo permite.
+- [ ] Probar botón Actualizar app.
 
 Resultado esperado:
 
 ```txt
-El service worker se registra desde /service-worker.js.
-El botón de actualización limpia caché y recarga.
-Jarvis queda incluido en caché.
+La app puede instalarse y actualizar caché.
 ```
 
-## 11. Prueba Electron
+## 13. Firebase
+
+- [ ] Confirmar que la app funciona local sin Firebase.
+- [ ] Confirmar que Ajustes permite preparar Firebase.
+- [ ] Si hay Auth y Functions, probar recomendación remota.
+- [ ] Si hay Functions y clave, probar Jarvis remoto.
+
+Resultado esperado:
+
+```txt
+La app no se rompe si Firebase está apagado.
+```
+
+## 14. Electron
 
 ```bash
 npm install
 npm start
 ```
 
-- [ ] Confirmar que abre ventana de escritorio.
-- [ ] Navegar por pantallas.
-- [ ] Entrar en Jarvis.
-- [ ] Guardar peso.
+- [ ] Confirmar ventana de escritorio.
+- [ ] Navegar pantallas.
 - [ ] Guardar entrenamiento.
-- [ ] Entrar en Ajustes y revisar entorno.
+- [ ] Guardar medidas.
+- [ ] Entrar en Diagnóstico.
 
 Resultado esperado:
 
 ```txt
-La app abre en Electron usando el mismo index.html.
-No se activa nodeIntegration.
-El preload expone FitJeffDesktop.
+Electron abre el mismo index.html.
 ```
 
-## 12. Prueba Firebase
+## 15. Revisión final antes de publicar
 
-Estado actual:
-
-```txt
-Firebase está preparado, pero desactivado por defecto.
-firestore.rules exige autenticación.
+```bash
+npm run check:release
 ```
 
-Prueba segura:
-
-- [ ] Ir a Ajustes.
-- [ ] Confirmar que Firebase está en No.
-- [ ] Guardar datos localmente.
-- [ ] No debe aparecer error por permisos de Firestore.
-
-Cuando se agregue Auth:
-
-- [ ] Activar Firebase.
-- [ ] Activar sincronización automática.
-- [ ] Probar sincronizar ahora.
-- [ ] Confirmar documentos en Firestore.
-
-## 13. Errores conocidos corregidos
-
-- [x] Import faltante de `src/data/usuario-base.js`.
-- [x] Import faltante de `src/data/rutina-base.js`.
-- [x] Registro incorrecto de service worker en `/public`.
-- [x] Ruta incorrecta de `version.json`.
-- [x] Firebase intentando sincronizar automáticamente sin Auth.
-- [x] Jarvis creado y conectado al menú.
-
-## 14. Próximo bloque recomendado
+Resultado esperado:
 
 ```txt
-Crear entrenamiento guiado visual completo.
-Conectar guiado.service.js.
-Crear pantalla entrenamiento-guiado.view.js.
-Conectar resumen final automático.
+Sin errores críticos.
+Build sincronizado.
 ```
