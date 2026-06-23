@@ -8,6 +8,7 @@ export const VISTAS_APP = {
   ENTRENAR: "entrenar",
   GUIADO: "guiado",
   HIIT: "hiit",
+  AUDIO_REMOTO: "audio-remoto",
   RUTINAS: "rutinas",
   MEDIDAS: "medidas",
   REPORTES: "reportes",
@@ -61,6 +62,11 @@ export function renderizarVistaActual(contexto = {}) {
 
   if (!render && vistaActual === VISTAS_APP.HIIT) {
     renderizarVistaDinamica("../vistas/hiit.view.js", "renderHIITView");
+    return null;
+  }
+
+  if (!render && vistaActual === VISTAS_APP.AUDIO_REMOTO) {
+    renderizarVistaDinamica("../vistas/audio-remoto.view.js", "renderAudioRemotoView");
     return null;
   }
 
