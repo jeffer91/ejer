@@ -3,20 +3,8 @@
   Ruta o ubicación: src/app-controller.js
 
   Función:
-    - Controlar el flujo principal de FitJeff con módulos separados.
-    - Cargar y guardar estado local.
-    - Conectar layout, router, vistas, formularios, PWA, actualizaciones, exportación, diagnóstico, sincronización, Jarvis y entrenamiento guiado.
-    - Evitar que un error de Firebase, PWA, actualización, voz o timer rompa el arranque principal.
-
-  Se conecta con:
-    - src/app.js
-    - src/storage/local-storage.service.js
-    - src/ui/router.js
-    - src/ui/layout.js
-    - src/ui/modal.js
-    - src/vistas/*.view.js
-    - src/jarvis/*.js
-    - src/entrenamiento-guiado/*.js
+    - Controlar el flujo principal de FitJeff.
+    - Conectar vistas, almacenamiento local, PWA, Jarvis, entrenamiento guiado y rutinas.
 */
 
 import {
@@ -34,6 +22,7 @@ import { leerFormulario, leerBooleano, leerNumero } from "./ui/helpers.js";
 import { renderInicioView } from "./vistas/inicio.view.js";
 import { renderEntrenarView } from "./vistas/entrenar.view.js";
 import { renderEntrenamientoGuiadoView } from "./vistas/entrenamiento-guiado.view.js";
+import { renderRutinasView } from "./vistas/rutinas.view.js";
 import { renderPesoView } from "./vistas/peso.view.js";
 import { renderEstadisticasView } from "./vistas/estadisticas.view.js";
 import { renderRecomendacionesView } from "./vistas/recomendaciones.view.js";
@@ -69,6 +58,14 @@ import {
   guardarNotaGuiada
 } from "./entrenamiento-guiado/guiado.service.js";
 
+import { prepararImportacionRutina, aplicarImportacionRutina } from "./rutinas/rutina.import.service.js";
+import {
+  obtenerImportacionActual,
+  guardarImportacionActual,
+  limpiarImportacionActual,
+  obtenerUltimaRutinaHistorial
+} from "./rutinas/rutina.storage.service.js";
+
 export const APP_VERSION = "0.1.0";
 
 let estado = cargarEstadoLocal();
@@ -87,6 +84,7 @@ export async function iniciarFitJeff() {
     [VISTAS_APP.INICIO]: () => renderizarVista(renderInicioView),
     [VISTAS_APP.ENTRENAR]: () => renderizarVista(renderEntrenarView),
     [VISTAS_APP.GUIADO]: () => renderizarVista(renderEntrenamientoGuiadoView),
+    [VISTAS_APP.RUTINAS]: () => renderizarVista(renderRutinasView),
     [VISTAS_APP.PESO]: () => renderizarVista(renderPesoView),
     [VISTAS_APP.ESTADISTICAS]: () => renderizarVista(renderEstadisticasView),
     [VISTAS_APP.RECOMENDACIONES]: () => renderizarVista(renderRecomendacionesView),
@@ -98,8 +96,7 @@ export async function iniciarFitJeff() {
   activarEventosApp();
   activarPWAConProteccion();
 
-  const vistaInicial = obtenerVistaInicial();
-  navegarA(vistaInicial);
+  navegarA(obtenerVistaInicial());
 
   if (estado.ajustes?.usarFirebase && estado.ajustes?.sincronizarAutomaticamente) {
     sincronizarSilencioso();
@@ -122,18 +119,13 @@ function renderizarVista(render) {
 }
 
 function activarEventosApp() {
-  if (eventosActivos) {
-    return;
-  }
+  if (eventosActivos) return;
 
   eventosActivos = true;
 
   document.body.addEventListener("click", async (event) => {
     const accion = event.target.closest("[data-action]")?.dataset.action;
-
-    if (!accion) {
-      return;
-    }
+    if (!accion) return;
 
     try {
       if (accion === "guardar-peso") await accionGuardarPeso();
@@ -170,6 +162,13 @@ function activarEventosApp() {
       if (accion === "guiado-sumar-descanso") await accionGuiadoSumarDescanso();
       if (accion === "guiado-terminar") await accionGuiadoTerminar();
       if (accion === "guiado-guardar-nota") await accionGuiadoGuardarNota();
+
+      if (accion === "rutina-copiar-formato") await accionRutinaCopiar("rutina-formato-base", "Formato copiado.");
+      if (accion === "rutina-copiar-prompt") await accionRutinaCopiar("rutina-prompt-base", "Prompt copiado.");
+      if (accion === "rutina-validar-importacion") await accionRutinaValidarImportacion();
+      if (accion === "rutina-limpiar-importacion") await accionRutinaLimpiarImportacion();
+      if (accion === "rutina-aplicar-importacion") await accionRutinaAplicarImportacion();
+      if (accion === "rutina-restaurar-ultima") await accionRutinaRestaurarUltima();
     } catch (error) {
       console.error(`Error ejecutando acción ${accion}.`, error);
       mostrarMensaje("Acción no completada", error.message || "Ocurrió un error.", "error");
@@ -181,6 +180,12 @@ function activarEventosApp() {
       estado.diaSeleccionado = Number(event.target.value || 1);
       guardarEstadoLocal(estado);
       navegarA(VISTAS_APP.ENTRENAR);
+    }
+
+    if (event.target.matches("#rutina-dia-formato")) {
+      estado.diaSeleccionado = Number(event.target.value || 1);
+      guardarEstadoLocal(estado);
+      navegarA(VISTAS_APP.RUTINAS);
     }
   });
 }
@@ -286,6 +291,7 @@ function leerEjercicioDesdeFormulario(ejercicio, datos) {
 
   const series = Array.from({ length: ejercicio.seriesObjetivo || 3 }, (_, index) => {
     const numero = index + 1;
+
     return {
       numero,
       valor: leerNumero(datos[`ex_${ejercicio.id}_serie_${numero}`], 0),
@@ -369,9 +375,7 @@ async function accionSincronizarAhora() {
 }
 
 async function sincronizarSilencioso() {
-  if (!estado.ajustes?.usarFirebase || !estado.ajustes?.sincronizarAutomaticamente) {
-    return null;
-  }
+  if (!estado.ajustes?.usarFirebase || !estado.ajustes?.sincronizarAutomaticamente) return null;
 
   try {
     const resultado = await sincronizarEstadoConFirebase({
@@ -469,6 +473,7 @@ async function accionJarvisEscuchar() {
   activarJarvis();
   await inicializarVozJarvis();
   await hablarJarvis("Te escucho.");
+
   const resultado = await escucharJarvis();
 
   if (!resultado.ok) {
@@ -484,9 +489,7 @@ async function accionJarvisEscuchar() {
 }
 
 async function manejarComandoJarvis(comando) {
-  if (!comando) {
-    return;
-  }
+  if (!comando) return;
 
   if (comando.accion === JARVIS_ACCIONES.INICIAR_ENTRENAMIENTO) {
     await accionJarvisIniciarEntrenamiento();
@@ -567,9 +570,7 @@ async function accionJarvisGuardarNota() {
     return;
   }
 
-  if (textarea) {
-    textarea.value = "";
-  }
+  if (textarea) textarea.value = "";
 
   mostrarMensaje("Nota guardada", "La observación quedó guardada localmente.", "ok");
   navegarA(VISTAS_APP.JARVIS);
@@ -638,12 +639,92 @@ async function accionGuiadoGuardarNota() {
     return;
   }
 
-  if (textarea) {
-    textarea.value = "";
-  }
+  if (textarea) textarea.value = "";
 
   mostrarMensaje("Nota guardada", "La observación quedó guardada.", "ok");
   navegarA(VISTAS_APP.GUIADO);
+}
+
+async function accionRutinaCopiar(idTextarea, mensaje) {
+  const textarea = document.getElementById(idTextarea);
+  const texto = textarea?.value || "";
+
+  if (!texto) {
+    mostrarMensaje("Nada para copiar", "No se encontró el formato.", "error");
+    return;
+  }
+
+  try {
+    await navigator.clipboard.writeText(texto);
+  } catch (_) {
+    textarea.classList.remove("oculto");
+    textarea.select();
+    document.execCommand("copy");
+    textarea.classList.add("oculto");
+  }
+
+  mostrarMensaje("Copiado", mensaje, "ok");
+}
+
+async function accionRutinaValidarImportacion() {
+  const texto = document.getElementById("rutina-texto-importar")?.value || "";
+  const resultado = prepararImportacionRutina(texto, estado.rutina);
+
+  guardarImportacionActual(resultado);
+
+  mostrarMensaje(
+    resultado.ok ? "Rutina validada" : "Rutina con errores",
+    resultado.ok ? "Puedes aplicarla." : resultado.errores.join("\n"),
+    resultado.ok ? "ok" : "error"
+  );
+
+  navegarA(VISTAS_APP.RUTINAS);
+}
+
+async function accionRutinaLimpiarImportacion() {
+  limpiarImportacionActual();
+  mostrarMensaje("Importación limpia", "Se limpió la previsualización.", "ok");
+  navegarA(VISTAS_APP.RUTINAS);
+}
+
+async function accionRutinaAplicarImportacion() {
+  const importacion = obtenerImportacionActual();
+
+  if (!importacion?.ok || !importacion?.rutinaImportada) {
+    mostrarMensaje("No se puede aplicar", "Primero valida una rutina sin errores.", "error");
+    return;
+  }
+
+  const resultado = aplicarImportacionRutina(estado.rutina, importacion.rutinaImportada);
+
+  if (!resultado.ok) {
+    mostrarMensaje("Rutina no aplicada", resultado.errores.join("\n"), "error");
+    return;
+  }
+
+  estado.rutina = resultado.rutina;
+  estado.diaSeleccionado = estado.rutina.diaActual || 1;
+  guardarEstadoLocal(estado);
+  limpiarImportacionActual();
+
+  mostrarMensaje("Rutina aplicada", resultado.mensaje, "ok");
+  navegarA(VISTAS_APP.RUTINAS);
+}
+
+async function accionRutinaRestaurarUltima() {
+  const ultima = obtenerUltimaRutinaHistorial();
+
+  if (!ultima?.rutina) {
+    mostrarMensaje("Sin respaldo", "No hay una rutina anterior para restaurar.", "error");
+    return;
+  }
+
+  estado.rutina = ultima.rutina;
+  estado.diaSeleccionado = estado.rutina.diaActual || 1;
+  guardarEstadoLocal(estado);
+
+  mostrarMensaje("Rutina restaurada", "Se restauró la última rutina guardada.", "ok");
+  navegarA(VISTAS_APP.RUTINAS);
 }
 
 function obtenerVistaInicial() {
