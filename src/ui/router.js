@@ -4,7 +4,7 @@
 
   Función:
     - Administrar navegación interna de FitJeff sin recargar la página.
-    - Mantener una vista activa: inicio, entrenar, peso, estadísticas, recomendaciones y ajustes.
+    - Mantener una vista activa: inicio, entrenar, peso, estadísticas, recomendaciones, Jarvis y ajustes.
     - Guardar la última vista visitada para que la app recuerde dónde estaba.
 
   Se conecta con:
@@ -20,6 +20,7 @@ export const VISTAS_APP = {
   PESO: "peso",
   ESTADISTICAS: "estadisticas",
   RECOMENDACIONES: "recomendaciones",
+  JARVIS: "jarvis",
   AJUSTES: "ajustes"
 };
 
@@ -28,6 +29,7 @@ const STORAGE_KEY_VISTA = "fitjeff_vista_actual";
 let vistaActual = VISTAS_APP.INICIO;
 let listeners = [];
 let vistasRegistradas = new Map();
+let routerActivo = false;
 
 export function registrarVista(nombre, render) {
   if (!nombre || typeof render !== "function") {
@@ -51,6 +53,10 @@ export function navegarA(nombreVista, contexto = {}) {
   marcarNavegacionActiva(vista);
   renderizarVistaActual(contexto);
   notificarCambioVista(vista, contexto);
+
+  if (location.hash.replace("#", "") !== vista) {
+    history.replaceState(null, "", `#${vista}`);
+  }
 
   return vista;
 }
@@ -94,9 +100,11 @@ export function escucharCambioVista(callback) {
 }
 
 export function activarRouterDelegado(root = document.body) {
-  if (!root) {
+  if (!root || routerActivo) {
     return;
   }
+
+  routerActivo = true;
 
   root.addEventListener("click", (event) => {
     const boton = event.target.closest("[data-nav]");
@@ -107,6 +115,14 @@ export function activarRouterDelegado(root = document.body) {
 
     event.preventDefault();
     navegarA(boton.dataset.nav);
+  });
+
+  window.addEventListener("hashchange", () => {
+    const hash = String(location.hash || "").replace("#", "").trim();
+
+    if (hash && hash !== vistaActual) {
+      navegarA(hash);
+    }
   });
 }
 
