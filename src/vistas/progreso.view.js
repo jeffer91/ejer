@@ -1,11 +1,13 @@
 import { prepararDashboard } from "../dashboard/dashboard.service.js";
 import { escapeDashboard, formatoMinutos } from "../dashboard/dashboard.format.service.js";
+import { cargarEstadoLocal } from "../storage/local-storage.service.js";
 import { crearBotones, crearEncabezadoVista, crearGridMetricas, crearTarjeta } from "./componentes.view.js";
 
-export function renderProgresoView(estado = {}) {
-  const dashboard = prepararDashboard(estado);
+export function renderProgresoView(estado = null) {
+  const datos = estado?.usuario ? estado : cargarEstadoLocal();
+  const dashboard = prepararDashboard(datos);
   const cumplimiento = dashboard.estadisticas?.cumplimiento || {};
-  const pesoActual = estado.usuario?.perfil?.pesoActualKg || dashboard.tarjetas?.find((item) => item.titulo === "Peso actual")?.valor || "Sin dato";
+  const pesoActual = datos.usuario?.perfil?.pesoActualKg || dashboard.tarjetas?.find((item) => item.titulo === "Peso actual")?.valor || "Sin dato";
 
   return `
     ${crearEncabezadoVista({
