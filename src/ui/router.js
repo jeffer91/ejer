@@ -9,6 +9,7 @@ export const VISTAS_APP = {
   GUIADO: "guiado",
   RUTINAS: "rutinas",
   MEDIDAS: "medidas",
+  REPORTES: "reportes",
   PESO: "peso",
   ESTADISTICAS: "estadisticas",
   RECOMENDACIONES: "recomendaciones",
@@ -57,7 +58,12 @@ export function renderizarVistaActual(contexto = {}) {
   const render = vistasRegistradas.get(vistaActual);
 
   if (!render && vistaActual === VISTAS_APP.MEDIDAS) {
-    renderizarMedidasDinamico();
+    renderizarVistaDinamica("../vistas/medidas.view.js", "renderMedidasView");
+    return null;
+  }
+
+  if (!render && vistaActual === VISTAS_APP.REPORTES) {
+    renderizarVistaDinamica("../vistas/reportes.view.js", "renderReportesView");
     return null;
   }
 
@@ -143,16 +149,16 @@ function notificarCambioVista(vista, contexto) {
   });
 }
 
-async function renderizarMedidasDinamico() {
+async function renderizarVistaDinamica(ruta, nombreRender) {
   try {
-    const modulo = await import("../vistas/medidas.view.js");
+    const modulo = await import(ruta);
     const vista = document.getElementById("vista");
 
-    if (!vista) return;
+    if (!vista || typeof modulo[nombreRender] !== "function") return;
 
-    vista.innerHTML = modulo.renderMedidasView();
+    vista.innerHTML = modulo[nombreRender]();
     vista.focus({ preventScroll: true });
   } catch (error) {
-    console.error("No se pudo cargar la vista Medidas.", error);
+    console.error("No se pudo cargar la vista dinámica.", error);
   }
 }
