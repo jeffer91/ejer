@@ -3,163 +3,154 @@
   Ruta o ubicación: src/vistas/inicio.view.js
 
   Función:
-    - Renderizar la pantalla de inicio de FitJeff.
-    - Mostrar peso actual, día sugerido, cumplimiento, último entrenamiento y recomendaciones rápidas.
-    - Dar acceso directo a entrenar, registrar peso, estadísticas y recomendaciones.
+    - Renderizar un inicio tipo dashboard minimalista.
+    - Mostrar enfoque del día, métricas clave, gráficos rápidos y acciones principales.
+    - Reducir números sueltos y priorizar lectura visual.
 
   Se conecta con:
+    - src/dashboard/dashboard.service.js
+    - src/dashboard/dashboard.graficas.service.js
+    - src/dashboard/dashboard.alertas.service.js
+    - src/dashboard/dashboard.estilos.service.js
     - src/vistas/componentes.view.js
-    - src/estadisticas/estadisticas.service.js
-    - src/data/rutina-base.js
-    - src/ui/helpers.js
-    - src/app.js cuando se actualice el flujo final.
 */
 
-import { obtenerDiaPorNumero } from "../data/rutina-base.js";
-import { generarResumenEstadistico } from "../estadisticas/estadisticas.service.js";
-import { escaparHTML, formatearFecha, ordenarPorFechaDesc } from "../ui/helpers.js";
-import {
-  crearAlerta,
-  crearBotones,
-  crearEncabezadoVista,
-  crearGridMetricas,
-  crearResumenEntrenamientoCard,
-  crearTarjeta
-} from "./componentes.view.js";
+import { prepararDashboard } from "../dashboard/dashboard.service.js";
+import { crearAlertasDashboard, crearClaseAlertaDashboard } from "../dashboard/dashboard.alertas.service.js";
+import { crearAnilloDashboard, crearGraficaLineaDashboard, crearGraficaBarrasDashboard } from "../dashboard/dashboard.graficas.service.js";
+import { crearEstilosDashboard } from "../dashboard/dashboard.estilos.service.js";
+import { escapeDashboard, formatoFechaCorta, formatoMinutos, limitarTextoDashboard } from "../dashboard/dashboard.format.service.js";
+import { crearAlerta, crearBotones, crearTarjeta } from "./componentes.view.js";
 
 export function renderInicioView(estado = {}) {
-  const estadisticas = generarResumenEstadistico(estado);
-  const perfil = estado.usuario?.perfil || {};
-  const entrenamientos = ordenarPorFechaDesc(estado.entrenamientos || []);
-  const ultimoEntrenamiento = entrenamientos[0] || null;
-  const diaActual = estado.rutina?.diaActual || calcularDiaSugerido(ultimoEntrenamiento);
-  const dia = obtenerDiaPorNumero(diaActual);
-  const pesoActual = estadisticas.peso?.pesoActualKg || perfil.pesoActualKg || 91;
+  const dashboard = prepararDashboard(estado);
+  const alertas = crearAlertasDashboard(dashboard);
 
   return `
-    ${crearEncabezadoVista({
-      titulo: `Hola, ${estado.usuario?.nombre || "Jeff"}`,
-      subtitulo: "Registra lo que haces, cómo te sientes y cómo va tu progreso real.",
-      pill: "Inicio"
-    })}
+    ${crearEstilosDashboard()}
+
+    <section class="card dashboard-hero">
+      <div>
+        <p class="pill">Inicio</p>
+        <h1 class="dashboard-hero-title">Hola, ${escapeDashboard(dashboard.usuario)}</h1>
+        <p class="dashboard-hero-subtitle">
+          Un resumen simple para decidir qué hacer hoy: entrenar, revisar rutina, registrar medidas o mirar el avance.
+        </p>
+        ${crearBotones([
+          { texto: "Entrenar hoy", nav: "entrenar" },
+          { texto: "Entrenamiento guiado", nav: "guiado", tipo: "secundario" },
+          { texto: "Medidas", nav: "medidas", tipo: "secundario" }
+        ])}
+      </div>
+
+      <div class="dashboard-focus">
+        ${crearAlerta({
+          tipo: dashboard.enfoque.tipo,
+          titulo: dashboard.enfoque.titulo,
+          mensaje: dashboard.enfoque.mensaje
+        })}
+        <div>
+          <p class="pill">Día ${escapeDashboard(dashboard.diaSugerido.numero)}</p>
+          <h2>${escapeDashboard(dashboard.diaSugerido.nombre)}</h2>
+          <p class="muted">${escapeDashboard(dashboard.diaSugerido.resumen)}</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="dashboard-card-grid section-space">
+      ${dashboard.tarjetas.map((tarjeta) => `
+        <article class="dashboard-metric-card" data-estado="${escapeDashboard(tarjeta.estado)}">
+          <span>${escapeDashboard(tarjeta.titulo)}</span>
+          <strong>${escapeDashboard(tarjeta.valor)}</strong>
+          <small class="muted">${escapeDashboard(tarjeta.detalle)}</small>
+        </article>
+      `).join("")}
+    </section>
 
     <section class="grid grid-2 section-space">
       ${crearTarjeta({
-        titulo: "Día sugerido",
-        contenido: `
-          <p class="pill">Día ${escaparHTML(dia.numero)}</p>
-          <h3>${escaparHTML(dia.nombre)}</h3>
-          <p class="muted">${escaparHTML(dia.objetivo)}</p>
-          <p><strong>Duración estimada:</strong> ${escaparHTML(dia.duracionEstimadaMin)} minutos</p>
-        `,
-        footer: crearBotones([
-          { texto: "Iniciar entrenamiento", nav: "entrenar" },
-          { texto: "Registrar peso", nav: "peso", tipo: "secundario" }
-        ])
+        titulo: "Constancia semanal",
+        contenido: crearAnilloDashboard({
+          valor: dashboard.estadisticas.cumplimiento?.porcentajeSemana || 0,
+          max: 100,
+          titulo: "Cumplimiento",
+          detalle: `${dashboard.estadisticas.cumplimiento?.entrenamientosUltimos7Dias || 0} entrenamientos en 7 días`
+        })
       })}
 
       ${crearTarjeta({
-        titulo: "Estado de hoy",
-        contenido: `
-          ${crearAlerta({
-            tipo: estadisticas.fatiga?.nivel === "alto" ? "danger" : estadisticas.fatiga?.nivel === "medio" ? "warning" : "ok",
-            titulo: "Fatiga",
-            mensaje: estadisticas.fatiga?.mensaje || "Sin alertas importantes."
-          })}
-          <div class="section-space">
-            ${crearAlerta({
-              tipo: "info",
-              titulo: "Fallo técnico",
-              mensaje: "Entrenar al fallo significa parar cuando se pierde la postura correcta, no forzar con mala técnica."
-            })}
-          </div>
-        `
+        titulo: "Peso / medidas",
+        contenido: crearGraficaLineaDashboard({
+          datos: dashboard.series.peso,
+          titulo: "Tendencia reciente"
+        })
       })}
     </section>
 
-    ${crearGridMetricas([
-      {
-        titulo: "Peso actual",
-        valor: `${pesoActual} kg`,
-        detalle: `Inicial: ${perfil.pesoInicialKg || 91} kg`
-      },
-      {
-        titulo: "Cumplimiento semanal",
-        valor: `${estadisticas.cumplimiento?.porcentajeSemana || 0}%`,
-        detalle: `${estadisticas.cumplimiento?.entrenamientosUltimos7Dias || 0} entrenamientos en 7 días`
-      },
-      {
-        titulo: "Minutos totales",
-        valor: `${estadisticas.entrenamientos?.minutosTotales || 0}`,
-        detalle: "Tiempo registrado"
-      }
-    ])}
+    <section class="grid grid-2 section-space">
+      ${crearTarjeta({
+        titulo: "Minutos por día",
+        contenido: crearGraficaBarrasDashboard({
+          datos: dashboard.series.minutos,
+          titulo: "Distribución"
+        })
+      })}
+
+      ${crearTarjeta({
+        titulo: "Alertas útiles",
+        contenido: alertas.map((alerta) => `
+          <div class="alerta ${crearClaseAlertaDashboard(alerta.tipo)}" style="margin-bottom:10px;">
+            <strong>${escapeDashboard(alerta.titulo)}</strong>
+            <p>${escapeDashboard(alerta.mensaje)}</p>
+          </div>
+        `).join("") || crearAlerta({
+          tipo: "ok",
+          mensaje: "Todo se ve estable con los datos actuales."
+        })
+      })}
+    </section>
 
     <section class="grid grid-2 section-space">
       ${crearTarjeta({
         titulo: "Último entrenamiento",
-        contenido: crearResumenEntrenamientoCard(ultimoEntrenamiento)
+        contenido: crearUltimoEntrenamiento(dashboard.ultimoEntrenamiento)
       })}
 
       ${crearTarjeta({
-        titulo: "Recomendación rápida",
-        contenido: crearRecomendacionRapida(estadisticas)
+        titulo: "Acciones rápidas",
+        contenido: crearBotones(dashboard.acciones.map((accion) => ({
+          texto: accion.texto,
+          nav: accion.nav,
+          tipo: accion.tipo === "principal" ? "" : "secundario"
+        })))
       })}
-    </section>
-
-    <section class="card section-space">
-      <h2>Acciones principales</h2>
-      ${crearBotones([
-        { texto: "Entrenar hoy", nav: "entrenar" },
-        { texto: "Ver estadísticas", nav: "estadisticas", tipo: "secundario" },
-        { texto: "Generar recomendaciones", nav: "recomendaciones", tipo: "secundario" },
-        { texto: "Sincronizar", action: "sincronizar-ahora", tipo: "secundario" }
-      ])}
     </section>
   `;
 }
 
-function crearRecomendacionRapida(estadisticas) {
-  const recomendaciones = estadisticas.recomendacionesRapidas || [];
-
-  if (!recomendaciones.length) {
-    return crearAlerta({
-      tipo: "info",
-      mensaje: "Sigue registrando datos para mejorar las recomendaciones."
-    });
+function crearUltimoEntrenamiento(entrenamiento) {
+  if (!entrenamiento) {
+    return `<p class="muted">Todavía no hay entrenamientos registrados.</p>`;
   }
 
-  return recomendaciones
-    .slice(0, 3)
-    .map((rec) =>
-      crearAlerta({
-        tipo: rec.tipo === "fatiga" ? "warning" : "info",
-        titulo: rec.tipo,
-        mensaje: rec.mensaje
-      })
-    )
-    .join("<div style='height:10px;'></div>");
-}
-
-function calcularDiaSugerido(ultimoEntrenamiento) {
-  if (!ultimoEntrenamiento?.diaRutina) {
-    return 1;
-  }
-
-  return Number(ultimoEntrenamiento.diaRutina) >= 4
-    ? 1
-    : Number(ultimoEntrenamiento.diaRutina) + 1;
+  return `
+    <article class="alerta">
+      <strong>Día ${escapeDashboard(entrenamiento.diaRutina)} · ${escapeDashboard(entrenamiento.nombreDia || "Entrenamiento")}</strong>
+      <p class="muted">
+        ${escapeDashboard(formatoFechaCorta(entrenamiento.fecha))} · ${escapeDashboard(entrenamiento.estado || "sin estado")} · ${escapeDashboard(formatoMinutos(entrenamiento.duracionMin || 0))}
+      </p>
+      ${entrenamiento.observacion ? `<p>${escapeDashboard(limitarTextoDashboard(entrenamiento.observacion, 120))}</p>` : ""}
+    </article>
+  `;
 }
 
 export function crearResumenInicioTexto(estado = {}) {
-  const estadisticas = generarResumenEstadistico(estado);
-  const perfil = estado.usuario?.perfil || {};
-  const ultimo = ordenarPorFechaDesc(estado.entrenamientos || [])[0];
+  const dashboard = prepararDashboard(estado);
 
   return [
-    `Peso actual: ${estadisticas.peso?.pesoActualKg || perfil.pesoActualKg || 91} kg`,
-    `Cumplimiento semanal: ${estadisticas.cumplimiento?.porcentajeSemana || 0}%`,
-    ultimo ? `Último entrenamiento: Día ${ultimo.diaRutina}, ${formatearFecha(ultimo.fecha)}` : "Sin entrenamientos registrados",
-    `Fatiga: ${estadisticas.fatiga?.nivel || "sin datos"}`
+    `Día sugerido: ${dashboard.diaSugerido.numero} - ${dashboard.diaSugerido.nombre}`,
+    `Constancia semanal: ${dashboard.estadisticas.cumplimiento?.porcentajeSemana || 0}%`,
+    dashboard.ultimoEntrenamiento ? `Último entrenamiento: Día ${dashboard.ultimoEntrenamiento.diaRutina}` : "Sin entrenamientos registrados",
+    `Fatiga: ${dashboard.estadisticas.fatiga?.nivel || "sin datos"}`
   ].join("\n");
 }
