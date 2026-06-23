@@ -5,7 +5,7 @@
   Función:
     - Permitir que FitJeff controle toda la app como PWA desde la raíz.
     - Guardar archivos principales en caché y permitir actualización controlada.
-    - Incluir Jarvis y entrenamiento guiado base en la instalación offline.
+    - Incluir Jarvis y entrenamiento guiado completo en la instalación offline.
 
   Se conecta con:
     - src/pwa/pwa.service.js
@@ -14,8 +14,8 @@
     - index.html
 */
 
-const FITJEFF_CACHE_VERSION = "fitjeff-root-v0.1.0-build-4";
-const FITJEFF_RUNTIME_CACHE = "fitjeff-runtime-v0.1.0-build-4";
+const FITJEFF_CACHE_VERSION = "fitjeff-root-v0.1.0-build-5";
+const FITJEFF_RUNTIME_CACHE = "fitjeff-runtime-v0.1.0-build-5";
 
 const ARCHIVOS_APP = [
   "./",
@@ -43,6 +43,8 @@ const ARCHIVOS_APP = [
   "./src/entrenamiento-guiado/guiado.config.js",
   "./src/entrenamiento-guiado/guiado.estado.js",
   "./src/entrenamiento-guiado/guiado.timer.service.js",
+  "./src/entrenamiento-guiado/guiado.service.js",
+  "./src/entrenamiento-guiado/guiado.resumen.service.js",
   "./src/estadisticas/estadisticas.calculos.js",
   "./src/estadisticas/estadisticas.service.js",
   "./src/recomendaciones/recomendaciones.prompt.js",
@@ -63,6 +65,7 @@ const ARCHIVOS_APP = [
   "./src/vistas/componentes.view.js",
   "./src/vistas/inicio.view.js",
   "./src/vistas/entrenar.view.js",
+  "./src/vistas/entrenamiento-guiado.view.js",
   "./src/vistas/peso.view.js",
   "./src/vistas/estadisticas.view.js",
   "./src/vistas/recomendaciones.view.js",
