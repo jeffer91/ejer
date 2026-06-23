@@ -3,100 +3,110 @@
   Ruta o ubicación: src/vistas/estadisticas.view.js
 
   Función:
-    - Renderizar un tablero gráfico de progreso de FitJeff.
-    - Mostrar peso, cumplimiento, minutos, fatiga, rendimiento por ejercicio y gráficas simples.
-    - Preparar datos visuales sin depender de librerías externas.
+    - Renderizar estadísticas con tablero visual mejorado.
+    - Mostrar constancia, minutos, peso/medidas, energía, fatiga y rendimiento.
+    - Mantener gráficos simples sin librerías externas.
 
   Se conecta con:
-    - src/estadisticas/estadisticas.service.js
+    - src/dashboard/dashboard.service.js
+    - src/dashboard/dashboard.graficas.service.js
+    - src/dashboard/dashboard.alertas.service.js
     - src/vistas/componentes.view.js
-    - src/ui/helpers.js
-    - src/app.js cuando se actualice el flujo final.
 */
 
-import { generarResumenEstadistico, prepararDatosParaGraficas } from "../estadisticas/estadisticas.service.js";
-import { escaparHTML, formatearFecha } from "../ui/helpers.js";
+import { prepararDashboard } from "../dashboard/dashboard.service.js";
+import { crearAlertasDashboard, crearClaseAlertaDashboard } from "../dashboard/dashboard.alertas.service.js";
+import { crearAnilloDashboard, crearGraficaBarrasDashboard, crearGraficaLineaDashboard } from "../dashboard/dashboard.graficas.service.js";
+import { crearEstilosDashboard } from "../dashboard/dashboard.estilos.service.js";
+import { escapeDashboard, formatoFechaCorta, formatoMinutos } from "../dashboard/dashboard.format.service.js";
+import { generarResumenEstadistico } from "../estadisticas/estadisticas.service.js";
 import {
-  crearAlerta,
   crearBotones,
   crearEncabezadoVista,
-  crearGraficaBarras,
-  crearGridMetricas,
-  crearMiniGraficaLinea,
   crearTablaSimple,
   crearTarjeta
 } from "./componentes.view.js";
 
 export function renderEstadisticasView(estado = {}) {
+  const dashboard = prepararDashboard(estado);
   const estadisticas = generarResumenEstadistico(estado);
-  const graficas = prepararDatosParaGraficas(estadisticas);
+  const alertas = crearAlertasDashboard(dashboard);
 
   return `
+    ${crearEstilosDashboard()}
+
     ${crearEncabezadoVista({
       titulo: "Estadísticas",
-      subtitulo: "Mira tu progreso con datos simples: cumplimiento, peso, minutos, fatiga y rendimiento.",
-      pill: "Tablero gráfico"
+      subtitulo: "Tablero visual para revisar constancia, carga, energía y progreso sin complicarlo.",
+      pill: "Dashboard"
     })}
 
-    ${crearGridMetricas(
-      estadisticas.tarjetas.map((tarjeta) => ({
-        titulo: tarjeta.titulo,
-        valor: tarjeta.valor,
-        detalle: tarjeta.detalle
-      }))
-    )}
+    <section class="dashboard-card-grid section-space">
+      ${dashboard.tarjetas.map((tarjeta) => `
+        <article class="dashboard-metric-card" data-estado="${escapeDashboard(tarjeta.estado)}">
+          <span>${escapeDashboard(tarjeta.titulo)}</span>
+          <strong>${escapeDashboard(tarjeta.valor)}</strong>
+          <small class="muted">${escapeDashboard(tarjeta.detalle)}</small>
+        </article>
+      `).join("")}
+    </section>
 
     <section class="grid grid-2 section-space">
       ${crearTarjeta({
-        titulo: "Evolución de peso",
-        contenido: crearMiniGraficaLinea({
-          datos: graficas.peso,
-          campoX: "fecha",
-          campoY: "valor"
+        titulo: "Constancia semanal",
+        contenido: crearAnilloDashboard({
+          valor: estadisticas.cumplimiento?.porcentajeSemana || 0,
+          max: 100,
+          titulo: "Cumplimiento",
+          detalle: `${estadisticas.cumplimiento?.entrenamientosUltimos7Dias || 0} entrenamientos en 7 días`
         })
       })}
 
       ${crearTarjeta({
-        titulo: "Minutos por día de rutina",
-        contenido: crearGraficaBarras({
-          datos: graficas.minutosPorDiaRutina.map((item) => ({
-            label: `Día ${item.diaRutina}`,
-            valor: item.minutos
-          })),
-          campoLabel: "label",
-          campoValor: "valor"
+        titulo: "Evolución peso / medidas",
+        contenido: crearGraficaLineaDashboard({
+          datos: dashboard.series.peso,
+          titulo: "Últimos registros"
         })
       })}
     </section>
 
     <section class="grid grid-2 section-space">
       ${crearTarjeta({
-        titulo: "Cumplimiento semanal",
-        contenido: crearGraficaBarras({
-          datos: graficas.cumplimientoSemanal.map((item) => ({
-            label: item.semana,
-            valor: item.cumplimiento
-          })),
-          campoLabel: "label",
-          campoValor: "valor",
-          max: 100
+        titulo: "Minutos por día de rutina",
+        contenido: crearGraficaBarrasDashboard({
+          datos: dashboard.series.minutos,
+          titulo: "Minutos acumulados"
         })
       })}
 
       ${crearTarjeta({
-        titulo: "Fatiga y recuperación",
-        contenido: `
-          ${crearAlerta({
-            tipo: estadisticas.fatiga.nivel === "alto" ? "danger" : estadisticas.fatiga.nivel === "medio" ? "warning" : "ok",
-            titulo: `Nivel: ${estadisticas.fatiga.nivel}`,
-            mensaje: estadisticas.fatiga.mensaje
-          })}
-          <div class="section-space">
-            <p><strong>Energía baja últimos 6:</strong> ${escaparHTML(estadisticas.fatiga.energiaBajaUltimos6 || 0)}</p>
-            <p><strong>Dolor últimos 6:</strong> ${escaparHTML(estadisticas.fatiga.dolorUltimos6 || 0)}</p>
-            <p><strong>Incompletos últimos 6:</strong> ${escaparHTML(estadisticas.fatiga.incompletosUltimos6 || 0)}</p>
+        titulo: "Cumplimiento por semana",
+        contenido: crearGraficaBarrasDashboard({
+          datos: dashboard.series.cumplimiento,
+          titulo: "Porcentaje semanal",
+          max: 100
+        })
+      })}
+    </section>
+
+    <section class="grid grid-2 section-space">
+      ${crearTarjeta({
+        titulo: "Energía semanal",
+        contenido: crearGraficaLineaDashboard({
+          datos: dashboard.series.energia,
+          titulo: "Energía registrada"
+        })
+      })}
+
+      ${crearTarjeta({
+        titulo: "Alertas",
+        contenido: alertas.map((alerta) => `
+          <div class="alerta ${crearClaseAlertaDashboard(alerta.tipo)}" style="margin-bottom:10px;">
+            <strong>${escapeDashboard(alerta.titulo)}</strong>
+            <p>${escapeDashboard(alerta.mensaje)}</p>
           </div>
-        `
+        `).join("") || `<p class="muted">Sin alertas importantes.</p>`
       })}
     </section>
 
@@ -119,9 +129,9 @@ export function renderEstadisticasView(estado = {}) {
       <h2>Entrenamientos recientes</h2>
       ${crearTablaSimple({
         columnas: [
-          { titulo: "Fecha", campo: (fila) => formatearFecha(fila.fecha) },
+          { titulo: "Fecha", campo: (fila) => formatoFechaCorta(fila.fecha) },
           { titulo: "Día", campo: (fila) => `Día ${fila.diaRutina}` },
-          { titulo: "Duración", campo: (fila) => `${fila.duracionMin || 0} min` },
+          { titulo: "Duración", campo: (fila) => formatoMinutos(fila.duracionMin || 0) },
           { titulo: "Estado", campo: "estado" },
           { titulo: "Energía final", campo: "energiaFinal" }
         ],
@@ -132,7 +142,7 @@ export function renderEstadisticasView(estado = {}) {
       <div class="section-space">
         ${crearBotones([
           { texto: "Registrar entrenamiento", nav: "entrenar" },
-          { texto: "Generar recomendaciones", nav: "recomendaciones", tipo: "secundario" },
+          { texto: "Ver medidas", nav: "medidas", tipo: "secundario" },
           { texto: "Guardar estadísticas en Firebase", action: "guardar-estadisticas", tipo: "secundario" }
         ])}
       </div>
