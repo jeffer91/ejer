@@ -4,7 +4,7 @@
 
   Función:
     - Administrar navegación interna de FitJeff sin recargar la página.
-    - Mantener una vista activa: inicio, entrenar, peso, estadísticas, recomendaciones, Jarvis y ajustes.
+    - Mantener una vista activa: inicio, entrenar, guiado, peso, estadísticas, recomendaciones, Jarvis y ajustes.
     - Guardar la última vista visitada para que la app recuerde dónde estaba.
 
   Se conecta con:
@@ -17,6 +17,7 @@
 export const VISTAS_APP = {
   INICIO: "inicio",
   ENTRENAR: "entrenar",
+  GUIADO: "guiado",
   PESO: "peso",
   ESTADISTICAS: "estadisticas",
   RECOMENDACIONES: "recomendaciones",
