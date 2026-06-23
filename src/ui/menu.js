@@ -58,6 +58,11 @@ export const MENU_PRINCIPAL = [
     descripcion: "Ajustes sugeridos"
   },
   {
+    id: VISTAS_APP.DIAGNOSTICO,
+    texto: "Diagnóstico",
+    descripcion: "Revisar sistema"
+  },
+  {
     id: VISTAS_APP.AJUSTES,
     texto: "Ajustes",
     descripcion: "Configurar app"
