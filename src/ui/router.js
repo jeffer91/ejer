@@ -1,11 +1,19 @@
 /*
   Nombre completo: router.js
   Ruta o ubicación: src/ui/router.js
+
+  Función:
+    - Definir las rutas internas de FitJeff.
+    - Mantener visible una navegación diaria simple.
+    - Conservar las vistas técnicas como rutas internas o avanzadas.
 */
 
 export const VISTAS_APP = {
   INICIO: "inicio",
   ENTRENAR: "entrenar",
+  REGISTRAR: "registrar",
+  PROGRESO: "progreso",
+  ASISTENTE: "asistente",
   GUIADO: "guiado",
   HIIT: "hiit",
   AUDIO_REMOTO: "audio-remoto",
@@ -22,10 +30,46 @@ export const VISTAS_APP = {
 
 const STORAGE_KEY_VISTA = "fitjeff_vista_actual";
 
+const VISTAS_DINAMICAS = {
+  [VISTAS_APP.REGISTRAR]: {
+    ruta: "../vistas/registrar.view.js",
+    render: "renderRegistrarView"
+  },
+  [VISTAS_APP.PROGRESO]: {
+    ruta: "../vistas/progreso.view.js",
+    render: "renderProgresoView"
+  },
+  [VISTAS_APP.ASISTENTE]: {
+    ruta: "../vistas/asistente.view.js",
+    render: "renderAsistenteView"
+  },
+  [VISTAS_APP.HIIT]: {
+    ruta: "../vistas/hiit.view.js",
+    render: "renderHIITView"
+  },
+  [VISTAS_APP.AUDIO_REMOTO]: {
+    ruta: "../vistas/audio-remoto.view.js",
+    render: "renderAudioRemotoView"
+  },
+  [VISTAS_APP.MEDIDAS]: {
+    ruta: "../vistas/medidas.view.js",
+    render: "renderMedidasView"
+  },
+  [VISTAS_APP.REPORTES]: {
+    ruta: "../vistas/reportes.view.js",
+    render: "renderReportesView"
+  },
+  [VISTAS_APP.DIAGNOSTICO]: {
+    ruta: "../vistas/diagnostico.view.js",
+    render: "renderDiagnosticoView"
+  }
+};
+
 let vistaActual = VISTAS_APP.INICIO;
 let listeners = [];
 let vistasRegistradas = new Map();
 let routerActivo = false;
+let ultimoContexto = {};
 
 export function registrarVista(nombre, render) {
   if (!nombre || typeof render !== "function") {
@@ -44,11 +88,12 @@ export function registrarVistas(mapaVistas = {}) {
 export function navegarA(nombreVista, contexto = {}) {
   const vista = normalizarVista(nombreVista);
   vistaActual = vista;
+  ultimoContexto = contexto || {};
 
   guardarVistaActual(vista);
   marcarNavegacionActiva(vista);
-  renderizarVistaActual(contexto);
-  notificarCambioVista(vista, contexto);
+  renderizarVistaActual(ultimoContexto);
+  notificarCambioVista(vista, ultimoContexto);
 
   if (location.hash.replace("#", "") !== vista) {
     history.replaceState(null, "", `#${vista}`);
@@ -57,40 +102,22 @@ export function navegarA(nombreVista, contexto = {}) {
   return vista;
 }
 
-export function renderizarVistaActual(contexto = {}) {
+export function renderizarVistaActual(contexto = ultimoContexto) {
   const render = vistasRegistradas.get(vistaActual);
 
-  if (!render && vistaActual === VISTAS_APP.HIIT) {
-    renderizarVistaDinamica("../vistas/hiit.view.js", "renderHIITView");
+  if (render) {
+    return render(contexto);
+  }
+
+  const dinamica = VISTAS_DINAMICAS[vistaActual];
+
+  if (dinamica) {
+    renderizarVistaDinamica(dinamica.ruta, dinamica.render, contexto);
     return null;
   }
 
-  if (!render && vistaActual === VISTAS_APP.AUDIO_REMOTO) {
-    renderizarVistaDinamica("../vistas/audio-remoto.view.js", "renderAudioRemotoView");
-    return null;
-  }
-
-  if (!render && vistaActual === VISTAS_APP.MEDIDAS) {
-    renderizarVistaDinamica("../vistas/medidas.view.js", "renderMedidasView");
-    return null;
-  }
-
-  if (!render && vistaActual === VISTAS_APP.REPORTES) {
-    renderizarVistaDinamica("../vistas/reportes.view.js", "renderReportesView");
-    return null;
-  }
-
-  if (!render && vistaActual === VISTAS_APP.DIAGNOSTICO) {
-    renderizarVistaDinamica("../vistas/diagnostico.view.js", "renderDiagnosticoView");
-    return null;
-  }
-
-  if (!render) {
-    console.warn(`No existe render registrado para la vista: ${vistaActual}`);
-    return null;
-  }
-
-  return render(contexto);
+  console.warn(`No existe render registrado para la vista: ${vistaActual}`);
+  return null;
 }
 
 export function obtenerVistaActual() {
@@ -167,14 +194,14 @@ function notificarCambioVista(vista, contexto) {
   });
 }
 
-async function renderizarVistaDinamica(ruta, nombreRender) {
+async function renderizarVistaDinamica(ruta, nombreRender, contexto = {}) {
   try {
     const modulo = await import(ruta);
     const vista = document.getElementById("vista");
 
     if (!vista || typeof modulo[nombreRender] !== "function") return;
 
-    vista.innerHTML = modulo[nombreRender]();
+    vista.innerHTML = modulo[nombreRender](contexto);
     vista.focus({ preventScroll: true });
   } catch (error) {
     console.error("No se pudo cargar la vista dinámica.", error);
