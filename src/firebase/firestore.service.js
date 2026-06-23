@@ -3,20 +3,9 @@
   Ruta o ubicación: src/firebase/firestore.service.js
 
   Función:
-    - Centralizar todas las lecturas y escrituras de Firestore.
-    - Guardar perfil, rutina, entrenamientos, peso, estadísticas, recomendaciones y ajustes.
-    - Mantener una estructura simple para la app personal de Jeff.
-    - Preparar la sincronización entre datos locales y Firebase sin romper la app si Firestore falla.
-
-  Se conecta con:
-    - src/firebase/firebase.app.js
-    - src/firebase/firebase.config.js
-    - src/sincronizacion/sincronizacion.service.js
-    - src/perfil/perfil.service.js
-    - src/peso/peso.service.js
-    - src/entrenamiento/entrenamiento.service.js
-    - src/estadisticas/estadisticas.service.js
-    - src/recomendaciones/recomendaciones.service.js
+    - Centralizar lecturas y escrituras de Firestore para FitJeff.
+    - Usar una estructura exclusiva: fitjeff / jeff.
+    - Mantener compatibilidad con los servicios existentes de sincronización.
 */
 
 import {
@@ -34,32 +23,27 @@ import {
 
 import { obtenerFirestore, inicializarFirebase } from "./firebase.app.js";
 import { FIREBASE_APP_INFO } from "./firebase.config.js";
+import {
+  FITJEFF_FIRESTORE,
+  crearRutasFitJeff,
+  obtenerUsuarioFitJeffId
+} from "./firestore.paths.js";
+import {
+  limpiarUndefined,
+  prepararDocumentoFijoFitJeff,
+  prepararItemSubcoleccionFitJeff
+} from "./firestore.schema.js";
 
-const COLECCIONES = {
-  USUARIOS: "usuarios",
-  PERFIL: "perfil",
-  RUTINA: "rutina",
-  ENTRENAMIENTOS: "entrenamientos",
-  PESOS: "pesos",
-  ESTADISTICAS: "estadisticas",
-  RECOMENDACIONES: "recomendaciones",
-  AJUSTES: "ajustes"
-};
-
-const DOCUMENTOS = {
-  DATOS: "datos",
-  ACTUAL: "actual",
-  RESUMEN: "resumen",
-  CONFIGURACION: "configuracion"
-};
+const DOCUMENTOS = FITJEFF_FIRESTORE.documentos;
+const SUBCOLECCIONES = FITJEFF_FIRESTORE.subcolecciones;
 
 export function obtenerUsuarioIdPorDefecto() {
-  return FIREBASE_APP_INFO.usuarioPrincipalId || "jeff";
+  return obtenerUsuarioFitJeffId(FIREBASE_APP_INFO.usuarioPrincipalId || "jeff");
 }
 
 export function obtenerReferenciaUsuario(usuarioId = obtenerUsuarioIdPorDefecto()) {
   const db = obtenerFirestore();
-  return doc(db, COLECCIONES.USUARIOS, usuarioId);
+  return doc(db, FITJEFF_FIRESTORE.coleccionRaiz, obtenerUsuarioFitJeffId(usuarioId));
 }
 
 export async function prepararFirestore() {
@@ -68,83 +52,93 @@ export async function prepararFirestore() {
   return {
     ok: true,
     usuarioId: obtenerUsuarioIdPorDefecto(),
-    proyecto: FIREBASE_APP_INFO.idProyecto
+    proyecto: FIREBASE_APP_INFO.idProyecto,
+    coleccionRaiz: FITJEFF_FIRESTORE.coleccionRaiz,
+    rutaBase: crearRutasFitJeff().usuario
   };
 }
 
 export async function guardarUsuarioBaseFirestore(usuario, usuarioId = obtenerUsuarioIdPorDefecto()) {
-  const db = obtenerFirestore();
-  const ref = doc(db, COLECCIONES.USUARIOS, usuarioId);
+  const ref = obtenerReferenciaUsuario(usuarioId);
 
   await setDoc(
     ref,
-    prepararPayload({
+    limpiarUndefined({
       nombre: usuario?.nombre || "Jeff",
       app: usuario?.app || "FitJeff",
       activo: true,
       creadoEn: usuario?.creadoEn || new Date().toISOString(),
-      actualizadoEn: serverTimestamp()
+      actualizadoEn: serverTimestamp(),
+      estructura: "fitjeff-v1"
     }),
     { merge: true }
   );
 
-  return { ok: true, usuarioId, ruta: `${COLECCIONES.USUARIOS}/${usuarioId}` };
+  return { ok: true, usuarioId, ruta: crearRutasFitJeff(usuarioId).usuario };
 }
 
 export async function guardarPerfilFirestore(perfil, usuarioId = obtenerUsuarioIdPorDefecto()) {
-  return guardarDocumentoFijo(usuarioId, COLECCIONES.PERFIL, DOCUMENTOS.DATOS, perfil);
+  return guardarDocumentoFijo(usuarioId, DOCUMENTOS.perfil, perfil, "perfil");
 }
 
 export async function leerPerfilFirestore(usuarioId = obtenerUsuarioIdPorDefecto()) {
-  return leerDocumentoFijo(usuarioId, COLECCIONES.PERFIL, DOCUMENTOS.DATOS);
+  return leerDocumentoFijo(usuarioId, DOCUMENTOS.perfil);
 }
 
 export async function guardarRutinaFirestore(rutina, usuarioId = obtenerUsuarioIdPorDefecto()) {
-  return guardarDocumentoFijo(usuarioId, COLECCIONES.RUTINA, DOCUMENTOS.ACTUAL, rutina);
+  return guardarDocumentoFijo(usuarioId, DOCUMENTOS.rutina, rutina, "rutina");
 }
 
 export async function leerRutinaFirestore(usuarioId = obtenerUsuarioIdPorDefecto()) {
-  return leerDocumentoFijo(usuarioId, COLECCIONES.RUTINA, DOCUMENTOS.ACTUAL);
+  return leerDocumentoFijo(usuarioId, DOCUMENTOS.rutina);
 }
 
 export async function guardarAjustesFirestore(ajustes, usuarioId = obtenerUsuarioIdPorDefecto()) {
-  return guardarDocumentoFijo(usuarioId, COLECCIONES.AJUSTES, DOCUMENTOS.CONFIGURACION, ajustes);
+  return guardarDocumentoFijo(usuarioId, DOCUMENTOS.ajustes, ajustes, "ajustes");
 }
 
 export async function leerAjustesFirestore(usuarioId = obtenerUsuarioIdPorDefecto()) {
-  return leerDocumentoFijo(usuarioId, COLECCIONES.AJUSTES, DOCUMENTOS.CONFIGURACION);
+  return leerDocumentoFijo(usuarioId, DOCUMENTOS.ajustes);
 }
 
 export async function guardarResumenEstadisticasFirestore(resumen, usuarioId = obtenerUsuarioIdPorDefecto()) {
-  return guardarDocumentoFijo(usuarioId, COLECCIONES.ESTADISTICAS, DOCUMENTOS.RESUMEN, resumen);
+  return guardarDocumentoFijo(usuarioId, DOCUMENTOS.estadisticas, resumen, "estadisticas");
 }
 
 export async function leerResumenEstadisticasFirestore(usuarioId = obtenerUsuarioIdPorDefecto()) {
-  return leerDocumentoFijo(usuarioId, COLECCIONES.ESTADISTICAS, DOCUMENTOS.RESUMEN);
+  return leerDocumentoFijo(usuarioId, DOCUMENTOS.estadisticas);
+}
+
+export async function guardarSincronizacionFirestore(resumen, usuarioId = obtenerUsuarioIdPorDefecto()) {
+  return guardarDocumentoFijo(usuarioId, DOCUMENTOS.sincronizacion, resumen, "sincronizacion");
+}
+
+export async function leerSincronizacionFirestore(usuarioId = obtenerUsuarioIdPorDefecto()) {
+  return leerDocumentoFijo(usuarioId, DOCUMENTOS.sincronizacion);
 }
 
 export async function guardarEntrenamientoFirestore(entrenamiento, usuarioId = obtenerUsuarioIdPorDefecto()) {
-  return crearDocumentoEnSubcoleccion(usuarioId, COLECCIONES.ENTRENAMIENTOS, entrenamiento);
+  return crearDocumentoEnSubcoleccion(usuarioId, SUBCOLECCIONES.entrenamientos, entrenamiento, "entrenamiento");
 }
 
 export async function listarEntrenamientosFirestore(cantidad = 50, usuarioId = obtenerUsuarioIdPorDefecto()) {
-  return listarSubcoleccionOrdenada(usuarioId, COLECCIONES.ENTRENAMIENTOS, cantidad);
+  return listarSubcoleccionOrdenada(usuarioId, SUBCOLECCIONES.entrenamientos, cantidad);
 }
 
 export async function guardarPesoFirestore(peso, usuarioId = obtenerUsuarioIdPorDefecto()) {
-  return crearDocumentoEnSubcoleccion(usuarioId, COLECCIONES.PESOS, peso);
+  return crearDocumentoEnSubcoleccion(usuarioId, SUBCOLECCIONES.pesos, peso, "peso");
 }
 
 export async function listarPesosFirestore(cantidad = 50, usuarioId = obtenerUsuarioIdPorDefecto()) {
-  return listarSubcoleccionOrdenada(usuarioId, COLECCIONES.PESOS, cantidad);
+  return listarSubcoleccionOrdenada(usuarioId, SUBCOLECCIONES.pesos, cantidad);
 }
 
 export async function guardarRecomendacionFirestore(recomendacion, usuarioId = obtenerUsuarioIdPorDefecto()) {
-  return crearDocumentoEnSubcoleccion(usuarioId, COLECCIONES.RECOMENDACIONES, recomendacion);
+  return crearDocumentoEnSubcoleccion(usuarioId, SUBCOLECCIONES.recomendaciones, recomendacion, "recomendacion");
 }
 
 export async function listarRecomendacionesFirestore(cantidad = 20, usuarioId = obtenerUsuarioIdPorDefecto()) {
-  return listarSubcoleccionOrdenada(usuarioId, COLECCIONES.RECOMENDACIONES, cantidad);
+  return listarSubcoleccionOrdenada(usuarioId, SUBCOLECCIONES.recomendaciones, cantidad);
 }
 
 export async function sincronizarBaseFirestore({ usuario, rutina, ajustes }) {
@@ -167,18 +161,20 @@ export async function sincronizarBaseFirestore({ usuario, rutina, ajustes }) {
   return {
     ok: true,
     usuarioId,
+    ruta: crearRutasFitJeff(usuarioId).usuario,
     sincronizadoEn: new Date().toISOString()
   };
 }
 
-async function guardarDocumentoFijo(usuarioId, nombreColeccion, documentoId, data) {
+async function guardarDocumentoFijo(usuarioId, documentoId, data, tipo) {
   const db = obtenerFirestore();
-  const ref = doc(db, COLECCIONES.USUARIOS, usuarioId, nombreColeccion, documentoId);
+  const id = obtenerUsuarioFitJeffId(usuarioId);
+  const ref = doc(db, FITJEFF_FIRESTORE.coleccionRaiz, id, documentoId);
 
   await setDoc(
     ref,
-    prepararPayload({
-      ...data,
+    limpiarUndefined({
+      ...prepararDocumentoFijoFitJeff(data || {}, tipo),
       actualizadoEn: serverTimestamp()
     }),
     { merge: true }
@@ -186,32 +182,31 @@ async function guardarDocumentoFijo(usuarioId, nombreColeccion, documentoId, dat
 
   return {
     ok: true,
-    usuarioId,
-    ruta: `${COLECCIONES.USUARIOS}/${usuarioId}/${nombreColeccion}/${documentoId}`
+    usuarioId: id,
+    ruta: `${FITJEFF_FIRESTORE.coleccionRaiz}/${id}/${documentoId}`
   };
 }
 
-async function leerDocumentoFijo(usuarioId, nombreColeccion, documentoId) {
+async function leerDocumentoFijo(usuarioId, documentoId) {
   const db = obtenerFirestore();
-  const ref = doc(db, COLECCIONES.USUARIOS, usuarioId, nombreColeccion, documentoId);
+  const id = obtenerUsuarioFitJeffId(usuarioId);
+  const ref = doc(db, FITJEFF_FIRESTORE.coleccionRaiz, id, documentoId);
   const snap = await getDoc(ref);
 
-  if (!snap.exists()) {
-    return null;
-  }
+  if (!snap.exists()) return null;
 
   return mapearDocumento(snap);
 }
 
-async function crearDocumentoEnSubcoleccion(usuarioId, nombreColeccion, data) {
+async function crearDocumentoEnSubcoleccion(usuarioId, nombreSubcoleccion, data, tipo) {
   const db = obtenerFirestore();
-  const ref = collection(db, COLECCIONES.USUARIOS, usuarioId, nombreColeccion);
+  const id = obtenerUsuarioFitJeffId(usuarioId);
+  const ref = collection(db, FITJEFF_FIRESTORE.coleccionRaiz, id, nombreSubcoleccion);
 
   const docRef = await addDoc(
     ref,
-    prepararPayload({
-      ...data,
-      creadoEn: data?.creadoEn || new Date().toISOString(),
+    limpiarUndefined({
+      ...prepararItemSubcoleccionFitJeff(data || {}, tipo),
       actualizadoEn: serverTimestamp()
     })
   );
@@ -219,14 +214,15 @@ async function crearDocumentoEnSubcoleccion(usuarioId, nombreColeccion, data) {
   return {
     ok: true,
     id: docRef.id,
-    usuarioId,
-    ruta: `${COLECCIONES.USUARIOS}/${usuarioId}/${nombreColeccion}/${docRef.id}`
+    usuarioId: id,
+    ruta: `${FITJEFF_FIRESTORE.coleccionRaiz}/${id}/${nombreSubcoleccion}/${docRef.id}`
   };
 }
 
-async function listarSubcoleccionOrdenada(usuarioId, nombreColeccion, cantidad) {
+async function listarSubcoleccionOrdenada(usuarioId, nombreSubcoleccion, cantidad) {
   const db = obtenerFirestore();
-  const ref = collection(db, COLECCIONES.USUARIOS, usuarioId, nombreColeccion);
+  const id = obtenerUsuarioFitJeffId(usuarioId);
+  const ref = collection(db, FITJEFF_FIRESTORE.coleccionRaiz, id, nombreSubcoleccion);
   const consulta = query(ref, orderBy("creadoEn", "desc"), limit(Number(cantidad) || 50));
   const snap = await getDocs(consulta);
 
@@ -240,51 +236,4 @@ function mapearDocumento(snapshot) {
   };
 }
 
-function prepararPayload(data) {
-  return limpiarUndefined(data);
-}
-
-function limpiarUndefined(valor) {
-  if (valor === undefined) {
-    return null;
-  }
-
-  if (valor === null) {
-    return null;
-  }
-
-  if (Array.isArray(valor)) {
-    return valor.map(limpiarUndefined);
-  }
-
-  if (esObjetoPlano(valor)) {
-    const salida = {};
-
-    Object.entries(valor).forEach(([clave, item]) => {
-      salida[clave] = limpiarUndefined(item);
-    });
-
-    return salida;
-  }
-
-  return valor;
-}
-
-function esObjetoPlano(valor) {
-  if (!valor || typeof valor !== "object") {
-    return false;
-  }
-
-  return Object.getPrototypeOf(valor) === Object.prototype;
-}
-
-export const FIRESTORE_RUTAS = {
-  usuario: `usuarios/${obtenerUsuarioIdPorDefecto()}`,
-  perfil: `usuarios/${obtenerUsuarioIdPorDefecto()}/perfil/datos`,
-  rutina: `usuarios/${obtenerUsuarioIdPorDefecto()}/rutina/actual`,
-  entrenamientos: `usuarios/${obtenerUsuarioIdPorDefecto()}/entrenamientos`,
-  pesos: `usuarios/${obtenerUsuarioIdPorDefecto()}/pesos`,
-  estadisticas: `usuarios/${obtenerUsuarioIdPorDefecto()}/estadisticas/resumen`,
-  recomendaciones: `usuarios/${obtenerUsuarioIdPorDefecto()}/recomendaciones`,
-  ajustes: `usuarios/${obtenerUsuarioIdPorDefecto()}/ajustes/configuracion`
-};
+export const FIRESTORE_RUTAS = crearRutasFitJeff(obtenerUsuarioIdPorDefecto());
