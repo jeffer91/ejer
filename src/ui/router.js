@@ -10,6 +10,7 @@ export const VISTAS_APP = {
   RUTINAS: "rutinas",
   MEDIDAS: "medidas",
   REPORTES: "reportes",
+  DIAGNOSTICO: "diagnostico",
   PESO: "peso",
   ESTADISTICAS: "estadisticas",
   RECOMENDACIONES: "recomendaciones",
@@ -64,6 +65,11 @@ export function renderizarVistaActual(contexto = {}) {
 
   if (!render && vistaActual === VISTAS_APP.REPORTES) {
     renderizarVistaDinamica("../vistas/reportes.view.js", "renderReportesView");
+    return null;
+  }
+
+  if (!render && vistaActual === VISTAS_APP.DIAGNOSTICO) {
+    renderizarVistaDinamica("../vistas/diagnostico.view.js", "renderDiagnosticoView");
     return null;
   }
 
