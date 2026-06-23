@@ -8,8 +8,8 @@
     - Incluir dashboard, reportes, diagnóstico, rutinas, medidas, Jarvis inteligente y entrenamiento guiado.
 */
 
-const FITJEFF_CACHE_VERSION = "fitjeff-root-v0.1.0-build-10";
-const FITJEFF_RUNTIME_CACHE = "fitjeff-runtime-v0.1.0-build-10";
+const FITJEFF_CACHE_VERSION = "fitjeff-root-v0.1.0-build-11";
+const FITJEFF_RUNTIME_CACHE = "fitjeff-runtime-v0.1.0-build-11";
 
 const ARCHIVOS_APP = [
   "./",
