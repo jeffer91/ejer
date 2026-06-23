@@ -6,13 +6,14 @@
     - Exponer Firebase Functions para FitJeff.
     - Recibir solicitudes de recomendación desde la app.
     - Consultar Gemini usando una clave segura del servidor.
-    - Guardar la recomendación generada en Firestore bajo usuarios/jeff/recomendaciones.
+    - Exponer Jarvis inteligente sin filtrar la clave al frontend.
 
   Se conecta con:
     - functions/gemini.service.js
+    - functions/jarvis.service.js
     - functions/package.json
     - src/recomendaciones/recomendaciones.service.js
-    - src/firebase/firestore.service.js
+    - src/jarvis/jarvis.gemini.service.js
 */
 
 const { onCall, HttpsError } = require("firebase-functions/v2/https");
@@ -22,6 +23,10 @@ const {
   generarRecomendacionGemini,
   crearRespuestaSinGemini
 } = require("./gemini.service.js");
+const {
+  consultarJarvisGemini,
+  crearRespuestaJarvisFallback
+} = require("./jarvis.service.js");
 
 if (!admin.apps.length) {
   admin.initializeApp();
@@ -97,6 +102,70 @@ exports.generarRecomendacionFitJeff = onCall(
   }
 );
 
+exports.consultarJarvisFitJeff = onCall(
+  {
+    region: "us-central1",
+    timeoutSeconds: 60,
+    memory: "256MiB"
+  },
+  async (request) => {
+    try {
+      const data = request.data || {};
+      validarSolicitudJarvis(data);
+
+      const usuarioId = limpiarTexto(data.usuarioId || USUARIO_PRINCIPAL_ID);
+      const prompt = limpiarTexto(data.prompt);
+      const consulta = data.consulta || {};
+      const contexto = data.contexto || {};
+      const tipo = limpiarTexto(data.tipo || "general");
+
+      let respuesta;
+
+      try {
+        respuesta = await consultarJarvisGemini({
+          prompt,
+          consulta,
+          contexto,
+          tipo
+        });
+      } catch (errorGemini) {
+        logger.warn("Jarvis remoto no disponible.", errorGemini);
+        respuesta = crearRespuestaJarvisFallback({
+          motivo: errorGemini.message
+        });
+      }
+
+      const documento = {
+        ...respuesta,
+        usuarioId,
+        tipo,
+        consultaTexto: limpiarTexto(consulta.texto || ""),
+        creadoEn: new Date().toISOString(),
+        actualizadoEn: admin.firestore.FieldValue.serverTimestamp()
+      };
+
+      await db
+        .collection("usuarios")
+        .doc(usuarioId)
+        .collection("jarvisConsultas")
+        .add(documento);
+
+      return documento;
+    } catch (error) {
+      logger.error("Error en consultarJarvisFitJeff.", error);
+
+      if (error instanceof HttpsError) {
+        throw error;
+      }
+
+      throw new HttpsError(
+        "internal",
+        error.message || "No se pudo consultar Jarvis."
+      );
+    }
+  }
+);
+
 exports.pingFitJeff = onCall(
   {
     region: "us-central1",
@@ -126,6 +195,23 @@ function validarSolicitud(data) {
     throw new HttpsError(
       "invalid-argument",
       "El prompt es demasiado largo. Reduce el rango de datos analizados."
+    );
+  }
+}
+
+function validarSolicitudJarvis(data) {
+  if (!data || typeof data !== "object") {
+    throw new HttpsError("invalid-argument", "La solicitud de Jarvis está vacía.");
+  }
+
+  if (!data.prompt || typeof data.prompt !== "string") {
+    throw new HttpsError("invalid-argument", "El prompt de Jarvis es obligatorio.");
+  }
+
+  if (data.prompt.length > 16000) {
+    throw new HttpsError(
+      "invalid-argument",
+      "La consulta de Jarvis es demasiado larga."
     );
   }
 }
