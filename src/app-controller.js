@@ -15,12 +15,15 @@ import {
   marcarSincronizacionLocal
 } from "./storage/local-storage.service.js";
 import { renderizarLayout, renderizarEnVista, actualizarEstadoSincronizacion } from "./ui/layout.js";
-import { activarRouterDelegado, navegarA, registrarVistas, restaurarVistaGuardada, VISTAS_APP } from "./ui/router.js";
+import { activarRouterDelegado, navegarA, obtenerVistaActual, registrarVistas, restaurarVistaGuardada, VISTAS_APP } from "./ui/router.js";
 import { asegurarEstilosModal, mostrarConfirmacion, mostrarMensaje } from "./ui/modal.js";
 import { leerFormulario, leerBooleano, leerNumero } from "./ui/helpers.js";
 
 import { renderInicioView } from "./vistas/inicio.view.js";
 import { renderEntrenarView } from "./vistas/entrenar.view.js";
+import { renderRegistrarView } from "./vistas/registrar.view.js";
+import { renderProgresoView } from "./vistas/progreso.view.js";
+import { renderAsistenteView } from "./vistas/asistente.view.js";
 import { renderEntrenamientoGuiadoView } from "./vistas/entrenamiento-guiado.view.js";
 import { renderRutinasView } from "./vistas/rutinas.view.js";
 import { renderPesoView } from "./vistas/peso.view.js";
@@ -83,6 +86,9 @@ export async function iniciarFitJeff() {
   registrarVistas({
     [VISTAS_APP.INICIO]: () => renderizarVista(renderInicioView),
     [VISTAS_APP.ENTRENAR]: () => renderizarVista(renderEntrenarView),
+    [VISTAS_APP.REGISTRAR]: () => renderizarVista(renderRegistrarView),
+    [VISTAS_APP.PROGRESO]: () => renderizarVista(renderProgresoView),
+    [VISTAS_APP.ASISTENTE]: () => renderizarVista(renderAsistenteView),
     [VISTAS_APP.GUIADO]: () => renderizarVista(renderEntrenamientoGuiadoView),
     [VISTAS_APP.RUTINAS]: () => renderizarVista(renderRutinasView),
     [VISTAS_APP.PESO]: () => renderizarVista(renderPesoView),
@@ -218,7 +224,7 @@ async function accionGuardarPeso() {
   guardarEstadoLocal(estado);
   await sincronizarSilencioso();
   mostrarMensaje("Peso guardado", "El registro de peso quedó guardado correctamente.", "ok");
-  navegarA(VISTAS_APP.PESO);
+  navegarA(obtenerVistaRetornoPeso());
 }
 
 async function accionGuardarEntrenamiento() {
@@ -461,12 +467,12 @@ async function accionJarvisActivar() {
 
   if (!soporte.sintesis) {
     mostrarMensaje("Jarvis activado sin voz", "Tu navegador no permite voz, pero puedes usar los botones manuales.", "error");
-    navegarA(VISTAS_APP.JARVIS);
+    navegarA(obtenerVistaRetornoAsistente());
     return;
   }
 
   await hablarJarvis("Jarvis listo. Puedo guiar tu entrenamiento paso a paso.");
-  navegarA(VISTAS_APP.JARVIS);
+  navegarA(obtenerVistaRetornoAsistente());
 }
 
 async function accionJarvisEscuchar() {
@@ -478,14 +484,14 @@ async function accionJarvisEscuchar() {
 
   if (!resultado.ok) {
     mostrarMensaje("Jarvis no escuchó", resultado.mensaje || "No se recibió comando.", "error");
-    navegarA(VISTAS_APP.JARVIS);
+    navegarA(obtenerVistaRetornoAsistente());
     return;
   }
 
   const comando = interpretarComandoJarvis(resultado.texto);
   guardarComandoJarvis(comando);
   await manejarComandoJarvis(comando);
-  navegarA(VISTAS_APP.JARVIS);
+  navegarA(obtenerVistaRetornoAsistente());
 }
 
 async function manejarComandoJarvis(comando) {
@@ -529,7 +535,7 @@ async function accionJarvisIniciarEntrenamiento() {
     mostrarMensaje("Jarvis no inició", resultado.mensaje || "No se pudo iniciar.", "error");
   }
 
-  navegarA(VISTAS_APP.JARVIS);
+  navegarA(obtenerVistaRetornoAsistente());
 }
 
 async function accionJarvisDetener() {
@@ -537,7 +543,7 @@ async function accionJarvisDetener() {
   detenerVozJarvis();
   desactivarJarvis();
   mostrarMensaje("Jarvis detenido", "El asistente quedó apagado.", "ok");
-  navegarA(VISTAS_APP.JARVIS);
+  navegarA(obtenerVistaRetornoAsistente());
 }
 
 async function accionJarvisManual(accion) {
@@ -557,7 +563,7 @@ async function accionJarvisManual(accion) {
     confianza: 1
   });
 
-  navegarA(VISTAS_APP.JARVIS);
+  navegarA(obtenerVistaRetornoAsistente());
 }
 
 async function accionJarvisGuardarNota() {
@@ -573,7 +579,7 @@ async function accionJarvisGuardarNota() {
   if (textarea) textarea.value = "";
 
   mostrarMensaje("Nota guardada", "La observación quedó guardada localmente.", "ok");
-  navegarA(VISTAS_APP.JARVIS);
+  navegarA(obtenerVistaRetornoAsistente());
 }
 
 async function accionGuiadoIniciar() {
@@ -725,6 +731,14 @@ async function accionRutinaRestaurarUltima() {
 
   mostrarMensaje("Rutina restaurada", "Se restauró la última rutina guardada.", "ok");
   navegarA(VISTAS_APP.RUTINAS);
+}
+
+function obtenerVistaRetornoPeso() {
+  return obtenerVistaActual() === VISTAS_APP.REGISTRAR ? VISTAS_APP.REGISTRAR : VISTAS_APP.PESO;
+}
+
+function obtenerVistaRetornoAsistente() {
+  return obtenerVistaActual() === VISTAS_APP.ASISTENTE ? VISTAS_APP.ASISTENTE : VISTAS_APP.JARVIS;
 }
 
 function obtenerVistaInicial() {
