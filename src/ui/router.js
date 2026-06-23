@@ -1,23 +1,13 @@
 /*
   Nombre completo: router.js
   Ruta o ubicación: src/ui/router.js
-
-  Función:
-    - Administrar navegación interna de FitJeff sin recargar la página.
-    - Mantener una vista activa: inicio, entrenar, guiado, peso, estadísticas, recomendaciones, Jarvis y ajustes.
-    - Guardar la última vista visitada para que la app recuerde dónde estaba.
-
-  Se conecta con:
-    - src/app.js
-    - src/ui/menu.js
-    - src/ui/layout.js
-    - src/ui/helpers.js
 */
 
 export const VISTAS_APP = {
   INICIO: "inicio",
   ENTRENAR: "entrenar",
   GUIADO: "guiado",
+  RUTINAS: "rutinas",
   PESO: "peso",
   ESTADISTICAS: "estadisticas",
   RECOMENDACIONES: "recomendaciones",
@@ -89,9 +79,7 @@ export function guardarVistaActual(vista = vistaActual) {
 }
 
 export function escucharCambioVista(callback) {
-  if (typeof callback !== "function") {
-    return () => {};
-  }
+  if (typeof callback !== "function") return () => {};
 
   listeners.push(callback);
 
@@ -101,18 +89,14 @@ export function escucharCambioVista(callback) {
 }
 
 export function activarRouterDelegado(root = document.body) {
-  if (!root || routerActivo) {
-    return;
-  }
+  if (!root || routerActivo) return;
 
   routerActivo = true;
 
   root.addEventListener("click", (event) => {
     const boton = event.target.closest("[data-nav]");
 
-    if (!boton) {
-      return;
-    }
+    if (!boton) return;
 
     event.preventDefault();
     navegarA(boton.dataset.nav);
@@ -130,10 +114,7 @@ export function activarRouterDelegado(root = document.body) {
 export function marcarNavegacionActiva(vista = vistaActual) {
   document.querySelectorAll("[data-nav]").forEach((elemento) => {
     elemento.classList.toggle("activo", elemento.dataset.nav === vista);
-    elemento.setAttribute(
-      "aria-current",
-      elemento.dataset.nav === vista ? "page" : "false"
-    );
+    elemento.setAttribute("aria-current", elemento.dataset.nav === vista ? "page" : "false");
   });
 }
 
