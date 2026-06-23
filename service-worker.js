@@ -5,17 +5,11 @@
   Función:
     - Permitir que FitJeff controle toda la app como PWA desde la raíz.
     - Guardar archivos principales en caché y permitir actualización controlada.
-    - Incluir Jarvis y entrenamiento guiado completo en la instalación offline.
-
-  Se conecta con:
-    - src/pwa/pwa.service.js
-    - src/actualizaciones/actualizaciones.service.js
-    - public/version.json
-    - index.html
+    - Incluir dashboard, rutinas, medidas, Jarvis y entrenamiento guiado en caché.
 */
 
-const FITJEFF_CACHE_VERSION = "fitjeff-root-v0.1.0-build-5";
-const FITJEFF_RUNTIME_CACHE = "fitjeff-runtime-v0.1.0-build-5";
+const FITJEFF_CACHE_VERSION = "fitjeff-root-v0.1.0-build-7";
+const FITJEFF_RUNTIME_CACHE = "fitjeff-runtime-v0.1.0-build-7";
 
 const ARCHIVOS_APP = [
   "./",
@@ -45,6 +39,24 @@ const ARCHIVOS_APP = [
   "./src/entrenamiento-guiado/guiado.timer.service.js",
   "./src/entrenamiento-guiado/guiado.service.js",
   "./src/entrenamiento-guiado/guiado.resumen.service.js",
+  "./src/dashboard/dashboard.constantes.js",
+  "./src/dashboard/dashboard.format.service.js",
+  "./src/dashboard/dashboard.service.js",
+  "./src/dashboard/dashboard.graficas.service.js",
+  "./src/dashboard/dashboard.alertas.service.js",
+  "./src/dashboard/dashboard.estilos.service.js",
+  "./src/rutinas/rutina.schema.js",
+  "./src/rutinas/rutina.formato-fitjeff.js",
+  "./src/rutinas/rutina.parser.js",
+  "./src/rutinas/rutina.validator.js",
+  "./src/rutinas/rutina.storage.service.js",
+  "./src/rutinas/rutina.import.service.js",
+  "./src/medidas/medidas.schema.js",
+  "./src/medidas/medidas.storage.service.js",
+  "./src/medidas/medidas.service.js",
+  "./src/medidas/medidas.recordatorio.service.js",
+  "./src/medidas/medidas.graficas.service.js",
+  "./src/medidas/medidas.format.service.js",
   "./src/estadisticas/estadisticas.calculos.js",
   "./src/estadisticas/estadisticas.service.js",
   "./src/recomendaciones/recomendaciones.prompt.js",
@@ -66,6 +78,8 @@ const ARCHIVOS_APP = [
   "./src/vistas/inicio.view.js",
   "./src/vistas/entrenar.view.js",
   "./src/vistas/entrenamiento-guiado.view.js",
+  "./src/vistas/rutinas.view.js",
+  "./src/vistas/medidas.view.js",
   "./src/vistas/peso.view.js",
   "./src/vistas/estadisticas.view.js",
   "./src/vistas/recomendaciones.view.js",
