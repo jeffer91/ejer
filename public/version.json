@@ -6,7 +6,7 @@
       "Publicar la versión actual disponible de FitJeff.",
       "Permitir que la app compare versión local contra versión remota.",
       "Activar el botón Actualizar app en PWA, navegador y Electron.",
-      "Registrar el módulo HIIT sonoro local."
+      "Registrar el control sonoro remoto celular/computadora."
     ],
     "seConectaCon": [
       "src/actualizaciones/actualizaciones.service.js",
@@ -19,23 +19,23 @@
   "app": "FitJeff",
   "version": "0.1.0",
   "appVersion": "0.1.0",
-  "build": 12,
+  "build": 13,
   "fechaPublicacion": "2026-06-23",
   "forzarActualizacion": false,
-  "notas": "Bloque 21A: HIIT sonoro local con voz, temporizador, volumen de app e historial.",
-  "estado": "bloque-hiit-sonoro-local",
+  "notas": "Bloque 21B: control sonoro remoto celular/computadora con comandos de voz, HIIT y volumen de app.",
+  "estado": "bloque-control-sonoro-remoto",
   "bloquesCompletados": 21,
   "archivosCriticos": [
     "index.html",
     "src/app.js",
     "src/ui/router.js",
     "src/ui/menu.js",
-    "src/audio/audio.config.js",
-    "src/audio/audio.speech.service.js",
-    "src/hiit/hiit.rutinas.js",
-    "src/hiit/hiit.timer.service.js",
-    "src/hiit/hiit.storage.service.js",
-    "src/vistas/hiit.view.js",
+    "src/audio/audio.remote.schema.js",
+    "src/audio/audio.remote.storage.service.js",
+    "src/audio/audio.comandos.service.js",
+    "src/audio/audio.remote.firebase.service.js",
+    "src/audio/audio.remote.receiver.service.js",
+    "src/vistas/audio-remoto.view.js",
     "service-worker.js",
     "public/version.json"
   ]
