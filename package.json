@@ -5,36 +5,42 @@
     "funcionFunciones": [
       "Configurar scripts principales de FitJeff.",
       "Permitir abrir la app en Electron.",
-      "Permitir usar Live Server o un servidor local para probar la PWA."
+      "Permitir usar servidor local para probar la PWA.",
+      "Ejecutar revisión final antes de publicar."
     ],
     "seConectaCon": [
       "main.js",
       "preload.js",
       "index.html",
       "src/app.js",
-      "functions/package.json"
+      "functions/package.json",
+      "scripts/fitjeff-release-check.mjs"
     ],
     "nota": "JSON no permite comentarios reales; esta metadata documenta el archivo sin romper el formato."
   },
   "name": "fitjeff",
   "version": "0.1.0",
-  "description": "App personal para registrar entrenamientos, peso, estadísticas y recomendaciones.",
+  "description": "App personal para registrar entrenamientos, medidas, estadísticas, reportes y Jarvis.",
   "main": "main.js",
   "private": true,
   "scripts": {
     "start": "electron .",
     "dev": "electron .",
     "serve": "npx live-server . --port=5500 --entry-file=index.html",
+    "check:release": "node scripts/fitjeff-release-check.mjs",
     "firebase:deploy": "firebase deploy",
     "firebase:hosting": "firebase deploy --only hosting",
-    "firebase:functions": "firebase deploy --only functions"
+    "firebase:functions": "firebase deploy --only functions",
+    "deploy:final": "npm run check:release && npm run firebase:hosting"
   },
   "keywords": [
     "fitness",
     "training",
     "pwa",
     "electron",
-    "firebase"
+    "firebase",
+    "dashboard",
+    "jarvis"
   ],
   "author": "Jeff",
   "license": "UNLICENSED",
