@@ -3,10 +3,9 @@
     "nombreCompleto": "version.json",
     "rutaUbicacion": "public/version.json",
     "funcionFunciones": [
-      "Publicar la versión actual disponible de FitJeff.",
-      "Permitir que la app compare versión local contra versión remota.",
-      "Activar el botón Actualizar app en PWA, navegador y Electron.",
-      "Registrar el control sonoro remoto celular/computadora."
+      "Publicar la version actual disponible de FitJeff.",
+      "Permitir comparacion entre version local y remota.",
+      "Registrar el redisenio de navegacion diaria."
     ],
     "seConectaCon": [
       "src/actualizaciones/actualizaciones.service.js",
@@ -14,28 +13,28 @@
       "src/pwa/pwa.service.js",
       "index.html"
     ],
-    "nota": "Cada vez que se suba una versión importante, este archivo debe actualizarse."
+    "nota": "Cada version importante debe actualizar este archivo."
   },
   "app": "FitJeff",
   "version": "0.1.0",
   "appVersion": "0.1.0",
-  "build": 13,
+  "build": 14,
   "fechaPublicacion": "2026-06-23",
   "forzarActualizacion": false,
-  "notas": "Bloque 21B: control sonoro remoto celular/computadora con comandos de voz, HIIT y volumen de app.",
-  "estado": "bloque-control-sonoro-remoto",
-  "bloquesCompletados": 21,
+  "notas": "Bloque redisenio 1: navegacion diaria con Inicio, Entrenar, Registrar, Progreso, Asistente y Ajustes.",
+  "estado": "bloque-redisenio-navegacion-diaria",
+  "bloquesCompletados": 22,
   "archivosCriticos": [
     "index.html",
     "src/app.js",
+    "src/app-controller.js",
     "src/ui/router.js",
     "src/ui/menu.js",
-    "src/audio/audio.remote.schema.js",
-    "src/audio/audio.remote.storage.service.js",
-    "src/audio/audio.comandos.service.js",
-    "src/audio/audio.remote.firebase.service.js",
-    "src/audio/audio.remote.receiver.service.js",
-    "src/vistas/audio-remoto.view.js",
+    "src/ui/layout.js",
+    "src/vistas/inicio.view.js",
+    "src/vistas/registrar.view.js",
+    "src/vistas/progreso.view.js",
+    "src/vistas/asistente.view.js",
     "service-worker.js",
     "public/version.json"
   ]
