@@ -8,6 +8,7 @@ export const VISTAS_APP = {
   ENTRENAR: "entrenar",
   GUIADO: "guiado",
   RUTINAS: "rutinas",
+  MEDIDAS: "medidas",
   PESO: "peso",
   ESTADISTICAS: "estadisticas",
   RECOMENDACIONES: "recomendaciones",
@@ -54,6 +55,11 @@ export function navegarA(nombreVista, contexto = {}) {
 
 export function renderizarVistaActual(contexto = {}) {
   const render = vistasRegistradas.get(vistaActual);
+
+  if (!render && vistaActual === VISTAS_APP.MEDIDAS) {
+    renderizarMedidasDinamico();
+    return null;
+  }
 
   if (!render) {
     console.warn(`No existe render registrado para la vista: ${vistaActual}`);
@@ -135,4 +141,18 @@ function notificarCambioVista(vista, contexto) {
       console.warn("Error en listener de navegación.", error);
     }
   });
+}
+
+async function renderizarMedidasDinamico() {
+  try {
+    const modulo = await import("../vistas/medidas.view.js");
+    const vista = document.getElementById("vista");
+
+    if (!vista) return;
+
+    vista.innerHTML = modulo.renderMedidasView();
+    vista.focus({ preventScroll: true });
+  } catch (error) {
+    console.error("No se pudo cargar la vista Medidas.", error);
+  }
 }
