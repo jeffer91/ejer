@@ -1,10 +1,12 @@
 import { obtenerPesoActual, ordenarPesosPorFecha } from "../peso/peso.service.js";
+import { cargarEstadoLocal } from "../storage/local-storage.service.js";
 import { escaparHTML, obtenerFechaISO } from "../ui/helpers.js";
 import { crearBotones, crearEncabezadoVista } from "./componentes.view.js";
 
-export function renderRegistrarView(estado = {}) {
-  const perfil = estado.usuario?.perfil || {};
-  const pesos = ordenarPesosPorFecha(estado.pesos || []);
+export function renderRegistrarView(estado = null) {
+  const datos = estado?.usuario ? estado : cargarEstadoLocal();
+  const perfil = datos.usuario?.perfil || {};
+  const pesos = ordenarPesosPorFecha(datos.pesos || []);
   const pesoActual = obtenerPesoActual(pesos, perfil.pesoActualKg || 91);
 
   return `
