@@ -21,6 +21,7 @@ No hay error de imports faltantes.
 
 - [ ] Clic en Inicio.
 - [ ] Clic en Entrenar.
+- [ ] Clic en Jarvis.
 - [ ] Clic en Peso.
 - [ ] Clic en Estadísticas.
 - [ ] Clic en Recomendaciones.
@@ -52,7 +53,58 @@ El próximo día sugerido cambia.
 Estadísticas empiezan a mostrar datos.
 ```
 
-## 4. Prueba de peso
+## 4. Prueba de Jarvis básico
+
+- [ ] Entrar en Jarvis desde el menú.
+- [ ] Confirmar que aparece la pantalla de Jarvis.
+- [ ] Clic en Activar Jarvis.
+- [ ] Confirmar mensaje hablado o visual.
+- [ ] Clic en Iniciar entrenamiento.
+- [ ] Confirmar que Jarvis guía el primer paso.
+- [ ] Usar botón Sí / hecho.
+- [ ] Usar botón Repetir.
+- [ ] Usar botón Pausar.
+- [ ] Usar botón Continuar.
+- [ ] Usar botón Terminar.
+
+Resultado esperado:
+
+```txt
+Jarvis funciona localmente.
+No necesita Gemini.
+Si la voz no está disponible, los botones manuales siguen funcionando.
+```
+
+## 5. Prueba de micrófono
+
+- [ ] Entrar en Jarvis.
+- [ ] Clic en Escuchar.
+- [ ] Permitir micrófono si el navegador lo pide.
+- [ ] Decir: Jarvis inicia entrenamiento.
+- [ ] Confirmar que la app interpreta el comando.
+
+Resultado esperado:
+
+```txt
+Si el navegador soporta reconocimiento de voz, Jarvis recibe el comando.
+Si no lo soporta, aparece un mensaje y se puede usar control manual.
+```
+
+## 6. Prueba de nota rápida Jarvis
+
+- [ ] Entrar en Jarvis.
+- [ ] Escribir una observación.
+- [ ] Clic en Guardar nota.
+- [ ] Revisar mensajes recientes.
+
+Resultado esperado:
+
+```txt
+La nota queda guardada localmente.
+No se pierde al navegar.
+```
+
+## 7. Prueba de peso
 
 - [ ] Entrar en Peso.
 - [ ] Guardar un peso.
@@ -66,7 +118,7 @@ Los pesos quedan guardados.
 La tendencia aparece cuando hay al menos dos registros.
 ```
 
-## 5. Prueba de recomendaciones
+## 8. Prueba de recomendaciones
 
 - [ ] Entrar en Recomendaciones.
 - [ ] Escribir una observación.
@@ -80,7 +132,7 @@ La recomendación local se guarda.
 No necesita Gemini para funcionar.
 ```
 
-## 6. Prueba de exportación
+## 9. Prueba de exportación
 
 - [ ] Entrar en Ajustes.
 - [ ] Clic en Exportar datos.
@@ -93,7 +145,7 @@ Resultado esperado:
 Se descargan dos archivos de respaldo.
 ```
 
-## 7. Prueba PWA
+## 10. Prueba PWA
 
 - [ ] Abrir la app desde Live Server o Hosting.
 - [ ] Revisar consola.
@@ -107,9 +159,10 @@ Resultado esperado:
 ```txt
 El service worker se registra desde /service-worker.js.
 El botón de actualización limpia caché y recarga.
+Jarvis queda incluido en caché.
 ```
 
-## 8. Prueba Electron
+## 11. Prueba Electron
 
 ```bash
 npm install
@@ -118,6 +171,7 @@ npm start
 
 - [ ] Confirmar que abre ventana de escritorio.
 - [ ] Navegar por pantallas.
+- [ ] Entrar en Jarvis.
 - [ ] Guardar peso.
 - [ ] Guardar entrenamiento.
 - [ ] Entrar en Ajustes y revisar entorno.
@@ -130,7 +184,7 @@ No se activa nodeIntegration.
 El preload expone FitJeffDesktop.
 ```
 
-## 9. Prueba Firebase
+## 12. Prueba Firebase
 
 Estado actual:
 
@@ -153,19 +207,20 @@ Cuando se agregue Auth:
 - [ ] Probar sincronizar ahora.
 - [ ] Confirmar documentos en Firestore.
 
-## 10. Errores conocidos corregidos
+## 13. Errores conocidos corregidos
 
 - [x] Import faltante de `src/data/usuario-base.js`.
 - [x] Import faltante de `src/data/rutina-base.js`.
 - [x] Registro incorrecto de service worker en `/public`.
 - [x] Ruta incorrecta de `version.json`.
 - [x] Firebase intentando sincronizar automáticamente sin Auth.
+- [x] Jarvis creado y conectado al menú.
 
-## 11. Próximo bloque recomendado
+## 14. Próximo bloque recomendado
 
 ```txt
-Crear módulo de Firebase Auth simple para usuario personal.
-Conectar login anónimo o email/password.
-Activar sincronización real con reglas seguras.
-Agregar pantalla Diagnóstico completa.
+Crear entrenamiento guiado visual completo.
+Conectar guiado.service.js.
+Crear pantalla entrenamiento-guiado.view.js.
+Conectar resumen final automático.
 ```
