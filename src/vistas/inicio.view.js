@@ -9,6 +9,8 @@
 
 import { prepararDashboard } from "../dashboard/dashboard.service.js";
 import { escapeDashboard, formatoMinutos } from "../dashboard/dashboard.format.service.js";
+import { obtenerAccionesHoyFitJeff } from "../automatizacion/hoy-acciones.service.js";
+import { obtenerPendientesHoyFitJeff } from "../automatizacion/hoy-pendientes.service.js";
 import { crearAlerta, crearBotones, crearGridMetricas, crearTarjeta } from "./componentes.view.js";
 
 export function renderInicioView(estado = {}) {
@@ -16,6 +18,9 @@ export function renderInicioView(estado = {}) {
   const cumplimiento = dashboard.estadisticas?.cumplimiento || {};
   const tiempo = dashboard.estadisticas?.tiempo || {};
   const pesoActual = estado.usuario?.perfil?.pesoActualKg || "Sin dato";
+  const acciones = obtenerAccionesHoyFitJeff(estado);
+  const pendientes = obtenerPendientesHoyFitJeff(estado);
+  const pendientePrincipal = pendientes[0];
 
   return `
     <section class="card dashboard-hero">
@@ -23,12 +28,11 @@ export function renderInicioView(estado = {}) {
         <p class="pill">Inicio</p>
         <h1 class="dashboard-hero-title">Hola, ${escapeDashboard(dashboard.usuario)}</h1>
         <p class="dashboard-hero-subtitle">Hoy toca avanzar con una sola accion clara.</p>
-        ${crearBotones([
-          { texto: "Entrenar ahora", nav: "entrenar" },
-          { texto: "Registrar", nav: "registrar", tipo: "secundario" },
-          { texto: "Hablar con FitJeff", nav: "asistente", tipo: "secundario" },
-          { texto: "Ver progreso", nav: "progreso", tipo: "secundario" }
-        ])}
+        ${crearBotones(acciones.map((accion) => ({
+          texto: accion.texto,
+          nav: accion.nav,
+          tipo: accion.tipo === "principal" ? "" : "secundario"
+        })))}
       </div>
 
       <div class="dashboard-focus">
@@ -65,9 +69,9 @@ export function renderInicioView(estado = {}) {
 
     <section class="grid grid-2 section-space">
       ${crearTarjeta({
-        titulo: "Pendiente principal",
-        contenido: `<p class="muted">${escapeDashboard(dashboard.alertaPrincipal?.mensaje || "Registra peso, medidas o entrenamiento para mantener el avance actualizado.")}</p>`,
-        footer: crearBotones([{ texto: "Registrar ahora", nav: "registrar" }])
+        titulo: pendientePrincipal?.titulo || "Pendiente principal",
+        contenido: `<p class="muted">${escapeDashboard(pendientePrincipal?.mensaje || "Todo se ve estable con los datos actuales.")}</p>`,
+        footer: crearBotones([{ texto: pendientePrincipal ? "Resolver ahora" : "Registrar", nav: pendientePrincipal?.nav || "registrar" }])
       })}
 
       ${crearTarjeta({
