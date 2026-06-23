@@ -20,7 +20,7 @@ import { escaparHTML } from "./helpers.js";
 export function renderizarLayout({
   rootId = "app",
   titulo = "FitJeff",
-  subtitulo = "Entrenamiento guiado, Jarvis, progreso y constancia",
+  subtitulo = "Tu entrenamiento de hoy",
   version = "0.1.0",
   estadoSync = "local",
   accionesHeader = true
@@ -123,14 +123,8 @@ export function mostrarErrorPantalla({ titulo = "Ocurrió un problema", mensaje 
 
 function crearAccionesHeader() {
   return `
-    <button class="btn secundario" type="button" data-nav="jarvis">
-      Jarvis
-    </button>
-    <button class="btn secundario" type="button" data-action="sincronizar-ahora">
-      Sincronizar
-    </button>
-    <button class="btn secundario" type="button" data-action="actualizar-app">
-      Actualizar app
+    <button class="btn secundario" type="button" data-nav="ajustes">
+      Ajustes
     </button>
   `;
 }
