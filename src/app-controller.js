@@ -5,8 +5,8 @@
   Función:
     - Controlar el flujo principal de FitJeff con módulos separados.
     - Cargar y guardar estado local.
-    - Conectar layout, router, vistas, formularios, PWA, actualizaciones, exportación, diagnóstico y sincronización.
-    - Evitar que un error de Firebase, PWA o actualización rompa el arranque principal.
+    - Conectar layout, router, vistas, formularios, PWA, actualizaciones, exportación, diagnóstico, sincronización y Jarvis.
+    - Evitar que un error de Firebase, PWA, actualización o voz rompa el arranque principal.
 
   Se conecta con:
     - src/app.js
@@ -15,13 +15,7 @@
     - src/ui/layout.js
     - src/ui/modal.js
     - src/vistas/*.view.js
-    - src/peso/peso.service.js
-    - src/entrenamiento/entrenamiento.service.js
-    - src/recomendaciones/recomendaciones.service.js
-    - src/sincronizacion/sincronizacion.service.js
-    - src/pwa/pwa.service.js
-    - src/actualizaciones/actualizaciones.service.js
-    - src/diagnostico/arranque-check.service.js
+    - src/jarvis/*.js
 */
 
 import {
@@ -35,12 +29,15 @@ import { renderizarLayout, renderizarEnVista, actualizarEstadoSincronizacion } f
 import { activarRouterDelegado, navegarA, registrarVistas, restaurarVistaGuardada, VISTAS_APP } from "./ui/router.js";
 import { asegurarEstilosModal, mostrarConfirmacion, mostrarMensaje } from "./ui/modal.js";
 import { leerFormulario, leerBooleano, leerNumero } from "./ui/helpers.js";
+
 import { renderInicioView } from "./vistas/inicio.view.js";
 import { renderEntrenarView } from "./vistas/entrenar.view.js";
 import { renderPesoView } from "./vistas/peso.view.js";
 import { renderEstadisticasView } from "./vistas/estadisticas.view.js";
 import { renderRecomendacionesView } from "./vistas/recomendaciones.view.js";
 import { renderAjustesView } from "./vistas/ajustes.view.js";
+import { renderJarvisView } from "./vistas/jarvis.view.js";
+
 import { crearRegistroPeso } from "./peso/peso.service.js";
 import { normalizarEntrenamiento, calcularSiguienteDiaRutina } from "./entrenamiento/entrenamiento.service.js";
 import { TIPOS_EJERCICIO } from "./data/rutina-base.js";
@@ -51,6 +48,13 @@ import { inicializarPWA, instalarPWA, aplicarActualizacionPWA, escucharEstadoPWA
 import { actualizarApp, revisarActualizacion } from "./actualizaciones/actualizaciones.service.js";
 import { exportarDatosCompletos } from "./exportacion/exportacion.service.js";
 import { imprimirDiagnosticoArranque } from "./diagnostico/arranque-check.service.js";
+
+import { JARVIS_ACCIONES } from "./jarvis/jarvis.config.js";
+import { activarJarvis, desactivarJarvis, obtenerEstadoJarvis, guardarComandoJarvis } from "./jarvis/jarvis.estado.js";
+import { inicializarVozJarvis, hablarJarvis, escucharJarvis, detenerEscuchaJarvis, detenerVozJarvis } from "./jarvis/jarvis.voz.service.js";
+import { interpretarComandoJarvis } from "./jarvis/jarvis.comandos.js";
+import { iniciarEntrenamientoConJarvis, procesarRespuestaEntrenamientoJarvis } from "./jarvis/jarvis.entrenamiento.js";
+import { crearNotaJarvis, extraerNotaDesdeComando } from "./jarvis/jarvis.notas.service.js";
 
 export const APP_VERSION = "0.1.0";
 
@@ -72,6 +76,7 @@ export async function iniciarFitJeff() {
     [VISTAS_APP.PESO]: () => renderizarVista(renderPesoView),
     [VISTAS_APP.ESTADISTICAS]: () => renderizarVista(renderEstadisticasView),
     [VISTAS_APP.RECOMENDACIONES]: () => renderizarVista(renderRecomendacionesView),
+    [VISTAS_APP.JARVIS]: () => renderizarVista(renderJarvisView),
     [VISTAS_APP.AJUSTES]: () => renderizarVista(renderAjustesView)
   });
 
@@ -130,6 +135,18 @@ function activarEventosApp() {
       if (accion === "aplicar-actualizacion-pwa") await accionAplicarActualizacionPWA();
       if (accion === "exportar-datos") accionExportarDatos();
       if (accion === "borrar-datos-locales") accionBorrarDatosLocales();
+
+      if (accion === "jarvis-activar") await accionJarvisActivar();
+      if (accion === "jarvis-escuchar") await accionJarvisEscuchar();
+      if (accion === "jarvis-iniciar-entrenamiento") await accionJarvisIniciarEntrenamiento();
+      if (accion === "jarvis-detener") await accionJarvisDetener();
+      if (accion === "jarvis-respuesta-si") await accionJarvisManual(JARVIS_ACCIONES.RESPUESTA_SI);
+      if (accion === "jarvis-respuesta-no") await accionJarvisManual(JARVIS_ACCIONES.RESPUESTA_NO);
+      if (accion === "jarvis-repetir") await accionJarvisManual(JARVIS_ACCIONES.REPETIR);
+      if (accion === "jarvis-pausar") await accionJarvisManual(JARVIS_ACCIONES.PAUSAR);
+      if (accion === "jarvis-continuar") await accionJarvisManual(JARVIS_ACCIONES.CONTINUAR);
+      if (accion === "jarvis-terminar") await accionJarvisManual(JARVIS_ACCIONES.TERMINAR);
+      if (accion === "jarvis-guardar-nota") await accionJarvisGuardarNota();
     } catch (error) {
       console.error(`Error ejecutando acción ${accion}.`, error);
       mostrarMensaje("Acción no completada", error.message || "Ocurrió un error.", "error");
@@ -409,6 +426,130 @@ function accionBorrarDatosLocales() {
       navegarA(VISTAS_APP.INICIO);
     }
   });
+}
+
+async function accionJarvisActivar() {
+  activarJarvis();
+  const soporte = await inicializarVozJarvis();
+
+  if (!soporte.sintesis) {
+    mostrarMensaje("Jarvis activado sin voz", "Tu navegador no permite voz, pero puedes usar los botones manuales.", "error");
+    navegarA(VISTAS_APP.JARVIS);
+    return;
+  }
+
+  await hablarJarvis("Jarvis listo. Puedo guiar tu entrenamiento paso a paso.");
+  navegarA(VISTAS_APP.JARVIS);
+}
+
+async function accionJarvisEscuchar() {
+  activarJarvis();
+  await inicializarVozJarvis();
+  await hablarJarvis("Te escucho.");
+  const resultado = await escucharJarvis();
+
+  if (!resultado.ok) {
+    mostrarMensaje("Jarvis no escuchó", resultado.mensaje || "No se recibió comando.", "error");
+    navegarA(VISTAS_APP.JARVIS);
+    return;
+  }
+
+  const comando = interpretarComandoJarvis(resultado.texto);
+  guardarComandoJarvis(comando);
+  await manejarComandoJarvis(comando);
+  navegarA(VISTAS_APP.JARVIS);
+}
+
+async function manejarComandoJarvis(comando) {
+  if (!comando) {
+    return;
+  }
+
+  if (comando.accion === JARVIS_ACCIONES.INICIAR_ENTRENAMIENTO) {
+    await accionJarvisIniciarEntrenamiento();
+    return;
+  }
+
+  if (comando.accion === JARVIS_ACCIONES.ACTIVAR) {
+    await hablarJarvis("Estoy listo.");
+    return;
+  }
+
+  if (comando.accion === JARVIS_ACCIONES.NOTA) {
+    const textoNota = extraerNotaDesdeComando(comando.original);
+    const resultadoNota = crearNotaJarvis(textoNota || comando.textoUtil || comando.original);
+    await hablarJarvis(resultadoNota.ok ? "Nota guardada." : "No pude guardar la nota.");
+    return;
+  }
+
+  const estadoJarvis = obtenerEstadoJarvis();
+
+  if (estadoJarvis.entrenamientoActivo || comando.accion !== JARVIS_ACCIONES.DESCONOCIDO) {
+    await procesarRespuestaEntrenamientoJarvis(comando);
+    return;
+  }
+
+  await hablarJarvis("No entendí bien. Puedes decir: iniciar entrenamiento, sí, no, repetir, pausar, continuar o terminar.");
+}
+
+async function accionJarvisIniciarEntrenamiento() {
+  activarJarvis();
+  await inicializarVozJarvis();
+
+  const dia = Number(estado.diaSeleccionado || estado.rutina?.diaActual || 1);
+  const resultado = await iniciarEntrenamientoConJarvis(estado.rutina, dia);
+
+  if (!resultado.ok) {
+    mostrarMensaje("Jarvis no inició", resultado.mensaje || "No se pudo iniciar.", "error");
+  }
+
+  navegarA(VISTAS_APP.JARVIS);
+}
+
+async function accionJarvisDetener() {
+  detenerEscuchaJarvis();
+  detenerVozJarvis();
+  desactivarJarvis();
+  mostrarMensaje("Jarvis detenido", "El asistente quedó apagado.", "ok");
+  navegarA(VISTAS_APP.JARVIS);
+}
+
+async function accionJarvisManual(accion) {
+  activarJarvis();
+  guardarComandoJarvis({
+    accion,
+    original: accion,
+    normalizado: accion,
+    confianza: 1,
+    creadoEn: new Date().toISOString()
+  });
+
+  await procesarRespuestaEntrenamientoJarvis({
+    accion,
+    original: accion,
+    normalizado: accion,
+    confianza: 1
+  });
+
+  navegarA(VISTAS_APP.JARVIS);
+}
+
+async function accionJarvisGuardarNota() {
+  const textarea = document.getElementById("jarvis-nota");
+  const texto = textarea?.value || "";
+  const resultado = crearNotaJarvis(texto);
+
+  if (!resultado.ok) {
+    mostrarMensaje("Nota no guardada", resultado.mensaje, "error");
+    return;
+  }
+
+  if (textarea) {
+    textarea.value = "";
+  }
+
+  mostrarMensaje("Nota guardada", "La observación quedó guardada localmente.", "ok");
+  navegarA(VISTAS_APP.JARVIS);
 }
 
 function obtenerVistaInicial() {
