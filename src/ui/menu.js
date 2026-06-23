@@ -28,6 +28,11 @@ export const MENU_PRINCIPAL = [
     descripcion: "Intervalos sonoros"
   },
   {
+    id: VISTAS_APP.AUDIO_REMOTO,
+    texto: "Remoto",
+    descripcion: "Control sonoro"
+  },
+  {
     id: VISTAS_APP.RUTINAS,
     texto: "Rutinas",
     descripcion: "Importar y editar"
