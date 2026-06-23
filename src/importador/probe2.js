@@ -1,1 +1,1 @@
-export const x = "ruti" + "na";
+export const x = "ok";
