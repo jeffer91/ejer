@@ -5,7 +5,8 @@
     "funcionFunciones": [
       "Publicar la version actual disponible de FitJeff.",
       "Permitir comparacion entre version local y remota.",
-      "Registrar el redisenio de navegacion diaria."
+      "Registrar el redisenio de navegacion diaria.",
+      "Registrar automatizacion basica de Inicio, Registrar y Progreso."
     ],
     "seConectaCon": [
       "src/actualizaciones/actualizaciones.service.js",
@@ -18,12 +19,12 @@
   "app": "FitJeff",
   "version": "0.1.0",
   "appVersion": "0.1.0",
-  "build": 14,
+  "build": 15,
   "fechaPublicacion": "2026-06-23",
   "forzarActualizacion": false,
-  "notas": "Bloque redisenio 1: navegacion diaria con Inicio, Entrenar, Registrar, Progreso, Asistente y Ajustes.",
-  "estado": "bloque-redisenio-navegacion-diaria",
-  "bloquesCompletados": 22,
+  "notas": "Bloque redisenio 2: pantallas dinamicas con estado local, Inicio automatizado y Entrenar compacto.",
+  "estado": "bloque-redisenio-automatizacion-base",
+  "bloquesCompletados": 23,
   "archivosCriticos": [
     "index.html",
     "src/app.js",
@@ -32,9 +33,13 @@
     "src/ui/menu.js",
     "src/ui/layout.js",
     "src/vistas/inicio.view.js",
+    "src/vistas/entrenar.view.js",
     "src/vistas/registrar.view.js",
     "src/vistas/progreso.view.js",
     "src/vistas/asistente.view.js",
+    "src/automatizacion/fitjeff-hoy.service.js",
+    "src/automatizacion/hoy-acciones.service.js",
+    "src/automatizacion/hoy-pendientes.service.js",
     "service-worker.js",
     "public/version.json"
   ]
