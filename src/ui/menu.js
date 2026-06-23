@@ -28,6 +28,11 @@ export const MENU_PRINCIPAL = [
     descripcion: "Registrar rutina"
   },
   {
+    id: VISTAS_APP.JARVIS,
+    texto: "Jarvis",
+    descripcion: "Asistente de voz"
+  },
+  {
     id: VISTAS_APP.PESO,
     texto: "Peso",
     descripcion: "Registrar peso"
