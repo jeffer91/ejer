@@ -10,3 +10,5 @@ export const PLAN_TYPES = Object.freeze({
   C: "car" + "dio",
   D: "hi" + "it"
 });
+
+export const OK = true;
