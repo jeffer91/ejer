@@ -73,6 +73,7 @@ export function iniciarEstadoGuiado({ diaRutina, nombreDia }) {
     fase: GUIADO_FASES.CALENTAMIENTO,
     diaRutina: Number(diaRutina || 1),
     nombreDia: nombreDia || "Entrenamiento",
+    pasoActual: null,
     indiceCalentamiento: 0,
     indiceEjercicio: 0,
     indiceSerie: 0,
@@ -100,13 +101,16 @@ export function continuarEstadoGuiado() {
 }
 
 export function finalizarEstadoGuiado(resumen = null) {
-  return actualizarEstadoGuiado({
+  const nuevoEstado = actualizarEstadoGuiado({
     activo: false,
     pausado: false,
     fase: GUIADO_FASES.FINALIZADO,
     resumen,
     finalizadoEn: new Date().toISOString()
   });
+
+  emitirEvento(GUIADO_EVENTOS.FINALIZADO, resumen);
+  return nuevoEstado;
 }
 
 export function actualizarPasoGuiado(pasoActual, parcial = {}) {
@@ -117,20 +121,30 @@ export function actualizarPasoGuiado(pasoActual, parcial = {}) {
 }
 
 export function agregarPasoCompletadoGuiado(paso) {
+  if (!paso) {
+    return obtenerEstadoGuiado();
+  }
+
   const completado = {
     ...paso,
     completadoEn: new Date().toISOString()
   };
 
   return actualizarEstadoGuiado({
-    pasosCompletados: [completado, ...(estadoGuiado.pasosCompletados || [])]
+    pasosCompletados: [...(estadoGuiado.pasosCompletados || []), completado]
   });
 }
 
 export function agregarMensajeGuiado(texto, tipo = "info") {
+  const contenido = String(texto || "").trim();
+
+  if (!contenido) {
+    return obtenerEstadoGuiado();
+  }
+
   const mensaje = {
     id: `guiado_msg_${Date.now()}`,
-    texto: String(texto || ""),
+    texto: contenido,
     tipo,
     creadoEn: new Date().toISOString()
   };
@@ -181,13 +195,15 @@ export function normalizarEstadoGuiado(estado = crearEstadoGuiadoBase()) {
 }
 
 function emitirCambio() {
+  emitirEvento(GUIADO_EVENTOS.CAMBIO, obtenerEstadoGuiado());
+}
+
+function emitirEvento(nombre, detalle) {
   if (typeof window === "undefined") {
     return;
   }
 
-  window.dispatchEvent(new CustomEvent(GUIADO_EVENTOS.CAMBIO, {
-    detail: obtenerEstadoGuiado()
-  }));
+  window.dispatchEvent(new CustomEvent(nombre, { detail: detalle }));
 }
 
 function clonar(valor) {
