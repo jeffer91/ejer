@@ -5,11 +5,11 @@
   Función:
     - Permitir que FitJeff controle toda la app como PWA desde la raíz.
     - Guardar archivos principales en caché y permitir actualización controlada.
-    - Incluir dashboard, reportes, rutinas, medidas, Jarvis inteligente y entrenamiento guiado.
+    - Incluir dashboard, reportes, diagnóstico, rutinas, medidas, Jarvis inteligente y entrenamiento guiado.
 */
 
-const FITJEFF_CACHE_VERSION = "fitjeff-root-v0.1.0-build-9";
-const FITJEFF_RUNTIME_CACHE = "fitjeff-runtime-v0.1.0-build-9";
+const FITJEFF_CACHE_VERSION = "fitjeff-root-v0.1.0-build-10";
+const FITJEFF_RUNTIME_CACHE = "fitjeff-runtime-v0.1.0-build-10";
 
 const ARCHIVOS_APP = [
   "./",
@@ -62,6 +62,12 @@ const ARCHIVOS_APP = [
   "./src/medidas/medidas.recordatorio.service.js",
   "./src/medidas/medidas.graficas.service.js",
   "./src/medidas/medidas.format.service.js",
+  "./src/diagnostico/arranque-check.service.js",
+  "./src/diagnostico/diagnostico.schema.js",
+  "./src/diagnostico/diagnostico.modulos.service.js",
+  "./src/diagnostico/diagnostico.pwa.service.js",
+  "./src/diagnostico/diagnostico.firebase.service.js",
+  "./src/diagnostico/diagnostico.completo.service.js",
   "./src/estadisticas/estadisticas.calculos.js",
   "./src/estadisticas/estadisticas.service.js",
   "./src/recomendaciones/recomendaciones.prompt.js",
@@ -91,6 +97,7 @@ const ARCHIVOS_APP = [
   "./src/vistas/rutinas.view.js",
   "./src/vistas/medidas.view.js",
   "./src/vistas/reportes.view.js",
+  "./src/vistas/diagnostico.view.js",
   "./src/vistas/peso.view.js",
   "./src/vistas/estadisticas.view.js",
   "./src/vistas/recomendaciones.view.js",
