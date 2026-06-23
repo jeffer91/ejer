@@ -4,15 +4,17 @@
     "rutaUbicacion": "firebase.json",
     "funcionFunciones": [
       "Configurar Firebase Hosting para publicar FitJeff.",
-      "Configurar Firebase Functions para recomendaciones con Gemini.",
-      "Configurar Firestore Rules para proteger la base de datos."
+      "Configurar Firebase Functions para recomendaciones y Jarvis remoto.",
+      "Configurar Firestore Rules para proteger la base de datos.",
+      "Evitar caché agresivo en archivos críticos de actualización."
     ],
     "seConectaCon": [
       "firestore.rules",
       "functions/index.js",
       "functions/package.json",
       "index.html",
-      "public/service-worker.js"
+      "service-worker.js",
+      "public/version.json"
     ],
     "nota": "JSON no permite comentarios reales; esta metadata documenta el archivo sin romper el formato."
   },
@@ -22,25 +24,35 @@
       "firebase.json",
       "**/.*",
       "**/node_modules/**",
-      "functions/**",
-      "README.md"
+      "functions/node_modules/**",
+      "firebase-debug.log",
+      "firebase-debug.*.log"
     ],
     "headers": [
       {
-        "source": "**/*.@(js|css|html|json)",
-        "headers": [
-          {
-            "key": "Cache-Control",
-            "value": "no-cache"
-          }
-        ]
-      },
-      {
-        "source": "public/service-worker.js",
+        "source": "/service-worker.js",
         "headers": [
           {
             "key": "Cache-Control",
             "value": "no-cache, no-store, must-revalidate"
+          }
+        ]
+      },
+      {
+        "source": "/public/version.json",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache, no-store, must-revalidate"
+          }
+        ]
+      },
+      {
+        "source": "**/*.@(js|css|html|json|svg)",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache"
           }
         ]
       }
