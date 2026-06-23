@@ -4,13 +4,12 @@
 
   Función:
     - Definir reglas de seguridad para Firestore en FitJeff.
-    - Proteger usuarios/jeff y sus subcolecciones.
+    - Proteger fitjeff/jeff y sus subcolecciones.
     - Evitar que la base quede disponible para cualquier visitante.
 
-  Se conecta con:
-    - firebase.json
-    - src/firebase/firestore.service.js
-    - functions/index.js
+  Nota:
+    - Estas reglas requieren Firebase Auth.
+    - Si la app sigue sin login, Firebase debe permanecer desactivado en Ajustes.
 */
 
 rules_version = '2';
@@ -30,9 +29,14 @@ service cloud.firestore {
       return signedIn() && isJeffProfile(usuarioId);
     }
 
-    match /usuarios/{usuarioId} {
+    match /fitjeff/{usuarioId} {
       allow get, list: if canUseFitJeff(usuarioId);
       allow create, update, delete: if canUseFitJeff(usuarioId);
+
+      match /{documentId} {
+        allow get, list: if canUseFitJeff(usuarioId);
+        allow create, update, delete: if canUseFitJeff(usuarioId);
+      }
 
       match /{collectionId}/{documentId} {
         allow get, list: if canUseFitJeff(usuarioId);
