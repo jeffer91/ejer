@@ -7,6 +7,7 @@ export const VISTAS_APP = {
   INICIO: "inicio",
   ENTRENAR: "entrenar",
   GUIADO: "guiado",
+  HIIT: "hiit",
   RUTINAS: "rutinas",
   MEDIDAS: "medidas",
   REPORTES: "reportes",
@@ -57,6 +58,11 @@ export function navegarA(nombreVista, contexto = {}) {
 
 export function renderizarVistaActual(contexto = {}) {
   const render = vistasRegistradas.get(vistaActual);
+
+  if (!render && vistaActual === VISTAS_APP.HIIT) {
+    renderizarVistaDinamica("../vistas/hiit.view.js", "renderHIITView");
+    return null;
+  }
 
   if (!render && vistaActual === VISTAS_APP.MEDIDAS) {
     renderizarVistaDinamica("../vistas/medidas.view.js", "renderMedidasView");
