@@ -1,15 +1,10 @@
 /*
   Nombre completo: service-worker.js
   Ruta o ubicación: service-worker.js
-
-  Función:
-    - Permitir que FitJeff controle toda la app como PWA desde la raíz.
-    - Guardar archivos principales en caché y permitir actualización controlada.
-    - Incluir dashboard, reportes, diagnóstico, rutinas, medidas, Jarvis inteligente y entrenamiento guiado.
 */
 
-const FITJEFF_CACHE_VERSION = "fitjeff-root-v0.1.0-build-11";
-const FITJEFF_RUNTIME_CACHE = "fitjeff-runtime-v0.1.0-build-11";
+const FITJEFF_CACHE_VERSION = "fitjeff-root-v0.1.0-build-12";
+const FITJEFF_RUNTIME_CACHE = "fitjeff-runtime-v0.1.0-build-12";
 
 const ARCHIVOS_APP = [
   "./",
@@ -23,6 +18,12 @@ const ARCHIVOS_APP = [
   "./styles/responsive.css",
   "./src/app.js",
   "./src/app-controller.js",
+  "./src/audio/audio.config.js",
+  "./src/audio/audio.speech.service.js",
+  "./src/hiit/hiit.rutinas.js",
+  "./src/hiit/hiit.timer.service.js",
+  "./src/hiit/hiit.storage.service.js",
+  "./src/vistas/hiit.view.js",
   "./src/data/usuario-base.js",
   "./src/data/rutina-base.js",
   "./src/storage/local-storage.service.js",
@@ -123,12 +124,7 @@ self.addEventListener("activate", (event) => {
       .then((keys) =>
         Promise.all(
           keys
-            .filter(
-              (key) =>
-                key.startsWith("fitjeff-") &&
-                key !== FITJEFF_CACHE_VERSION &&
-                key !== FITJEFF_RUNTIME_CACHE
-            )
+            .filter((key) => key.startsWith("fitjeff-") && key !== FITJEFF_CACHE_VERSION && key !== FITJEFF_RUNTIME_CACHE)
             .map((key) => caches.delete(key))
         )
       )
