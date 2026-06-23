@@ -5,8 +5,8 @@
   Función:
     - Controlar el flujo principal de FitJeff con módulos separados.
     - Cargar y guardar estado local.
-    - Conectar layout, router, vistas, formularios, PWA, actualizaciones, exportación, diagnóstico, sincronización y Jarvis.
-    - Evitar que un error de Firebase, PWA, actualización o voz rompa el arranque principal.
+    - Conectar layout, router, vistas, formularios, PWA, actualizaciones, exportación, diagnóstico, sincronización, Jarvis y entrenamiento guiado.
+    - Evitar que un error de Firebase, PWA, actualización, voz o timer rompa el arranque principal.
 
   Se conecta con:
     - src/app.js
@@ -16,6 +16,7 @@
     - src/ui/modal.js
     - src/vistas/*.view.js
     - src/jarvis/*.js
+    - src/entrenamiento-guiado/*.js
 */
 
 import {
@@ -32,6 +33,7 @@ import { leerFormulario, leerBooleano, leerNumero } from "./ui/helpers.js";
 
 import { renderInicioView } from "./vistas/inicio.view.js";
 import { renderEntrenarView } from "./vistas/entrenar.view.js";
+import { renderEntrenamientoGuiadoView } from "./vistas/entrenamiento-guiado.view.js";
 import { renderPesoView } from "./vistas/peso.view.js";
 import { renderEstadisticasView } from "./vistas/estadisticas.view.js";
 import { renderRecomendacionesView } from "./vistas/recomendaciones.view.js";
@@ -56,6 +58,17 @@ import { interpretarComandoJarvis } from "./jarvis/jarvis.comandos.js";
 import { iniciarEntrenamientoConJarvis, procesarRespuestaEntrenamientoJarvis } from "./jarvis/jarvis.entrenamiento.js";
 import { crearNotaJarvis, extraerNotaDesdeComando } from "./jarvis/jarvis.notas.service.js";
 
+import {
+  iniciarEntrenamientoGuiado,
+  marcarPasoGuiadoHecho,
+  repetirPasoGuiado,
+  pausarEntrenamientoGuiado,
+  continuarEntrenamientoGuiado,
+  agregarTiempoDescansoGuiado,
+  finalizarEntrenamientoGuiado,
+  guardarNotaGuiada
+} from "./entrenamiento-guiado/guiado.service.js";
+
 export const APP_VERSION = "0.1.0";
 
 let estado = cargarEstadoLocal();
@@ -73,6 +86,7 @@ export async function iniciarFitJeff() {
   registrarVistas({
     [VISTAS_APP.INICIO]: () => renderizarVista(renderInicioView),
     [VISTAS_APP.ENTRENAR]: () => renderizarVista(renderEntrenarView),
+    [VISTAS_APP.GUIADO]: () => renderizarVista(renderEntrenamientoGuiadoView),
     [VISTAS_APP.PESO]: () => renderizarVista(renderPesoView),
     [VISTAS_APP.ESTADISTICAS]: () => renderizarVista(renderEstadisticasView),
     [VISTAS_APP.RECOMENDACIONES]: () => renderizarVista(renderRecomendacionesView),
@@ -147,6 +161,15 @@ function activarEventosApp() {
       if (accion === "jarvis-continuar") await accionJarvisManual(JARVIS_ACCIONES.CONTINUAR);
       if (accion === "jarvis-terminar") await accionJarvisManual(JARVIS_ACCIONES.TERMINAR);
       if (accion === "jarvis-guardar-nota") await accionJarvisGuardarNota();
+
+      if (accion === "guiado-iniciar") await accionGuiadoIniciar();
+      if (accion === "guiado-hecho") await accionGuiadoHecho();
+      if (accion === "guiado-repetir") await accionGuiadoRepetir();
+      if (accion === "guiado-pausar") await accionGuiadoPausar();
+      if (accion === "guiado-continuar") await accionGuiadoContinuar();
+      if (accion === "guiado-sumar-descanso") await accionGuiadoSumarDescanso();
+      if (accion === "guiado-terminar") await accionGuiadoTerminar();
+      if (accion === "guiado-guardar-nota") await accionGuiadoGuardarNota();
     } catch (error) {
       console.error(`Error ejecutando acción ${accion}.`, error);
       mostrarMensaje("Acción no completada", error.message || "Ocurrió un error.", "error");
@@ -550,6 +573,77 @@ async function accionJarvisGuardarNota() {
 
   mostrarMensaje("Nota guardada", "La observación quedó guardada localmente.", "ok");
   navegarA(VISTAS_APP.JARVIS);
+}
+
+async function accionGuiadoIniciar() {
+  const dia = Number(estado.diaSeleccionado || estado.rutina?.diaActual || 1);
+  const resultado = iniciarEntrenamientoGuiado(estado.rutina, dia);
+
+  if (!resultado.ok) {
+    mostrarMensaje("Guiado no iniciado", resultado.mensaje || "No se pudo iniciar.", "error");
+    return;
+  }
+
+  mostrarMensaje("Entrenamiento guiado", "Sesión iniciada correctamente.", "ok");
+  navegarA(VISTAS_APP.GUIADO);
+}
+
+async function accionGuiadoHecho() {
+  const resultado = marcarPasoGuiadoHecho();
+
+  if (!resultado.ok) {
+    mostrarMensaje("Guiado", resultado.mensaje || "No hay sesión activa.", "error");
+  }
+
+  navegarA(VISTAS_APP.GUIADO);
+}
+
+async function accionGuiadoRepetir() {
+  repetirPasoGuiado();
+  navegarA(VISTAS_APP.GUIADO);
+}
+
+async function accionGuiadoPausar() {
+  pausarEntrenamientoGuiado();
+  navegarA(VISTAS_APP.GUIADO);
+}
+
+async function accionGuiadoContinuar() {
+  continuarEntrenamientoGuiado();
+  navegarA(VISTAS_APP.GUIADO);
+}
+
+async function accionGuiadoSumarDescanso() {
+  agregarTiempoDescansoGuiado(30);
+  navegarA(VISTAS_APP.GUIADO);
+}
+
+async function accionGuiadoTerminar() {
+  const resultado = finalizarEntrenamientoGuiado("finalizado_por_usuario");
+
+  if (resultado.ok) {
+    mostrarMensaje("Entrenamiento finalizado", resultado.resumen?.mensaje || "Resumen creado.", "ok");
+  }
+
+  navegarA(VISTAS_APP.GUIADO);
+}
+
+async function accionGuiadoGuardarNota() {
+  const textarea = document.getElementById("guiado-nota");
+  const texto = textarea?.value || "";
+  const resultado = guardarNotaGuiada(texto);
+
+  if (!resultado.ok) {
+    mostrarMensaje("Nota no guardada", resultado.mensaje, "error");
+    return;
+  }
+
+  if (textarea) {
+    textarea.value = "";
+  }
+
+  mostrarMensaje("Nota guardada", "La observación quedó guardada.", "ok");
+  navegarA(VISTAS_APP.GUIADO);
 }
 
 function obtenerVistaInicial() {
