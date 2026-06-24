@@ -3,8 +3,8 @@
   Ruta o ubicación: service-worker.js
 */
 
-const FITJEFF_CACHE_VERSION = "fitjeff-root-v0.1.0-build-16";
-const FITJEFF_RUNTIME_CACHE = "fitjeff-runtime-v0.1.0-build-16";
+const FITJEFF_CACHE_VERSION = "fitjeff-root-v0.1.0-build-17";
+const FITJEFF_RUNTIME_CACHE = "fitjeff-runtime-v0.1.0-build-17";
 
 const ARCHIVOS_APP = [
   "./",
