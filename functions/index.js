@@ -36,6 +36,7 @@ if (!admin.apps.length) {
 const db = admin.firestore();
 const USUARIO_PRINCIPAL_ID = "jeff";
 const FITJEFF_COLLECTION = "fitjeff";
+const GEMINI_SECRET = "GEMINI_API_KEY";
 const FITJEFF_SUBCOLECCIONES = Object.freeze({
   recomendaciones: "recomendaciones",
   asistente: "asistente"
@@ -45,7 +46,8 @@ exports.generarRecomendacionFitJeff = onCall(
   {
     region: "us-central1",
     timeoutSeconds: 60,
-    memory: "256MiB"
+    memory: "256MiB",
+    secrets: [GEMINI_SECRET]
   },
   async (request) => {
     try {
@@ -109,7 +111,8 @@ exports.consultarJarvisFitJeff = onCall(
   {
     region: "us-central1",
     timeoutSeconds: 60,
-    memory: "256MiB"
+    memory: "256MiB",
+    secrets: [GEMINI_SECRET]
   },
   async (request) => {
     try {
