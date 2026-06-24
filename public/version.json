@@ -7,7 +7,8 @@
       "Permitir comparacion entre version local y remota.",
       "Registrar el redisenio de navegacion diaria.",
       "Registrar automatizacion basica de Inicio, Registrar y Progreso.",
-      "Registrar Firestore limpio en fitjeff/jeff con documentos fijos validos."
+      "Registrar Firestore limpio en fitjeff/jeff con documentos fijos validos.",
+      "Registrar Functions alineadas a la estructura FitJeff."
     ],
     "seConectaCon": [
       "src/actualizaciones/actualizaciones.service.js",
@@ -20,11 +21,11 @@
   "app": "FitJeff",
   "version": "0.1.0",
   "appVersion": "0.1.0",
-  "build": 17,
+  "build": 18,
   "fechaPublicacion": "2026-06-24",
   "forzarActualizacion": false,
-  "notas": "Auditoria: Firestore corregido para usar rutas validas fitjeff/jeff/documentos/{documentoId}; cache PWA actualizado.",
-  "estado": "auditoria-firestore-rutas-validas",
+  "notas": "Auditoria: Firestore corregido para usar rutas validas fitjeff/jeff/documentos/{documentoId}; Functions alineadas a fitjeff/{usuarioId}; cache PWA actualizado.",
+  "estado": "auditoria-firestore-functions-rutas-validas",
   "bloquesCompletados": 24,
   "archivosCriticos": [
     "index.html",
@@ -39,6 +40,7 @@
     "src/sincronizacion/sincronizacion.service.js",
     "src/diagnostico/diagnostico.firebase.service.js",
     "src/vistas/ajustes.view.js",
+    "functions/index.js",
     "firestore.rules",
     "service-worker.js",
     "public/version.json"
