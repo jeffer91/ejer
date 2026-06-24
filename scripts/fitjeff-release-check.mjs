@@ -7,6 +7,7 @@
     - Validar JSON de package, manifest, Firebase y versión.
     - Confirmar que el service worker y version.json tengan el mismo build.
     - Confirmar rutas nuevas del rediseño y estructura Firestore fitjeff/jeff.
+    - Detectar referencias antiguas a usuarios/ en frontend y functions.
 */
 
 import fs from "node:fs";
@@ -185,24 +186,35 @@ function revisarFirestoreFitJeff() {
   const paths = leerArchivo("src/firebase/firestore.paths.js");
   const service = leerArchivo("src/firebase/firestore.service.js");
   const rules = leerArchivo("firestore.rules");
+  const functionsIndex = leerArchivo("functions/index.js");
 
   agregarRevisionTexto("firestore", "firestore.paths.js", paths, "coleccionRaiz: \"fitjeff\"", "Colección raíz fitjeff definida.");
+  agregarRevisionTexto("firestore", "firestore.paths.js", paths, "coleccionDocumentos: \"documentos\"", "Colección documentos definida para documentos fijos.");
   agregarRevisionTexto("firestore", "firestore.paths.js", paths, "usuarioPrincipalId", "Usuario principal definido.");
   agregarRevisionTexto("firestore", "firestore.service.js", service, "FITJEFF_FIRESTORE.coleccionRaiz", "Servicio usa rutas centralizadas.");
+  agregarRevisionTexto("firestore", "firestore.service.js", service, "COLECCION_DOCUMENTOS", "Servicio usa documentos fijos en subcolección válida.");
   agregarRevisionTexto("firestore", "firestore.rules", rules, "match /fitjeff/{usuarioId}", "Reglas protegen fitjeff/{usuarioId}.");
+  agregarRevisionTexto("firestore", "firestore.rules", rules, "match /documentos/{documentoId}", "Reglas protegen documentos fijos.");
+  agregarRevisionTexto("functions", "functions/index.js", functionsIndex, "FITJEFF_COLLECTION = \"fitjeff\"", "Functions escriben en fitjeff.");
+  agregarRevisionTexto("functions", "functions/index.js", functionsIndex, "FITJEFF_SUBCOLECCIONES", "Functions usan subcolecciones centralizadas.");
 
-  if (service.includes("COLECCIONES.USUARIOS") || service.includes("usuarios/")) {
+  revisarSinReferenciasAntiguas("firestore", "src/firebase/firestore.service.js", service);
+  revisarSinReferenciasAntiguas("functions", "functions/index.js", functionsIndex);
+}
+
+function revisarSinReferenciasAntiguas(area, archivo, contenido) {
+  if (contenido.includes("COLECCIONES.USUARIOS") || contenido.includes("usuarios/")) {
     resultados.push({
-      nivel: "warning",
-      area: "firestore",
-      archivo: "src/firebase/firestore.service.js",
-      mensaje: "Aún hay referencias a usuarios/. Revisar migración."
+      nivel: "error",
+      area,
+      archivo,
+      mensaje: "Aún hay referencias antiguas a usuarios/. Revisar migración."
     });
   } else {
     resultados.push({
       nivel: "ok",
-      area: "firestore",
-      archivo: "src/firebase/firestore.service.js",
+      area,
+      archivo,
       mensaje: "Sin referencias antiguas a usuarios/."
     });
   }
