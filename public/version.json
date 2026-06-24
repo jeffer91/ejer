@@ -8,7 +8,8 @@
       "Registrar el redisenio de navegacion diaria.",
       "Registrar automatizacion basica de Inicio, Registrar y Progreso.",
       "Registrar Firestore limpio en fitjeff/jeff con documentos fijos validos.",
-      "Registrar Functions alineadas a la estructura FitJeff."
+      "Registrar Functions alineadas a la estructura FitJeff.",
+      "Registrar UX simplificada para Asistente, Jarvis y configuracion Gemini."
     ],
     "seConectaCon": [
       "src/actualizaciones/actualizaciones.service.js",
@@ -21,11 +22,11 @@
   "app": "FitJeff",
   "version": "0.1.0",
   "appVersion": "0.1.0",
-  "build": 18,
+  "build": 19,
   "fechaPublicacion": "2026-06-24",
   "forzarActualizacion": false,
-  "notas": "Auditoria: Firestore corregido para usar rutas validas fitjeff/jeff/documentos/{documentoId}; Functions alineadas a fitjeff/{usuarioId}; cache PWA actualizado.",
-  "estado": "auditoria-firestore-functions-rutas-validas",
+  "notas": "Auditoria UX: Asistente sin duplicar Jarvis, Ajustes muestra configuracion Gemini, Functions declara secreto GEMINI_API_KEY y guia CONFIGURAR-GEMINI agregada.",
+  "estado": "auditoria-ux-jarvis-gemini",
   "bloquesCompletados": 24,
   "archivosCriticos": [
     "index.html",
@@ -39,8 +40,11 @@
     "src/sincronizacion/sync-fitjeff.mapper.js",
     "src/sincronizacion/sincronizacion.service.js",
     "src/diagnostico/diagnostico.firebase.service.js",
+    "src/vistas/asistente.view.js",
     "src/vistas/ajustes.view.js",
+    "src/vistas/jarvis.view.js",
     "functions/index.js",
+    "docs/CONFIGURAR-GEMINI.md",
     "firestore.rules",
     "service-worker.js",
     "public/version.json"
