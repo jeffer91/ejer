@@ -7,6 +7,7 @@
     - Recibir solicitudes de recomendación desde la app.
     - Consultar Gemini usando una clave segura del servidor.
     - Exponer Jarvis inteligente sin filtrar la clave al frontend.
+    - Guardar resultados en la estructura Firestore vigente: fitjeff/{usuarioId}/...
 
   Se conecta con:
     - functions/gemini.service.js
@@ -34,6 +35,11 @@ if (!admin.apps.length) {
 
 const db = admin.firestore();
 const USUARIO_PRINCIPAL_ID = "jeff";
+const FITJEFF_COLLECTION = "fitjeff";
+const FITJEFF_SUBCOLECCIONES = Object.freeze({
+  recomendaciones: "recomendaciones",
+  asistente: "asistente"
+});
 
 exports.generarRecomendacionFitJeff = onCall(
   {
@@ -46,7 +52,7 @@ exports.generarRecomendacionFitJeff = onCall(
       const data = request.data || {};
       validarSolicitud(data);
 
-      const usuarioId = limpiarTexto(data.usuarioId || USUARIO_PRINCIPAL_ID);
+      const usuarioId = normalizarUsuarioId(data.usuarioId || USUARIO_PRINCIPAL_ID);
       const prompt = limpiarTexto(data.prompt);
       const datos = data.datos || {};
       const observacionUsuario = limpiarTexto(data.observacionUsuario || "");
@@ -72,16 +78,13 @@ exports.generarRecomendacionFitJeff = onCall(
         actualizadoEn: admin.firestore.FieldValue.serverTimestamp()
       };
 
-      const ref = await db
-        .collection("usuarios")
-        .doc(usuarioId)
-        .collection("recomendaciones")
+      const ref = await obtenerReferenciaFitJeff(usuarioId, FITJEFF_SUBCOLECCIONES.recomendaciones)
         .add(documento);
 
       return {
         ok: true,
         id: ref.id,
-        ruta: `usuarios/${usuarioId}/recomendaciones/${ref.id}`,
+        ruta: `${FITJEFF_COLLECTION}/${usuarioId}/${FITJEFF_SUBCOLECCIONES.recomendaciones}/${ref.id}`,
         recomendacion: {
           idFirestore: ref.id,
           ...documento
@@ -113,7 +116,7 @@ exports.consultarJarvisFitJeff = onCall(
       const data = request.data || {};
       validarSolicitudJarvis(data);
 
-      const usuarioId = limpiarTexto(data.usuarioId || USUARIO_PRINCIPAL_ID);
+      const usuarioId = normalizarUsuarioId(data.usuarioId || USUARIO_PRINCIPAL_ID);
       const prompt = limpiarTexto(data.prompt);
       const consulta = data.consulta || {};
       const contexto = data.contexto || {};
@@ -144,13 +147,15 @@ exports.consultarJarvisFitJeff = onCall(
         actualizadoEn: admin.firestore.FieldValue.serverTimestamp()
       };
 
-      await db
-        .collection("usuarios")
-        .doc(usuarioId)
-        .collection("jarvisConsultas")
+      const ref = await obtenerReferenciaFitJeff(usuarioId, FITJEFF_SUBCOLECCIONES.asistente)
         .add(documento);
 
-      return documento;
+      return {
+        ...documento,
+        ok: documento.ok !== false,
+        idFirestore: ref.id,
+        ruta: `${FITJEFF_COLLECTION}/${usuarioId}/${FITJEFF_SUBCOLECCIONES.asistente}/${ref.id}`
+      };
     } catch (error) {
       logger.error("Error en consultarJarvisFitJeff.", error);
 
@@ -181,6 +186,13 @@ exports.pingFitJeff = onCall(
     };
   }
 );
+
+function obtenerReferenciaFitJeff(usuarioId, subcoleccion) {
+  return db
+    .collection(FITJEFF_COLLECTION)
+    .doc(normalizarUsuarioId(usuarioId))
+    .collection(subcoleccion);
+}
 
 function validarSolicitud(data) {
   if (!data || typeof data !== "object") {
@@ -214,6 +226,11 @@ function validarSolicitudJarvis(data) {
       "La consulta de Jarvis es demasiado larga."
     );
   }
+}
+
+function normalizarUsuarioId(valor) {
+  const limpio = limpiarTexto(valor);
+  return limpio || USUARIO_PRINCIPAL_ID;
 }
 
 function limpiarTexto(valor) {
