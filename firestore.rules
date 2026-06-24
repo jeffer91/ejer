@@ -4,7 +4,7 @@
 
   Función:
     - Definir reglas de seguridad para Firestore en FitJeff.
-    - Proteger fitjeff/jeff y sus subcolecciones.
+    - Proteger fitjeff/{usuarioId}, documentos fijos y subcolecciones.
     - Evitar que la base quede disponible para cualquier visitante.
 
   Nota:
@@ -33,7 +33,7 @@ service cloud.firestore {
       allow get, list: if canUseFitJeff(usuarioId);
       allow create, update, delete: if canUseFitJeff(usuarioId);
 
-      match /{documentId} {
+      match /documentos/{documentoId} {
         allow get, list: if canUseFitJeff(usuarioId);
         allow create, update, delete: if canUseFitJeff(usuarioId);
       }
