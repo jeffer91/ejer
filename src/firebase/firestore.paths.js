@@ -1,8 +1,19 @@
+/*
+  Nombre completo: firestore.paths.js
+  Ruta o ubicación: src/firebase/firestore.paths.js
+
+  Función:
+    - Centralizar rutas válidas de Firestore para FitJeff.
+    - Mantener la raíz fitjeff/{usuarioId} y guardar documentos fijos en una subcolección válida.
+    - Evitar rutas inválidas con número impar de segmentos como fitjeff/jeff/perfil.
+*/
+
 import { FIREBASE_APP_INFO } from "./firebase.config.js";
 
 export const FITJEFF_FIRESTORE = {
   coleccionRaiz: "fitjeff",
   usuarioPrincipalId: FIREBASE_APP_INFO.usuarioPrincipalId || "jeff",
+  coleccionDocumentos: "documentos",
   documentos: {
     perfil: "perfil",
     rutina: "rutina",
@@ -28,8 +39,12 @@ export function crearRutaUsuarioFitJeff(usuarioId = obtenerUsuarioFitJeffId()) {
   return `${FITJEFF_FIRESTORE.coleccionRaiz}/${obtenerUsuarioFitJeffId(usuarioId)}`;
 }
 
+export function crearRutaDocumentosFijosFitJeff(usuarioId = obtenerUsuarioFitJeffId()) {
+  return `${crearRutaUsuarioFitJeff(usuarioId)}/${FITJEFF_FIRESTORE.coleccionDocumentos}`;
+}
+
 export function crearRutaDocumentoFitJeff(nombreDocumento, usuarioId = obtenerUsuarioFitJeffId()) {
-  return `${crearRutaUsuarioFitJeff(usuarioId)}/${nombreDocumento}`;
+  return `${crearRutaDocumentosFijosFitJeff(usuarioId)}/${nombreDocumento}`;
 }
 
 export function crearRutaSubcoleccionFitJeff(nombreSubcoleccion, usuarioId = obtenerUsuarioFitJeffId()) {
@@ -42,6 +57,7 @@ export function crearRutasFitJeff(usuarioId = obtenerUsuarioFitJeffId()) {
 
   return {
     usuario: crearRutaUsuarioFitJeff(usuarioId),
+    documentos: crearRutaDocumentosFijosFitJeff(usuarioId),
     perfil: crearRutaDocumentoFitJeff(documentos.perfil, usuarioId),
     rutina: crearRutaDocumentoFitJeff(documentos.rutina, usuarioId),
     ajustes: crearRutaDocumentoFitJeff(documentos.ajustes, usuarioId),
