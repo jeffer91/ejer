@@ -4,7 +4,8 @@
 
   Función:
     - Centralizar lecturas y escrituras de Firestore para FitJeff.
-    - Usar una estructura exclusiva: fitjeff / jeff.
+    - Usar una estructura válida: fitjeff/{usuarioId}/documentos/{documentoId}.
+    - Mantener subcolecciones válidas: fitjeff/{usuarioId}/{subcoleccion}/{itemId}.
     - Mantener compatibilidad con los servicios existentes de sincronización.
 */
 
@@ -36,6 +37,7 @@ import {
 
 const DOCUMENTOS = FITJEFF_FIRESTORE.documentos;
 const SUBCOLECCIONES = FITJEFF_FIRESTORE.subcolecciones;
+const COLECCION_DOCUMENTOS = FITJEFF_FIRESTORE.coleccionDocumentos || "documentos";
 
 export function obtenerUsuarioIdPorDefecto() {
   return obtenerUsuarioFitJeffId(FIREBASE_APP_INFO.usuarioPrincipalId || "jeff");
@@ -54,6 +56,7 @@ export async function prepararFirestore() {
     usuarioId: obtenerUsuarioIdPorDefecto(),
     proyecto: FIREBASE_APP_INFO.idProyecto,
     coleccionRaiz: FITJEFF_FIRESTORE.coleccionRaiz,
+    coleccionDocumentos: COLECCION_DOCUMENTOS,
     rutaBase: crearRutasFitJeff().usuario
   };
 }
@@ -162,6 +165,7 @@ export async function sincronizarBaseFirestore({ usuario, rutina, ajustes }) {
     ok: true,
     usuarioId,
     ruta: crearRutasFitJeff(usuarioId).usuario,
+    rutaDocumentos: crearRutasFitJeff(usuarioId).documentos,
     sincronizadoEn: new Date().toISOString()
   };
 }
@@ -169,7 +173,7 @@ export async function sincronizarBaseFirestore({ usuario, rutina, ajustes }) {
 async function guardarDocumentoFijo(usuarioId, documentoId, data, tipo) {
   const db = obtenerFirestore();
   const id = obtenerUsuarioFitJeffId(usuarioId);
-  const ref = doc(db, FITJEFF_FIRESTORE.coleccionRaiz, id, documentoId);
+  const ref = doc(db, FITJEFF_FIRESTORE.coleccionRaiz, id, COLECCION_DOCUMENTOS, documentoId);
 
   await setDoc(
     ref,
@@ -183,14 +187,14 @@ async function guardarDocumentoFijo(usuarioId, documentoId, data, tipo) {
   return {
     ok: true,
     usuarioId: id,
-    ruta: `${FITJEFF_FIRESTORE.coleccionRaiz}/${id}/${documentoId}`
+    ruta: `${FITJEFF_FIRESTORE.coleccionRaiz}/${id}/${COLECCION_DOCUMENTOS}/${documentoId}`
   };
 }
 
 async function leerDocumentoFijo(usuarioId, documentoId) {
   const db = obtenerFirestore();
   const id = obtenerUsuarioFitJeffId(usuarioId);
-  const ref = doc(db, FITJEFF_FIRESTORE.coleccionRaiz, id, documentoId);
+  const ref = doc(db, FITJEFF_FIRESTORE.coleccionRaiz, id, COLECCION_DOCUMENTOS, documentoId);
   const snap = await getDoc(ref);
 
   if (!snap.exists()) return null;
