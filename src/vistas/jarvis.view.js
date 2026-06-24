@@ -6,6 +6,7 @@
     - Renderizar la pantalla de Jarvis.
     - Mostrar controles de voz, estado, comandos, mensajes recientes y consulta inteligente.
     - Permitir uso manual si el micrófono o el servicio remoto no están disponibles.
+    - Mostrar con claridad si Jarvis está en modo local o Gemini remoto.
 
   Se conecta con:
     - src/app-controller.js
@@ -39,9 +40,7 @@ export function renderJarvisView(estadoApp) {
       <article class="card jarvis-panel-principal">
         <span class="pill">Asistente de voz</span>
         <h1>${JARVIS_CONFIG.nombre}</h1>
-        <p>
-          Controla tu entrenamiento con comandos simples. Puedes usar voz, botones grandes o consulta inteligente.
-        </p>
+        <p>Controla tu entrenamiento con comandos simples. Puedes usar voz, botones grandes o consulta inteligente.</p>
 
         <div class="jarvis-orb ${estadoJarvis.activo ? "activo" : ""} ${estadoJarvis.escuchando ? "escuchando" : ""} ${estadoJarvis.hablando ? "hablando" : ""}">
           <span>${estadoJarvis.activo ? "ON" : "OFF"}</span>
@@ -72,7 +71,7 @@ export function renderJarvisView(estadoApp) {
       </article>
 
       <article class="card">
-        <h2>Disponibilidad</h2>
+        <h2>Estado de Jarvis</h2>
         <div class="tabla-scroll">
           <table class="tabla-simple">
             <tbody>
@@ -89,17 +88,26 @@ export function renderJarvisView(estadoApp) {
                 <td>${soporte.seguro ? "Sí" : "No"}</td>
               </tr>
               <tr>
-                <th>Inteligencia remota</th>
-                <td>${remotoActivo ? "Activa por Firebase Functions" : "Fallback local"}</td>
+                <th>Gemini remoto</th>
+                <td>${remotoActivo ? "Activo por Firebase Functions" : "Modo local"}</td>
               </tr>
             </tbody>
           </table>
         </div>
 
-        <div class="alerta warning">
-          <strong>Comandos principales</strong>
-          <p>Jarvis inicia entrenamiento, sí, no, repetir, pausar, continuar, siguiente, terminar.</p>
-        </div>
+        ${remotoActivo ? `
+          <div class="alerta ok">
+            <strong>Gemini activado</strong>
+            <p>Jarvis intentará responder con Firebase Functions. Si el secreto GEMINI_API_KEY falta o falla, usará respuesta local.</p>
+          </div>
+        ` : `
+          <div class="alerta warning">
+            <strong>Gemini no está activo</strong>
+            <p>Para usar Jarvis remoto ve a Ajustes y configura Firebase + Gemini. La API key va como secreto GEMINI_API_KEY en Functions.</p>
+          </div>
+        `}
+
+        ${crearBotonAjustesGemini()}
       </article>
     </section>
 
@@ -163,6 +171,15 @@ export function renderJarvisView(estadoApp) {
       <h2>Mensajes recientes</h2>
       ${mensajes.length ? renderMensajesJarvis(mensajes) : "<p>No hay mensajes recientes.</p>"}
     </section>
+  `;
+}
+
+function crearBotonAjustesGemini() {
+  return `
+    <div class="acciones section-space">
+      <button class="btn secundario" type="button" data-nav="ajustes">Configurar Gemini</button>
+      <button class="btn secundario" type="button" data-nav="diagnostico">Diagnóstico</button>
+    </div>
   `;
 }
 
