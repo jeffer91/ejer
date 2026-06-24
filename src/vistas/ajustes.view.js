@@ -5,7 +5,7 @@
   Función:
     - Renderizar la pantalla de ajustes de FitJeff.
     - Permitir activar o desactivar Firebase, Gemini, sincronización, recomendaciones y estadísticas.
-    - Mostrar información de PWA, Electron, versión, actualización, datos locales y Firestore.
+    - Mostrar información de PWA, Electron, versión, actualización, datos locales, Firestore y Gemini.
 */
 
 import { crearResumenActualizacion } from "../actualizaciones/actualizaciones.service.js";
@@ -26,23 +26,25 @@ export function renderAjustesView(estado = {}) {
   const actualizacion = crearResumenActualizacion();
   const pwa = obtenerResumenPWASeguro();
   const entorno = obtenerEntorno();
+  const geminiListo = Boolean(ajustes.usarGemini && ajustes.usarFirebase);
 
   return `
     ${crearEncabezadoVista({
       titulo: "Ajustes",
-      subtitulo: "Configura sincronizacion, Firebase, actualizacion, instalacion y datos locales.",
+      subtitulo: "Configura sincronizacion, Gemini, instalacion, actualizacion y datos locales desde un solo lugar.",
       pill: "Configuracion"
     })}
 
     <section class="grid grid-2 section-space">
       <form id="form-ajustes" class="card" data-form="ajustes">
-        <h2>Preferencias</h2>
+        <h2>Preferencias principales</h2>
+        <p class="muted">Para usar Jarvis remoto con Gemini necesitas Firebase activo, Gemini activo y la clave configurada en Firebase Functions.</p>
 
         <div class="grid grid-2">
-          ${crearSelectBooleano("usarFirebase", "Usar Firebase", ajustes.usarFirebase !== false)}
-          ${crearSelectBooleano("usarGemini", "Usar Gemini", ajustes.usarGemini !== false)}
+          ${crearSelectBooleano("usarFirebase", "Usar Firebase", ajustes.usarFirebase === true)}
+          ${crearSelectBooleano("usarGemini", "Usar Gemini / Jarvis remoto", ajustes.usarGemini !== false)}
           ${crearSelectBooleano("guardarLocalAutomatico", "Guardar local automatico", ajustes.guardarLocalAutomatico !== false)}
-          ${crearSelectBooleano("sincronizarAutomaticamente", "Sincronizar automaticamente", ajustes.sincronizarAutomaticamente !== false)}
+          ${crearSelectBooleano("sincronizarAutomaticamente", "Sincronizar automaticamente", ajustes.sincronizarAutomaticamente === true)}
           ${crearSelectBooleano("mostrarRecomendaciones", "Mostrar recomendaciones", ajustes.mostrarRecomendaciones !== false)}
           ${crearSelectBooleano("mostrarEstadisticas", "Mostrar estadisticas", ajustes.mostrarEstadisticas !== false)}
         </div>
@@ -54,12 +56,36 @@ export function renderAjustesView(estado = {}) {
       </form>
 
       ${crearTarjeta({
+        titulo: "Gemini API / Jarvis remoto",
+        contenido: `
+          ${crearAlerta({
+            tipo: geminiListo ? "ok" : "warning",
+            mensaje: geminiListo
+              ? "La app intentara usar Gemini mediante Firebase Functions. Si la clave no esta configurada, Jarvis vuelve a modo local."
+              : "Gemini remoto necesita Firebase activo y la clave GEMINI_API_KEY configurada en Functions."
+          })}
+          <p><strong>Donde va la API key:</strong> Firebase Functions, no en el frontend.</p>
+          <p><strong>Nombre esperado:</strong> <code>GEMINI_API_KEY</code></p>
+          <pre style="white-space:pre-wrap;overflow:auto;">firebase functions:secrets:set GEMINI_API_KEY
+npm run firebase:functions</pre>
+          <p class="muted">Luego abre Jarvis y usa Preguntar. Si falla el remoto, la app responde localmente para no romperse.</p>
+        `,
+        footer: crearBotones([
+          { texto: "Abrir Jarvis", nav: "jarvis" },
+          { texto: "Diagnostico", nav: "diagnostico", tipo: "secundario" }
+        ])
+      })}
+    </section>
+
+    <section class="grid grid-2 section-space">
+      ${crearTarjeta({
         titulo: "Firebase / Firestore",
         contenido: `
           <p><strong>Proyecto:</strong> ${escaparHTML(FIREBASE_APP_INFO.nombreProyecto)} · ${escaparHTML(FIREBASE_APP_INFO.idProyecto)}</p>
           <p><strong>App web:</strong> ${escaparHTML(FIREBASE_APP_INFO.nombreAppWeb)}</p>
           <p><strong>Usuario:</strong> ${escaparHTML(FIREBASE_APP_INFO.usuarioPrincipalId)}</p>
           <p><strong>Ruta base:</strong> ${escaparHTML(FIRESTORE_RUTAS.usuario)}</p>
+          <p><strong>Documentos fijos:</strong> ${escaparHTML(FIRESTORE_RUTAS.documentos)}</p>
           ${crearAlerta({
             tipo: ajustes.usarFirebase ? "ok" : "info",
             mensaje: ajustes.usarFirebase
@@ -69,9 +95,7 @@ export function renderAjustesView(estado = {}) {
         `,
         footer: crearBotones([{ texto: "Sincronizar ahora", action: "sincronizar-ahora" }])
       })}
-    </section>
 
-    <section class="grid grid-2 section-space">
       ${crearTarjeta({
         titulo: "Actualizacion",
         contenido: `
@@ -89,7 +113,9 @@ export function renderAjustesView(estado = {}) {
           { texto: "Actualizar app", action: "actualizar-app", tipo: "secundario" }
         ])
       })}
+    </section>
 
+    <section class="grid grid-2 section-space">
       ${crearTarjeta({
         titulo: "Instalacion en celular",
         contenido: `
@@ -107,6 +133,20 @@ export function renderAjustesView(estado = {}) {
           { texto: "Aplicar actualizacion PWA", action: "aplicar-actualizacion-pwa", tipo: "secundario" }
         ])
       })}
+
+      ${crearTarjeta({
+        titulo: "Zona de seguridad",
+        contenido: `
+          ${crearAlerta({
+            tipo: "warning",
+            mensaje: "Borrar datos locales solo elimina la informacion de este dispositivo. Exporta antes si necesitas respaldo."
+          })}
+        `,
+        footer: crearBotones([
+          { texto: "Exportar datos", action: "exportar-datos", tipo: "secundario" },
+          { texto: "Borrar datos locales", action: "borrar-datos-locales", tipo: "peligro" }
+        ])
+      })}
     </section>
 
     ${crearGridMetricas([
@@ -121,27 +161,15 @@ export function renderAjustesView(estado = {}) {
         detalle: pwa.instalable ? "Lista para instalar" : "Instalacion segun navegador"
       },
       {
-        titulo: "Datos locales",
-        valor: "Activos",
-        detalle: "localStorage + sincronizacion opcional"
+        titulo: "Gemini",
+        valor: geminiListo ? "Activado" : "Local",
+        detalle: geminiListo ? "Functions + GEMINI_API_KEY" : "Sin remoto activo"
       }
     ])}
 
     <section class="card section-space">
-      <h2>Zona de seguridad</h2>
-      ${crearAlerta({
-        tipo: "warning",
-        mensaje: "Borrar datos locales solo elimina la informacion de este dispositivo. Exporta antes si necesitas respaldo."
-      })}
-      ${crearBotones([
-        { texto: "Exportar datos", action: "exportar-datos", tipo: "secundario" },
-        { texto: "Borrar datos locales", action: "borrar-datos-locales", tipo: "peligro" }
-      ])}
-    </section>
-
-    <section class="card section-space">
       <h2>Informacion tecnica</h2>
-      <pre style="white-space:pre-wrap;overflow:auto;">${escaparHTML(JSON.stringify({ entorno, pwa, actualizacion, firestore: FIRESTORE_RUTAS }, null, 2))}</pre>
+      <pre style="white-space:pre-wrap;overflow:auto;">${escaparHTML(JSON.stringify({ entorno, pwa, actualizacion, firestore: FIRESTORE_RUTAS, gemini: { geminiListo, secretoEsperado: "GEMINI_API_KEY" } }, null, 2))}</pre>
     </section>
   `;
 }
@@ -159,11 +187,9 @@ function crearSelectBooleano(nombre, label, activo) {
 }
 
 function obtenerEntorno() {
-  const desktop = window.FitJeffDesktop?.obtenerEntorno?.();
-
   return {
     esElectron: Boolean(window.FitJeffDesktop?.esElectron),
-    plataforma: desktop?.plataforma || navigator.platform || "web",
+    plataforma: navigator.platform || "web",
     userAgent: navigator.userAgent,
     online: navigator.onLine
   };
