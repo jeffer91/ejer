@@ -8,6 +8,7 @@
     - Confirmar que el service worker y version.json tengan el mismo build.
     - Confirmar rutas nuevas del rediseño y estructura Firestore fitjeff/jeff.
     - Detectar referencias antiguas a usuarios/ en frontend y functions.
+    - Verificar que Gemini tenga guía y secreto declarado en Functions v2.
 */
 
 import fs from "node:fs";
@@ -24,6 +25,7 @@ const ARCHIVOS_OBLIGATORIOS = [
   "public/manifest.json",
   "public/version.json",
   "public/fit-redesign.css",
+  "docs/CONFIGURAR-GEMINI.md",
   "src/app.js",
   "src/app-controller.js",
   "src/ui/router.js",
@@ -54,6 +56,7 @@ const ARCHIVOS_OBLIGATORIOS = [
   "src/diagnostico/diagnostico.firebase.service.js",
   "src/diagnostico/diagnostico.completo.service.js",
   "functions/index.js",
+  "functions/gemini.service.js",
   "functions/jarvis.service.js"
 ];
 
@@ -77,6 +80,7 @@ function main() {
   revisarRedisenio();
   revisarControladorIntegracion();
   revisarFirestoreFitJeff();
+  revisarGemini();
   imprimirResultado();
 
   const hayError = resultados.some((item) => item.nivel === "error");
@@ -141,6 +145,7 @@ function revisarServiceWorker() {
     "./src/vistas/registrar.view.js",
     "./src/vistas/progreso.view.js",
     "./src/vistas/asistente.view.js",
+    "./src/vistas/ajustes.view.js",
     "./src/firebase/firestore.paths.js",
     "./src/firebase/firestore.schema.js",
     "./src/sincronizacion/sync-fitjeff.mapper.js"
@@ -200,6 +205,21 @@ function revisarFirestoreFitJeff() {
 
   revisarSinReferenciasAntiguas("firestore", "src/firebase/firestore.service.js", service);
   revisarSinReferenciasAntiguas("functions", "functions/index.js", functionsIndex);
+}
+
+function revisarGemini() {
+  const functionsIndex = leerArchivo("functions/index.js");
+  const gemini = leerArchivo("functions/gemini.service.js");
+  const jarvis = leerArchivo("functions/jarvis.service.js");
+  const ajustes = leerArchivo("src/vistas/ajustes.view.js");
+  const guia = leerArchivo("docs/CONFIGURAR-GEMINI.md");
+
+  agregarRevisionTexto("gemini", "functions/index.js", functionsIndex, "GEMINI_SECRET = \"GEMINI_API_KEY\"", "Secreto Gemini centralizado.");
+  agregarRevisionTexto("gemini", "functions/index.js", functionsIndex, "secrets: [GEMINI_SECRET]", "Functions v2 declara el secreto Gemini.");
+  agregarRevisionTexto("gemini", "functions/gemini.service.js", gemini, "process.env.GEMINI_API_KEY", "Gemini usa variable segura del servidor.");
+  agregarRevisionTexto("gemini", "functions/jarvis.service.js", jarvis, "process.env.GEMINI_API_KEY", "Jarvis usa variable segura del servidor.");
+  agregarRevisionTexto("gemini", "src/vistas/ajustes.view.js", ajustes, "GEMINI_API_KEY", "Ajustes muestra dónde configurar la API key.");
+  agregarRevisionTexto("gemini", "docs/CONFIGURAR-GEMINI.md", guia, "firebase functions:secrets:set GEMINI_API_KEY", "Guía Gemini incluye comando de secreto.");
 }
 
 function revisarSinReferenciasAntiguas(area, archivo, contenido) {
