@@ -1,0 +1,65 @@
+/*
+  Nombre completo: registro.css
+  Ruta o ubicación: src/modules/registro/registro.css
+
+  Función o funciones:
+    - Dar estilos base al módulo Registro completo.
+    - Mantener diseño compacto para ingreso, estadísticas e historial.
+    - No depender de una carpeta global de estilos.
+
+  Se conecta con:
+    - src/modules/registro/registro.module.js
+    - futuras vistas de ingreso, estadísticas e historial.
+*/
+
+.registro-module {
+  display: grid;
+  gap: 14px;
+}
+
+.registro-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.registro-card {
+  border: 1px solid #dce3ec;
+  border-radius: 18px;
+  background: #ffffff;
+  padding: 14px;
+}
+
+.registro-card__title {
+  margin: 0 0 8px;
+  font-size: 1rem;
+  color: #17202a;
+}
+
+.registro-card__text {
+  margin: 0;
+  color: #64748b;
+  line-height: 1.45;
+}
+
+.registro-indicador--progreso {
+  color: #15803d;
+}
+
+.registro-indicador--pendiente {
+  color: #b45309;
+}
+
+.registro-indicador--alerta {
+  color: #b91c1c;
+}
+
+.registro-indicador--info {
+  color: #1d4ed8;
+}
+
+@media (max-width: 720px) {
+  .registro-grid {
+    grid-template-columns: 1fr;
+  }
+}
