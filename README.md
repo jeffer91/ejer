@@ -39,6 +39,18 @@ Inicio de primera vez creado:
 - Guardado en Registro
 - Salto automático a Estadísticas
 
+## Bloque 4
+
+Registro / Ingreso creado:
+
+- Peso diario máximo una vez por día
+- Medidas semanales
+- Campos rápidos e inteligentes
+- Validación de rangos corporales
+- Detección de cambios poco comunes
+- Confirmación antes de guardar datos raros
+- Conexión real desde el menú Registro
+
 ## Comandos
 
 ```bash
