@@ -5,13 +5,14 @@
   Función o funciones:
     - Revisar herramientas necesarias para desarrollo y publicación de FitJeff.
     - Validar Node.js, npm, Git y GitHub CLI.
-    - Confirmar que package.json tenga los scripts base de Electron y publicación.
+    - Confirmar que package.json tenga los scripts base de Electron, Windows, Android y publicación.
     - Avisar claramente qué falta antes de compilar o publicar.
 
   Se conecta con:
     - package.json
     - scripts/abrir-electron-dev.bat
     - scripts/build-windows.cjs
+    - scripts/build-android.cjs
     - scripts/release-github.cjs
     - scripts/publicar-version.bat
     - scripts/actualizar-todo.bat
@@ -70,6 +71,7 @@ function revisarPackage() {
     "version:bump",
     "tools:check",
     "build:windows",
+    "build:android",
     "release:github",
     "publicar:version",
     "actualizar:todo"
