@@ -1,0 +1,124 @@
+/*
+  Nombre completo: historial.css
+  Ruta o ubicación: src/modules/registro/historial/historial.css
+
+  Función o funciones:
+    - Dar estilo propio a la pantalla Historial.
+    - Mostrar registros en tarjetas compactas y claras.
+    - Separar visualmente acciones de editar, cambios y borrar.
+
+  Se conecta con:
+    - src/modules/registro/historial/historial.view.js
+    - src/modules/registro/historial/historial.controller.js
+*/
+
+.historial-screen {
+  display: grid;
+  gap: 14px;
+}
+
+.historial-header,
+.historial-card,
+.historial-empty {
+  border: 1px solid #dce3ec;
+  border-radius: 20px;
+  background: #ffffff;
+  padding: 16px;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.05);
+}
+
+.historial-kicker {
+  margin: 0 0 6px;
+  color: #15803d;
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.historial-header h2 {
+  margin: 0 0 8px;
+  font-size: 1.45rem;
+}
+
+.historial-header p:last-child {
+  margin: 0;
+  color: #64748b;
+}
+
+.historial-list {
+  display: grid;
+  gap: 10px;
+}
+
+.historial-card__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.historial-card h3 {
+  margin: 0 0 4px;
+  font-size: 1.05rem;
+}
+
+.historial-card__date {
+  margin: 0;
+  color: #64748b;
+  font-weight: 700;
+}
+
+.historial-card__summary {
+  margin: 12px 0 0;
+  color: #334155;
+  line-height: 1.45;
+}
+
+.historial-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 7px;
+}
+
+.historial-button {
+  border: 1px solid #dce3ec;
+  border-radius: 12px;
+  background: #ffffff;
+  color: #334155;
+  cursor: pointer;
+  font-weight: 800;
+  padding: 8px 10px;
+}
+
+.historial-button--editar {
+  border-color: #bbf7d0;
+  color: #15803d;
+}
+
+.historial-button--cambios {
+  border-color: #bfdbfe;
+  color: #1d4ed8;
+}
+
+.historial-button--borrar {
+  border-color: #fecaca;
+  color: #b91c1c;
+}
+
+.historial-empty {
+  margin: 0;
+  color: #64748b;
+  font-weight: 800;
+}
+
+@media (max-width: 640px) {
+  .historial-card__header {
+    flex-direction: column;
+  }
+
+  .historial-card__actions {
+    justify-content: flex-start;
+  }
+}
