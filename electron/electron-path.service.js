@@ -10,7 +10,7 @@
   Se conecta con:
     - electron/main.js
     - electron/electron-window.service.js
-    - electron/preload.js
+    - electron/preload.cjs
 */
 
 import path from "node:path";
@@ -30,7 +30,7 @@ export function obtenerElectronDir() {
 }
 
 export function obtenerPreloadPath() {
-  return path.join(electronDir, "preload.js");
+  return path.join(electronDir, "preload.cjs");
 }
 
 export function obtenerDistIndexPath() {
