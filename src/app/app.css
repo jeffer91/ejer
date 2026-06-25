@@ -1,0 +1,59 @@
+/*
+  Nombre completo: app.css
+  Ruta o ubicación: src/app/app.css
+  Función: estilos base de FitJeff.
+  Se conecta con: src/app/app.bootstrap.js.
+*/
+
+:root {
+  font-family: Arial, sans-serif;
+  background: #f6f7fb;
+  color: #17202a;
+}
+
+body {
+  margin: 0;
+  background: #f6f7fb;
+}
+
+.fj-app-shell {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 18px;
+}
+
+.fj-header,
+.fj-nav,
+.fj-main {
+  margin-bottom: 16px;
+}
+
+.fj-card,
+.fj-nav__button,
+.fj-status {
+  border: 1px solid #dce3ec;
+  border-radius: 16px;
+  background: #ffffff;
+  padding: 12px;
+}
+
+.fj-nav {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.fj-nav__button--active {
+  border-color: #22c55e;
+  background: #edfdf3;
+}
+
+.fj-status--info {
+  color: #1d4ed8;
+}
+
+@media (max-width: 640px) {
+  .fj-nav {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
