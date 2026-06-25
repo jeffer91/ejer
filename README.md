@@ -90,6 +90,19 @@ Ajustes creado:
 - Reabrir Inicio desde Ajustes
 - Conexion real desde el menu Ajustes
 
+## Bloque 8
+
+Core local y control de datos creado:
+
+- Configuracion central de app
+- Utilidades de fecha
+- Utilidades de numeros
+- Storage local seguro
+- Estado visible Datos al dia
+- Diagnostico interno oculto
+- Manejo general de errores simples
+- Conexion del manejador de errores al arranque
+
 ## Comandos
 
 ```bash
