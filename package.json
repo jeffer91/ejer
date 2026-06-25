@@ -3,15 +3,42 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "main": "electron/main.js",
+  "description": "FitJeff: app personal local-first para registro corporal, estadisticas, PWA y escritorio Electron.",
+  "author": "Jeff",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "electron:dev": "concurrently \"npm run dev\" \"wait-on http://127.0.0.1:5173 && cross-env FITJEFF_ELECTRON_DEV=1 electron .\"",
+    "electron:build": "npm run build && cross-env FITJEFF_ELECTRON_DEV=0 electron .",
+    "desktop:pack": "npm run build && electron-builder --dir",
+    "desktop:win": "npm run build && electron-builder --win nsis"
   },
   "dependencies": {
     "firebase": "^10.14.1"
   },
   "devDependencies": {
-    "vite": "^5.4.11"
+    "concurrently": "latest",
+    "cross-env": "latest",
+    "electron": "^41.2.1",
+    "electron-builder": "latest",
+    "vite": "^5.4.11",
+    "wait-on": "latest"
+  },
+  "build": {
+    "appId": "com.jeff.fitjeff",
+    "productName": "FitJeff",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "electron/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": "nsis"
+    }
   }
 }
