@@ -17,15 +17,15 @@ Base inicial creada:
 
 ## Bloque 2
 
-Base central del módulo Registro creada:
+Base central del modulo Registro creada:
 
-- Módulo central
+- Modulo central
 - Constantes
 - Estado
 - Esquema de datos
 - Repository local
 - Service principal
-- Estilos propios del módulo
+- Estilos propios del modulo
 
 ## Bloque 3
 
@@ -35,48 +35,60 @@ Inicio de primera vez creado:
 - Fecha de nacimiento
 - Peso inicial
 - Peso objetivo
-- Validación inteligente básica
+- Validacion inteligente basica
 - Guardado en Registro
-- Salto automático a Estadísticas
+- Salto automatico a Estadisticas
 
 ## Bloque 4
 
 Registro / Ingreso creado:
 
-- Peso diario máximo una vez por día
+- Peso diario maximo una vez por dia
 - Medidas semanales
-- Campos rápidos e inteligentes
-- Validación de rangos corporales
-- Detección de cambios poco comunes
-- Confirmación antes de guardar datos raros
-- Conexión real desde el menú Registro
+- Campos rapidos e inteligentes
+- Validacion de rangos corporales
+- Deteccion de cambios poco comunes
+- Confirmacion antes de guardar datos raros
+- Conexion real desde el menu Registro
 
 ## Bloque 5
 
-Estadísticas creado:
+Estadisticas creado:
 
 - Peso actual
 - Peso objetivo
-- Cambio desde el último registro
+- Cambio desde el ultimo registro
 - Tendencia desde 3 registros
-- IMC con categoría
-- Próxima medición semanal
+- IMC con categoria
+- Proxima medicion semanal
 - Barra de progreso del objetivo
-- Gráfico simple de peso
+- Grafico simple de peso
 - Tarjetas compactas de medidas corporales
-- Conexión real como pantalla principal por defecto
+- Conexion real como pantalla principal por defecto
 
 ## Bloque 6
 
 Historial creado:
 
 - Lista compacta por fecha
-- Visualización de peso y medidas guardadas
-- Edición de registros
-- Confirmación antes de borrar
-- Envío a papelera interna
+- Visualizacion de peso y medidas guardadas
+- Edicion de registros
+- Confirmacion antes de borrar
+- Envio a papelera interna
 - Consulta simple de cambios
-- Conexión real desde el menú Historial
+- Conexion real desde el menu Historial
+
+## Bloque 7
+
+Ajustes creado:
+
+- Perfil simple
+- Objetivo simple
+- Editar altura
+- Editar fecha de nacimiento
+- Editar peso objetivo
+- Reabrir Inicio desde Ajustes
+- Conexion real desde el menu Ajustes
 
 ## Comandos
 
@@ -85,4 +97,4 @@ npm install
 npm run dev
 ```
 
-La app crecerá por bloques, manteniendo Registro, Estadísticas, Historial y Ajustes bien separados.
+La app crecera por bloques, manteniendo Registro, Estadisticas, Historial y Ajustes bien separados.
