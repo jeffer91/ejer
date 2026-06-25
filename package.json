@@ -20,8 +20,10 @@
     "build:windows": "node scripts/build-windows.cjs",
     "build:android": "node scripts/build-android.cjs",
     "release:github": "node scripts/release-github.cjs",
+    "review:updates": "node scripts/revision-actualizaciones.cjs",
     "publicar:version": "scripts\\publicar-version.bat",
-    "actualizar:todo": "scripts\\actualizar-todo.bat"
+    "actualizar:todo": "scripts\\actualizar-todo.bat",
+    "revisar:todo": "scripts\\revisar-todo.bat"
   },
   "dependencies": {
     "electron-updater": "latest",
