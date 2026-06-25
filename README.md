@@ -128,11 +128,37 @@ Backups y exportacion local creado:
 - Copia previa antes de restaurar
 - Proteccion contra perdida de informacion
 
+## Bloque 11
+
+Electron base creado:
+
+- Main process de Electron
+- Preload seguro
+- Ventana principal de escritorio
+- Menu simple de aplicacion
+- IPC seguro basico
+- Carga de Vite en desarrollo
+- Carga de dist en produccion
+- Scripts para escritorio e instalador Windows
+
 ## Comandos
 
 ```bash
 npm install
 npm run dev
+npm run electron:dev
+```
+
+Para probar modo escritorio con dist:
+
+```bash
+npm run electron:build
+```
+
+Para crear instalador Windows:
+
+```bash
+npm run desktop:win
 ```
 
 La app crecera por bloques, manteniendo Registro, Estadisticas, Historial y Ajustes bien separados.
