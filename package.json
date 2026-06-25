@@ -19,6 +19,7 @@
     "version:bump": "node scripts/version-bump.cjs"
   },
   "dependencies": {
+    "electron-updater": "latest",
     "firebase": "^10.14.1"
   },
   "devDependencies": {
@@ -39,6 +40,14 @@
       "dist/**/*",
       "electron/**/*",
       "package.json"
+    ],
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "jeffer91",
+        "repo": "ejer",
+        "releaseType": "release"
+      }
     ],
     "win": {
       "target": "nsis"
