@@ -116,6 +116,18 @@ Firebase y sync base creado:
 - Estado interno de sincronizacion
 - Servicio coordinador de sincronizacion
 
+## Bloque 10
+
+Backups y exportacion local creado:
+
+- Copia local automatica
+- Lista corta de backups locales
+- Exportar JSON desde Ajustes
+- Importar JSON desde Ajustes
+- Restaurar datos locales
+- Copia previa antes de restaurar
+- Proteccion contra perdida de informacion
+
 ## Comandos
 
 ```bash
