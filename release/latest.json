@@ -1,0 +1,19 @@
+{
+  "app": "FitJeff",
+  "repository": "jeffer91/ejer",
+  "channel": "stable",
+  "version": "0.1.0",
+  "tag": "v0.1.0",
+  "generatedAt": "",
+  "windows": {
+    "enabled": true,
+    "provider": "github",
+    "owner": "jeffer91",
+    "repo": "ejer"
+  },
+  "android": {
+    "enabled": false,
+    "note": "La publicación de APK se agregará en el bloque Android."
+  },
+  "files": []
+}
