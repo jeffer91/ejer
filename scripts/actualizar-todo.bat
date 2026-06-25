@@ -4,7 +4,7 @@ REM  Ruta o ubicacion: scripts/actualizar-todo.bat
 REM
 REM  Funcion o funciones:
 REM    - Dar un menu simple para trabajar y publicar FitJeff.
-REM    - Ejecutar la publicacion completa de Windows con un solo clic.
+REM    - Ejecutar la publicacion completa de Windows + Android preparado con un solo clic.
 REM    - Abrir Electron en desarrollo cuando solo se quiera probar.
 REM    - Revisar herramientas antes de avanzar.
 REM
@@ -12,6 +12,7 @@ REM  Se conecta con:
 REM    - scripts/publicar-version.bat
 REM    - scripts/abrir-electron-dev.bat
 REM    - scripts/check-tools.cjs
+REM    - scripts/build-android.cjs
 REM    - package.json
 
 setlocal
@@ -22,13 +23,14 @@ cls
 echo ========================================
 echo FitJeff - Actualizar todo
 echo ========================================
-echo 1. Publicar version estable Windows + GitHub Release
+echo 1. Publicar version estable Windows + Android preparado + GitHub Release
 echo 2. Abrir Electron en desarrollo
 echo 3. Revisar herramientas
 echo 4. Ver estado de Git
+echo 5. Preparar Android/APK solamente
 echo 0. Salir
 echo ========================================
-echo Nota: La APK se integrara en el siguiente bloque Android.
+echo Nota: Si aun no existe proyecto Android nativo, se generara solo el manifiesto Android.
 echo.
 set /p OPCION="Elige una opcion: "
 
@@ -36,6 +38,7 @@ if "%OPCION%"=="1" goto PUBLICAR
 if "%OPCION%"=="2" goto ELECTRON_DEV
 if "%OPCION%"=="3" goto HERRAMIENTAS
 if "%OPCION%"=="4" goto ESTADO_GIT
+if "%OPCION%"=="5" goto ANDROID
 if "%OPCION%"=="0" goto SALIR
 
 echo.
@@ -60,6 +63,11 @@ goto MENU
 
 :ESTADO_GIT
 git status
+pause
+goto MENU
+
+:ANDROID
+call npm run build:android
 pause
 goto MENU
 
