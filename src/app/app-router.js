@@ -6,16 +6,19 @@
     - Controlar la navegación principal de FitJeff.
     - Mostrar Inicio solo la primera vez.
     - Abrir Estadísticas por defecto después de completar Inicio.
+    - Conectar Estadísticas con su pantalla real.
     - Conectar Registro con su pantalla real de Ingreso.
     - Mantener el menú visible simple: Estadísticas, Registro, Historial y Ajustes.
 
   Se conecta con:
     - src/app/app.bootstrap.js
     - src/modules/inicio/inicio.controller.js
+    - src/modules/registro/estadisticas/estadisticas.controller.js
     - src/modules/registro/ingreso/ingreso.controller.js
 */
 
 import { crearInicioController } from "../modules/inicio/inicio.controller.js";
+import { crearEstadisticasController } from "../modules/registro/estadisticas/estadisticas.controller.js";
 import { crearIngresoController } from "../modules/registro/ingreso/ingreso.controller.js";
 
 const RUTAS_VISIBLES = ["estadisticas", "registro", "historial", "ajustes"];
@@ -29,7 +32,6 @@ const NOMBRES = {
 };
 
 const TEXTOS = {
-  estadisticas: "Aquí se mostrará peso actual, objetivo, tendencia, IMC, próxima medición y Datos al día.",
   historial: "Aquí podrás revisar, editar y enviar registros a papelera.",
   ajustes: "Aquí estarán perfil y objetivo en una pantalla simple."
 };
@@ -57,6 +59,11 @@ export function crearRouterFitJeff(configuracion) {
     tarjeta.appendChild(crearElemento("h2", "", NOMBRES[ruta]));
     tarjeta.appendChild(crearElemento("p", "", TEXTOS[ruta] || "Pantalla lista para crecer por bloques."));
     contenedor.appendChild(tarjeta);
+  }
+
+  function montarEstadisticas(contenedor) {
+    const controller = crearEstadisticasController();
+    controller.montar(contenedor);
   }
 
   function montarRegistro(contenedor) {
@@ -123,6 +130,11 @@ export function crearRouterFitJeff(configuracion) {
     }
 
     const main = montarShell(rutaActual);
+
+    if (rutaActual === "estadisticas") {
+      montarEstadisticas(main);
+      return;
+    }
 
     if (rutaActual === "registro") {
       montarRegistro(main);
