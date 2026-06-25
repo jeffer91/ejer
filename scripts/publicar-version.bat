@@ -4,7 +4,7 @@ REM  Ruta o ubicacion: scripts/publicar-version.bat
 REM
 REM  Funcion o funciones:
 REM    - Publicar una nueva version estable de FitJeff.
-REM    - Instalar dependencias, subir version, compilar Windows y crear GitHub Release.
+REM    - Instalar dependencias, subir version, compilar Windows, preparar Android/APK y crear GitHub Release.
 REM    - Confirmar antes de subir cambios a GitHub.
 REM    - Dejar la app instalada lista para detectar actualizaciones automaticas.
 REM
@@ -12,6 +12,7 @@ REM  Se conecta con:
 REM    - package.json
 REM    - scripts/version-bump.cjs
 REM    - scripts/build-windows.cjs
+REM    - scripts/build-android.cjs
 REM    - scripts/release-github.cjs
 REM    - GitHub Releases
 
@@ -99,6 +100,16 @@ if errorlevel 1 (
 )
 
 echo.
+echo Preparando Android/APK...
+call npm run build:android
+if errorlevel 1 (
+  echo.
+  echo ERROR: No se pudo preparar Android/APK.
+  pause
+  exit /b 1
+)
+
+echo.
 echo Guardando cambios en Git...
 git add -A
 git commit -m "%APP_TAG% - Actualizacion automatica de FitJeff"
@@ -132,7 +143,7 @@ echo ========================================
 echo FitJeff publicado correctamente: %APP_TAG%
 echo ========================================
 echo La app instalada podra detectar esta version desde GitHub Releases.
-echo La APK se integrara en el siguiente bloque Android.
+echo Android queda preparado; si existe APK real, se publica junto con Windows.
 echo.
 pause
 endlocal
