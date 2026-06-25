@@ -11,7 +11,7 @@
   Se conecta con:
     - electron/main.js
     - electron/electron-path.service.js
-    - electron/preload.js
+    - electron/preload.cjs
 */
 
 import { BrowserWindow, shell } from "electron";
