@@ -15,6 +15,18 @@ Base inicial creada:
 - Estilos base
 - Service worker reservado
 
+## Bloque 2
+
+Base central del módulo Registro creada:
+
+- Módulo central
+- Constantes
+- Estado
+- Esquema de datos
+- Repository local
+- Service principal
+- Estilos propios del módulo
+
 ## Comandos
 
 ```bash
