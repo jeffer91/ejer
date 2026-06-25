@@ -4,16 +4,19 @@
 
   Función o funciones:
     - Crear un GitHub Release estable usando GitHub CLI.
-    - Publicar instalador Windows, latest.yml, blockmap y latest.json.
+    - Publicar instalador Windows, latest.yml, blockmap, APK si existe y manifiestos JSON.
     - Generar un manifiesto local de versión para trazabilidad.
     - Evitar publicar dos veces la misma versión.
 
   Se conecta con:
     - package.json
     - release/latest.json
+    - release/latest-android.json
     - release/*.exe
+    - release/*.apk
     - release/latest.yml
     - scripts/build-windows.cjs
+    - scripts/build-android.cjs
     - scripts/publicar-version.bat
 */
 
@@ -25,6 +28,7 @@ const rootDir = path.resolve(__dirname, "..");
 const releaseDir = path.join(rootDir, "release");
 const packagePath = path.join(rootDir, "package.json");
 const latestJsonPath = path.join(releaseDir, "latest.json");
+const latestAndroidPath = path.join(releaseDir, "latest-android.json");
 const repo = "jeffer91/ejer";
 
 function ejecutar(comando, args, opciones = {}) {
@@ -45,6 +49,14 @@ function ejecutar(comando, args, opciones = {}) {
 
 function leerPackage() {
   return JSON.parse(fs.readFileSync(packagePath, "utf8"));
+}
+
+function leerJsonOpcional(ruta, fallback = null) {
+  if (!fs.existsSync(ruta)) {
+    return fallback;
+  }
+
+  return JSON.parse(fs.readFileSync(ruta, "utf8"));
 }
 
 function existeGh() {
@@ -74,7 +86,7 @@ function listarArchivosPublicables() {
     return [];
   }
 
-  const permitidos = new Set([".exe", ".yml", ".yaml", ".blockmap", ".json"]);
+  const permitidos = new Set([".exe", ".apk", ".aab", ".yml", ".yaml", ".blockmap", ".json"]);
 
   return fs.readdirSync(releaseDir)
     .map((nombre) => path.join(releaseDir, nombre))
@@ -97,8 +109,22 @@ function validarArtefactos(archivos) {
   }
 }
 
+function obtenerInfoAndroid() {
+  const manifest = leerJsonOpcional(latestAndroidPath, null);
+  const apk = listarArchivosPublicables().find((archivo) => archivo.toLowerCase().endsWith(".apk"));
+
+  return {
+    enabled: Boolean(apk),
+    manifest,
+    apkFileName: apk ? path.basename(apk) : "",
+    note: apk ? "APK incluida en este release." : "Android preparado sin APK real todavía."
+  };
+}
+
 function generarLatestJson({ pkg, tag, archivos }) {
   fs.mkdirSync(releaseDir, { recursive: true });
+
+  const android = obtenerInfoAndroid();
 
   const payload = {
     app: "FitJeff",
@@ -114,8 +140,10 @@ function generarLatestJson({ pkg, tag, archivos }) {
       repo: "ejer"
     },
     android: {
-      enabled: false,
-      note: "La publicación de APK se agregará en el bloque Android."
+      enabled: android.enabled,
+      apkFileName: android.apkFileName,
+      manifestFile: fs.existsSync(latestAndroidPath) ? "latest-android.json" : "",
+      note: android.note
     },
     files: archivos.map((archivo) => ({
       name: path.basename(archivo),
@@ -129,6 +157,7 @@ function generarLatestJson({ pkg, tag, archivos }) {
 
 function crearNotasRelease(pkg, tag, archivos) {
   const lista = archivos.map((archivo) => `- ${path.basename(archivo)}`).join("\n");
+  const incluyeApk = archivos.some((archivo) => archivo.toLowerCase().endsWith(".apk"));
 
   return [
     `FitJeff ${tag}`,
@@ -137,6 +166,8 @@ function crearNotasRelease(pkg, tag, archivos) {
     "",
     `Versión: ${pkg.version}`,
     "Canal: estable",
+    `Windows: incluido`,
+    `Android/APK: ${incluyeApk ? "incluido" : "preparado sin APK real"}`,
     "",
     "Archivos publicados:",
     lista
