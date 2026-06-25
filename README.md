@@ -66,6 +66,18 @@ Estadísticas creado:
 - Tarjetas compactas de medidas corporales
 - Conexión real como pantalla principal por defecto
 
+## Bloque 6
+
+Historial creado:
+
+- Lista compacta por fecha
+- Visualización de peso y medidas guardadas
+- Edición de registros
+- Confirmación antes de borrar
+- Envío a papelera interna
+- Consulta simple de cambios
+- Conexión real desde el menú Historial
+
 ## Comandos
 
 ```bash
