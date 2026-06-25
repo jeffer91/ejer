@@ -5,7 +5,7 @@
   Función o funciones:
     - Dar estilo propio a la pantalla Ajustes.
     - Mantener la pantalla simple y compacta para celular y computadora.
-    - Separar visualmente perfil, objetivo e inicio.
+    - Separar visualmente perfil, objetivo, inicio y copia de seguridad.
 
   Se conecta con:
     - src/modules/ajustes/ajustes.view.js
@@ -53,10 +53,19 @@
   gap: 12px;
 }
 
-.ajustes-card--info {
+.ajustes-card--info,
+.ajustes-card--backup {
   grid-column: 1 / -1;
+}
+
+.ajustes-card--info {
   background: #eff6ff;
   border-color: #bfdbfe;
+}
+
+.ajustes-card--backup {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
 }
 
 .ajustes-card__title {
@@ -131,7 +140,7 @@
 }
 
 .ajustes-button--secondary {
-  margin-top: 12px;
+  margin-top: 0;
   border: 1px solid #bfdbfe;
   background: #ffffff;
   color: #1d4ed8;
@@ -141,8 +150,23 @@
   background: #dbeafe;
 }
 
+.ajustes-backup-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.ajustes-file-input {
+  display: none;
+}
+
 @media (max-width: 760px) {
   .ajustes-layout {
     grid-template-columns: 1fr;
+  }
+
+  .ajustes-backup-actions {
+    display: grid;
   }
 }
