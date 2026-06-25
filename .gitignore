@@ -5,6 +5,7 @@ release/*
 !release/README.md
 !release/latest.json
 out/
+package-lock.json
 .DS_Store
 npm-debug.log*
 yarn-debug.log*
