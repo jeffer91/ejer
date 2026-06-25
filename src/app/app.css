@@ -1,8 +1,16 @@
 /*
   Nombre completo: app.css
   Ruta o ubicación: src/app/app.css
-  Función: estilos base de FitJeff.
-  Se conecta con: src/app/app.bootstrap.js.
+
+  Función o funciones:
+    - Definir estilos base de FitJeff.
+    - Mantener un shell claro para Electron, PWA y futura APK.
+    - Permitir que el menú crezca sin romperse cuando se agregan módulos.
+
+  Se conecta con:
+    - src/app/app.bootstrap.js
+    - src/app/app-router.js
+    - src/modules/actualizaciones/actualizaciones.css
 */
 
 :root {
@@ -11,9 +19,20 @@
   color: #17202a;
 }
 
+* {
+  box-sizing: border-box;
+}
+
 body {
   margin: 0;
   background: #f6f7fb;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
 }
 
 .fj-app-shell {
@@ -28,6 +47,17 @@ body {
   margin-bottom: 16px;
 }
 
+.fj-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.fj-header h1 {
+  margin: 0;
+}
+
 .fj-card,
 .fj-nav__button,
 .fj-status {
@@ -39,8 +69,13 @@ body {
 
 .fj-nav {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 8px;
+}
+
+.fj-nav__button {
+  cursor: pointer;
+  font-weight: 700;
 }
 
 .fj-nav__button--active {
@@ -53,6 +88,15 @@ body {
 }
 
 @media (max-width: 640px) {
+  .fj-app-shell {
+    padding: 12px;
+  }
+
+  .fj-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
   .fj-nav {
     grid-template-columns: repeat(2, 1fr);
   }
