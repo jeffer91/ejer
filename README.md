@@ -51,6 +51,21 @@ Registro / Ingreso creado:
 - Confirmación antes de guardar datos raros
 - Conexión real desde el menú Registro
 
+## Bloque 5
+
+Estadísticas creado:
+
+- Peso actual
+- Peso objetivo
+- Cambio desde el último registro
+- Tendencia desde 3 registros
+- IMC con categoría
+- Próxima medición semanal
+- Barra de progreso del objetivo
+- Gráfico simple de peso
+- Tarjetas compactas de medidas corporales
+- Conexión real como pantalla principal por defecto
+
 ## Comandos
 
 ```bash
