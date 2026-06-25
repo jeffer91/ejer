@@ -8,6 +8,7 @@
     - Abrir Estadísticas por defecto después de completar Inicio.
     - Conectar Estadísticas con su pantalla real.
     - Conectar Registro con su pantalla real de Ingreso.
+    - Conectar Historial con su pantalla real.
     - Mantener el menú visible simple: Estadísticas, Registro, Historial y Ajustes.
 
   Se conecta con:
@@ -15,10 +16,12 @@
     - src/modules/inicio/inicio.controller.js
     - src/modules/registro/estadisticas/estadisticas.controller.js
     - src/modules/registro/ingreso/ingreso.controller.js
+    - src/modules/registro/historial/historial.controller.js
 */
 
 import { crearInicioController } from "../modules/inicio/inicio.controller.js";
 import { crearEstadisticasController } from "../modules/registro/estadisticas/estadisticas.controller.js";
+import { crearHistorialController } from "../modules/registro/historial/historial.controller.js";
 import { crearIngresoController } from "../modules/registro/ingreso/ingreso.controller.js";
 
 const RUTAS_VISIBLES = ["estadisticas", "registro", "historial", "ajustes"];
@@ -32,7 +35,6 @@ const NOMBRES = {
 };
 
 const TEXTOS = {
-  historial: "Aquí podrás revisar, editar y enviar registros a papelera.",
   ajustes: "Aquí estarán perfil y objetivo en una pantalla simple."
 };
 
@@ -71,6 +73,11 @@ export function crearRouterFitJeff(configuracion) {
       alGuardar: () => {}
     });
 
+    controller.montar(contenedor);
+  }
+
+  function montarHistorial(contenedor) {
+    const controller = crearHistorialController();
     controller.montar(contenedor);
   }
 
@@ -138,6 +145,11 @@ export function crearRouterFitJeff(configuracion) {
 
     if (rutaActual === "registro") {
       montarRegistro(main);
+      return;
+    }
+
+    if (rutaActual === "historial") {
+      montarHistorial(main);
       return;
     }
 
