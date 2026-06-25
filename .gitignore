@@ -1,6 +1,9 @@
 node_modules/
 dist/
-release/
+release/*
+!release/
+!release/README.md
+!release/latest.json
 out/
 .DS_Store
 npm-debug.log*
