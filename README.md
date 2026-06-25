@@ -41,7 +41,7 @@ Inicio de primera vez creado:
 
 ## Bloque 4
 
-Registro / Ingreso creado:
+Registro e Ingreso creado:
 
 - Peso diario maximo una vez por dia
 - Medidas semanales
@@ -102,6 +102,19 @@ Core local y control de datos creado:
 - Diagnostico interno oculto
 - Manejo general de errores simples
 - Conexion del manejador de errores al arranque
+
+## Bloque 9
+
+Firebase y sync base creado:
+
+- Dependencia Firebase agregada
+- Configuracion Firebase preparada
+- Inicializacion segura de Firebase
+- Servicio base Firestore
+- Manejo simple de errores Firebase
+- Cola local de sincronizacion
+- Estado interno de sincronizacion
+- Servicio coordinador de sincronizacion
 
 ## Comandos
 
