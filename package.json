@@ -18,6 +18,7 @@
     "tools:check": "node scripts/check-tools.cjs",
     "version:bump": "node scripts/version-bump.cjs",
     "build:windows": "node scripts/build-windows.cjs",
+    "build:android": "node scripts/build-android.cjs",
     "release:github": "node scripts/release-github.cjs",
     "publicar:version": "scripts\\publicar-version.bat",
     "actualizar:todo": "scripts\\actualizar-todo.bat"
