@@ -6,6 +6,7 @@
     - Construir la pantalla visual de Ajustes.
     - Mostrar formularios simples para perfil y objetivo.
     - Crear botón para reabrir Inicio.
+    - Crear bloque simple de copia de seguridad.
     - Mantener la vista sin lógica de guardado.
 
   Se conecta con:
@@ -116,6 +117,40 @@ function crearBloqueInicio() {
   return { bloque, boton };
 }
 
+function crearBloqueBackup() {
+  const bloque = crearElemento("article", "ajustes-card ajustes-card--backup");
+  const acciones = crearElemento("div", "ajustes-backup-actions");
+  const mensaje = crearElemento("p", "ajustes-message");
+  const exportarBoton = crearElemento("button", "ajustes-button", "Exportar copia");
+  const importarBoton = crearElemento("button", "ajustes-button ajustes-button--secondary", "Importar copia");
+  const inputArchivo = crearElemento("input", "ajustes-file-input");
+
+  exportarBoton.type = "button";
+  importarBoton.type = "button";
+  exportarBoton.dataset.action = "exportar-backup";
+  importarBoton.dataset.action = "importar-backup";
+
+  inputArchivo.type = "file";
+  inputArchivo.accept = "application/json,.json";
+  inputArchivo.dataset.input = "backup-file";
+
+  acciones.appendChild(exportarBoton);
+  acciones.appendChild(importarBoton);
+  bloque.appendChild(crearElemento("h3", "ajustes-card__title", "Copia de seguridad"));
+  bloque.appendChild(crearElemento("p", "ajustes-card__text", "Crea o restaura una copia local de tus datos de FitJeff."));
+  bloque.appendChild(acciones);
+  bloque.appendChild(inputArchivo);
+  bloque.appendChild(mensaje);
+
+  return {
+    bloque,
+    exportarBoton,
+    importarBoton,
+    inputArchivo,
+    mensaje
+  };
+}
+
 export function crearAjustesView(datos) {
   const pantalla = crearElemento("section", "ajustes-screen");
   const header = crearElemento("div", "ajustes-header");
@@ -123,6 +158,7 @@ export function crearAjustesView(datos) {
   const perfil = crearFormularioPerfil(datos);
   const objetivo = crearFormularioObjetivo(datos);
   const inicio = crearBloqueInicio();
+  const backup = crearBloqueBackup();
 
   header.appendChild(crearElemento("p", "ajustes-kicker", "Configuración"));
   header.appendChild(crearElemento("h2", "", AJUSTES_TEXTOS.TITULO));
@@ -131,6 +167,7 @@ export function crearAjustesView(datos) {
   layout.appendChild(perfil.form);
   layout.appendChild(objetivo.form);
   layout.appendChild(inicio.bloque);
+  layout.appendChild(backup.bloque);
 
   pantalla.appendChild(header);
   pantalla.appendChild(layout);
@@ -141,7 +178,11 @@ export function crearAjustesView(datos) {
     perfilMensaje: perfil.mensaje,
     objetivoForm: objetivo.form,
     objetivoMensaje: objetivo.mensaje,
-    reabrirInicioBoton: inicio.boton
+    reabrirInicioBoton: inicio.boton,
+    backupExportarBoton: backup.exportarBoton,
+    backupImportarBoton: backup.importarBoton,
+    backupInputArchivo: backup.inputArchivo,
+    backupMensaje: backup.mensaje
   };
 }
 
