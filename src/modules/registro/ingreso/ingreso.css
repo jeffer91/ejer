@@ -1,0 +1,142 @@
+/*
+  Nombre completo: ingreso.css
+  Ruta o ubicación: src/modules/registro/ingreso/ingreso.css
+
+  Función o funciones:
+    - Dar estilo propio a la pantalla Registro / Ingreso.
+    - Mantener formularios compactos para celular y computadora.
+    - Separar visualmente peso diario y medidas semanales.
+
+  Se conecta con:
+    - src/modules/registro/ingreso/ingreso.view.js
+    - src/modules/registro/ingreso/ingreso.controller.js
+*/
+
+.ingreso-screen {
+  display: grid;
+  gap: 14px;
+}
+
+.ingreso-header {
+  border: 1px solid #dce3ec;
+  border-radius: 20px;
+  background: #ffffff;
+  padding: 16px;
+}
+
+.ingreso-kicker {
+  margin: 0 0 6px;
+  color: #15803d;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.ingreso-header h2 {
+  margin: 0 0 8px;
+  font-size: 1.45rem;
+}
+
+.ingreso-header p:last-child {
+  margin: 0;
+  color: #64748b;
+}
+
+.ingreso-layout {
+  display: grid;
+  grid-template-columns: minmax(240px, 0.8fr) minmax(320px, 1.2fr);
+  gap: 12px;
+}
+
+.ingreso-card {
+  border: 1px solid #dce3ec;
+  border-radius: 20px;
+  background: #ffffff;
+  padding: 16px;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.05);
+}
+
+.ingreso-card__title {
+  margin: 0 0 12px;
+  font-size: 1.08rem;
+}
+
+.ingreso-form {
+  display: grid;
+  gap: 12px;
+  align-content: start;
+}
+
+.ingreso-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.ingreso-field {
+  display: grid;
+  gap: 5px;
+}
+
+.ingreso-field__label {
+  color: #334155;
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+.ingreso-field__input {
+  width: 100%;
+  border: 1px solid #dce3ec;
+  border-radius: 14px;
+  background: #f8fafc;
+  padding: 11px 12px;
+  color: #17202a;
+  outline: none;
+}
+
+.ingreso-field__input:focus {
+  border-color: #22c55e;
+  background: #ffffff;
+}
+
+.ingreso-field__error {
+  min-height: 15px;
+  color: #b91c1c;
+  font-size: 0.78rem;
+}
+
+.ingreso-message {
+  margin: 0;
+  min-height: 20px;
+  font-weight: 800;
+}
+
+.ingreso-message--ok {
+  color: #15803d;
+}
+
+.ingreso-message--error {
+  color: #b91c1c;
+}
+
+.ingreso-button {
+  border: 0;
+  border-radius: 15px;
+  padding: 12px 14px;
+  background: #22c55e;
+  color: #ffffff;
+  cursor: pointer;
+  font-weight: 900;
+}
+
+.ingreso-button:hover {
+  background: #16a34a;
+}
+
+@media (max-width: 760px) {
+  .ingreso-layout,
+  .ingreso-grid {
+    grid-template-columns: 1fr;
+  }
+}
