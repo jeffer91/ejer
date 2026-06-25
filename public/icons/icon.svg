@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="FitJeff">
+  <rect width="512" height="512" rx="112" fill="#22c55e"/>
+  <circle cx="256" cy="180" r="58" fill="#ffffff"/>
+  <path d="M150 390c18-70 58-112 106-112s88 42 106 112" fill="none" stroke="#ffffff" stroke-width="34" stroke-linecap="round"/>
+  <path d="M166 248h180" stroke="#ffffff" stroke-width="34" stroke-linecap="round"/>
+</svg>
