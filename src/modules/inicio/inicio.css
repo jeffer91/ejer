@@ -1,0 +1,115 @@
+/*
+  Nombre completo: inicio.css
+  Ruta o ubicación: src/modules/inicio/inicio.css
+
+  Función o funciones:
+    - Dar estilo propio al Inicio de primera vez.
+    - Mantener una pantalla compacta y clara para celular y computadora.
+    - No depender de estilos globales fuera del módulo.
+
+  Se conecta con:
+    - src/modules/inicio/inicio.view.js
+    - src/modules/inicio/inicio.controller.js
+*/
+
+.inicio-screen {
+  display: grid;
+  place-items: center;
+  min-height: calc(100vh - 120px);
+  padding: 12px;
+}
+
+.inicio-card {
+  width: min(560px, 100%);
+  border: 1px solid #dce3ec;
+  border-radius: 24px;
+  background: #ffffff;
+  padding: 20px;
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
+}
+
+.inicio-header {
+  margin-bottom: 16px;
+}
+
+.inicio-kicker {
+  margin: 0 0 6px;
+  color: #15803d;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.inicio-header h2 {
+  margin: 0 0 8px;
+  font-size: 1.55rem;
+}
+
+.inicio-header p:last-child {
+  margin: 0;
+  color: #64748b;
+}
+
+.inicio-form {
+  display: grid;
+  gap: 12px;
+}
+
+.inicio-field {
+  display: grid;
+  gap: 6px;
+}
+
+.inicio-field__label {
+  font-weight: 700;
+  color: #334155;
+}
+
+.inicio-field__input {
+  width: 100%;
+  border: 1px solid #dce3ec;
+  border-radius: 14px;
+  padding: 12px;
+  background: #f8fafc;
+  color: #17202a;
+  outline: none;
+}
+
+.inicio-field__input:focus {
+  border-color: #22c55e;
+  background: #ffffff;
+}
+
+.inicio-field__error {
+  min-height: 16px;
+  color: #b91c1c;
+}
+
+.inicio-message {
+  margin: 2px 0 0;
+  min-height: 20px;
+  font-weight: 700;
+}
+
+.inicio-message--ok {
+  color: #15803d;
+}
+
+.inicio-message--error {
+  color: #b91c1c;
+}
+
+.inicio-submit {
+  border: 0;
+  border-radius: 16px;
+  padding: 13px 14px;
+  background: #22c55e;
+  color: #ffffff;
+  cursor: pointer;
+  font-weight: 800;
+}
+
+.inicio-submit:hover {
+  background: #16a34a;
+}
