@@ -6,14 +6,17 @@
     - Controlar la navegación principal de FitJeff.
     - Mostrar Inicio solo la primera vez.
     - Abrir Estadísticas por defecto después de completar Inicio.
+    - Conectar Registro con su pantalla real de Ingreso.
     - Mantener el menú visible simple: Estadísticas, Registro, Historial y Ajustes.
 
   Se conecta con:
     - src/app/app.bootstrap.js
     - src/modules/inicio/inicio.controller.js
+    - src/modules/registro/ingreso/ingreso.controller.js
 */
 
 import { crearInicioController } from "../modules/inicio/inicio.controller.js";
+import { crearIngresoController } from "../modules/registro/ingreso/ingreso.controller.js";
 
 const RUTAS_VISIBLES = ["estadisticas", "registro", "historial", "ajustes"];
 
@@ -27,7 +30,6 @@ const NOMBRES = {
 
 const TEXTOS = {
   estadisticas: "Aquí se mostrará peso actual, objetivo, tendencia, IMC, próxima medición y Datos al día.",
-  registro: "Aquí irá el registro compacto de peso diario y medidas semanales.",
   historial: "Aquí podrás revisar, editar y enviar registros a papelera.",
   ajustes: "Aquí estarán perfil y objetivo en una pantalla simple."
 };
@@ -55,6 +57,14 @@ export function crearRouterFitJeff(configuracion) {
     tarjeta.appendChild(crearElemento("h2", "", NOMBRES[ruta]));
     tarjeta.appendChild(crearElemento("p", "", TEXTOS[ruta] || "Pantalla lista para crecer por bloques."));
     contenedor.appendChild(tarjeta);
+  }
+
+  function montarRegistro(contenedor) {
+    const controller = crearIngresoController({
+      alGuardar: () => {}
+    });
+
+    controller.montar(contenedor);
   }
 
   function montarShell(ruta) {
@@ -113,6 +123,12 @@ export function crearRouterFitJeff(configuracion) {
     }
 
     const main = montarShell(rutaActual);
+
+    if (rutaActual === "registro") {
+      montarRegistro(main);
+      return;
+    }
+
     montarPantallaBase(main, rutaActual);
   }
 
