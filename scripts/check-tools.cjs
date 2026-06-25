@@ -5,12 +5,14 @@
   Función o funciones:
     - Revisar herramientas necesarias para desarrollo y publicación de FitJeff.
     - Validar Node.js, npm, Git y GitHub CLI.
-    - Confirmar que package.json tenga los scripts base de Electron.
+    - Confirmar que package.json tenga los scripts base de Electron y publicación.
     - Avisar claramente qué falta antes de compilar o publicar.
 
   Se conecta con:
     - package.json
     - scripts/abrir-electron-dev.bat
+    - scripts/build-windows.cjs
+    - scripts/release-github.cjs
     - scripts/publicar-version.bat
     - scripts/actualizar-todo.bat
 */
@@ -59,7 +61,19 @@ function revisarPackage() {
 
   const pkg = JSON.parse(fs.readFileSync(packagePath, "utf8"));
   const scripts = pkg.scripts || {};
-  const scriptsNecesarios = ["dev", "build", "electron:dev", "electron:build", "desktop:win", "version:bump", "tools:check"];
+  const scriptsNecesarios = [
+    "dev",
+    "build",
+    "electron:dev",
+    "electron:build",
+    "desktop:win",
+    "version:bump",
+    "tools:check",
+    "build:windows",
+    "release:github",
+    "publicar:version",
+    "actualizar:todo"
+  ];
   const faltantes = scriptsNecesarios.filter((script) => !scripts[script]);
 
   return {
@@ -110,7 +124,9 @@ function main() {
   console.log("Resultado: herramientas principales listas.");
 
   if (!resultados.find((resultado) => resultado.nombre === "GitHub CLI")?.ok) {
-    console.log("Aviso: GitHub CLI será necesario para crear releases automáticos en bloques posteriores.");
+    console.log("Aviso: GitHub CLI será necesario para crear releases automáticos.");
+    console.log("Instalación recomendada: winget install GitHub.cli");
+    console.log("Después ejecuta: gh auth login");
   }
 }
 
