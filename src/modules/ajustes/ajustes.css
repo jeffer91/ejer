@@ -1,0 +1,148 @@
+/*
+  Nombre completo: ajustes.css
+  Ruta o ubicación: src/modules/ajustes/ajustes.css
+
+  Función o funciones:
+    - Dar estilo propio a la pantalla Ajustes.
+    - Mantener la pantalla simple y compacta para celular y computadora.
+    - Separar visualmente perfil, objetivo e inicio.
+
+  Se conecta con:
+    - src/modules/ajustes/ajustes.view.js
+    - src/modules/ajustes/ajustes.controller.js
+*/
+
+.ajustes-screen {
+  display: grid;
+  gap: 14px;
+}
+
+.ajustes-header,
+.ajustes-card {
+  border: 1px solid #dce3ec;
+  border-radius: 20px;
+  background: #ffffff;
+  padding: 16px;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.05);
+}
+
+.ajustes-kicker {
+  margin: 0 0 6px;
+  color: #15803d;
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.ajustes-header h2 {
+  margin: 0 0 8px;
+  font-size: 1.45rem;
+}
+
+.ajustes-header p:last-child,
+.ajustes-card__text {
+  margin: 0;
+  color: #64748b;
+  line-height: 1.45;
+}
+
+.ajustes-layout {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.ajustes-card--info {
+  grid-column: 1 / -1;
+  background: #eff6ff;
+  border-color: #bfdbfe;
+}
+
+.ajustes-card__title {
+  margin: 0 0 12px;
+  font-size: 1.08rem;
+}
+
+.ajustes-form {
+  display: grid;
+  gap: 12px;
+  align-content: start;
+}
+
+.ajustes-field {
+  display: grid;
+  gap: 5px;
+}
+
+.ajustes-field__label {
+  color: #334155;
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+.ajustes-field__input {
+  width: 100%;
+  border: 1px solid #dce3ec;
+  border-radius: 14px;
+  background: #f8fafc;
+  padding: 11px 12px;
+  color: #17202a;
+  outline: none;
+}
+
+.ajustes-field__input:focus {
+  border-color: #22c55e;
+  background: #ffffff;
+}
+
+.ajustes-field__error {
+  min-height: 15px;
+  color: #b91c1c;
+  font-size: 0.78rem;
+}
+
+.ajustes-message {
+  margin: 0;
+  min-height: 20px;
+  font-weight: 800;
+}
+
+.ajustes-message--ok {
+  color: #15803d;
+}
+
+.ajustes-message--error {
+  color: #b91c1c;
+}
+
+.ajustes-button {
+  border: 0;
+  border-radius: 15px;
+  padding: 12px 14px;
+  background: #22c55e;
+  color: #ffffff;
+  cursor: pointer;
+  font-weight: 900;
+}
+
+.ajustes-button:hover {
+  background: #16a34a;
+}
+
+.ajustes-button--secondary {
+  margin-top: 12px;
+  border: 1px solid #bfdbfe;
+  background: #ffffff;
+  color: #1d4ed8;
+}
+
+.ajustes-button--secondary:hover {
+  background: #dbeafe;
+}
+
+@media (max-width: 760px) {
+  .ajustes-layout {
+    grid-template-columns: 1fr;
+  }
+}
