@@ -7,6 +7,7 @@
     - Crear una sola instancia de la app.
     - Cargar Vite en desarrollo y dist en producción.
     - Registrar menú e IPC seguros.
+    - Limpiar la referencia de ventana al cerrar.
 
   Se conecta con:
     - electron/electron-window.service.js
@@ -29,16 +30,27 @@ if (!bloqueoInstancia) {
   app.quit();
 }
 
+function crearYGuardarVentanaPrincipal() {
+  mainWindow = crearVentanaPrincipal();
+
+  mainWindow.on("closed", () => {
+    mainWindow = null;
+  });
+
+  return mainWindow;
+}
+
 async function iniciarElectron() {
   registrarIpcElectron();
   instalarMenuAplicacion();
-  mainWindow = crearVentanaPrincipal();
+  crearYGuardarVentanaPrincipal();
 }
 
 app.whenReady().then(iniciarElectron);
 
 app.on("second-instance", () => {
   if (!mainWindow) {
+    crearYGuardarVentanaPrincipal();
     return;
   }
 
@@ -51,7 +63,7 @@ app.on("second-instance", () => {
 
 app.on("activate", () => {
   if (mainWindow === null) {
-    mainWindow = crearVentanaPrincipal();
+    crearYGuardarVentanaPrincipal();
   }
 });
 
