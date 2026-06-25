@@ -9,17 +9,20 @@
     - Conectar Estadísticas con su pantalla real.
     - Conectar Registro con su pantalla real de Ingreso.
     - Conectar Historial con su pantalla real.
+    - Conectar Ajustes con su pantalla real.
     - Mantener el menú visible simple: Estadísticas, Registro, Historial y Ajustes.
 
   Se conecta con:
     - src/app/app.bootstrap.js
     - src/modules/inicio/inicio.controller.js
+    - src/modules/ajustes/ajustes.controller.js
     - src/modules/registro/estadisticas/estadisticas.controller.js
     - src/modules/registro/ingreso/ingreso.controller.js
     - src/modules/registro/historial/historial.controller.js
 */
 
 import { crearInicioController } from "../modules/inicio/inicio.controller.js";
+import { crearAjustesController } from "../modules/ajustes/ajustes.controller.js";
 import { crearEstadisticasController } from "../modules/registro/estadisticas/estadisticas.controller.js";
 import { crearHistorialController } from "../modules/registro/historial/historial.controller.js";
 import { crearIngresoController } from "../modules/registro/ingreso/ingreso.controller.js";
@@ -32,10 +35,6 @@ const NOMBRES = {
   registro: "Registro",
   historial: "Historial",
   ajustes: "Ajustes"
-};
-
-const TEXTOS = {
-  ajustes: "Aquí estarán perfil y objetivo en una pantalla simple."
 };
 
 function crearElemento(etiqueta, clase, texto) {
@@ -55,14 +54,6 @@ export function crearRouterFitJeff(configuracion) {
   let perfilCompletado = configuracion.perfilInicialCompletado;
   let rutaActual = perfilCompletado ? "estadisticas" : "inicio";
 
-  function montarPantallaBase(contenedor, ruta) {
-    const tarjeta = crearElemento("section", "fj-card");
-    tarjeta.appendChild(crearElemento("p", "fj-kicker", "Módulo en construcción"));
-    tarjeta.appendChild(crearElemento("h2", "", NOMBRES[ruta]));
-    tarjeta.appendChild(crearElemento("p", "", TEXTOS[ruta] || "Pantalla lista para crecer por bloques."));
-    contenedor.appendChild(tarjeta);
-  }
-
   function montarEstadisticas(contenedor) {
     const controller = crearEstadisticasController();
     controller.montar(contenedor);
@@ -78,6 +69,18 @@ export function crearRouterFitJeff(configuracion) {
 
   function montarHistorial(contenedor) {
     const controller = crearHistorialController();
+    controller.montar(contenedor);
+  }
+
+  function montarAjustes(contenedor) {
+    const controller = crearAjustesController({
+      alReabrirInicio: () => {
+        perfilCompletado = false;
+        rutaActual = "inicio";
+        renderizarInicio();
+      }
+    });
+
     controller.montar(contenedor);
   }
 
@@ -153,7 +156,9 @@ export function crearRouterFitJeff(configuracion) {
       return;
     }
 
-    montarPantallaBase(main, rutaActual);
+    if (rutaActual === "ajustes") {
+      montarAjustes(main);
+    }
   }
 
   function navegar(ruta) {
