@@ -27,6 +27,18 @@ Base central del módulo Registro creada:
 - Service principal
 - Estilos propios del módulo
 
+## Bloque 3
+
+Inicio de primera vez creado:
+
+- Altura
+- Fecha de nacimiento
+- Peso inicial
+- Peso objetivo
+- Validación inteligente básica
+- Guardado en Registro
+- Salto automático a Estadísticas
+
 ## Comandos
 
 ```bash
