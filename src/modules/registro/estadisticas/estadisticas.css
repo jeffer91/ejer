@@ -1,0 +1,156 @@
+/*
+  Nombre completo: estadisticas.css
+  Ruta o ubicación: src/modules/registro/estadisticas/estadisticas.css
+
+  Función o funciones:
+    - Dar estilo propio a la pantalla Estadísticas.
+    - Mantener dashboard compacto para celular y computadora.
+    - Usar colores claros con indicadores de progreso, pendiente, alerta e información.
+
+  Se conecta con:
+    - src/modules/registro/estadisticas/estadisticas.view.js
+    - src/modules/registro/estadisticas/estadisticas.controller.js
+*/
+
+.estadisticas-screen {
+  display: grid;
+  gap: 14px;
+}
+
+.estadisticas-header,
+.estadisticas-chart-card,
+.estadisticas-measures {
+  border: 1px solid #dce3ec;
+  border-radius: 20px;
+  background: #ffffff;
+  padding: 16px;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.05);
+}
+
+.estadisticas-kicker {
+  margin: 0 0 6px;
+  color: #15803d;
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.estadisticas-header h2,
+.estadisticas-chart-card h3,
+.estadisticas-measures h3 {
+  margin: 0 0 8px;
+}
+
+.estadisticas-header p:last-child {
+  margin: 0;
+  color: #64748b;
+}
+
+.estadisticas-cards,
+.estadisticas-measures__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.estadisticas-card {
+  border: 1px solid #dce3ec;
+  border-radius: 18px;
+  background: #ffffff;
+  padding: 13px;
+}
+
+.estadisticas-card__label {
+  margin: 0 0 5px;
+  color: #64748b;
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.estadisticas-card__value {
+  display: block;
+  color: #17202a;
+  font-size: 1.2rem;
+}
+
+.estadisticas-card__detail {
+  display: block;
+  margin-top: 5px;
+  color: #64748b;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.estadisticas-card--progreso {
+  border-color: #bbf7d0;
+  background: #f0fdf4;
+}
+
+.estadisticas-card--pendiente {
+  border-color: #fde68a;
+  background: #fffbeb;
+}
+
+.estadisticas-card--alerta {
+  border-color: #fecaca;
+  background: #fef2f2;
+}
+
+.estadisticas-card--info {
+  border-color: #bfdbfe;
+  background: #eff6ff;
+}
+
+.estadisticas-progress {
+  position: relative;
+  overflow: hidden;
+  min-height: 42px;
+  border: 1px solid #bbf7d0;
+  border-radius: 999px;
+  background: #ffffff;
+}
+
+.estadisticas-progress__bar {
+  height: 42px;
+  border-radius: 999px;
+  background: #22c55e;
+}
+
+.estadisticas-progress__text {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: #14532d;
+  font-weight: 900;
+}
+
+.estadisticas-chart {
+  width: 100%;
+  min-height: 180px;
+  color: #22c55e;
+  background: linear-gradient(180deg, #f8fafc, #ffffff);
+  border-radius: 16px;
+}
+
+.estadisticas-chart__detail,
+.estadisticas-empty {
+  margin: 8px 0 0;
+  color: #64748b;
+  font-weight: 700;
+}
+
+@media (max-width: 760px) {
+  .estadisticas-cards,
+  .estadisticas-measures__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 460px) {
+  .estadisticas-cards,
+  .estadisticas-measures__grid {
+    grid-template-columns: 1fr;
+  }
+}
