@@ -13,7 +13,7 @@
     - electron/electron-window.service.js
     - electron/electron-menu.service.js
     - electron/electron-ipc.service.js
-    - electron/preload.js
+    - electron/preload.cjs
     - package.json
 */
 
