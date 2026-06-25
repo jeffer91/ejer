@@ -7,10 +7,10 @@
   "description": "FitJeff: app personal local-first para registro corporal, estadisticas, PWA y escritorio Electron.",
   "author": "Jeff",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --host localhost --port 5173 --strictPort",
     "build": "vite build",
-    "preview": "vite preview",
-    "electron:dev": "concurrently \"npm run dev\" \"wait-on http://127.0.0.1:5173 && cross-env FITJEFF_ELECTRON_DEV=1 electron .\"",
+    "preview": "vite preview --host localhost --port 4173 --strictPort",
+    "electron:dev": "concurrently -k -n VITE,ELECTRON -c green,blue \"npm run dev\" \"wait-on http://localhost:5173/ && cross-env FITJEFF_ELECTRON_DEV=1 electron .\"",
     "electron:build": "npm run build && cross-env FITJEFF_ELECTRON_DEV=0 electron .",
     "desktop:pack": "npm run build && electron-builder --dir",
     "desktop:win": "npm run build && electron-builder --win nsis"
