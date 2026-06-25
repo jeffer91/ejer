@@ -16,7 +16,11 @@
     "desktop:pack": "npm run build && electron-builder --dir",
     "desktop:win": "npm run build && electron-builder --win nsis",
     "tools:check": "node scripts/check-tools.cjs",
-    "version:bump": "node scripts/version-bump.cjs"
+    "version:bump": "node scripts/version-bump.cjs",
+    "build:windows": "node scripts/build-windows.cjs",
+    "release:github": "node scripts/release-github.cjs",
+    "publicar:version": "scripts\\publicar-version.bat",
+    "actualizar:todo": "scripts\\actualizar-todo.bat"
   },
   "dependencies": {
     "electron-updater": "latest",
@@ -33,6 +37,7 @@
   "build": {
     "appId": "com.jeff.fitjeff",
     "productName": "FitJeff",
+    "artifactName": "${productName}-Setup-${version}.${ext}",
     "directories": {
       "output": "release"
     },
@@ -50,7 +55,19 @@
       }
     ],
     "win": {
-      "target": "nsis"
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true
     }
   }
 }
