@@ -9,13 +9,15 @@
     - Conectar Estadísticas con su pantalla real.
     - Conectar Registro con su pantalla real de Ingreso.
     - Conectar Historial con su pantalla real.
+    - Conectar Actualizaciones con su pantalla real.
     - Conectar Ajustes con su pantalla real.
-    - Mantener el menú visible simple: Estadísticas, Registro, Historial y Ajustes.
+    - Mantener el menú visible simple: Estadísticas, Registro, Historial, Actualizaciones y Ajustes.
 
   Se conecta con:
     - src/app/app.bootstrap.js
     - src/modules/inicio/inicio.controller.js
     - src/modules/ajustes/ajustes.controller.js
+    - src/modules/actualizaciones/actualizaciones.controller.js
     - src/modules/registro/estadisticas/estadisticas.controller.js
     - src/modules/registro/ingreso/ingreso.controller.js
     - src/modules/registro/historial/historial.controller.js
@@ -23,17 +25,19 @@
 
 import { crearInicioController } from "../modules/inicio/inicio.controller.js";
 import { crearAjustesController } from "../modules/ajustes/ajustes.controller.js";
+import { crearActualizacionesController } from "../modules/actualizaciones/actualizaciones.controller.js";
 import { crearEstadisticasController } from "../modules/registro/estadisticas/estadisticas.controller.js";
 import { crearHistorialController } from "../modules/registro/historial/historial.controller.js";
 import { crearIngresoController } from "../modules/registro/ingreso/ingreso.controller.js";
 
-const RUTAS_VISIBLES = ["estadisticas", "registro", "historial", "ajustes"];
+const RUTAS_VISIBLES = ["estadisticas", "registro", "historial", "actualizaciones", "ajustes"];
 
 const NOMBRES = {
   inicio: "Inicio",
   estadisticas: "Estadísticas",
   registro: "Registro",
   historial: "Historial",
+  actualizaciones: "Actualizaciones",
   ajustes: "Ajustes"
 };
 
@@ -53,27 +57,41 @@ function limpiar(contenedor) {
 export function crearRouterFitJeff(configuracion) {
   let perfilCompletado = configuracion.perfilInicialCompletado;
   let rutaActual = perfilCompletado ? "estadisticas" : "inicio";
+  let controllerActual = null;
+
+  function desmontarControllerActual() {
+    if (controllerActual && typeof controllerActual.desmontar === "function") {
+      controllerActual.desmontar();
+    }
+
+    controllerActual = null;
+  }
 
   function montarEstadisticas(contenedor) {
-    const controller = crearEstadisticasController();
-    controller.montar(contenedor);
+    controllerActual = crearEstadisticasController();
+    controllerActual.montar(contenedor);
   }
 
   function montarRegistro(contenedor) {
-    const controller = crearIngresoController({
+    controllerActual = crearIngresoController({
       alGuardar: () => {}
     });
 
-    controller.montar(contenedor);
+    controllerActual.montar(contenedor);
   }
 
   function montarHistorial(contenedor) {
-    const controller = crearHistorialController();
-    controller.montar(contenedor);
+    controllerActual = crearHistorialController();
+    controllerActual.montar(contenedor);
+  }
+
+  function montarActualizaciones(contenedor) {
+    controllerActual = crearActualizacionesController();
+    controllerActual.montar(contenedor);
   }
 
   function montarAjustes(contenedor) {
-    const controller = crearAjustesController({
+    controllerActual = crearAjustesController({
       alReabrirInicio: () => {
         perfilCompletado = false;
         rutaActual = "inicio";
@@ -81,10 +99,11 @@ export function crearRouterFitJeff(configuracion) {
       }
     });
 
-    controller.montar(contenedor);
+    controllerActual.montar(contenedor);
   }
 
   function montarShell(ruta) {
+    desmontarControllerActual();
     limpiar(configuracion.raiz);
 
     const shell = crearElemento("div", "fj-app-shell");
@@ -114,16 +133,17 @@ export function crearRouterFitJeff(configuracion) {
   }
 
   function renderizarInicio() {
+    desmontarControllerActual();
     limpiar(configuracion.raiz);
 
-    const controller = crearInicioController({
+    controllerActual = crearInicioController({
       alCompletar: () => {
         perfilCompletado = true;
         navegar("estadisticas");
       }
     });
 
-    controller.montar(configuracion.raiz);
+    controllerActual.montar(configuracion.raiz);
   }
 
   function renderizar(ruta) {
@@ -153,6 +173,11 @@ export function crearRouterFitJeff(configuracion) {
 
     if (rutaActual === "historial") {
       montarHistorial(main);
+      return;
+    }
+
+    if (rutaActual === "actualizaciones") {
+      montarActualizaciones(main);
       return;
     }
 
