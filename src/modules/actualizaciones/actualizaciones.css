@@ -1,0 +1,127 @@
+/*
+  Nombre completo: actualizaciones.css
+  Ruta o ubicación: src/modules/actualizaciones/actualizaciones.css
+
+  Función o funciones:
+    - Estilizar la pantalla de actualizaciones.
+    - Mostrar barra de progreso clara para descarga de versiones.
+    - Mantener diseño simple compatible con Electron, PWA y futura APK.
+
+  Se conecta con:
+    - src/modules/actualizaciones/actualizaciones.controller.js
+    - src/modules/actualizaciones/actualizaciones.view.js
+*/
+
+.fj-update-card {
+  display: grid;
+  gap: 18px;
+}
+
+.fj-update-header {
+  display: grid;
+  gap: 6px;
+}
+
+.fj-update-title {
+  margin: 0;
+  color: #17202a;
+}
+
+.fj-update-subtitle,
+.fj-update-message,
+.fj-update-help {
+  margin: 0;
+  color: #536179;
+  line-height: 1.45;
+}
+
+.fj-update-message {
+  border: 1px solid #dce3ec;
+  border-radius: 14px;
+  background: #f8fafc;
+  padding: 12px;
+  color: #1d4ed8;
+  font-weight: 700;
+}
+
+.fj-update-data {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.fj-update-data__row {
+  border: 1px solid #e4eaf2;
+  border-radius: 14px;
+  background: #ffffff;
+  padding: 12px;
+  display: grid;
+  gap: 5px;
+}
+
+.fj-update-data__label {
+  color: #64748b;
+  font-size: 13px;
+}
+
+.fj-update-data__value {
+  color: #17202a;
+  font-size: 15px;
+}
+
+.fj-update-progress {
+  width: 100%;
+  height: 16px;
+  overflow: hidden;
+  border-radius: 999px;
+  border: 1px solid #dce3ec;
+  background: #edf2f7;
+}
+
+.fj-update-progress__bar {
+  width: 0%;
+  height: 100%;
+  border-radius: 999px;
+  background: #22c55e;
+  transition: width 220ms ease;
+}
+
+.fj-update-actions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.fj-update-button {
+  border: 1px solid #16a34a;
+  border-radius: 14px;
+  background: #22c55e;
+  color: #ffffff;
+  padding: 12px 14px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.fj-update-button--secondary {
+  border-color: #2563eb;
+  background: #3b82f6;
+}
+
+.fj-update-button--success {
+  border-color: #15803d;
+  background: #16a34a;
+}
+
+.fj-update-button:disabled {
+  border-color: #cbd5e1;
+  background: #e2e8f0;
+  color: #64748b;
+  cursor: not-allowed;
+}
+
+@media (max-width: 720px) {
+  .fj-update-data,
+  .fj-update-actions {
+    grid-template-columns: 1fr;
+  }
+}
