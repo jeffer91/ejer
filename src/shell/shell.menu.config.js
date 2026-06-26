@@ -11,41 +11,18 @@
     - src/shell/shell.router.js
     - src/shell/shell.controller.js
     - src/app/app-router.js
+    - src/features/control-corporal/control-corporal.menu.js
 */
 
-export const SHELL_DEFAULT_MODULE_ID = "control-corporal";
-export const SHELL_DEFAULT_ROUTE_ID = "estadisticas";
+import { CONTROL_CORPORAL_MENU, CONTROL_CORPORAL_MODULE_ID } from "../features/control-corporal/control-corporal.menu.js";
+import { CONTROL_CORPORAL_ROUTES } from "../features/control-corporal/control-corporal.routes.js";
+
+export const SHELL_DEFAULT_MODULE_ID = CONTROL_CORPORAL_MODULE_ID;
+export const SHELL_DEFAULT_ROUTE_ID = CONTROL_CORPORAL_ROUTES.ESTADISTICAS;
 export const SHELL_ONBOARDING_ROUTE_ID = "inicio";
 
 export const SHELL_MODULES = [
-  {
-    id: "control-corporal",
-    label: "Control corporal",
-    shortLabel: "Corporal",
-    description: "Peso, medidas, progreso e historial.",
-    defaultRoute: "estadisticas",
-    status: "Datos al día",
-    routes: [
-      {
-        id: "estadisticas",
-        label: "Estadísticas",
-        shortLabel: "Stats",
-        description: "Resumen y progreso"
-      },
-      {
-        id: "registro",
-        label: "Registro",
-        shortLabel: "Registro",
-        description: "Peso y medidas"
-      },
-      {
-        id: "historial",
-        label: "Historial",
-        shortLabel: "Historial",
-        description: "Cambios guardados"
-      }
-    ]
-  },
+  CONTROL_CORPORAL_MENU,
   {
     id: "sistema",
     label: "Sistema",
