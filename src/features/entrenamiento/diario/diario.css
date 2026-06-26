@@ -1,9 +1,22 @@
 .entreno-diario-screen { display: grid; gap: 10px; }
-.entreno-diario-header, .entreno-diario-panel { border: 1px solid var(--fj-border, #1e2a44); border-radius: var(--fj-radius, 12px); background: var(--fj-surface, #121a2b); padding: 11px; }
+.entreno-diario-header, .entreno-diario-panel { border: 1px solid var(--fj-border, #1e2a44); border-radius: var(--fj-radius, 12px); background: var(--fj-surface, #121a2b); padding: 11px; box-shadow: var(--fj-shadow, none); }
 .entreno-diario-header h2, .entreno-diario-panel h3 { margin: 0; }
-.entreno-diario-header p { margin: 5px 0 0; color: var(--fj-muted, #8ba3c2); font-size: 0.86rem; }
+.entreno-diario-header p, .entreno-diario-panel p { margin: 5px 0 0; color: var(--fj-muted, #8ba3c2); font-size: 0.86rem; }
 .entreno-diario-kicker { color: var(--fj-cyan, #00f5ff) !important; font-size: 0.72rem !important; font-weight: 950; text-transform: uppercase; }
-.entreno-diario-list { display: grid; gap: 8px; margin-top: 9px; }
-.entreno-diario-item { border: 1px solid var(--fj-border, #1e2a44); border-radius: 10px; padding: 9px; color: var(--fj-text, #e0f2ff); background: rgba(255, 255, 255, 0.02); }
-.entreno-diario-actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; margin-top: 10px; }
-.entreno-diario-button { border: 1px solid var(--fj-border, #1e2a44); border-radius: 10px; background: var(--fj-surface-2, #162036); color: var(--fj-muted, #8ba3c2); font-weight: 900; }
+.entreno-diario-metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; margin-top: 9px; }
+.entreno-diario-metric { display: grid; gap: 3px; border: 1px solid var(--fj-border, #1e2a44); border-radius: 10px; padding: 9px; background: rgba(255, 255, 255, 0.02); }
+.entreno-diario-metric span, .entreno-diario-metric small { color: var(--fj-muted, #8ba3c2); font-size: 0.74rem; font-weight: 800; }
+.entreno-diario-metric strong { color: var(--fj-text, #e0f2ff); font-size: 1.15rem; font-weight: 1000; }
+.entreno-diario-exercises { display: grid; gap: 8px; margin-top: 10px; }
+.entreno-diario-exercise, .entreno-diario-warmup, .entreno-diario-empty { border: 1px solid var(--fj-border, #1e2a44); border-radius: 10px; padding: 9px; background: rgba(255, 255, 255, 0.02); }
+.entreno-diario-exercise { display: grid; gap: 4px; }
+.entreno-diario-exercise strong { color: var(--fj-text, #e0f2ff); }
+.entreno-diario-exercise span, .entreno-diario-warmup, .entreno-diario-empty { color: var(--fj-muted, #8ba3c2); font-size: 0.82rem; font-weight: 780; }
+.entreno-diario-actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; margin-top: 10px; }
+.entreno-diario-button { border: 1px solid var(--fj-border, #1e2a44); border-radius: 10px; background: var(--fj-surface-2, #162036); color: var(--fj-text, #e0f2ff); font-weight: 900; cursor: pointer; }
+.entreno-diario-button--primary { border-color: var(--fj-cyan, #00f5ff); background: rgba(0, 245, 255, 0.12); color: var(--fj-cyan, #00f5ff); }
+.entreno-diario-button:disabled { opacity: 0.48; cursor: default; }
+.entreno-diario-message { display: grid; gap: 3px; border: 1px solid var(--fj-border, #1e2a44); border-radius: 10px; padding: 9px; margin-bottom: 9px; font-size: 0.82rem; }
+.entreno-diario-message--ok { border-color: rgba(34, 255, 136, 0.28); color: var(--fj-green, #22ff88); }
+.entreno-diario-message--error { border-color: rgba(255, 59, 92, 0.34); color: var(--fj-red, #ff3b5c); }
+.entreno-diario-message span { color: var(--fj-muted, #8ba3c2); }
