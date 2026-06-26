@@ -3,7 +3,10 @@
 .entreno-rutinas-header h2, .entreno-rutinas-form h3, .entreno-rutinas-list h3 { margin: 0; }
 .entreno-rutinas-header p, .entreno-rutinas-list p, .entreno-rutinas-note { color: var(--fj-muted, #8ba3c2); font-size: 0.84rem; }
 .entreno-rutinas-kicker { color: var(--fj-cyan, #00f5ff) !important; font-size: 0.72rem !important; font-weight: 950; text-transform: uppercase; }
-.entreno-rutinas-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px; margin-top: 9px; }
+.entreno-rutinas-grid, .entreno-rutinas-saved { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px; margin-top: 9px; }
 .entreno-rutinas-field { display: grid; gap: 5px; color: var(--fj-muted, #8ba3c2); font-size: 0.78rem; font-weight: 850; }
 .entreno-rutinas-field input { min-height: 38px; border-radius: 10px; padding: 8px; }
 .entreno-rutinas-note { border: 1px dashed var(--fj-border, #1e2a44); border-radius: 10px; padding: 9px; }
+.entreno-rutinas-card { display: grid; gap: 4px; border: 1px solid var(--fj-border, #1e2a44); border-radius: 10px; padding: 9px; background: rgba(255, 255, 255, 0.02); }
+.entreno-rutinas-card strong { color: var(--fj-text, #e0f2ff); }
+.entreno-rutinas-card span { color: var(--fj-muted, #8ba3c2); font-size: 0.78rem; font-weight: 800; }
