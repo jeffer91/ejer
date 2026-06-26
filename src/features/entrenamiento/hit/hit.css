@@ -1,9 +1,26 @@
 .entreno-hit-screen { display: grid; gap: 10px; }
-.entreno-hit-header, .entreno-hit-card, .entreno-hit-timer { border: 1px solid var(--fj-border, #1e2a44); border-radius: var(--fj-radius, 12px); background: var(--fj-surface, #121a2b); padding: 11px; }
-.entreno-hit-header h2, .entreno-hit-card h3, .entreno-hit-timer h3 { margin: 0; }
-.entreno-hit-header p, .entreno-hit-card p, .entreno-hit-timer p { color: var(--fj-muted, #8ba3c2); font-size: 0.84rem; }
+.entreno-hit-header, .entreno-hit-card, .entreno-hit-timer, .entreno-hit-panel { border: 1px solid var(--fj-border, #1e2a44); border-radius: var(--fj-radius, 12px); background: var(--fj-surface, #121a2b); padding: 11px; box-shadow: var(--fj-shadow, none); }
+.entreno-hit-header h2, .entreno-hit-card h3, .entreno-hit-timer h3, .entreno-hit-panel h3 { margin: 0; }
+.entreno-hit-header p, .entreno-hit-card p, .entreno-hit-timer p, .entreno-hit-panel p { color: var(--fj-muted, #8ba3c2); font-size: 0.84rem; }
 .entreno-hit-kicker { color: var(--fj-cyan, #00f5ff) !important; font-size: 0.72rem !important; font-weight: 950; text-transform: uppercase; }
-.entreno-hit-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 8px; }
-.entreno-hit-card { display: grid; gap: 6px; }
-.entreno-hit-badge { width: max-content; border: 1px solid var(--fj-border, #1e2a44); border-radius: 999px; padding: 5px 8px; color: var(--fj-muted, #8ba3c2); font-size: 0.72rem; font-weight: 850; }
-.entreno-hit-time { display: block; margin-top: 8px; color: var(--fj-cyan, #00f5ff); font-size: 2rem; line-height: 1; }
+.entreno-hit-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; }
+.entreno-hit-card { display: grid; gap: 5px; }
+.entreno-hit-card__value { color: var(--fj-text, #e0f2ff); font-size: 1.25rem; font-weight: 1000; }
+.entreno-hit-badge { width: max-content; border: 1px solid var(--fj-border, #1e2a44); border-radius: 999px; padding: 5px 8px; color: var(--fj-cyan, #00f5ff); font-size: 0.72rem; font-weight: 850; }
+.entreno-hit-time { display: block; margin-top: 8px; color: var(--fj-cyan, #00f5ff); font-size: 2.2rem; line-height: 1; }
+.entreno-hit-timer-form, .entreno-hit-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; margin-top: 10px; }
+.entreno-hit-field { display: grid; gap: 5px; color: var(--fj-muted, #8ba3c2); font-size: 0.78rem; font-weight: 850; }
+.entreno-hit-field--full { grid-column: 1 / -1; }
+.entreno-hit-field input, .entreno-hit-field select, .entreno-hit-field textarea { width: 100%; min-height: 38px; border-radius: 10px; padding: 8px; resize: vertical; }
+.entreno-hit-actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px; margin-top: 10px; }
+.entreno-hit-button { border: 1px solid var(--fj-border, #1e2a44); border-radius: 10px; background: var(--fj-surface-2, #162036); color: var(--fj-text, #e0f2ff); padding: 8px 11px; font-weight: 950; cursor: pointer; }
+.entreno-hit-button--primary { border-color: var(--fj-cyan, #00f5ff); background: rgba(0, 245, 255, 0.12); color: var(--fj-cyan, #00f5ff); }
+.entreno-hit-message { display: grid; gap: 3px; border: 1px solid var(--fj-border, #1e2a44); border-radius: 10px; padding: 9px; margin-top: 9px; font-size: 0.82rem; }
+.entreno-hit-message--ok { border-color: rgba(34, 255, 136, 0.28); color: var(--fj-green, #22ff88); }
+.entreno-hit-message--error { border-color: rgba(255, 59, 92, 0.34); color: var(--fj-red, #ff3b5c); }
+.entreno-hit-message span, .entreno-hit-message small { color: var(--fj-muted, #8ba3c2); }
+.entreno-hit-records { display: grid; gap: 8px; margin-top: 9px; }
+.entreno-hit-record { display: grid; gap: 3px; border: 1px solid var(--fj-border, #1e2a44); border-radius: 10px; padding: 9px; background: rgba(255, 255, 255, 0.02); }
+.entreno-hit-record strong { color: var(--fj-text, #e0f2ff); text-transform: capitalize; }
+.entreno-hit-record span, .entreno-hit-record small { color: var(--fj-muted, #8ba3c2); font-size: 0.78rem; font-weight: 800; }
+@media (max-width: 640px) { .entreno-hit-timer-form, .entreno-hit-form, .entreno-hit-actions { grid-template-columns: 1fr; } }
