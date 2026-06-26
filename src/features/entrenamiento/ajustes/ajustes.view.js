@@ -4,7 +4,7 @@
 
   Función o funciones:
     - Construir la pantalla Ajustes de Entrenamiento.
-    - Mostrar base para Gemini, IA y voz automática.
+    - Mostrar estado local de Gemini, IA y voz automática.
     - Preparar guardado local de configuración para próximos bloques.
 
   Se conecta con:
@@ -17,14 +17,14 @@ import "./ajustes.css";
 function crearElemento(etiqueta, clase = "", texto = "") {
   const elemento = document.createElement(etiqueta);
   if (clase) elemento.className = clase;
-  if (texto) elemento.textContent = texto;
+  if (texto !== undefined && texto !== null) elemento.textContent = String(texto);
   return elemento;
 }
 
-function crearToggle(label, detalle) {
+function crearToggle(label, detalle, activo = false) {
   const fila = crearElemento("article", "entreno-ajustes-row");
   const textos = crearElemento("div", "");
-  const boton = crearElemento("button", "entreno-ajustes-toggle", "Pendiente");
+  const boton = crearElemento("button", "entreno-ajustes-toggle", activo ? "Activo" : "Inactivo");
   boton.type = "button";
   boton.disabled = true;
   textos.appendChild(crearElemento("strong", "", label));
@@ -34,29 +34,30 @@ function crearToggle(label, detalle) {
   return fila;
 }
 
-export function crearEntrenamientoAjustesView() {
+export function crearEntrenamientoAjustesView({ ajustes = {} } = {}) {
   const pantalla = crearElemento("section", "entreno-ajustes-screen");
   const header = crearElemento("div", "entreno-ajustes-header");
   const panel = crearElemento("section", "entreno-ajustes-panel");
   const keyBox = crearElemento("label", "entreno-ajustes-key");
   const input = document.createElement("input");
+  const tieneGemini = Boolean(ajustes.geminiApiKey);
 
   input.type = "password";
-  input.placeholder = "API Key de Gemini";
+  input.placeholder = tieneGemini ? "Gemini configurado" : "API Key de Gemini pendiente";
   input.disabled = true;
 
   header.appendChild(crearElemento("p", "entreno-ajustes-kicker", "Conexión"));
   header.appendChild(crearElemento("h2", "", "Ajustes"));
-  header.appendChild(crearElemento("p", "", "Base para conectar Gemini, guía por IA y voz automática."));
+  header.appendChild(crearElemento("p", "", "Estado local de Gemini, guía por IA y voz automática."));
 
   keyBox.appendChild(crearElemento("span", "", "Gemini"));
   keyBox.appendChild(input);
-  keyBox.appendChild(crearElemento("small", "", "La clave se guardará localmente cuando se active el bloque de datos."));
+  keyBox.appendChild(crearElemento("small", "", tieneGemini ? "Clave guardada localmente." : "La clave se guardará solo en este dispositivo."));
 
   panel.appendChild(keyBox);
-  panel.appendChild(crearToggle("IA de entrenamiento", "Preparada para sugerencias y ajustes de sesión."));
-  panel.appendChild(crearToggle("Voz automática", "Preparada para guía hablada durante la sesión."));
-  panel.appendChild(crearToggle("Prueba de conexión", "Se activará cuando exista el servicio Gemini."));
+  panel.appendChild(crearToggle("IA de entrenamiento", "Sugerencias y ajustes de sesión.", Boolean(ajustes.iaActiva)));
+  panel.appendChild(crearToggle("Voz automática", "Guía hablada durante la sesión.", Boolean(ajustes.vozActiva)));
+  panel.appendChild(crearToggle("Prueba de conexión", "Se activará cuando exista el servicio Gemini.", tieneGemini));
 
   pantalla.appendChild(header);
   pantalla.appendChild(panel);
