@@ -4,25 +4,25 @@
 
   Función o funciones:
     - Montar la pantalla Stats del módulo Entrenamiento.
-    - Leer el resumen local desde entrenamiento.service.js.
-    - Mostrar un dashboard compacto de rendimiento.
+    - Leer el dashboard local desde stats.service.js.
+    - Mostrar estadísticas compactas de rendimiento, racha, semana y alertas.
 
   Se conecta con:
-    - src/features/entrenamiento/entrenamiento.service.js
+    - src/features/entrenamiento/stats/stats.service.js
     - src/features/entrenamiento/stats/stats.view.js
     - src/features/entrenamiento/entrenamiento.module.js
 */
 
-import { crearEntrenamientoService } from "../entrenamiento.service.js";
+import { crearEntrenamientoStatsService } from "./stats.service.js";
 import { crearEntrenamientoStatsView } from "./stats.view.js";
 
 export function crearEntrenamientoStatsController() {
-  const service = crearEntrenamientoService();
+  const service = crearEntrenamientoStatsService();
 
   function montar(contenedor) {
-    const resumen = service.obtenerResumen();
+    const dashboard = service.obtenerDashboard();
     contenedor.innerHTML = "";
-    contenedor.appendChild(crearEntrenamientoStatsView(resumen));
+    contenedor.appendChild(crearEntrenamientoStatsView(dashboard));
   }
 
   return {
