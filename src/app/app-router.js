@@ -7,7 +7,7 @@
     - Mostrar Inicio solo la primera vez.
     - Abrir la última pantalla usada después de completar Inicio.
     - Conectar el shell global con módulos grandes y submenús internos.
-    - Conectar Control corporal desde src/features/control-corporal.
+    - Montar funcionalidades desde src/features/features.registry.js.
     - Conectar Sistema: Actualizaciones y Ajustes.
 
   Se conecta con:
@@ -15,13 +15,13 @@
     - src/shell/shell.controller.js
     - src/shell/shell.memory.js
     - src/shell/shell.router.js
-    - src/features/control-corporal/control-corporal.module.js
+    - src/features/features.registry.js
     - src/features/control-corporal/inicio/inicio.controller.js
     - src/modules/ajustes/ajustes.controller.js
     - src/modules/actualizaciones/actualizaciones.controller.js
 */
 
-import { montarPantallaControlCorporal, esRutaControlCorporal } from "../features/control-corporal/control-corporal.module.js";
+import { esRutaFeature, montarPantallaFeature } from "../features/features.registry.js";
 import { crearInicioController } from "../features/control-corporal/inicio/inicio.controller.js";
 import { crearShellController } from "../shell/shell.controller.js";
 import { SHELL_DEFAULT_ROUTE_ID, SHELL_ONBOARDING_ROUTE_ID } from "../shell/shell.menu.config.js";
@@ -112,8 +112,8 @@ export function crearRouterFitJeff(configuracion) {
     rutaActual = ubicacion.rutaId;
     const main = montarShell(ubicacion);
 
-    if (esRutaControlCorporal(rutaActual)) {
-      controllerActual = montarPantallaControlCorporal(rutaActual, main, {
+    if (esRutaFeature(rutaActual)) {
+      controllerActual = montarPantallaFeature(rutaActual, main, {
         alGuardar: () => {}
       });
       return;
