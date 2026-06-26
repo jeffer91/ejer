@@ -3,11 +3,46 @@
   Ruta o ubicación: src/features/control-corporal/inicio/inicio.controller.js
 
   Función o funciones:
-    - Exponer el Inicio de primera configuración dentro de Control corporal.
-    - Mantener compatibilidad mientras se migra la estructura antigua.
+    - Montar la pantalla de Inicio de primera vez dentro de Control corporal.
+    - Escuchar el envío del formulario inicial.
+    - Guardar configuración inicial mediante inicio.service.js.
+    - Avisar al router para abrir Estadísticas cuando el Inicio termina.
 
   Se conecta con:
-    - src/modules/inicio/inicio.controller.js
+    - src/features/control-corporal/inicio/inicio.view.js
+    - src/features/control-corporal/inicio/inicio.service.js
+    - src/app/app-router.js
 */
 
-export { crearInicioController } from "../../../modules/inicio/inicio.controller.js";
+import { crearInicioService } from "./inicio.service.js";
+import { crearInicioView, leerDatosInicio, mostrarErroresInicio } from "./inicio.view.js";
+
+export function crearInicioController({ alCompletar } = {}) {
+  const service = crearInicioService();
+
+  function montar(contenedor) {
+    const vista = crearInicioView();
+
+    contenedor.innerHTML = "";
+    contenedor.appendChild(vista.pantalla);
+
+    vista.formulario.addEventListener("submit", (evento) => {
+      evento.preventDefault();
+
+      const datos = leerDatosInicio(vista.formulario);
+      const resultado = service.guardarConfiguracionInicial(datos);
+
+      mostrarErroresInicio(vista.formulario, resultado.errores || {});
+      vista.mensaje.textContent = resultado.mensaje;
+      vista.mensaje.className = resultado.ok ? "inicio-message inicio-message--ok" : "inicio-message inicio-message--error";
+
+      if (resultado.ok && typeof alCompletar === "function") {
+        alCompletar();
+      }
+    });
+  }
+
+  return {
+    montar
+  };
+}
