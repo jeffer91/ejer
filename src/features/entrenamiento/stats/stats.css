@@ -1,7 +1,29 @@
 .entreno-stats-screen { display: grid; gap: 10px; }
-.entreno-stats-header, .entreno-stats-card, .entreno-stats-panel { border: 1px solid var(--fj-border, #1e2a44); border-radius: var(--fj-radius, 12px); background: var(--fj-surface, #121a2b); padding: 11px; }
-.entreno-stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; }
-.entreno-stats-card { display: grid; gap: 4px; min-height: 82px; }
-.entreno-stats-kicker, .entreno-stats-card__label { color: var(--fj-cyan, #00f5ff); font-size: 0.74rem; font-weight: 850; }
-.entreno-stats-card__value { color: var(--fj-text, #e0f2ff); font-size: 1.35rem; font-weight: 1000; }
-.entreno-stats-card__detail, .entreno-stats-header p, .entreno-stats-panel p { color: var(--fj-muted, #8ba3c2); font-size: 0.82rem; }
+.entreno-stats-header, .entreno-stats-card, .entreno-stats-panel { border: 1px solid var(--fj-border, #1e2a44); border-radius: var(--fj-radius, 12px); background: var(--fj-surface, #121a2b); padding: 11px; box-shadow: var(--fj-shadow, none); }
+.entreno-stats-header h2, .entreno-stats-panel h3 { margin: 0; }
+.entreno-stats-header p { margin: 5px 0 0; color: var(--fj-muted, #8ba3c2); font-size: 0.84rem; }
+.entreno-stats-kicker, .entreno-stats-card__label { color: var(--fj-cyan, #00f5ff); font-size: 0.72rem; font-weight: 950; text-transform: uppercase; }
+.entreno-stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; }
+.entreno-stats-card { display: grid; gap: 4px; min-height: 84px; }
+.entreno-stats-card__value { color: var(--fj-text, #e0f2ff); font-size: 1.3rem; font-weight: 1000; line-height: 1; }
+.entreno-stats-card__detail { color: var(--fj-muted, #8ba3c2); font-size: 0.76rem; font-weight: 780; }
+.entreno-stats-card--ok { border-color: rgba(34, 255, 136, 0.28); }
+.entreno-stats-card--info { border-color: rgba(77, 159, 255, 0.28); }
+.entreno-stats-card--accent { border-color: rgba(0, 245, 255, 0.34); }
+.entreno-stats-bars, .entreno-stats-alerts { display: grid; gap: 8px; margin-top: 9px; }
+.entreno-stats-bar { display: grid; gap: 6px; }
+.entreno-stats-bar__top { display: flex; align-items: center; justify-content: space-between; gap: 8px; color: var(--fj-muted, #8ba3c2); font-size: 0.78rem; }
+.entreno-stats-bar__top strong { color: var(--fj-text, #e0f2ff); }
+.entreno-stats-bar__track { height: 9px; overflow: hidden; border: 1px solid var(--fj-border, #1e2a44); border-radius: 999px; background: rgba(255, 255, 255, 0.04); }
+.entreno-stats-bar__fill { height: 100%; border-radius: 999px; background: var(--fj-cyan, #00f5ff); }
+.entreno-stats-week { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 7px; margin-top: 9px; }
+.entreno-stats-day { display: grid; gap: 3px; min-height: 62px; border: 1px solid var(--fj-border, #1e2a44); border-radius: 10px; padding: 7px; color: var(--fj-muted, #8ba3c2); background: rgba(255, 255, 255, 0.02); }
+.entreno-stats-day--active { border-color: rgba(0, 245, 255, 0.34); color: var(--fj-text, #e0f2ff); }
+.entreno-stats-day strong { font-size: 0.78rem; }
+.entreno-stats-day span { font-size: 0.86rem; font-weight: 900; }
+.entreno-stats-day small { font-size: 0.68rem; }
+.entreno-stats-alert { border: 1px solid var(--fj-border, #1e2a44); border-radius: 10px; padding: 9px; color: var(--fj-muted, #8ba3c2); font-size: 0.82rem; font-weight: 760; }
+.entreno-stats-alert--ok { border-color: rgba(34, 255, 136, 0.28); }
+.entreno-stats-alert--info { border-color: rgba(77, 159, 255, 0.28); }
+.entreno-stats-alert--pendiente { border-color: rgba(255, 196, 87, 0.3); }
+@media (max-width: 720px) { .entreno-stats-week { grid-template-columns: repeat(2, minmax(0, 1fr)); } .entreno-stats-bar__top { align-items: flex-start; flex-direction: column; } }
