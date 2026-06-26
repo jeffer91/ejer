@@ -7,7 +7,7 @@
     - Mostrar Inicio solo la primera vez.
     - Abrir la última pantalla usada después de completar Inicio.
     - Conectar el shell global con módulos grandes y submenús internos.
-    - Conectar Control corporal: Estadísticas, Registro e Historial.
+    - Conectar Control corporal desde src/features/control-corporal.
     - Conectar Sistema: Actualizaciones y Ajustes.
 
   Se conecta con:
@@ -15,14 +15,13 @@
     - src/shell/shell.controller.js
     - src/shell/shell.memory.js
     - src/shell/shell.router.js
+    - src/features/control-corporal/control-corporal.module.js
     - src/modules/inicio/inicio.controller.js
     - src/modules/ajustes/ajustes.controller.js
     - src/modules/actualizaciones/actualizaciones.controller.js
-    - src/modules/registro/estadisticas/estadisticas.controller.js
-    - src/modules/registro/ingreso/ingreso.controller.js
-    - src/modules/registro/historial/historial.controller.js
 */
 
+import { montarPantallaControlCorporal, esRutaControlCorporal } from "../features/control-corporal/control-corporal.module.js";
 import { crearShellController } from "../shell/shell.controller.js";
 import { SHELL_DEFAULT_ROUTE_ID, SHELL_ONBOARDING_ROUTE_ID } from "../shell/shell.menu.config.js";
 import { guardarUbicacionShell, leerUbicacionShell, limpiarUbicacionShell } from "../shell/shell.memory.js";
@@ -30,9 +29,6 @@ import { resolverUbicacionShell } from "../shell/shell.router.js";
 import { crearInicioController } from "../modules/inicio/inicio.controller.js";
 import { crearAjustesController } from "../modules/ajustes/ajustes.controller.js";
 import { crearActualizacionesController } from "../modules/actualizaciones/actualizaciones.controller.js";
-import { crearEstadisticasController } from "../modules/registro/estadisticas/estadisticas.controller.js";
-import { crearHistorialController } from "../modules/registro/historial/historial.controller.js";
-import { crearIngresoController } from "../modules/registro/ingreso/ingreso.controller.js";
 
 function limpiar(contenedor) {
   while (contenedor.firstChild) {
@@ -52,24 +48,6 @@ export function crearRouterFitJeff(configuracion) {
     }
 
     controllerActual = null;
-  }
-
-  function montarEstadisticas(contenedor) {
-    controllerActual = crearEstadisticasController();
-    controllerActual.montar(contenedor);
-  }
-
-  function montarRegistro(contenedor) {
-    controllerActual = crearIngresoController({
-      alGuardar: () => {}
-    });
-
-    controllerActual.montar(contenedor);
-  }
-
-  function montarHistorial(contenedor) {
-    controllerActual = crearHistorialController();
-    controllerActual.montar(contenedor);
   }
 
   function montarActualizaciones(contenedor) {
@@ -134,18 +112,10 @@ export function crearRouterFitJeff(configuracion) {
     rutaActual = ubicacion.rutaId;
     const main = montarShell(ubicacion);
 
-    if (rutaActual === "estadisticas") {
-      montarEstadisticas(main);
-      return;
-    }
-
-    if (rutaActual === "registro") {
-      montarRegistro(main);
-      return;
-    }
-
-    if (rutaActual === "historial") {
-      montarHistorial(main);
+    if (esRutaControlCorporal(rutaActual)) {
+      controllerActual = montarPantallaControlCorporal(rutaActual, main, {
+        alGuardar: () => {}
+      });
       return;
     }
 
