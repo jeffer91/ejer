@@ -27,11 +27,14 @@ export function fechaEntrenamientoHoy() {
 export function crearAjustesEntrenamientoBase(datos = {}) {
   return {
     geminiApiKey: "",
+    geminiModelo: "gemini-1.5-flash",
     iaActiva: false,
     vozActiva: false,
     vozNombre: "",
     volumenVoz: 1,
     velocidadVoz: 1,
+    ultimaPruebaGemini: null,
+    ultimaPruebaVoz: null,
     actualizadoEn: null,
     ...datos
   };
