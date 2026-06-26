@@ -4,26 +4,39 @@
 
   Función o funciones:
     - Montar la pantalla Diario del módulo Entrenamiento.
-    - Leer la rutina activa y el día correspondiente desde el service.
-    - Preparar la vista de rutina diaria con datos locales.
+    - Cargar la rutina activa del día.
+    - Iniciar y completar sesiones con guardado local.
 
   Se conecta con:
-    - src/features/entrenamiento/entrenamiento.service.js
+    - src/features/entrenamiento/diario/diario.service.js
     - src/features/entrenamiento/diario/diario.view.js
     - src/features/entrenamiento/entrenamiento.module.js
 */
 
-import { crearEntrenamientoService } from "../entrenamiento.service.js";
+import { crearDiarioService } from "./diario.service.js";
 import { crearEntrenamientoDiarioView } from "./diario.view.js";
 
 export function crearEntrenamientoDiarioController() {
-  const service = crearEntrenamientoService();
+  const service = crearDiarioService();
+  let contenedorActual = null;
+  let mensajeActual = null;
+
+  function refrescar(mensaje = mensajeActual) {
+    if (!contenedorActual) return;
+
+    mensajeActual = mensaje;
+    contenedorActual.innerHTML = "";
+    contenedorActual.appendChild(crearEntrenamientoDiarioView({
+      diario: service.obtenerDiario(),
+      mensaje,
+      onIniciar: () => refrescar(service.iniciarSesion()),
+      onCompletar: () => refrescar(service.completarSesion())
+    }));
+  }
 
   function montar(contenedor) {
-    const rutinaDelDia = service.obtenerRutinaDelDia();
-    const resumen = service.obtenerResumen();
-    contenedor.innerHTML = "";
-    contenedor.appendChild(crearEntrenamientoDiarioView({ rutinaDelDia, resumen }));
+    contenedorActual = contenedor;
+    refrescar(null);
   }
 
   return {
