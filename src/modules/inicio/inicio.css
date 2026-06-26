@@ -4,7 +4,7 @@
 
   Función o funciones:
     - Dar estilo propio al Inicio de primera vez.
-    - Mantener una pantalla compacta y clara para celular y computadora.
+    - Mantener una pantalla compacta, oscura y tecnológica para celular y computadora.
     - No depender de estilos globales fuera del módulo.
 
   Se conecta con:
@@ -15,101 +15,153 @@
 .inicio-screen {
   display: grid;
   place-items: center;
-  min-height: calc(100vh - 120px);
-  padding: 12px;
+  min-height: calc(100vh - 96px);
+  padding: 10px;
 }
 
 .inicio-card {
-  width: min(560px, 100%);
-  border: 1px solid #dce3ec;
-  border-radius: 24px;
-  background: #ffffff;
-  padding: 20px;
-  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
+  position: relative;
+  overflow: hidden;
+  width: min(520px, 100%);
+  border: 1px solid var(--fj-border, #1e2a44);
+  border-radius: var(--fj-radius, 12px);
+  background:
+    radial-gradient(circle at top right, rgba(0, 245, 255, 0.12), transparent 16rem),
+    linear-gradient(145deg, rgba(18, 26, 43, 0.98), rgba(10, 15, 28, 0.96));
+  padding: 14px;
+  box-shadow: var(--fj-shadow-strong, 0 0 0 1px rgba(0, 245, 255, 0.2), 0 10px 28px rgba(0, 245, 255, 0.12));
+}
+
+.inicio-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  background: linear-gradient(180deg, var(--fj-cyan, #00f5ff), var(--fj-green, #22ff88));
+  box-shadow: 0 0 18px rgba(0, 245, 255, 0.55);
 }
 
 .inicio-header {
-  margin-bottom: 16px;
+  margin-bottom: 11px;
 }
 
 .inicio-kicker {
-  margin: 0 0 6px;
-  color: #15803d;
-  font-size: 0.78rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
+  margin: 0 0 4px;
+  color: var(--fj-cyan, #00f5ff);
+  font-size: 0.7rem;
+  font-weight: 900;
+  letter-spacing: 0.11em;
   text-transform: uppercase;
 }
 
 .inicio-header h2 {
-  margin: 0 0 8px;
-  font-size: 1.55rem;
+  margin: 0 0 6px;
+  color: var(--fj-text, #e0f2ff);
+  font-size: 1.28rem;
+  line-height: 1.12;
+  letter-spacing: -0.03em;
 }
 
 .inicio-header p:last-child {
   margin: 0;
-  color: #64748b;
+  color: var(--fj-muted, #8ba3c2);
+  font-size: 0.84rem;
+  line-height: 1.35;
 }
 
 .inicio-form {
   display: grid;
-  gap: 12px;
+  gap: 9px;
 }
 
 .inicio-field {
   display: grid;
-  gap: 6px;
+  gap: 4px;
 }
 
 .inicio-field__label {
-  font-weight: 700;
-  color: #334155;
+  color: var(--fj-muted, #8ba3c2);
+  font-size: 0.76rem;
+  font-weight: 850;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
 }
 
 .inicio-field__input {
   width: 100%;
-  border: 1px solid #dce3ec;
-  border-radius: 14px;
-  padding: 12px;
-  background: #f8fafc;
-  color: #17202a;
+  min-height: 38px;
+  border: 1px solid var(--fj-border, #1e2a44);
+  border-radius: var(--fj-radius-sm, 10px);
+  padding: 8px 10px;
+  background: rgba(14, 22, 39, 0.98);
+  color: var(--fj-text, #e0f2ff);
   outline: none;
+  transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
 }
 
 .inicio-field__input:focus {
-  border-color: #22c55e;
-  background: #ffffff;
+  border-color: var(--fj-cyan, #00f5ff);
+  background: rgba(10, 15, 28, 0.98);
+  box-shadow: 0 0 0 3px rgba(0, 245, 255, 0.1), inset 0 0 0 1px rgba(0, 245, 255, 0.12);
+}
+
+.inicio-field--error .inicio-field__input {
+  border-color: var(--fj-red, #ff3b5c);
+  box-shadow: 0 0 0 3px rgba(255, 59, 92, 0.08);
 }
 
 .inicio-field__error {
-  min-height: 16px;
-  color: #b91c1c;
+  min-height: 13px;
+  color: var(--fj-red, #ff3b5c);
+  font-size: 0.7rem;
+  font-weight: 750;
 }
 
 .inicio-message {
-  margin: 2px 0 0;
-  min-height: 20px;
-  font-weight: 700;
+  margin: 0;
+  min-height: 18px;
+  color: var(--fj-muted, #8ba3c2);
+  font-size: 0.78rem;
+  font-weight: 850;
 }
 
 .inicio-message--ok {
-  color: #15803d;
+  color: var(--fj-green, #22ff88);
 }
 
 .inicio-message--error {
-  color: #b91c1c;
+  color: var(--fj-red, #ff3b5c);
 }
 
 .inicio-submit {
-  border: 0;
-  border-radius: 16px;
-  padding: 13px 14px;
-  background: #22c55e;
-  color: #ffffff;
+  min-height: 40px;
+  border: 1px solid rgba(0, 245, 255, 0.36);
+  border-radius: var(--fj-radius-sm, 10px);
+  padding: 8px 12px;
+  background: linear-gradient(135deg, rgba(0, 245, 255, 0.2), rgba(34, 255, 136, 0.16));
+  color: var(--fj-text, #e0f2ff);
   cursor: pointer;
-  font-weight: 800;
+  font-size: 0.88rem;
+  font-weight: 950;
+  letter-spacing: 0.02em;
+  box-shadow: 0 8px 20px rgba(0, 245, 255, 0.08);
+  transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease, color 160ms ease;
 }
 
 .inicio-submit:hover {
-  background: #16a34a;
+  transform: translateY(-1px);
+  border-color: var(--fj-cyan, #00f5ff);
+  color: var(--fj-cyan, #00f5ff);
+  box-shadow: var(--fj-shadow-strong, 0 0 0 1px rgba(0, 245, 255, 0.2), 0 10px 28px rgba(0, 245, 255, 0.12));
+}
+
+@media (max-width: 560px) {
+  .inicio-screen {
+    min-height: calc(100vh - 74px);
+    padding: 8px;
+  }
+
+  .inicio-card {
+    padding: 12px;
+  }
 }
