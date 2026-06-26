@@ -126,11 +126,14 @@ export function normalizarAjustesEntrenamiento(datos = {}) {
   return {
     ...base,
     geminiApiKey: texto(base.geminiApiKey),
+    geminiModelo: texto(base.geminiModelo, "gemini-1.5-flash"),
     iaActiva: Boolean(base.iaActiva),
     vozActiva: Boolean(base.vozActiva),
     vozNombre: texto(base.vozNombre),
     volumenVoz: limitar(numero(base.volumenVoz, 1), 0, 1),
     velocidadVoz: limitar(numero(base.velocidadVoz, 1), 0.5, 2),
+    ultimaPruebaGemini: base.ultimaPruebaGemini || null,
+    ultimaPruebaVoz: base.ultimaPruebaVoz || null,
     actualizadoEn: new Date().toISOString()
   };
 }
