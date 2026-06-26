@@ -36,3 +36,18 @@ Las pantallas `Stats`, `Diario`, `Rutinas` y `Ajustes` ya leen el estado local. 
 - Alertas simples sobre rutina activa, registro de hoy y Gemini.
 
 Los cálculos viven en `stats/stats.service.js` para no mezclar lógica con la vista.
+
+## Estado del bloque 4
+
+`Rutinas` ahora permite crear y activar rutinas locales:
+
+- Nombre.
+- Número de días.
+- Calentamiento.
+- Ejercicios por líneas.
+- Descanso en segundos.
+- Series.
+- Repeticiones.
+- Opción para guardar como rutina activa.
+
+La validación vive en `rutinas/rutinas.validator.js` y la conversión del formulario vive en `rutinas/rutinas.service.js`.
