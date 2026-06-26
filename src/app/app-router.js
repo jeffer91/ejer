@@ -5,16 +5,16 @@
   Función o funciones:
     - Controlar la navegación principal de FitJeff.
     - Mostrar Inicio solo la primera vez.
-    - Abrir Estadísticas por defecto después de completar Inicio.
-    - Conectar Estadísticas con su pantalla real.
-    - Conectar Registro con su pantalla real de Ingreso.
-    - Conectar Historial con su pantalla real.
-    - Conectar Actualizaciones con su pantalla real.
-    - Conectar Ajustes con su pantalla real.
-    - Mantener el menú visible simple: Estadísticas, Registro, Historial, Actualizaciones y Ajustes.
+    - Abrir la última pantalla usada después de completar Inicio.
+    - Conectar el shell global con módulos grandes y submenús internos.
+    - Conectar Control corporal: Estadísticas, Registro e Historial.
+    - Conectar Sistema: Actualizaciones y Ajustes.
 
   Se conecta con:
     - src/app/app.bootstrap.js
+    - src/shell/shell.controller.js
+    - src/shell/shell.memory.js
+    - src/shell/shell.router.js
     - src/modules/inicio/inicio.controller.js
     - src/modules/ajustes/ajustes.controller.js
     - src/modules/actualizaciones/actualizaciones.controller.js
@@ -23,30 +23,16 @@
     - src/modules/registro/historial/historial.controller.js
 */
 
+import { crearShellController } from "../shell/shell.controller.js";
+import { SHELL_DEFAULT_ROUTE_ID, SHELL_ONBOARDING_ROUTE_ID } from "../shell/shell.menu.config.js";
+import { guardarUbicacionShell, leerUbicacionShell, limpiarUbicacionShell } from "../shell/shell.memory.js";
+import { resolverUbicacionShell } from "../shell/shell.router.js";
 import { crearInicioController } from "../modules/inicio/inicio.controller.js";
 import { crearAjustesController } from "../modules/ajustes/ajustes.controller.js";
 import { crearActualizacionesController } from "../modules/actualizaciones/actualizaciones.controller.js";
 import { crearEstadisticasController } from "../modules/registro/estadisticas/estadisticas.controller.js";
 import { crearHistorialController } from "../modules/registro/historial/historial.controller.js";
 import { crearIngresoController } from "../modules/registro/ingreso/ingreso.controller.js";
-
-const RUTAS_VISIBLES = ["estadisticas", "registro", "historial", "actualizaciones", "ajustes"];
-
-const NOMBRES = {
-  inicio: "Inicio",
-  estadisticas: "Estadísticas",
-  registro: "Registro",
-  historial: "Historial",
-  actualizaciones: "Actualizaciones",
-  ajustes: "Ajustes"
-};
-
-function crearElemento(etiqueta, clase, texto) {
-  const elemento = document.createElement(etiqueta);
-  if (clase) elemento.className = clase;
-  if (texto) elemento.textContent = texto;
-  return elemento;
-}
 
 function limpiar(contenedor) {
   while (contenedor.firstChild) {
@@ -56,7 +42,8 @@ function limpiar(contenedor) {
 
 export function crearRouterFitJeff(configuracion) {
   let perfilCompletado = configuracion.perfilInicialCompletado;
-  let rutaActual = perfilCompletado ? "estadisticas" : "inicio";
+  const ubicacionInicial = resolverUbicacionShell(leerUbicacionShell() || {});
+  let rutaActual = perfilCompletado ? ubicacionInicial.rutaId : SHELL_ONBOARDING_ROUTE_ID;
   let controllerActual = null;
 
   function desmontarControllerActual() {
@@ -94,7 +81,8 @@ export function crearRouterFitJeff(configuracion) {
     controllerActual = crearAjustesController({
       alReabrirInicio: () => {
         perfilCompletado = false;
-        rutaActual = "inicio";
+        rutaActual = SHELL_ONBOARDING_ROUTE_ID;
+        limpiarUbicacionShell();
         renderizarInicio();
       }
     });
@@ -102,34 +90,17 @@ export function crearRouterFitJeff(configuracion) {
     controllerActual.montar(contenedor);
   }
 
-  function montarShell(ruta) {
+  function montarShell(ubicacion) {
     desmontarControllerActual();
     limpiar(configuracion.raiz);
+    guardarUbicacionShell(ubicacion);
 
-    const shell = crearElemento("div", "fj-app-shell");
-    const header = crearElemento("header", "fj-header");
-    const titulo = crearElemento("h1", "", NOMBRES[ruta]);
-    const estado = crearElemento("span", "fj-status fj-status--info", "Datos al día");
-    const nav = crearElemento("nav", "fj-nav");
-    const main = crearElemento("main", "fj-main");
-
-    header.appendChild(titulo);
-    header.appendChild(estado);
-
-    RUTAS_VISIBLES.forEach((rutaItem) => {
-      const boton = crearElemento("button", "fj-nav__button", NOMBRES[rutaItem]);
-      boton.type = "button";
-      if (rutaItem === ruta) boton.classList.add("fj-nav__button--active");
-      boton.addEventListener("click", () => navegar(rutaItem));
-      nav.appendChild(boton);
+    const shellController = crearShellController({
+      raiz: configuracion.raiz,
+      onNavegar: navegar
     });
 
-    shell.appendChild(header);
-    shell.appendChild(nav);
-    shell.appendChild(main);
-    configuracion.raiz.appendChild(shell);
-
-    return main;
+    return shellController.montar(ubicacion);
   }
 
   function renderizarInicio() {
@@ -139,7 +110,7 @@ export function crearRouterFitJeff(configuracion) {
     controllerActual = crearInicioController({
       alCompletar: () => {
         perfilCompletado = true;
-        navegar("estadisticas");
+        navegar(SHELL_DEFAULT_ROUTE_ID);
       }
     });
 
@@ -150,16 +121,18 @@ export function crearRouterFitJeff(configuracion) {
     rutaActual = ruta || rutaActual;
 
     if (!perfilCompletado) {
-      rutaActual = "inicio";
+      rutaActual = SHELL_ONBOARDING_ROUTE_ID;
       renderizarInicio();
       return;
     }
 
-    if (rutaActual === "inicio") {
-      rutaActual = "estadisticas";
+    if (rutaActual === SHELL_ONBOARDING_ROUTE_ID) {
+      rutaActual = SHELL_DEFAULT_ROUTE_ID;
     }
 
-    const main = montarShell(rutaActual);
+    const ubicacion = resolverUbicacionShell({ rutaId: rutaActual });
+    rutaActual = ubicacion.rutaId;
+    const main = montarShell(ubicacion);
 
     if (rutaActual === "estadisticas") {
       montarEstadisticas(main);
