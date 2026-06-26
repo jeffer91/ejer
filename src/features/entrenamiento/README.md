@@ -64,3 +64,19 @@ La validación vive en `rutinas/rutinas.validator.js` y la conversión del formu
 - Guardar el resultado localmente.
 
 La lógica vive en `diario/diario.service.js` para mantener separada la pantalla de los cálculos y el guardado.
+
+## Estado del bloque 6
+
+`HIT` ahora registra cardio y maneja temporizador simple:
+
+- HIT / intervalos.
+- Caminata.
+- Bicicleta.
+- Otro cardio.
+- Tiempo.
+- Distancia opcional.
+- Intensidad.
+- Rondas, actividad y descanso.
+- Últimos registros.
+
+La lógica de guardado vive en `hit/hit.service.js` y el reloj vive en `hit/hit.timer.js`.
