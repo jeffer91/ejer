@@ -5,7 +5,7 @@
   Función o funciones:
     - Construir la pantalla Rutinas de Entrenamiento.
     - Mostrar campos base para crear planes reutilizables.
-    - Preparar activos e inactivos para el siguiente bloque.
+    - Mostrar rutinas locales activas e inactivas cuando existan.
 
   Se conecta con:
     - src/features/entrenamiento/rutinas/rutinas.controller.js
@@ -17,7 +17,7 @@ import "./rutinas.css";
 function crearElemento(etiqueta, clase = "", texto = "") {
   const elemento = document.createElement(etiqueta);
   if (clase) elemento.className = clase;
-  if (texto) elemento.textContent = texto;
+  if (texto !== undefined && texto !== null) elemento.textContent = String(texto);
   return elemento;
 }
 
@@ -33,16 +33,24 @@ function crearCampo(label, placeholder) {
   return grupo;
 }
 
-export function crearEntrenamientoRutinasView() {
+function crearRutinaCard(rutina) {
+  const card = crearElemento("article", "entreno-rutinas-card");
+  card.appendChild(crearElemento("strong", "", rutina.nombre));
+  card.appendChild(crearElemento("span", "", `${rutina.dias.length} día(s) · ${rutina.estado}`));
+  return card;
+}
+
+export function crearEntrenamientoRutinasView({ rutinas = [] } = {}) {
   const pantalla = crearElemento("section", "entreno-rutinas-screen");
   const header = crearElemento("div", "entreno-rutinas-header");
   const form = crearElemento("section", "entreno-rutinas-form");
   const grid = crearElemento("div", "entreno-rutinas-grid");
   const lista = crearElemento("section", "entreno-rutinas-list");
+  const rutinasGrid = crearElemento("div", "entreno-rutinas-saved");
 
   header.appendChild(crearElemento("p", "entreno-rutinas-kicker", "Planes"));
   header.appendChild(crearElemento("h2", "", "Rutinas"));
-  header.appendChild(crearElemento("p", "", "Aquí se crearán planes con días, calentamiento, ejercicios, descansos, series y repeticiones."));
+  header.appendChild(crearElemento("p", "", "Planes con días, calentamiento, ejercicios, descansos, series y repeticiones."));
 
   grid.appendChild(crearCampo("Nombre", "Ejemplo: Semana casa"));
   grid.appendChild(crearCampo("Días", "Ejemplo: 4"));
@@ -53,10 +61,16 @@ export function crearEntrenamientoRutinasView() {
 
   form.appendChild(crearElemento("h3", "", "Crear rutina"));
   form.appendChild(grid);
-  form.appendChild(crearElemento("p", "entreno-rutinas-note", "Formulario visual listo. El guardado se conecta en el bloque 2."));
+  form.appendChild(crearElemento("p", "entreno-rutinas-note", "La estructura de guardado local ya está creada. El formulario editable se activa en el bloque de Rutinas."));
 
   lista.appendChild(crearElemento("h3", "", "Rutinas guardadas"));
-  lista.appendChild(crearElemento("p", "", "Todavía no hay rutinas porque falta conectar datos locales."));
+
+  if (rutinas.length === 0) {
+    lista.appendChild(crearElemento("p", "", "Todavía no hay rutinas guardadas."));
+  } else {
+    rutinas.forEach((rutina) => rutinasGrid.appendChild(crearRutinaCard(rutina)));
+    lista.appendChild(rutinasGrid);
+  }
 
   pantalla.appendChild(header);
   pantalla.appendChild(form);
