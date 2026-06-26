@@ -12,14 +12,19 @@
     - src/app/app-router.js
     - src/features/control-corporal/control-corporal.menu.js
     - src/features/control-corporal/control-corporal.module.js
+    - src/features/entrenamiento/entrenamiento.menu.js
+    - src/features/entrenamiento/entrenamiento.module.js
 */
 
 import { CONTROL_CORPORAL_MENU, CONTROL_CORPORAL_MODULE_ID } from "./control-corporal/control-corporal.menu.js";
 import { CONTROL_CORPORAL_ROUTES } from "./control-corporal/control-corporal.routes.js";
 import { esRutaControlCorporal, montarPantallaControlCorporal } from "./control-corporal/control-corporal.module.js";
+import { ENTRENAMIENTO_MENU, ENTRENAMIENTO_MODULE_ID } from "./entrenamiento/entrenamiento.menu.js";
+import { esRutaEntrenamiento, montarPantallaEntrenamiento } from "./entrenamiento/entrenamiento.module.js";
 
 export const FEATURE_MODULES = [
-  CONTROL_CORPORAL_MENU
+  CONTROL_CORPORAL_MENU,
+  ENTRENAMIENTO_MENU
 ];
 
 export const FEATURE_DEFAULT_MODULE_ID = CONTROL_CORPORAL_MODULE_ID;
@@ -30,6 +35,11 @@ const FEATURE_MOUNTERS = [
     id: CONTROL_CORPORAL_MODULE_ID,
     aceptaRuta: esRutaControlCorporal,
     montar: montarPantallaControlCorporal
+  },
+  {
+    id: ENTRENAMIENTO_MODULE_ID,
+    aceptaRuta: esRutaEntrenamiento,
+    montar: montarPantallaEntrenamiento
   }
 ];
 
