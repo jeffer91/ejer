@@ -4,8 +4,8 @@
 
   Función o funciones:
     - Estilizar la pantalla de actualizaciones.
-    - Mostrar barra de progreso clara para descarga de versiones.
-    - Mantener diseño simple compatible con Electron, PWA y futura APK.
+    - Mostrar barra de progreso neon para descarga de versiones.
+    - Mantener diseño compacto compatible con Electron, PWA y futura APK.
 
   Se conecta con:
     - src/modules/actualizaciones/actualizaciones.controller.js
@@ -13,115 +13,181 @@
 */
 
 .fj-update-card {
+  position: relative;
   display: grid;
-  gap: 18px;
+  gap: 10px;
+  overflow: hidden;
+}
+
+.fj-update-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  background: var(--fj-cyan, #00f5ff);
+  box-shadow: 0 0 14px rgba(0, 245, 255, 0.45);
 }
 
 .fj-update-header {
   display: grid;
-  gap: 6px;
+  gap: 4px;
 }
 
 .fj-update-title {
   margin: 0;
-  color: #17202a;
+  color: var(--fj-text, #e0f2ff);
+  font-size: 1.08rem;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
 }
 
 .fj-update-subtitle,
 .fj-update-message,
 .fj-update-help {
   margin: 0;
-  color: #536179;
-  line-height: 1.45;
+  color: var(--fj-muted, #8ba3c2);
+  font-size: 0.84rem;
+  line-height: 1.35;
 }
 
 .fj-update-message {
-  border: 1px solid #dce3ec;
-  border-radius: 14px;
-  background: #f8fafc;
-  padding: 12px;
-  color: #1d4ed8;
-  font-weight: 700;
+  position: relative;
+  border: 1px solid rgba(77, 159, 255, 0.3);
+  border-radius: var(--fj-radius, 12px);
+  background: linear-gradient(145deg, rgba(77, 159, 255, 0.1), rgba(18, 26, 43, 0.96));
+  padding: 10px 11px;
+  color: var(--fj-blue, #4d9fff);
+  font-weight: 850;
+  box-shadow: 0 8px 20px rgba(77, 159, 255, 0.08);
 }
 
 .fj-update-data {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
+  gap: 8px;
 }
 
 .fj-update-data__row {
-  border: 1px solid #e4eaf2;
-  border-radius: 14px;
-  background: #ffffff;
-  padding: 12px;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--fj-border, #1e2a44);
+  border-radius: var(--fj-radius, 12px);
+  background: rgba(18, 26, 43, 0.96);
+  padding: 10px 10px 10px 13px;
   display: grid;
-  gap: 5px;
+  gap: 4px;
+  box-shadow: 0 8px 20px rgba(0, 245, 255, 0.05);
+}
+
+.fj-update-data__row::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  background: var(--fj-cyan, #00f5ff);
+  box-shadow: 0 0 12px rgba(0, 245, 255, 0.35);
 }
 
 .fj-update-data__label {
-  color: #64748b;
-  font-size: 13px;
+  color: var(--fj-muted, #8ba3c2);
+  font-size: 0.72rem;
+  font-weight: 850;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
 }
 
 .fj-update-data__value {
-  color: #17202a;
-  font-size: 15px;
+  color: var(--fj-text, #e0f2ff);
+  font-size: 0.9rem;
+  font-weight: 900;
 }
 
 .fj-update-progress {
   width: 100%;
-  height: 16px;
+  height: 14px;
   overflow: hidden;
   border-radius: 999px;
-  border: 1px solid #dce3ec;
-  background: #edf2f7;
+  border: 1px solid rgba(0, 245, 255, 0.3);
+  background: rgba(14, 22, 39, 0.98);
+  box-shadow: inset 0 0 0 1px rgba(0, 245, 255, 0.06), 0 0 18px rgba(0, 245, 255, 0.08);
 }
 
 .fj-update-progress__bar {
   width: 0%;
   height: 100%;
   border-radius: 999px;
-  background: #22c55e;
+  background: linear-gradient(90deg, var(--fj-cyan, #00f5ff), var(--fj-green, #22ff88));
+  box-shadow: 0 0 18px rgba(0, 245, 255, 0.35);
   transition: width 220ms ease;
 }
 
 .fj-update-actions {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
+  gap: 8px;
 }
 
 .fj-update-button {
-  border: 1px solid #16a34a;
-  border-radius: 14px;
-  background: #22c55e;
-  color: #ffffff;
-  padding: 12px 14px;
-  font-weight: 800;
+  min-height: 40px;
+  border: 1px solid rgba(0, 245, 255, 0.34);
+  border-radius: var(--fj-radius-sm, 10px);
+  background: linear-gradient(135deg, rgba(0, 245, 255, 0.18), rgba(34, 255, 136, 0.12));
+  color: var(--fj-text, #e0f2ff);
+  padding: 8px 12px;
+  font-size: 0.84rem;
+  font-weight: 950;
   cursor: pointer;
+  box-shadow: 0 8px 20px rgba(0, 245, 255, 0.08);
+  transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease, color 160ms ease, opacity 160ms ease;
+}
+
+.fj-update-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  border-color: var(--fj-cyan, #00f5ff);
+  color: var(--fj-cyan, #00f5ff);
+  box-shadow: var(--fj-shadow-strong, 0 0 0 1px rgba(0, 245, 255, 0.2), 0 10px 28px rgba(0, 245, 255, 0.12));
 }
 
 .fj-update-button--secondary {
-  border-color: #2563eb;
-  background: #3b82f6;
+  border-color: rgba(77, 159, 255, 0.34);
+  background: rgba(77, 159, 255, 0.1);
+  color: var(--fj-blue, #4d9fff);
+}
+
+.fj-update-button--secondary:hover:not(:disabled) {
+  border-color: var(--fj-blue, #4d9fff);
+  color: var(--fj-text, #e0f2ff);
+  box-shadow: 0 0 0 1px rgba(77, 159, 255, 0.2), 0 10px 28px rgba(77, 159, 255, 0.12);
 }
 
 .fj-update-button--success {
-  border-color: #15803d;
-  background: #16a34a;
+  border-color: rgba(34, 255, 136, 0.34);
+  background: rgba(34, 255, 136, 0.1);
+  color: var(--fj-green, #22ff88);
+}
+
+.fj-update-button--success:hover:not(:disabled) {
+  border-color: var(--fj-green, #22ff88);
+  color: var(--fj-text, #e0f2ff);
+  box-shadow: 0 0 0 1px rgba(34, 255, 136, 0.2), 0 10px 28px rgba(34, 255, 136, 0.12);
 }
 
 .fj-update-button:disabled {
-  border-color: #cbd5e1;
-  background: #e2e8f0;
-  color: #64748b;
+  border-color: rgba(139, 163, 194, 0.14);
+  background: rgba(139, 163, 194, 0.08);
+  color: rgba(139, 163, 194, 0.48);
   cursor: not-allowed;
+  box-shadow: none;
+  opacity: 0.78;
 }
 
 @media (max-width: 720px) {
   .fj-update-data,
   .fj-update-actions {
     grid-template-columns: 1fr;
+  }
+
+  .fj-update-button {
+    min-height: 38px;
   }
 }
