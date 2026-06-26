@@ -4,8 +4,8 @@
 
   Función o funciones:
     - Construir la pantalla visual Stats de Entrenamiento.
-    - Mostrar un resumen inicial compacto y seguro.
-    - Dejar lista la pantalla para datos locales reales.
+    - Mostrar un resumen local compacto y seguro.
+    - Recibir datos desde entrenamiento.service.js.
 
   Se conecta con:
     - src/features/entrenamiento/stats/stats.controller.js
@@ -17,7 +17,7 @@ import "./stats.css";
 function crearElemento(etiqueta, clase = "", texto = "") {
   const elemento = document.createElement(etiqueta);
   if (clase) elemento.className = clase;
-  if (texto) elemento.textContent = texto;
+  if (texto !== undefined && texto !== null) elemento.textContent = String(texto);
   return elemento;
 }
 
@@ -29,7 +29,7 @@ function crearTarjeta(label, valor, detalle, modificador = "") {
   return tarjeta;
 }
 
-export function crearEntrenamientoStatsView() {
+export function crearEntrenamientoStatsView(resumen = {}) {
   const pantalla = crearElemento("section", "entreno-stats-screen");
   const header = crearElemento("div", "entreno-stats-header");
   const grid = crearElemento("div", "entreno-stats-grid");
@@ -39,15 +39,15 @@ export function crearEntrenamientoStatsView() {
   header.appendChild(crearElemento("h2", "", "Stats"));
   header.appendChild(crearElemento("p", "", "Resumen compacto para controlar actividad, descanso y progreso."));
 
-  grid.appendChild(crearTarjeta("Días activos", "0", "Pendiente de datos", "entreno-stats-card--ok"));
-  grid.appendChild(crearTarjeta("Descanso", "0", "Pendiente de datos", "entreno-stats-card--info"));
-  grid.appendChild(crearTarjeta("Ejercicios", "0", "Pendiente de datos", "entreno-stats-card--accent"));
-  grid.appendChild(crearTarjeta("Tiempo", "0 min", "Pendiente de datos", "entreno-stats-card--ok"));
-  grid.appendChild(crearTarjeta("Cardio", "0", "Pendiente de datos", "entreno-stats-card--info"));
-  grid.appendChild(crearTarjeta("Estado", "Base", "Lista para conectar", "entreno-stats-card--accent"));
+  grid.appendChild(crearTarjeta("Rutinas", resumen.totalRutinas ?? 0, `${resumen.rutinasActivas ?? 0} activa`, "entreno-stats-card--ok"));
+  grid.appendChild(crearTarjeta("Sesiones", resumen.sesionesCompletadas ?? 0, `${resumen.sesionesHoy ?? 0} hoy`, "entreno-stats-card--info"));
+  grid.appendChild(crearTarjeta("Ejercicios", resumen.ejerciciosCompletados ?? 0, "Completados", "entreno-stats-card--accent"));
+  grid.appendChild(crearTarjeta("Series", resumen.seriesCompletadas ?? 0, `${resumen.repeticionesCompletadas ?? 0} repeticiones`, "entreno-stats-card--ok"));
+  grid.appendChild(crearTarjeta("Tiempo", `${resumen.tiempoTotalMinutos ?? 0} min`, "Total registrado", "entreno-stats-card--info"));
+  grid.appendChild(crearTarjeta("Cardio", resumen.cardioHoy ?? 0, `Cam ${resumen.caminatas ?? 0} / Bic ${resumen.bicicleta ?? 0}`, "entreno-stats-card--accent"));
 
-  panel.appendChild(crearElemento("h3", "", "Estado del bloque"));
-  panel.appendChild(crearElemento("p", "entreno-stats-note", "Pantalla creada. En el siguiente bloque se conectará el guardado local."));
+  panel.appendChild(crearElemento("h3", "", "Conexión local"));
+  panel.appendChild(crearElemento("p", "entreno-stats-note", `IA: ${resumen.iaActiva ? "activa" : "inactiva"} · Voz: ${resumen.vozActiva ? "activa" : "inactiva"} · Gemini: ${resumen.tieneGemini ? "configurado" : "pendiente"}`));
 
   pantalla.appendChild(header);
   pantalla.appendChild(grid);
