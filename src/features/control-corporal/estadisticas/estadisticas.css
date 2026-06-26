@@ -1,0 +1,248 @@
+/*
+  Nombre completo: estadisticas.css
+  Ruta o ubicación: src/features/control-corporal/estadisticas/estadisticas.css
+
+  Función o funciones:
+    - Dar estilo propio a la pantalla Estadísticas.
+    - Convertir el dashboard en una vista oscura, compacta y tecnológica.
+    - Usar indicadores neon para progreso, pendiente, alerta e información.
+
+  Se conecta con:
+    - src/features/control-corporal/estadisticas/estadisticas.view.js
+    - src/features/control-corporal/estadisticas/estadisticas.controller.js
+*/
+
+.estadisticas-screen {
+  display: grid;
+  gap: 10px;
+}
+
+.estadisticas-header,
+.estadisticas-chart-card,
+.estadisticas-measures {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--fj-border, #1e2a44);
+  border-radius: var(--fj-radius, 12px);
+  background: linear-gradient(145deg, rgba(18, 26, 43, 0.98), rgba(10, 15, 28, 0.95));
+  padding: 11px;
+  box-shadow: var(--fj-shadow, 0 8px 20px rgba(0, 245, 255, 0.08));
+}
+
+.estadisticas-header::before,
+.estadisticas-chart-card::before,
+.estadisticas-measures::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  background: var(--fj-cyan, #00f5ff);
+  box-shadow: 0 0 14px rgba(0, 245, 255, 0.5);
+}
+
+.estadisticas-kicker {
+  margin: 0 0 4px;
+  color: var(--fj-cyan, #00f5ff);
+  font-size: 0.7rem;
+  font-weight: 900;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+
+.estadisticas-header h2,
+.estadisticas-chart-card h3,
+.estadisticas-measures h3 {
+  margin: 0 0 6px;
+  color: var(--fj-text, #e0f2ff);
+  font-size: 1.08rem;
+  line-height: 1.15;
+}
+
+.estadisticas-header p:last-child {
+  margin: 0;
+  color: var(--fj-muted, #8ba3c2);
+  font-size: 0.84rem;
+  line-height: 1.35;
+}
+
+.estadisticas-cards,
+.estadisticas-measures__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.estadisticas-card {
+  position: relative;
+  overflow: hidden;
+  min-height: 82px;
+  border: 1px solid var(--fj-border, #1e2a44);
+  border-radius: var(--fj-radius, 12px);
+  background: rgba(18, 26, 43, 0.96);
+  padding: 10px 10px 10px 13px;
+  box-shadow: 0 8px 20px rgba(0, 245, 255, 0.055);
+  transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
+}
+
+.estadisticas-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  background: var(--fj-cyan, #00f5ff);
+  box-shadow: 0 0 14px rgba(0, 245, 255, 0.45);
+}
+
+.estadisticas-card:hover {
+  transform: translateY(-1px);
+  border-color: rgba(0, 245, 255, 0.35);
+  background: rgba(22, 32, 54, 0.98);
+  box-shadow: var(--fj-shadow-strong, 0 0 0 1px rgba(0, 245, 255, 0.2), 0 10px 28px rgba(0, 245, 255, 0.12));
+}
+
+.estadisticas-card__label {
+  margin: 0 0 4px;
+  color: var(--fj-muted, #8ba3c2);
+  font-size: 0.72rem;
+  font-weight: 850;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.estadisticas-card__value {
+  display: block;
+  color: var(--fj-text, #e0f2ff);
+  font-size: 1.1rem;
+  line-height: 1.1;
+}
+
+.estadisticas-card__detail {
+  display: block;
+  margin-top: 4px;
+  color: var(--fj-muted, #8ba3c2);
+  font-size: 0.75rem;
+  font-weight: 750;
+}
+
+.estadisticas-card--progreso {
+  border-color: rgba(34, 255, 136, 0.28);
+  background: linear-gradient(145deg, rgba(34, 255, 136, 0.1), rgba(18, 26, 43, 0.96));
+}
+
+.estadisticas-card--progreso::before {
+  background: var(--fj-green, #22ff88);
+  box-shadow: 0 0 15px rgba(34, 255, 136, 0.55);
+}
+
+.estadisticas-card--pendiente {
+  border-color: rgba(0, 245, 255, 0.26);
+  background: linear-gradient(145deg, rgba(0, 245, 255, 0.09), rgba(18, 26, 43, 0.96));
+}
+
+.estadisticas-card--pendiente::before {
+  background: var(--fj-cyan, #00f5ff);
+  box-shadow: 0 0 15px rgba(0, 245, 255, 0.55);
+}
+
+.estadisticas-card--alerta {
+  border-color: rgba(255, 59, 92, 0.3);
+  background: linear-gradient(145deg, rgba(255, 59, 92, 0.1), rgba(18, 26, 43, 0.96));
+}
+
+.estadisticas-card--alerta::before {
+  background: var(--fj-red, #ff3b5c);
+  box-shadow: 0 0 15px rgba(255, 59, 92, 0.55);
+}
+
+.estadisticas-card--info {
+  border-color: rgba(77, 159, 255, 0.3);
+  background: linear-gradient(145deg, rgba(77, 159, 255, 0.1), rgba(18, 26, 43, 0.96));
+}
+
+.estadisticas-card--info::before {
+  background: var(--fj-blue, #4d9fff);
+  box-shadow: 0 0 15px rgba(77, 159, 255, 0.55);
+}
+
+.estadisticas-card--small {
+  min-height: 70px;
+}
+
+.estadisticas-progress {
+  position: relative;
+  overflow: hidden;
+  min-height: 34px;
+  border: 1px solid rgba(34, 255, 136, 0.32);
+  border-radius: 999px;
+  background: rgba(18, 26, 43, 0.96);
+  box-shadow: 0 0 0 1px rgba(34, 255, 136, 0.08), var(--fj-shadow, 0 8px 20px rgba(0, 245, 255, 0.08));
+}
+
+.estadisticas-progress__bar {
+  height: 34px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--fj-green, #22ff88), var(--fj-cyan, #00f5ff));
+  box-shadow: 0 0 18px rgba(34, 255, 136, 0.35);
+}
+
+.estadisticas-progress__text {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--fj-text, #e0f2ff);
+  font-size: 0.82rem;
+  font-weight: 900;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.45);
+}
+
+.estadisticas-chart {
+  width: 100%;
+  min-height: 150px;
+  color: var(--fj-cyan, #00f5ff);
+  background:
+    linear-gradient(rgba(0, 245, 255, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 245, 255, 0.08) 1px, transparent 1px),
+    linear-gradient(180deg, rgba(14, 22, 39, 0.95), rgba(10, 15, 28, 0.95));
+  background-size: 28px 28px, 28px 28px, 100% 100%;
+  border: 1px solid var(--fj-border, #1e2a44);
+  border-radius: var(--fj-radius, 12px);
+  filter: drop-shadow(0 0 10px rgba(0, 245, 255, 0.16));
+}
+
+.estadisticas-chart__detail,
+.estadisticas-empty {
+  margin: 7px 0 0;
+  color: var(--fj-muted, #8ba3c2);
+  font-size: 0.8rem;
+  font-weight: 750;
+}
+
+.estadisticas-empty {
+  border: 1px solid rgba(0, 245, 255, 0.18);
+  border-radius: var(--fj-radius, 12px);
+  background: rgba(18, 26, 43, 0.72);
+  padding: 10px 11px;
+}
+
+@media (max-width: 760px) {
+  .estadisticas-cards,
+  .estadisticas-measures__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 7px;
+  }
+
+  .estadisticas-header,
+  .estadisticas-chart-card,
+  .estadisticas-measures,
+  .estadisticas-card {
+    padding: 10px;
+  }
+}
+
+@media (max-width: 460px) {
+  .estadisticas-cards,
+  .estadisticas-measures__grid {
+    grid-template-columns: 1fr;
+  }
+}
