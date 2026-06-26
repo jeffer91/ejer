@@ -12,6 +12,16 @@ Módulo grande de FitJeff para rutinas, entrenamiento diario, estadísticas, HIT
 
 ## Estado del bloque 1
 
-Este bloque crea la estructura visual y conecta el módulo al menú principal.
+Estructura visual conectada al menú principal.
 
-Los datos locales, guardado real, Gemini y voz se completan en los siguientes bloques.
+## Estado del bloque 2
+
+Capa local creada para guardar y leer:
+
+- Rutinas.
+- Sesiones de entrenamiento.
+- Registros de cardio.
+- Ajustes de Gemini, IA y voz.
+- Historial de cambios.
+
+Las pantallas `Stats`, `Diario`, `Rutinas` y `Ajustes` ya leen el estado local. El formulario editable y las acciones reales se completan en los siguientes bloques.
