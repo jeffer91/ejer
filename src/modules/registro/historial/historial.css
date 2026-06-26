@@ -4,8 +4,8 @@
 
   Función o funciones:
     - Dar estilo propio a la pantalla Historial.
-    - Mostrar registros en tarjetas compactas y claras.
-    - Separar visualmente acciones de editar, cambios y borrar.
+    - Mostrar registros en tarjetas compactas, oscuras y premium.
+    - Separar visualmente acciones de editar, cambios y borrar con acentos neon.
 
   Se conecta con:
     - src/modules/registro/historial/historial.view.js
@@ -14,111 +14,179 @@
 
 .historial-screen {
   display: grid;
-  gap: 14px;
+  gap: 10px;
 }
 
 .historial-header,
 .historial-card,
 .historial-empty {
-  border: 1px solid #dce3ec;
-  border-radius: 20px;
-  background: #ffffff;
-  padding: 16px;
-  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.05);
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--fj-border, #1e2a44);
+  border-radius: var(--fj-radius, 12px);
+  background: linear-gradient(145deg, rgba(18, 26, 43, 0.98), rgba(10, 15, 28, 0.95));
+  padding: 11px;
+  box-shadow: var(--fj-shadow, 0 8px 20px rgba(0, 245, 255, 0.08));
+}
+
+.historial-header::before,
+.historial-card::before,
+.historial-empty::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  background: var(--fj-cyan, #00f5ff);
+  box-shadow: 0 0 14px rgba(0, 245, 255, 0.45);
+}
+
+.historial-card {
+  padding-left: 13px;
+  transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
+}
+
+.historial-card:hover {
+  transform: translateY(-1px);
+  border-color: rgba(0, 245, 255, 0.34);
+  background: linear-gradient(145deg, rgba(22, 32, 54, 0.98), rgba(10, 15, 28, 0.96));
+  box-shadow: var(--fj-shadow-strong, 0 0 0 1px rgba(0, 245, 255, 0.2), 0 10px 28px rgba(0, 245, 255, 0.12));
 }
 
 .historial-kicker {
-  margin: 0 0 6px;
-  color: #15803d;
-  font-size: 0.78rem;
+  margin: 0 0 4px;
+  color: var(--fj-cyan, #00f5ff);
+  font-size: 0.7rem;
   font-weight: 900;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.11em;
   text-transform: uppercase;
 }
 
 .historial-header h2 {
-  margin: 0 0 8px;
-  font-size: 1.45rem;
+  margin: 0 0 6px;
+  color: var(--fj-text, #e0f2ff);
+  font-size: 1.08rem;
+  line-height: 1.15;
 }
 
 .historial-header p:last-child {
   margin: 0;
-  color: #64748b;
+  color: var(--fj-muted, #8ba3c2);
+  font-size: 0.84rem;
+  line-height: 1.35;
 }
 
 .historial-list {
   display: grid;
-  gap: 10px;
+  gap: 8px;
 }
 
 .historial-card__header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 12px;
+  gap: 9px;
 }
 
 .historial-card h3 {
-  margin: 0 0 4px;
-  font-size: 1.05rem;
+  margin: 0 0 3px;
+  color: var(--fj-text, #e0f2ff);
+  font-size: 0.98rem;
+  line-height: 1.15;
 }
 
 .historial-card__date {
   margin: 0;
-  color: #64748b;
-  font-weight: 700;
+  color: var(--fj-muted, #8ba3c2);
+  font-size: 0.76rem;
+  font-weight: 800;
 }
 
 .historial-card__summary {
-  margin: 12px 0 0;
-  color: #334155;
-  line-height: 1.45;
+  margin: 8px 0 0;
+  color: var(--fj-muted, #8ba3c2);
+  font-size: 0.84rem;
+  line-height: 1.35;
 }
 
 .historial-card__actions {
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-end;
-  gap: 7px;
+  gap: 6px;
 }
 
 .historial-button {
-  border: 1px solid #dce3ec;
-  border-radius: 12px;
-  background: #ffffff;
-  color: #334155;
+  min-height: 34px;
+  border: 1px solid var(--fj-border, #1e2a44);
+  border-radius: var(--fj-radius-sm, 10px);
+  background: rgba(14, 22, 39, 0.95);
+  color: var(--fj-text, #e0f2ff);
   cursor: pointer;
-  font-weight: 800;
-  padding: 8px 10px;
+  font-size: 0.76rem;
+  font-weight: 900;
+  padding: 7px 9px;
+  transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease, color 160ms ease, background 160ms ease;
+}
+
+.historial-button:hover {
+  transform: translateY(-1px);
+  background: rgba(22, 32, 54, 0.98);
 }
 
 .historial-button--editar {
-  border-color: #bbf7d0;
-  color: #15803d;
+  border-color: rgba(34, 255, 136, 0.3);
+  color: var(--fj-green, #22ff88);
+}
+
+.historial-button--editar:hover {
+  border-color: var(--fj-green, #22ff88);
+  box-shadow: 0 0 16px rgba(34, 255, 136, 0.12);
 }
 
 .historial-button--cambios {
-  border-color: #bfdbfe;
-  color: #1d4ed8;
+  border-color: rgba(77, 159, 255, 0.32);
+  color: var(--fj-blue, #4d9fff);
+}
+
+.historial-button--cambios:hover {
+  border-color: var(--fj-blue, #4d9fff);
+  box-shadow: 0 0 16px rgba(77, 159, 255, 0.12);
 }
 
 .historial-button--borrar {
-  border-color: #fecaca;
-  color: #b91c1c;
+  border-color: rgba(255, 59, 92, 0.32);
+  color: var(--fj-red, #ff3b5c);
+}
+
+.historial-button--borrar:hover {
+  border-color: var(--fj-red, #ff3b5c);
+  box-shadow: 0 0 16px rgba(255, 59, 92, 0.12);
 }
 
 .historial-empty {
   margin: 0;
-  color: #64748b;
-  font-weight: 800;
+  color: var(--fj-muted, #8ba3c2);
+  font-size: 0.84rem;
+  font-weight: 850;
 }
 
 @media (max-width: 640px) {
+  .historial-header,
+  .historial-card,
+  .historial-empty {
+    padding: 10px;
+  }
+
   .historial-card__header {
     flex-direction: column;
   }
 
   .historial-card__actions {
     justify-content: flex-start;
+  }
+
+  .historial-button {
+    min-height: 33px;
+    padding: 7px 8px;
   }
 }
