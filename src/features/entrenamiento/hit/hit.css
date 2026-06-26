@@ -1,0 +1,9 @@
+.entreno-hit-screen { display: grid; gap: 10px; }
+.entreno-hit-header, .entreno-hit-card, .entreno-hit-timer { border: 1px solid var(--fj-border, #1e2a44); border-radius: var(--fj-radius, 12px); background: var(--fj-surface, #121a2b); padding: 11px; }
+.entreno-hit-header h2, .entreno-hit-card h3, .entreno-hit-timer h3 { margin: 0; }
+.entreno-hit-header p, .entreno-hit-card p, .entreno-hit-timer p { color: var(--fj-muted, #8ba3c2); font-size: 0.84rem; }
+.entreno-hit-kicker { color: var(--fj-cyan, #00f5ff) !important; font-size: 0.72rem !important; font-weight: 950; text-transform: uppercase; }
+.entreno-hit-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 8px; }
+.entreno-hit-card { display: grid; gap: 6px; }
+.entreno-hit-badge { width: max-content; border: 1px solid var(--fj-border, #1e2a44); border-radius: 999px; padding: 5px 8px; color: var(--fj-muted, #8ba3c2); font-size: 0.72rem; font-weight: 850; }
+.entreno-hit-time { display: block; margin-top: 8px; color: var(--fj-cyan, #00f5ff); font-size: 2rem; line-height: 1; }
