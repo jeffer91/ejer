@@ -12,13 +12,13 @@
     - src/core/firebase/firebase-database.service.js
     - src/core/sync/sync-queue.service.js
     - src/core/sync/sync-status.service.js
-    - src/modules/registro/registro.service.js
+    - src/features/control-corporal/registro.service.js
 */
 
 import { crearFirebaseDatabaseService } from "../firebase/firebase-database.service.js";
 import { crearSyncQueueService } from "./sync-queue.service.js";
 import { crearSyncStatusService } from "./sync-status.service.js";
-import { crearRegistroService } from "../../modules/registro/registro.service.js";
+import { crearRegistroService } from "../../features/control-corporal/registro.service.js";
 
 export function crearSyncService({
   firebaseDatabase = crearFirebaseDatabaseService(),
