@@ -71,7 +71,7 @@ export function crearVentanaPrincipal() {
     minWidth: 980,
     minHeight: 680,
     title: "FitJeff",
-    backgroundColor: "#f6f7fb",
+    backgroundColor: "#0a0f1c",
     show: false,
     webPreferences: {
       preload: obtenerPreloadPath(),
