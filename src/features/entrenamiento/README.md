@@ -51,3 +51,16 @@ Los cálculos viven en `stats/stats.service.js` para no mezclar lógica con la v
 - Opción para guardar como rutina activa.
 
 La validación vive en `rutinas/rutinas.validator.js` y la conversión del formulario vive en `rutinas/rutinas.service.js`.
+
+## Estado del bloque 5
+
+`Diario` ahora carga la rutina activa del día y permite:
+
+- Ver rutina y día asignado.
+- Ver ejercicios preparados.
+- Ver series, repeticiones y tiempo estimado.
+- Iniciar sesión diaria.
+- Completar sesión diaria.
+- Guardar el resultado localmente.
+
+La lógica vive en `diario/diario.service.js` para mantener separada la pantalla de los cálculos y el guardado.
