@@ -4,25 +4,45 @@
 
   Función o funciones:
     - Montar la pantalla Rutinas del módulo Entrenamiento.
-    - Leer rutinas locales desde entrenamiento.service.js.
-    - Preparar el formulario base para crear planes.
+    - Crear rutinas reales con datos del formulario.
+    - Activar rutinas guardadas y refrescar la pantalla.
 
   Se conecta con:
-    - src/features/entrenamiento/entrenamiento.service.js
+    - src/features/entrenamiento/rutinas/rutinas.service.js
     - src/features/entrenamiento/rutinas/rutinas.view.js
     - src/features/entrenamiento/entrenamiento.module.js
 */
 
-import { crearEntrenamientoService } from "../entrenamiento.service.js";
+import { crearRutinasService } from "./rutinas.service.js";
 import { crearEntrenamientoRutinasView } from "./rutinas.view.js";
 
 export function crearEntrenamientoRutinasController() {
-  const service = crearEntrenamientoService();
+  const service = crearRutinasService();
+  let contenedorActual = null;
+  let mensajeActual = null;
+
+  function refrescar(mensaje = mensajeActual) {
+    if (!contenedorActual) return;
+
+    mensajeActual = mensaje;
+    contenedorActual.innerHTML = "";
+    contenedorActual.appendChild(crearEntrenamientoRutinasView({
+      rutinas: service.obtenerRutinas(),
+      mensaje,
+      onGuardar: (datos) => {
+        const resultado = service.crearDesdeFormulario(datos);
+        refrescar(resultado);
+      },
+      onActivar: (rutinaId) => {
+        const resultado = service.activar(rutinaId);
+        refrescar(resultado);
+      }
+    }));
+  }
 
   function montar(contenedor) {
-    const estado = service.obtenerEstado();
-    contenedor.innerHTML = "";
-    contenedor.appendChild(crearEntrenamientoRutinasView({ rutinas: estado.rutinas }));
+    contenedorActual = contenedor;
+    refrescar(null);
   }
 
   return {
