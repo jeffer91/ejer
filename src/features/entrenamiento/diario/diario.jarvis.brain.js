@@ -7,6 +7,7 @@
     - Interpretar comandos hablados durante la sesión.
     - Actualizar el formulario del Diario con repeticiones, tiempo, distancia, fallo, notas y progreso.
     - Ejecutar acciones de Diario desde voz: iniciar, guardar, completar, siguiente y repetir.
+    - Evitar que Jarvis quede activo sobre una vista vieja cuando Diario se recarga.
 
   Se conecta con:
     - src/features/entrenamiento/diario/diario.jarvis.js
@@ -44,6 +45,25 @@ function hacerClickAccion(pantalla, textoBoton) {
   const boton = obtenerBotonPorTexto(pantalla, textoBoton);
   if (!boton || boton.disabled) return false;
   boton.click();
+  return true;
+}
+
+function detenerJarvisAntesDeRecargar(pantalla) {
+  const botonJarvis = pantalla?.querySelector(".entreno-diario-button--jarvis");
+  if (botonJarvis && normalizar(botonJarvis.textContent).includes("detener")) {
+    botonJarvis.click();
+  }
+}
+
+function programarClickAccionConRecarga(pantalla, textoBoton) {
+  const boton = obtenerBotonPorTexto(pantalla, textoBoton);
+  if (!boton || boton.disabled) return false;
+
+  window.setTimeout(() => {
+    detenerJarvisAntesDeRecargar(pantalla);
+    boton.click();
+  }, 900);
+
   return true;
 }
 
@@ -334,7 +354,6 @@ export function procesarComandoJarvis({ frase = "", diario = {}, pantalla = {}, 
   let respuesta = "Comando escuchado, pero todavía no sé ejecutarlo.";
 
   if (comandoContiene(limpia, ["iniciemos", "iniciar", "empezar", "comencemos"])) {
-    hacerClickAccion(pantalla, "Iniciar sesión");
     indiceEjercicioActual = buscarSiguientePendiente(pantalla, diario);
     respuesta = `Iniciamos. ${responderEjercicioActual(diario)}`;
   } else if (comandoContiene(limpia, ["siguiente", "listo", "ya esta", "ya está"])) {
@@ -362,9 +381,17 @@ export function procesarComandoJarvis({ frase = "", diario = {}, pantalla = {}, 
   } else if (comandoContiene(limpia, ["me duele", "me dolio", "dolor", "molestia"])) {
     respuesta = marcarMolestia(pantalla, diario, limpia);
   } else if (comandoContiene(limpia, ["guarda", "guardar progreso", "guardar"])) {
-    respuesta = hacerClickAccion(pantalla, "Guardar progreso") ? "Progreso guardado." : "No pude guardar el progreso.";
+    respuesta = programarClickAccionConRecarga(pantalla, "Guardar progreso")
+      ? "Guardo el progreso. Jarvis se apagará para evitar duplicar el micrófono después de recargar Diario."
+      : "No pude guardar el progreso.";
   } else if (comandoContiene(limpia, ["terminar", "finalizar", "completar", "cerrar sesion", "cerrar sesión"])) {
-    respuesta = hacerClickAccion(pantalla, "Completar sesión") ? "Cierro la sesión con los datos registrados." : "No pude completar la sesión.";
+    respuesta = programarClickAccionConRecarga(pantalla, "Completar sesión")
+      ? "Cierro la sesión con los datos registrados. Jarvis se apagará al recargar Diario."
+      : "No pude completar la sesión.";
+  } else if (comandoContiene(limpia, ["sesion", "sesión"])) {
+    respuesta = hacerClickAccion(pantalla, "Iniciar sesión")
+      ? "Sesión iniciada desde el botón del Diario. Si la pantalla se recarga, vuelve a activar Jarvis."
+      : "No pude iniciar la sesión desde el botón.";
   }
 
   responder?.(respuesta, crearContextoJarvisCompleto({ diario, pantalla, frase }));
