@@ -24,21 +24,21 @@ const SYSTEM_MODULE = {
   id: "sistema",
   label: "Sistema",
   shortLabel: "Sistema",
-  description: "Actualizaciones, ajustes y respaldo.",
+  description: "Ajustes, versiones y respaldo.",
   defaultRoute: "actualizaciones",
   status: "App lista",
   routes: [
     {
       id: "actualizaciones",
-      label: "Actualizaciones",
-      shortLabel: "Updates",
-      description: "Versiones de la app"
+      label: "Versiones",
+      shortLabel: "Versiones",
+      description: "Actualizar la app"
     },
     {
       id: "ajustes",
       label: "Ajustes",
       shortLabel: "Ajustes",
-      description: "Perfil y respaldo"
+      description: "Perfil, respaldo y preferencias"
     }
   ]
 };
