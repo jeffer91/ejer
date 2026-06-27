@@ -10,6 +10,7 @@
     - Guardar rutinas IA interpretadas como rutinas reales de FitJeff.
     - Editar ejercicios avanzados de rutinas IA sin perder bloques ni tipos.
     - Ejecutar diagnóstico rápido del flujo IA sin guardar datos.
+    - Borrar rutinas con confirmación desde la pantalla.
     - Editar, duplicar, activar, archivar y restaurar rutinas guardadas.
 
   Se conecta con:
@@ -17,9 +18,11 @@
     - src/features/entrenamiento/rutinas/rutinas.view.js
     - src/features/entrenamiento/rutinas/rutinas.parser.js
     - src/features/entrenamiento/rutinas/rutinas.ia.diagnostics.js
+    - src/features/entrenamiento/rutinas/rutinas.delete-actions.js
     - src/features/entrenamiento/entrenamiento.module.js
 */
 
+import { insertarBotonesBorrarRutina } from "./rutinas.delete-actions.js";
 import { ejecutarDiagnosticoRutinaIA, insertarPanelDiagnosticoRutinaIA } from "./rutinas.ia.diagnostics.js";
 import { convertirRutinaIAATextoSimple, interpretarRutinaIA } from "./rutinas.parser.js";
 import { crearRutinasService } from "./rutinas.service.js";
@@ -85,8 +88,9 @@ export function crearEntrenamientoRutinasController() {
     mensajeActual = mensaje;
     contenedorActual.innerHTML = "";
 
+    const rutinas = service.obtenerRutinas();
     const vista = crearEntrenamientoRutinasView({
-      rutinas: service.obtenerRutinas(),
+      rutinas,
       mensaje,
       onInterpretarRutinaIA: interpretarTextoRutinaIA,
       onGuardarRutinaIA: (resultadoIA) => refrescar(guardarRutinaIA(resultadoIA)),
@@ -101,6 +105,10 @@ export function crearEntrenamientoRutinasController() {
     });
 
     contenedorActual.appendChild(vista);
+    insertarBotonesBorrarRutina(vista, {
+      rutinas,
+      onBorrar: (rutinaId) => refrescar(service.borrar(rutinaId))
+    });
     insertarPanelDiagnosticoRutinaIA(vista, { onEjecutar: diagnosticarFlujoIA });
   }
 
