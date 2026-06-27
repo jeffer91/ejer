@@ -22,21 +22,21 @@ export const CONTROL_CORPORAL_ROUTES = {
 export const CONTROL_CORPORAL_ROUTE_ITEMS = [
   {
     id: CONTROL_CORPORAL_ROUTES.ESTADISTICAS,
-    label: "Estadísticas",
-    shortLabel: "Stats",
-    description: "Resumen y progreso"
+    label: "Progreso",
+    shortLabel: "Progreso",
+    description: "Resumen de peso y medidas"
   },
   {
     id: CONTROL_CORPORAL_ROUTES.REGISTRO,
-    label: "Registro",
-    shortLabel: "Registro",
-    description: "Peso y medidas"
+    label: "Registrar datos",
+    shortLabel: "Registrar",
+    description: "Agregar peso y medidas"
   },
   {
     id: CONTROL_CORPORAL_ROUTES.HISTORIAL,
     label: "Historial",
     shortLabel: "Historial",
-    description: "Cambios guardados"
+    description: "Ver registros guardados"
   }
 ];
 
