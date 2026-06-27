@@ -17,6 +17,7 @@ import {
 import {
   crearAjustesEntrenamientoBase,
   crearCardioEntrenamientoBase,
+  crearDetalleEjercicioSesionBase,
   crearDiaRutinaBase,
   crearEjercicioEntrenamientoBase,
   crearRutinaEntrenamientoBase,
@@ -51,6 +52,21 @@ export function normalizarEjercicioEntrenamiento(datos = {}) {
     descansoSegundos: limitar(numero(base.descansoSegundos, 60), 0, 600),
     notas: texto(base.notas),
     completado: Boolean(base.completado)
+  };
+}
+
+export function normalizarDetalleEjercicioSesion(datos = {}) {
+  const base = crearDetalleEjercicioSesionBase(datos);
+
+  return {
+    ...base,
+    ejercicioId: texto(base.ejercicioId),
+    nombre: texto(base.nombre, "Ejercicio"),
+    completado: Boolean(base.completado),
+    seriesCompletadas: Math.max(numero(base.seriesCompletadas, 0), 0),
+    repeticionesCompletadas: Math.max(numero(base.repeticionesCompletadas, 0), 0),
+    dificultad: texto(base.dificultad, "media"),
+    notas: texto(base.notas)
   };
 }
 
@@ -96,6 +112,9 @@ export function normalizarSesionEntrenamiento(datos = {}) {
     seriesCompletadas: Math.max(numero(base.seriesCompletadas, 0), 0),
     repeticionesCompletadas: Math.max(numero(base.repeticionesCompletadas, 0), 0),
     tiempoMinutos: Math.max(numero(base.tiempoMinutos, 0), 0),
+    dificultadGeneral: texto(base.dificultadGeneral, "media"),
+    molestias: texto(base.molestias),
+    detalleEjercicios: lista(base.detalleEjercicios).map(normalizarDetalleEjercicioSesion),
     notas: texto(base.notas),
     actualizadoEn: new Date().toISOString()
   };
