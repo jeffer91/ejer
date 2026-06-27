@@ -44,6 +44,14 @@ npm run electron:dev
 - HIT debe registrar cardio y mostrar últimos registros.
 - Ajustes debe guardar IA, voz y Gemini en localStorage.
 - Stats debe mostrar datos y alertas.
+- La fecha de Diario, HIT y Stats debe respetar el día local del computador.
+
+## Correcciones de la última revisión
+
+- Se reforzó la validación de rutinas para no aceptar solo títulos como Día 1 o Día 2.
+- Se agregó diagnóstico interno para detectar inconsistencias básicas.
+- Se corrigió la fecha local para evitar desfases por UTC durante la noche.
+- Stats ahora usa fechas locales para semana, racha y actividad diaria.
 
 ## Pendiente después de primera versión
 
