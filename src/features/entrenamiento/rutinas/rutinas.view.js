@@ -7,6 +7,7 @@
     - Permitir crear rutinas locales con días iguales o diferentes.
     - Pegar e interpretar rutinas generadas por IA con el contrato FITJEFF_RUTINA_V1.
     - Mostrar una vista previa antes de guardar una rutina interpretada por IA.
+    - Mostrar rutinas guardadas con bloques, tipos, cardio, fútbol, duración y notas.
     - Cargar una rutina interpretada por IA dentro del formulario manual.
     - Guardar una rutina interpretada por IA como rutina real de FitJeff.
     - Editar, duplicar, activar, archivar y restaurar rutinas guardadas.
@@ -381,6 +382,7 @@ function calcularTotales(rutina) {
   const dias = rutina.dias || [];
   return {
     dias: dias.length,
+    bloques: dias.reduce((total, dia) => total + (dia.bloques || []).length, 0),
     ejercicios: dias.reduce((total, dia) => total + (dia.ejercicios || []).length, 0),
     series: dias.reduce((total, dia) => total + (dia.ejercicios || []).reduce((subtotal, ejercicio) => subtotal + Number(ejercicio.series || 0), 0), 0)
   };
@@ -408,16 +410,115 @@ function obtenerBaseEdicion(rutina) {
   };
 }
 
+function crearChipRutina(textoChip, clase = "") {
+  if (!textoChip && textoChip !== 0) return null;
+  return crearElemento("span", `entreno-rutinas-chip ${clase}`.trim(), textoChip);
+}
+
+function crearMetaRutinaGuardada(rutina = {}) {
+  const meta = crearElemento("div", "entreno-rutinas-card-meta");
+  const chips = [
+    rutina.origen === "ia" ? crearChipRutina("IA", "entreno-rutinas-chip--ia") : null,
+    crearChipRutina(rutina.objetivo),
+    crearChipRutina(rutina.nivel),
+    crearChipRutina(rutina.lugar),
+    crearChipRutina(rutina.equipo),
+    crearChipRutina(rutina.duracionSesion)
+  ].filter(Boolean);
+
+  chips.forEach((chip) => meta.appendChild(chip));
+  return meta.childNodes.length ? meta : null;
+}
+
+function crearDetalleEjercicioGuardado(ejercicio = {}) {
+  const partes = [];
+
+  if (ejercicio.series && ejercicio.repeticiones) partes.push(`${ejercicio.series}x${ejercicio.repeticiones}`);
+  else if (ejercicio.series) partes.push(`${ejercicio.series} serie(s)`);
+  else if (ejercicio.repeticiones) partes.push(`${ejercicio.repeticiones} rep.`);
+
+  if (ejercicio.duracionMinutos) partes.push(`${ejercicio.duracionMinutos} min`);
+  if (ejercicio.descansoSegundos) partes.push(`descanso ${ejercicio.descansoSegundos}s`);
+  if (ejercicio.intensidad) partes.push(ejercicio.intensidad);
+  if (ejercicio.notas) partes.push(ejercicio.notas);
+
+  return partes.join(" · ");
+}
+
+function crearEjercicioGuardado(ejercicio = {}) {
+  const item = crearElemento("div", "entreno-rutinas-saved-exercise");
+  const nombre = crearElemento("strong", "", ejercicio.nombre || "Ejercicio");
+  const tipo = crearChipRutina(ejercicio.tipo || "manual", `entreno-rutinas-chip--type entreno-rutinas-chip--${ejercicio.tipo || "manual"}`);
+  const detalle = crearDetalleEjercicioGuardado(ejercicio);
+  const top = crearElemento("div", "entreno-rutinas-saved-exercise__top");
+
+  top.appendChild(nombre);
+  if (tipo) top.appendChild(tipo);
+  item.appendChild(top);
+  item.appendChild(crearElemento("span", "", detalle || "Sin detalle adicional"));
+  return item;
+}
+
+function obtenerEjerciciosDeBloque(dia = {}, bloque = {}) {
+  const nombreBloque = bloque.nombre || bloque.tipo || "";
+  const tipoBloque = bloque.tipo || "";
+  const ejercicios = dia.ejercicios || [];
+  const porNombre = ejercicios.filter((ejercicio) => ejercicio.bloque && ejercicio.bloque === nombreBloque);
+
+  if (porNombre.length) return porNombre;
+  return ejercicios.filter((ejercicio) => tipoBloque && ejercicio.tipo === tipoBloque);
+}
+
+function crearBloqueGuardado(dia = {}, bloque = {}) {
+  const bloqueNodo = crearElemento("article", "entreno-rutinas-saved-block");
+  const encabezado = crearElemento("div", "entreno-rutinas-saved-block__head");
+  const ejercicios = obtenerEjerciciosDeBloque(dia, bloque);
+  const nombre = crearElemento("strong", "", bloque.nombre || bloque.tipo || "Bloque");
+  const tipo = crearChipRutina(bloque.tipo || "otro", `entreno-rutinas-chip--type entreno-rutinas-chip--${bloque.tipo || "otro"}`);
+
+  encabezado.appendChild(nombre);
+  if (tipo) encabezado.appendChild(tipo);
+  bloqueNodo.appendChild(encabezado);
+
+  if (ejercicios.length === 0) {
+    bloqueNodo.appendChild(crearElemento("small", "", "Bloque detectado sin ejercicios visibles."));
+    return bloqueNodo;
+  }
+
+  ejercicios.forEach((ejercicio) => bloqueNodo.appendChild(crearEjercicioGuardado(ejercicio)));
+  return bloqueNodo;
+}
+
 function crearResumenDias(rutina) {
   const wrapper = crearElemento("div", "entreno-rutinas-days");
 
-  (rutina.dias || []).forEach((dia) => {
+  (rutina.dias || []).forEach((dia, indice) => {
     const bloque = crearElemento("article", "entreno-rutinas-day");
-    bloque.appendChild(crearElemento("strong", "", dia.nombre));
-    bloque.appendChild(crearElemento("span", "", `${(dia.ejercicios || []).length} ejercicio(s)`));
-    (dia.ejercicios || []).slice(0, 5).forEach((ejercicio) => {
-      bloque.appendChild(crearElemento("small", "", `• ${ejercicio.nombre}`));
-    });
+    const header = crearElemento("div", "entreno-rutinas-day__head");
+    const meta = crearElemento("div", "entreno-rutinas-card-meta");
+    const bloques = Array.isArray(dia.bloques) ? dia.bloques : [];
+
+    header.appendChild(crearElemento("strong", "", dia.nombre || `Día ${indice + 1}`));
+    header.appendChild(crearElemento("span", "", `${bloques.length || 0} bloque(s) · ${(dia.ejercicios || []).length} ejercicio(s)`));
+    bloque.appendChild(header);
+
+    [
+      dia.enfoque ? crearChipRutina(`Enfoque: ${dia.enfoque}`) : null,
+      dia.calentamiento ? crearChipRutina(`Calentamiento: ${dia.calentamiento}`) : null
+    ].filter(Boolean).forEach((chip) => meta.appendChild(chip));
+
+    if (meta.childNodes.length) bloque.appendChild(meta);
+
+    if (bloques.length > 0) {
+      const bloquesNodo = crearElemento("div", "entreno-rutinas-saved-blocks");
+      bloques.forEach((bloqueDia) => bloquesNodo.appendChild(crearBloqueGuardado(dia, bloqueDia)));
+      bloque.appendChild(bloquesNodo);
+    } else {
+      const listaSimple = crearElemento("div", "entreno-rutinas-saved-blocks");
+      (dia.ejercicios || []).slice(0, 8).forEach((ejercicio) => listaSimple.appendChild(crearEjercicioGuardado(ejercicio)));
+      if (listaSimple.childNodes.length) bloque.appendChild(listaSimple);
+    }
+
     wrapper.appendChild(bloque);
   });
 
@@ -466,6 +567,7 @@ function crearRutinaCard(rutina, acciones) {
   const botones = crearElemento("div", "entreno-rutinas-card__actions");
   const totales = calcularTotales(rutina);
   const archivada = rutina.estado === "archivada";
+  const metaRutina = crearMetaRutinaGuardada(rutina);
 
   inputNombre.name = "nombre";
   inputNombre.value = rutina.nombre;
@@ -480,7 +582,7 @@ function crearRutinaCard(rutina, acciones) {
   });
 
   info.appendChild(crearElemento("strong", "", rutina.nombre));
-  info.appendChild(crearElemento("span", "", `${totales.dias} día(s) · ${totales.ejercicios} ejercicio(s) · ${totales.series} serie(s) · ${rutina.estado}`));
+  info.appendChild(crearElemento("span", "", `${totales.dias} día(s) · ${totales.bloques} bloque(s) · ${totales.ejercicios} ejercicio(s) · ${totales.series} serie(s) · ${rutina.estado}`));
   top.appendChild(info);
 
   if (!archivada) {
@@ -493,6 +595,7 @@ function crearRutinaCard(rutina, acciones) {
   }
 
   card.appendChild(top);
+  if (metaRutina) card.appendChild(metaRutina);
   card.appendChild(botones);
   card.appendChild(formNombre);
   card.appendChild(crearResumenDias(rutina));
