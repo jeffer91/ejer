@@ -9,12 +9,21 @@
 .entreno-diario-metric span, .entreno-diario-metric small { color: var(--fj-muted, #8ba3c2); font-size: 0.74rem; font-weight: 800; }
 .entreno-diario-metric strong { color: var(--fj-text, #e0f2ff); font-size: 1.15rem; font-weight: 1000; }
 .entreno-diario-mini { display: grid; gap: 5px; color: var(--fj-muted, #8ba3c2); font-size: 0.76rem; font-weight: 850; }
+.entreno-diario-mini--check { align-items: center; grid-template-columns: auto 1fr; min-height: 36px; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 9px; padding: 7px; background: rgba(255, 255, 255, 0.025); }
+.entreno-diario-mini--check input { width: 16px; height: 16px; }
 .entreno-diario-mini input, .entreno-diario-mini select, .entreno-diario-exercise textarea { width: 100%; min-height: 36px; border-radius: 9px; padding: 7px; resize: vertical; }
 .entreno-diario-exercises { display: grid; gap: 8px; margin-top: 2px; }
 .entreno-diario-exercise, .entreno-diario-warmup, .entreno-diario-empty { border: 1px solid var(--fj-border, #1e2a44); border-radius: 10px; padding: 9px; background: rgba(255, 255, 255, 0.02); }
 .entreno-diario-exercise { display: grid; gap: 8px; }
-.entreno-diario-exercise__top { display: flex; align-items: center; gap: 8px; color: var(--fj-text, #e0f2ff); }
-.entreno-diario-exercise__top input { width: 16px; height: 16px; }
+.entreno-diario-exercise__top { display: flex; align-items: flex-start; gap: 8px; color: var(--fj-text, #e0f2ff); }
+.entreno-diario-exercise__top > input { width: 16px; height: 16px; margin-top: 3px; }
+.entreno-diario-exercise__title { display: grid; gap: 5px; width: 100%; }
+.entreno-diario-chips { display: flex; flex-wrap: wrap; gap: 5px; }
+.entreno-diario-chip { border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 999px; padding: 2px 7px; color: var(--fj-muted, #8ba3c2); background: rgba(255, 255, 255, 0.035); font-size: 0.68rem; font-weight: 950; text-transform: uppercase; }
+.entreno-diario-chip--tiempo { border-color: rgba(0, 245, 255, 0.3); color: var(--fj-cyan, #00f5ff); }
+.entreno-diario-chip--mixto { border-color: rgba(167, 139, 250, 0.32); color: #c4b5fd; }
+.entreno-diario-chip--distancia { border-color: rgba(34, 255, 136, 0.3); color: var(--fj-green, #22ff88); }
+.entreno-diario-chip--repeticiones { border-color: rgba(255, 255, 255, 0.16); color: var(--fj-text, #e0f2ff); }
 .entreno-diario-exercise__base, .entreno-diario-warmup, .entreno-diario-empty { color: var(--fj-muted, #8ba3c2); font-size: 0.82rem; font-weight: 780; }
 .entreno-diario-exercise__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; }
 .entreno-diario-actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; margin-top: 2px; }
@@ -26,4 +35,4 @@
 .entreno-diario-message--error { border-color: rgba(255, 59, 92, 0.34); color: var(--fj-red, #ff3b5c); }
 .entreno-diario-message span { color: var(--fj-muted, #8ba3c2); }
 .entreno-diario-safe { border: 1px dashed rgba(0, 245, 255, 0.28); border-radius: 10px; padding: 9px; }
-@media (max-width: 640px) { .entreno-diario-metrics, .entreno-diario-controls, .entreno-diario-exercise__grid, .entreno-diario-actions { grid-template-columns: 1fr; } }
+@media (max-width: 640px) { .entreno-diario-metrics, .entreno-diario-controls, .entreno-diario-exercise__grid, .entreno-diario-actions { grid-template-columns: 1fr; } .entreno-diario-exercise__top { align-items: flex-start; } }
