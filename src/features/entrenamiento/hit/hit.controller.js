@@ -6,14 +6,17 @@
     - Montar la pantalla HIT del módulo Entrenamiento.
     - Registrar intervalos, caminata, bicicleta y otro cardio.
     - Controlar el temporizador simple de intervalos.
+    - Insertar Jarvis HIT para guiar intervalos y registrar cardio por voz o texto.
 
   Se conecta con:
     - src/features/entrenamiento/hit/hit.service.js
     - src/features/entrenamiento/hit/hit.timer.js
     - src/features/entrenamiento/hit/hit.view.js
+    - src/features/entrenamiento/hit/hit.jarvis.js
     - src/features/entrenamiento/entrenamiento.module.js
 */
 
+import { insertarPanelJarvisHit } from "./hit.jarvis.js";
 import { crearHitService } from "./hit.service.js";
 import { crearHitTimer } from "./hit.timer.js";
 import { crearEntrenamientoHitView } from "./hit.view.js";
@@ -62,8 +65,10 @@ export function crearEntrenamientoHitController() {
 
     mensajeActual = mensaje;
     contenedorActual.innerHTML = "";
-    contenedorActual.appendChild(crearEntrenamientoHitView({
-      estado: service.obtenerEstado(),
+
+    const estado = service.obtenerEstado();
+    const vista = crearEntrenamientoHitView({
+      estado,
       timerEstado,
       mensaje,
       onGuardar: (datos) => refrescar(service.guardarRegistro(datos), false),
@@ -77,7 +82,10 @@ export function crearEntrenamientoHitController() {
       onReiniciarTimer: (datos) => {
         timer?.reiniciar(datos);
       }
-    }));
+    });
+
+    contenedorActual.appendChild(vista);
+    insertarPanelJarvisHit(vista, { estado, timerEstado });
   }
 
   function montar(contenedor) {
