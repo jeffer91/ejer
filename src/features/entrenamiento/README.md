@@ -96,3 +96,20 @@ La lógica de guardado vive en `hit/hit.service.js` y el reloj vive en `hit/hit.
 - Borrar API Key.
 
 Gemini vive en `ajustes/gemini.service.js`, la voz vive en `ajustes/voice.service.js` y la coordinación vive en `ajustes/ajustes.service.js`.
+
+## Estado del bloque 8
+
+`Diario` ahora permite registro avanzado de sesión:
+
+- Marcar ejercicio por ejercicio.
+- Registrar series hechas.
+- Registrar repeticiones hechas.
+- Registrar dificultad por ejercicio.
+- Agregar notas por ejercicio.
+- Registrar tiempo real.
+- Registrar dificultad general.
+- Registrar molestias o señales de alerta.
+- Guardar progreso sin cerrar sesión.
+- Completar sesión con datos reales.
+
+La conversión del formulario vive en `diario/diario.mapper.js` y `entrenamiento.service.js` ahora puede actualizar sesiones existentes.
