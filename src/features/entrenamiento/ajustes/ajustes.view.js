@@ -6,6 +6,7 @@
     - Construir la pantalla Ajustes de Entrenamiento.
     - Guardar API Key, modelo, IA y voz automática.
     - Probar Gemini y voz desde la interfaz.
+    - Mostrar el modelo Gemini vigente y recordar que cada solicitud envía contexto.
 
   Se conecta con:
     - src/features/entrenamiento/ajustes/ajustes.controller.js
@@ -14,6 +15,8 @@
 
 import "./ajustes.css";
 
+const GEMINI_MODELO_RECOMENDADO = "gemini-2.5-flash";
+
 function crearElemento(etiqueta, clase = "", texto = "") {
   const elemento = document.createElement(etiqueta);
   if (clase) elemento.className = clase;
@@ -21,7 +24,7 @@ function crearElemento(etiqueta, clase = "", texto = "") {
   return elemento;
 }
 
-function crearCampo({ nombre, label, tipo = "text", valor = "", placeholder = "" }) {
+function crearCampo({ nombre, label, tipo = "text", valor = "", placeholder = "", ayuda = "" }) {
   const grupo = crearElemento("label", "entreno-ajustes-field");
   const texto = crearElemento("span", "", label);
   const input = document.createElement("input");
@@ -34,6 +37,7 @@ function crearCampo({ nombre, label, tipo = "text", valor = "", placeholder = ""
 
   grupo.appendChild(texto);
   grupo.appendChild(input);
+  if (ayuda) grupo.appendChild(crearElemento("small", "entreno-ajustes-help", ayuda));
   return grupo;
 }
 
@@ -137,13 +141,14 @@ export function crearEntrenamientoAjustesView({ vista = {}, mensaje = null, onGu
   form.appendChild(crearCampo({
     nombre: "geminiModelo",
     label: "Modelo Gemini",
-    valor: ajustes.geminiModelo || "gemini-1.5-flash",
-    placeholder: "gemini-1.5-flash"
+    valor: ajustes.geminiModelo || GEMINI_MODELO_RECOMENDADO,
+    placeholder: GEMINI_MODELO_RECOMENDADO,
+    ayuda: "Recomendado: gemini-2.5-flash. Si tenías gemini-1.5-flash, FitJeff lo migrará automáticamente."
   }));
   form.appendChild(crearSelectVoz(voces, ajustes.vozNombre));
   form.appendChild(crearCampo({ nombre: "volumenVoz", label: "Volumen", tipo: "number", valor: ajustes.volumenVoz ?? 1 }));
   form.appendChild(crearCampo({ nombre: "velocidadVoz", label: "Velocidad", tipo: "number", valor: ajustes.velocidadVoz ?? 1 }));
-  form.appendChild(crearCheck({ nombre: "iaActiva", label: "IA de entrenamiento", detalle: "Permite usar Gemini para guías y sugerencias.", activo: ajustes.iaActiva }));
+  form.appendChild(crearCheck({ nombre: "iaActiva", label: "IA de entrenamiento", detalle: "Permite usar Gemini para guías y sugerencias. Cada solicitud envía contexto actual porque Gemini no recuerda llamadas anteriores.", activo: ajustes.iaActiva }));
   form.appendChild(crearCheck({ nombre: "vozActiva", label: "Voz automática", detalle: "Permite guía hablada durante sesiones.", activo: ajustes.vozActiva }));
 
   const guardar = crearElemento("button", "entreno-ajustes-button entreno-ajustes-button--primary", "Guardar ajustes");
@@ -175,7 +180,7 @@ export function crearEntrenamientoAjustesView({ vista = {}, mensaje = null, onGu
 
   estadoPanel.appendChild(crearElemento("h3", "", "Estado"));
   estadoPanel.appendChild(crearEstado("Gemini", Boolean(ajustes.geminiApiKeyVisible), ajustes.ultimaPruebaGemini?.mensaje || "Pendiente de prueba."));
-  estadoPanel.appendChild(crearEstado("IA", Boolean(ajustes.iaActiva), "Controla sugerencias inteligentes."));
+  estadoPanel.appendChild(crearEstado("IA", Boolean(ajustes.iaActiva), "Controla sugerencias inteligentes con contexto enviado en cada solicitud."));
   estadoPanel.appendChild(crearEstado("Voz", Boolean(ajustes.vozActiva), vista.vozSoportada ? "Voz disponible en este entorno." : "Voz no disponible en este entorno."));
   estadoPanel.appendChild(crearElemento("p", "entreno-ajustes-safe", "La guía de entrenamiento debe ajustarse a tu nivel. Detén la sesión si aparece dolor fuerte, mareo o malestar."));
 
