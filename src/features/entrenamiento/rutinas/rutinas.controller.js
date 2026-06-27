@@ -11,6 +11,7 @@
     - Editar ejercicios avanzados de rutinas IA sin perder bloques ni tipos.
     - Ejecutar diagnóstico rápido del flujo IA sin guardar datos.
     - Borrar rutinas con confirmación desde la pantalla.
+    - Mostrar ayuda para registrar ejercicios por tiempo.
     - Editar, duplicar, activar, archivar y restaurar rutinas guardadas.
 
   Se conecta con:
@@ -19,6 +20,7 @@
     - src/features/entrenamiento/rutinas/rutinas.parser.js
     - src/features/entrenamiento/rutinas/rutinas.ia.diagnostics.js
     - src/features/entrenamiento/rutinas/rutinas.delete-actions.js
+    - src/features/entrenamiento/rutinas/rutinas.time-help.js
     - src/features/entrenamiento/entrenamiento.module.js
 */
 
@@ -26,6 +28,7 @@ import { insertarBotonesBorrarRutina } from "./rutinas.delete-actions.js";
 import { ejecutarDiagnosticoRutinaIA, insertarPanelDiagnosticoRutinaIA } from "./rutinas.ia.diagnostics.js";
 import { convertirRutinaIAATextoSimple, interpretarRutinaIA } from "./rutinas.parser.js";
 import { crearRutinasService } from "./rutinas.service.js";
+import { insertarAyudaTiempoRutinas } from "./rutinas.time-help.js";
 import { crearEntrenamientoRutinasView } from "./rutinas.view.js";
 
 function primerEjercicioConValor(rutina, clave) {
@@ -105,6 +108,7 @@ export function crearEntrenamientoRutinasController() {
     });
 
     contenedorActual.appendChild(vista);
+    insertarAyudaTiempoRutinas(vista);
     insertarBotonesBorrarRutina(vista, {
       rutinas,
       onBorrar: (rutinaId) => refrescar(service.borrar(rutinaId))
