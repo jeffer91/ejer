@@ -27,12 +27,20 @@
 .entreno-diario-exercise__base, .entreno-diario-warmup, .entreno-diario-empty { color: var(--fj-muted, #8ba3c2); font-size: 0.82rem; font-weight: 780; }
 .entreno-diario-exercise__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; }
 .entreno-diario-actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; margin-top: 2px; }
+.entreno-diario-actions--jarvis { margin-top: 7px; }
 .entreno-diario-button { border: 1px solid var(--fj-border, #1e2a44); border-radius: 10px; background: var(--fj-surface-2, #162036); color: var(--fj-text, #e0f2ff); padding: 8px 11px; font-weight: 900; cursor: pointer; }
 .entreno-diario-button--primary { border-color: var(--fj-cyan, #00f5ff); background: rgba(0, 245, 255, 0.12); color: var(--fj-cyan, #00f5ff); }
+.entreno-diario-button--jarvis { border-color: rgba(34, 255, 136, 0.38); background: rgba(34, 255, 136, 0.12); color: var(--fj-green, #22ff88); }
 .entreno-diario-button:disabled { opacity: 0.48; cursor: default; }
 .entreno-diario-message { display: grid; gap: 3px; border: 1px solid var(--fj-border, #1e2a44); border-radius: 10px; padding: 9px; margin-bottom: 9px; font-size: 0.82rem; }
 .entreno-diario-message--ok { border-color: rgba(34, 255, 136, 0.28); color: var(--fj-green, #22ff88); }
 .entreno-diario-message--error { border-color: rgba(255, 59, 92, 0.34); color: var(--fj-red, #ff3b5c); }
 .entreno-diario-message span { color: var(--fj-muted, #8ba3c2); }
 .entreno-diario-safe { border: 1px dashed rgba(0, 245, 255, 0.28); border-radius: 10px; padding: 9px; }
-@media (max-width: 640px) { .entreno-diario-metrics, .entreno-diario-controls, .entreno-diario-exercise__grid, .entreno-diario-actions { grid-template-columns: 1fr; } .entreno-diario-exercise__top { align-items: flex-start; } }
+.entreno-diario-jarvis { display: grid; gap: 8px; border-color: rgba(34, 255, 136, 0.28); background: linear-gradient(145deg, rgba(18, 26, 43, 0.98), rgba(10, 20, 18, 0.92)); }
+.entreno-diario-jarvis__top { display: flex; justify-content: space-between; gap: 8px; align-items: flex-start; flex-wrap: wrap; }
+.entreno-diario-jarvis-status { border: 1px solid var(--fj-border, #1e2a44); border-radius: 10px; padding: 8px; margin: 0 !important; color: var(--fj-muted, #8ba3c2); background: rgba(255, 255, 255, 0.025); font-weight: 850; }
+.entreno-diario-jarvis-status--on { border-color: rgba(34, 255, 136, 0.32); color: var(--fj-green, #22ff88) !important; background: rgba(34, 255, 136, 0.07); }
+.entreno-diario-jarvis-context { color: var(--fj-cyan, #00f5ff); font-size: 0.76rem; font-weight: 850; }
+.entreno-diario-jarvis-log { border: 1px dashed rgba(0, 245, 255, 0.26); border-radius: 10px; padding: 8px; color: var(--fj-muted, #8ba3c2); font-size: 0.82rem; background: rgba(0, 245, 255, 0.035); }
+@media (max-width: 640px) { .entreno-diario-metrics, .entreno-diario-controls, .entreno-diario-exercise__grid, .entreno-diario-actions { grid-template-columns: 1fr; } .entreno-diario-exercise__top, .entreno-diario-jarvis__top { align-items: flex-start; } }
