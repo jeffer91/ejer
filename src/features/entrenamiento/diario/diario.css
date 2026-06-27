@@ -3,20 +3,27 @@
 .entreno-diario-header h2, .entreno-diario-panel h3 { margin: 0; }
 .entreno-diario-header p, .entreno-diario-panel p { margin: 5px 0 0; color: var(--fj-muted, #8ba3c2); font-size: 0.86rem; }
 .entreno-diario-kicker { color: var(--fj-cyan, #00f5ff) !important; font-size: 0.72rem !important; font-weight: 950; text-transform: uppercase; }
-.entreno-diario-metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; margin-top: 9px; }
+.entreno-diario-form { display: grid; gap: 10px; }
+.entreno-diario-metrics, .entreno-diario-controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; margin-top: 9px; }
 .entreno-diario-metric { display: grid; gap: 3px; border: 1px solid var(--fj-border, #1e2a44); border-radius: 10px; padding: 9px; background: rgba(255, 255, 255, 0.02); }
 .entreno-diario-metric span, .entreno-diario-metric small { color: var(--fj-muted, #8ba3c2); font-size: 0.74rem; font-weight: 800; }
 .entreno-diario-metric strong { color: var(--fj-text, #e0f2ff); font-size: 1.15rem; font-weight: 1000; }
-.entreno-diario-exercises { display: grid; gap: 8px; margin-top: 10px; }
+.entreno-diario-mini { display: grid; gap: 5px; color: var(--fj-muted, #8ba3c2); font-size: 0.76rem; font-weight: 850; }
+.entreno-diario-mini input, .entreno-diario-mini select, .entreno-diario-exercise textarea { width: 100%; min-height: 36px; border-radius: 9px; padding: 7px; resize: vertical; }
+.entreno-diario-exercises { display: grid; gap: 8px; margin-top: 2px; }
 .entreno-diario-exercise, .entreno-diario-warmup, .entreno-diario-empty { border: 1px solid var(--fj-border, #1e2a44); border-radius: 10px; padding: 9px; background: rgba(255, 255, 255, 0.02); }
-.entreno-diario-exercise { display: grid; gap: 4px; }
-.entreno-diario-exercise strong { color: var(--fj-text, #e0f2ff); }
-.entreno-diario-exercise span, .entreno-diario-warmup, .entreno-diario-empty { color: var(--fj-muted, #8ba3c2); font-size: 0.82rem; font-weight: 780; }
-.entreno-diario-actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; margin-top: 10px; }
-.entreno-diario-button { border: 1px solid var(--fj-border, #1e2a44); border-radius: 10px; background: var(--fj-surface-2, #162036); color: var(--fj-text, #e0f2ff); font-weight: 900; cursor: pointer; }
+.entreno-diario-exercise { display: grid; gap: 8px; }
+.entreno-diario-exercise__top { display: flex; align-items: center; gap: 8px; color: var(--fj-text, #e0f2ff); }
+.entreno-diario-exercise__top input { width: 16px; height: 16px; }
+.entreno-diario-exercise__base, .entreno-diario-warmup, .entreno-diario-empty { color: var(--fj-muted, #8ba3c2); font-size: 0.82rem; font-weight: 780; }
+.entreno-diario-exercise__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; }
+.entreno-diario-actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; margin-top: 2px; }
+.entreno-diario-button { border: 1px solid var(--fj-border, #1e2a44); border-radius: 10px; background: var(--fj-surface-2, #162036); color: var(--fj-text, #e0f2ff); padding: 8px 11px; font-weight: 900; cursor: pointer; }
 .entreno-diario-button--primary { border-color: var(--fj-cyan, #00f5ff); background: rgba(0, 245, 255, 0.12); color: var(--fj-cyan, #00f5ff); }
 .entreno-diario-button:disabled { opacity: 0.48; cursor: default; }
 .entreno-diario-message { display: grid; gap: 3px; border: 1px solid var(--fj-border, #1e2a44); border-radius: 10px; padding: 9px; margin-bottom: 9px; font-size: 0.82rem; }
 .entreno-diario-message--ok { border-color: rgba(34, 255, 136, 0.28); color: var(--fj-green, #22ff88); }
 .entreno-diario-message--error { border-color: rgba(255, 59, 92, 0.34); color: var(--fj-red, #ff3b5c); }
 .entreno-diario-message span { color: var(--fj-muted, #8ba3c2); }
+.entreno-diario-safe { border: 1px dashed rgba(0, 245, 255, 0.28); border-radius: 10px; padding: 9px; }
+@media (max-width: 640px) { .entreno-diario-metrics, .entreno-diario-controls, .entreno-diario-exercise__grid, .entreno-diario-actions { grid-template-columns: 1fr; } }
