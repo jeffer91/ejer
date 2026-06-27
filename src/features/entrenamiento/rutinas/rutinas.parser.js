@@ -7,14 +7,17 @@
     - Separar rutina, días, bloques y ejercicios.
     - Detectar fuerza, cardio, fútbol, movilidad, técnica, core y otros bloques.
     - Normalizar campos clave para que luego el controller y service puedan guardar la rutina.
+    - Apoyarse en validaciones y autocorrecciones para respuestas IA incompletas.
 
   Se conecta con:
     - src/features/entrenamiento/rutinas/rutinas.prompt.js
+    - src/features/entrenamiento/rutinas/rutinas.ia.validator.js
     - src/features/entrenamiento/rutinas/rutinas.controller.js
     - src/features/entrenamiento/rutinas/rutinas.service.js
 */
 
 import { FITJEFF_RUTINA_FORMAT_VERSION } from "./rutinas.prompt.js";
+import { corregirRutinaInterpretadaIA, normalizarTextoRutinaIA } from "./rutinas.ia.validator.js";
 
 export const TIPOS_BLOQUE_RUTINA_IA = [
   "fuerza",
@@ -67,8 +70,8 @@ function normalizarTipo(valor = "") {
   if (TIPOS_BLOQUE_RUTINA_IA.includes(limpio)) return limpio;
   if (["football", "futbol", "futbolistico", "balon"].includes(limpio)) return "futbol";
   if (["tecnico", "tecnica_deportiva", "coordinacion", "agilidad"].includes(limpio)) return "tecnica";
-  if (["movilidad_articular", "estiramiento", "estiramientos"].includes(limpio)) return "movilidad";
-  if (["abdomen", "abdominales"].includes(limpio)) return "core";
+  if (["movilidad_articular", "estiramiento", "estiramientos", "flexibilidad"].includes(limpio)) return "movilidad";
+  if (["abdomen", "abdominales", "zona_media"].includes(limpio)) return "core";
   if (["calentar", "activacion", "activacion_muscular"].includes(limpio)) return "calentamiento";
   if (["descanso", "recuperacion", "recuperacion_activa"].includes(limpio)) return "descanso_activo";
 
@@ -209,8 +212,9 @@ function parsearEjercicio(linea = "", bloqueActual = {}) {
   });
 
   const nombre = texto(datos.ejercicio || datos.nombre || limpio);
-  const tipoBase = datos.tipo || bloqueActual.tipo || inferirTipoPorTexto(`${bloqueActual.nombre} ${nombre}`);
-  const tipo = normalizarTipo(tipoBase === "otro" ? inferirTipoPorTexto(`${bloqueActual.nombre} ${nombre}`) : tipoBase);
+  const tipoInferido = inferirTipoPorTexto(`${bloqueActual.nombre} ${nombre}`);
+  const tipoBase = datos.tipo || bloqueActual.tipo || tipoInferido;
+  const tipo = normalizarTipo(tipoBase === "otro" ? tipoInferido : tipoBase);
   const series = convertirNumero(datos.series);
   const repeticiones = convertirNumero(datos.repeticiones);
   const descansoSegundos = convertirSegundos(datos.descanso);
@@ -243,6 +247,12 @@ function cerrarBloque(diaActual, bloqueActual) {
     bloqueActual.tipo = normalizarTipo(inferirTipoPorTexto(`${bloqueActual.nombre} ${(bloqueActual.ejercicios || []).map((ejercicio) => ejercicio.nombre).join(" ")}`));
   }
 
+  bloqueActual.ejercicios = (bloqueActual.ejercicios || []).map((ejercicio) => ({
+    ...ejercicio,
+    tipo: ejercicio.tipo === "otro" && bloqueActual.tipo !== "otro" ? bloqueActual.tipo : ejercicio.tipo,
+    bloque: bloqueActual.nombre || bloqueActual.tipo || ejercicio.bloque
+  }));
+
   diaActual.bloques.push(bloqueActual);
   diaActual.ejercicios.push(...bloqueActual.ejercicios);
 }
@@ -266,31 +276,12 @@ function crearResumen(rutina) {
   };
 }
 
-function validarResultado(rutina, errores, advertencias) {
-  if (!rutina.nombre) advertencias.push("La rutina no tiene nombre. Se podrá asignar uno automáticamente después.");
-  if (rutina.dias.length === 0) errores.push("No se detectaron días de entrenamiento.");
-
-  rutina.dias.forEach((dia) => {
-    if (dia.bloques.length === 0) errores.push(`${dia.nombre} no tiene bloques.`);
-    if (dia.ejercicios.length === 0) errores.push(`${dia.nombre} no tiene ejercicios.`);
-
-    dia.ejercicios.forEach((ejercicio) => {
-      if (!ejercicio.nombre) errores.push(`${dia.nombre} tiene un ejercicio sin nombre.`);
-      if (ejercicio.tipo === "cardio" && !ejercicio.duracionMinutos && !ejercicio.series) {
-        advertencias.push(`${ejercicio.nombre || "Cardio"} no tiene duración ni series.`);
-      }
-      if ((ejercicio.tipo === "futbol" || ejercicio.tipo === "tecnica") && !ejercicio.duracionMinutos && !ejercicio.repeticiones) {
-        advertencias.push(`${ejercicio.nombre || "Actividad técnica"} no tiene duración ni repeticiones.`);
-      }
-    });
-  });
-}
-
 export function interpretarRutinaIA(textoFuente = "") {
   const errores = [];
   const advertencias = [];
   const rutina = crearRutinaBase();
-  const contenido = extraerBloqueCompatible(textoFuente, advertencias);
+  const textoNormalizado = normalizarTextoRutinaIA(textoFuente, advertencias);
+  const contenido = extraerBloqueCompatible(textoNormalizado, advertencias);
   const lineas = normalizarLineas(contenido);
   let seccion = null;
   let diaActual = null;
@@ -347,12 +338,12 @@ export function interpretarRutinaIA(textoFuente = "") {
     }
 
     if (seccion === "rutina") {
-      const anterior = { ...rutina };
+      const anteriorDias = rutina.dias;
       if (asignarClave(rutina, linea)) {
         rutina.diasDeclarados = convertirNumero(rutina.dias) || rutina.diasDeclarados;
         rutina.duracionSesion = rutina.duracion_sesion || rutina.duracionSesion;
         rutina.notasGenerales = rutina.notas_generales || rutina.notasGenerales;
-        rutina.dias = anterior.dias;
+        rutina.dias = anteriorDias;
       }
       return;
     }
@@ -391,7 +382,7 @@ export function interpretarRutinaIA(textoFuente = "") {
     dia.nombre = dia.nombre || `Día ${indice + 1}`;
   });
 
-  validarResultado(rutina, errores, advertencias);
+  corregirRutinaInterpretadaIA(rutina, errores, advertencias);
 
   return {
     ok: errores.length === 0,
