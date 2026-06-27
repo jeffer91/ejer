@@ -9,15 +9,18 @@
     - Preparar la rutina IA interpretada para cargarla en el formulario manual.
     - Guardar rutinas IA interpretadas como rutinas reales de FitJeff.
     - Editar ejercicios avanzados de rutinas IA sin perder bloques ni tipos.
+    - Ejecutar diagnóstico rápido del flujo IA sin guardar datos.
     - Editar, duplicar, activar, archivar y restaurar rutinas guardadas.
 
   Se conecta con:
     - src/features/entrenamiento/rutinas/rutinas.service.js
     - src/features/entrenamiento/rutinas/rutinas.view.js
     - src/features/entrenamiento/rutinas/rutinas.parser.js
+    - src/features/entrenamiento/rutinas/rutinas.ia.diagnostics.js
     - src/features/entrenamiento/entrenamiento.module.js
 */
 
+import { ejecutarDiagnosticoRutinaIA, insertarPanelDiagnosticoRutinaIA } from "./rutinas.ia.diagnostics.js";
 import { convertirRutinaIAATextoSimple, interpretarRutinaIA } from "./rutinas.parser.js";
 import { crearRutinasService } from "./rutinas.service.js";
 import { crearEntrenamientoRutinasView } from "./rutinas.view.js";
@@ -69,12 +72,20 @@ export function crearEntrenamientoRutinasController() {
     return service.crearDesdeRutinaIA(resultadoIA);
   }
 
+  function diagnosticarFlujoIA() {
+    return ejecutarDiagnosticoRutinaIA({
+      interpretarTextoRutinaIA,
+      puedeGuardar: true
+    });
+  }
+
   function refrescar(mensaje = mensajeActual) {
     if (!contenedorActual) return;
 
     mensajeActual = mensaje;
     contenedorActual.innerHTML = "";
-    contenedorActual.appendChild(crearEntrenamientoRutinasView({
+
+    const vista = crearEntrenamientoRutinasView({
       rutinas: service.obtenerRutinas(),
       mensaje,
       onInterpretarRutinaIA: interpretarTextoRutinaIA,
@@ -87,7 +98,10 @@ export function crearEntrenamientoRutinasController() {
       onDuplicar: (rutinaId) => refrescar(service.duplicar(rutinaId)),
       onArchivar: (rutinaId) => refrescar(service.archivar(rutinaId)),
       onRestaurar: (rutinaId) => refrescar(service.restaurar(rutinaId))
-    }));
+    });
+
+    contenedorActual.appendChild(vista);
+    insertarPanelDiagnosticoRutinaIA(vista, { onEjecutar: diagnosticarFlujoIA });
   }
 
   function montar(contenedor) {
