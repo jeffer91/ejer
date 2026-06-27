@@ -7,7 +7,7 @@
     - Crear días iguales o días diferentes por bloques.
     - Guardar rutinas interpretadas desde IA conservando días, bloques, tipos, cardio, fútbol, duración y notas.
     - Editar ejercicios avanzados de rutinas IA sin perder estructura.
-    - Editar, duplicar, activar, archivar y restaurar rutinas.
+    - Editar, duplicar, activar, archivar, restaurar y borrar rutinas.
 
   Se conecta con:
     - src/features/entrenamiento/entrenamiento.service.js
@@ -322,6 +322,10 @@ export function crearRutinasService(entrenamientoService = crearEntrenamientoSer
     });
   }
 
+  function borrar(rutinaId) {
+    return entrenamientoService.eliminarRutina(rutinaId);
+  }
+
   return {
     obtenerRutinas,
     crearDesdeFormulario,
@@ -332,6 +336,7 @@ export function crearRutinasService(entrenamientoService = crearEntrenamientoSer
     actualizarDesdeFormulario,
     duplicar,
     archivar,
-    restaurar
+    restaurar,
+    borrar
   };
 }
