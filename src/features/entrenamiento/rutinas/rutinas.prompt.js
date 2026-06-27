@@ -6,6 +6,7 @@
     - Centralizar el prompt maestro para generar rutinas compatibles con FitJeff.
     - Definir el contrato FITJEFF_RUTINA_V1 que luego podrá interpretar el parser.
     - Obligar a la IA a devolver días, bloques y ejercicios en un formato estable.
+    - Diferenciar ejercicios por repeticiones, por tiempo, mixtos o por distancia.
 
   Se conecta con:
     - src/features/entrenamiento/rutinas/rutinas.view.js
@@ -23,7 +24,7 @@ DATOS QUE DEBES USAR
 - Objetivo principal: [bajar grasa / ganar fuerza / ganar músculo / resistencia / salud general / rendimiento deportivo]
 - Nivel: [principiante / intermedio / avanzado]
 - Lugar de entrenamiento: [casa / gimnasio / parque / cancha]
-- Equipo disponible: [mancuernas / barra / máquinas / ligas / balón / sin equipo]
+- Equipo disponible: [mancuernas / barra / máquinas / ligas / balón / bicicleta / sin equipo]
 - Días por semana: [4]
 - Duración por sesión: [45 a 60 minutos]
 - Limitaciones o molestias: [ninguna / rodilla / espalda / hombro / tobillo / otra]
@@ -33,17 +34,22 @@ DATOS QUE DEBES USAR
 REGLAS IMPORTANTES
 1. Devuelve únicamente el texto desde FITJEFF_RUTINA_V1 hasta FIN_RUTINA.
 2. No uses markdown, tablas, emojis, explicaciones largas ni texto fuera del formato.
-3. Respeta exactamente los nombres de las claves: nombre, objetivo, nivel, lugar, equipo, dias, duracion_sesion, numero, enfoque, calentamiento, tipo, ejercicio, series, repeticiones, descanso, duracion, intensidad, notas.
+3. Respeta exactamente los nombres de las claves: nombre, objetivo, nivel, lugar, equipo, dias, duracion_sesion, numero, enfoque, calentamiento, tipo, ejercicio, medicion, series, repeticiones, descanso, duracion, duracion_segundos, distancia_km, intensidad, notas.
 4. Cada ejercicio debe estar en una sola línea y empezar con: - ejercicio=
 5. En cada ejercicio conserva todas las claves aunque alguna no aplique. Si no aplica, deja el valor vacío.
 6. Los tipos permitidos son: fuerza, cardio, futbol, movilidad, tecnica, core, calentamiento, descanso_activo, otro.
-7. Si agregas fútbol, conducción, tiros, pases, coordinación o agilidad, usa tipo=futbol o tipo=tecnica.
-8. Si agregas caminata, trote, bicicleta, cuerda o cardio final, usa tipo=cardio.
-9. Si agregas estiramientos, movilidad articular o activación, usa tipo=movilidad o tipo=calentamiento.
-10. Usa descansos en segundos con s. Ejemplo: 60s.
-11. Usa duración en minutos con min. Ejemplo: 15min.
-12. Evita ejercicios peligrosos o demasiado avanzados si el nivel no corresponde.
-13. Cada día debe tener al menos un bloque y cada bloque al menos un ejercicio.
+7. Las mediciones permitidas son: repeticiones, tiempo, mixto, distancia.
+8. Para fuerza tradicional usa medicion=repeticiones, series y repeticiones.
+9. Para bicicleta, caminata, cardio, movilidad, estiramientos, calentamiento o plancha por duración usa medicion=tiempo, series=0, repeticiones=0 y duracion con min o s.
+10. Para ejercicios con series y duración, como plancha por series, usa medicion=mixto, series, duracion y repeticiones=0.
+11. Para carrera o caminata por distancia usa medicion=distancia y distancia_km.
+12. Si agregas fútbol, conducción, tiros, pases, coordinación o agilidad, usa tipo=futbol o tipo=tecnica.
+13. Si agregas caminata, trote, bicicleta, cuerda o cardio final, usa tipo=cardio.
+14. Si agregas estiramientos, movilidad articular o activación, usa tipo=movilidad o tipo=calentamiento.
+15. Usa descansos en segundos con s. Ejemplo: 60s.
+16. Usa duración en minutos con min o segundos con s. Ejemplo: 15min o 45s.
+17. Evita ejercicios peligrosos o demasiado avanzados si el nivel no corresponde.
+18. Cada día debe tener al menos un bloque y cada bloque al menos un ejercicio.
 
 FORMATO OBLIGATORIO
 FITJEFF_RUTINA_V1
@@ -66,16 +72,22 @@ enfoque=
 calentamiento=
 
 [BLOQUE]
+tipo=calentamiento
+nombre=Calentamiento por tiempo
+- ejercicio=Bicicleta suave | tipo=cardio | medicion=tiempo | series=0 | repeticiones=0 | descanso= | duracion=10min | duracion_segundos=600 | distancia_km= | intensidad=suave | notas=calentamiento progresivo
+[FIN_BLOQUE]
+
+[BLOQUE]
 tipo=fuerza
 nombre=[nombre del bloque]
-- ejercicio=Nombre del ejercicio | tipo=fuerza | series=3 | repeticiones=12 | descanso=60s | duracion= | intensidad=media | notas=controlar técnica
-- ejercicio=Nombre del ejercicio | tipo=fuerza | series=3 | repeticiones=10 | descanso=60s | duracion= | intensidad=media | notas=
+- ejercicio=Nombre del ejercicio | tipo=fuerza | medicion=repeticiones | series=3 | repeticiones=12 | descanso=60s | duracion= | duracion_segundos= | distancia_km= | intensidad=media | notas=controlar técnica
+- ejercicio=Nombre del ejercicio | tipo=fuerza | medicion=repeticiones | series=3 | repeticiones=10 | descanso=60s | duracion= | duracion_segundos= | distancia_km= | intensidad=media | notas=
 [FIN_BLOQUE]
 
 [BLOQUE]
 tipo=cardio
-nombre=[nombre del bloque]
-- ejercicio=Nombre del cardio | tipo=cardio | series= | repeticiones= | descanso= | duracion=15min | intensidad=suave | notas=
+nombre=Cardio final
+- ejercicio=Caminata inclinada | tipo=cardio | medicion=tiempo | series=0 | repeticiones=0 | descanso= | duracion=15min | duracion_segundos=900 | distancia_km= | intensidad=suave | notas=
 [FIN_BLOQUE]
 [FIN_DIA]
 
@@ -87,9 +99,15 @@ calentamiento=
 
 [BLOQUE]
 tipo=futbol
-nombre=[nombre del bloque]
-- ejercicio=Conducción de balón | tipo=futbol | series= | repeticiones= | descanso= | duracion=10min | intensidad=media | notas=trabajo técnico
-- ejercicio=Pases contra pared | tipo=futbol | series=3 | repeticiones=20 | descanso=45s | duracion= | intensidad=media | notas=
+nombre=Técnica de fútbol
+- ejercicio=Conducción de balón | tipo=futbol | medicion=tiempo | series=0 | repeticiones=0 | descanso= | duracion=10min | duracion_segundos=600 | distancia_km= | intensidad=media | notas=trabajo técnico
+- ejercicio=Pases contra pared | tipo=futbol | medicion=repeticiones | series=3 | repeticiones=20 | descanso=45s | duracion= | duracion_segundos= | distancia_km= | intensidad=media | notas=
+[FIN_BLOQUE]
+
+[BLOQUE]
+tipo=core
+nombre=Core por tiempo
+- ejercicio=Plancha frontal | tipo=core | medicion=mixto | series=3 | repeticiones=0 | descanso=45s | duracion=45s | duracion_segundos=45 | distancia_km= | intensidad=media | notas=mantener técnica
 [FIN_BLOQUE]
 [FIN_DIA]
 
