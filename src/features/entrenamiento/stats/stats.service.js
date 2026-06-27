@@ -22,12 +22,19 @@ import { diagnosticarEntrenamiento } from "../entrenamiento.diagnostics.js";
 import { crearEntrenamientoService } from "../entrenamiento.service.js";
 import { fechaEntrenamientoHoy } from "../entrenamiento.state.js";
 
+function dosDigitos(valor) {
+  return String(valor).padStart(2, "0");
+}
+
 function fechaLocal(fechaIso) {
   return new Date(`${fechaIso}T00:00:00`);
 }
 
 function formatoFecha(fecha) {
-  return fecha.toISOString().slice(0, 10);
+  const anio = fecha.getFullYear();
+  const mes = dosDigitos(fecha.getMonth() + 1);
+  const dia = dosDigitos(fecha.getDate());
+  return `${anio}-${mes}-${dia}`;
 }
 
 function sumarDias(fechaIso, dias) {
