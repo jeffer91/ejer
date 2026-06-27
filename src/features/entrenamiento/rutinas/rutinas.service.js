@@ -38,17 +38,22 @@ function ordenarRutinas(rutinas = []) {
 }
 
 function clonarDias(dias = []) {
-  return dias.map((dia, indice) => ({
-    ...dia,
-    id: undefined,
-    nombre: dia.nombre || `Día ${indice + 1}`,
-    orden: indice + 1,
-    ejercicios: (dia.ejercicios || []).map((ejercicio) => ({
-      ...ejercicio,
-      id: undefined,
-      completado: false
-    }))
-  }));
+  return dias.map((dia, indice) => {
+    const { id: _diaId, ...diaSinId } = dia;
+
+    return {
+      ...diaSinId,
+      nombre: dia.nombre || `Día ${indice + 1}`,
+      orden: indice + 1,
+      ejercicios: (dia.ejercicios || []).map((ejercicio) => {
+        const { id: _ejercicioId, ...ejercicioSinId } = ejercicio;
+        return {
+          ...ejercicioSinId,
+          completado: false
+        };
+      })
+    };
+  });
 }
 
 export function crearRutinasService(entrenamientoService = crearEntrenamientoService()) {
