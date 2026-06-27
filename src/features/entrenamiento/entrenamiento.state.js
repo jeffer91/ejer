@@ -53,6 +53,19 @@ export function crearEjercicioEntrenamientoBase(datos = {}) {
   };
 }
 
+export function crearDetalleEjercicioSesionBase(datos = {}) {
+  return {
+    ejercicioId: null,
+    nombre: "",
+    completado: false,
+    seriesCompletadas: 0,
+    repeticionesCompletadas: 0,
+    dificultad: "media",
+    notas: "",
+    ...datos
+  };
+}
+
 export function crearDiaRutinaBase(datos = {}) {
   return {
     id: generarEntrenamientoId("dia"),
@@ -92,6 +105,9 @@ export function crearSesionEntrenamientoBase(datos = {}) {
     seriesCompletadas: 0,
     repeticionesCompletadas: 0,
     tiempoMinutos: 0,
+    dificultadGeneral: "media",
+    molestias: "",
+    detalleEjercicios: [],
     notas: "",
     creadoEn: fecha,
     actualizadoEn: fecha,
