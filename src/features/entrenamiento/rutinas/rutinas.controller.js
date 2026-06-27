@@ -11,7 +11,7 @@
     - Editar ejercicios avanzados de rutinas IA sin perder bloques ni tipos.
     - Ejecutar diagnóstico rápido del flujo IA sin guardar datos.
     - Borrar rutinas con confirmación desde la pantalla.
-    - Mostrar ayuda para registrar ejercicios por tiempo.
+    - Mostrar ayuda y vista mejorada para ejercicios por tiempo.
     - Editar, duplicar, activar, archivar y restaurar rutinas guardadas.
 
   Se conecta con:
@@ -21,6 +21,7 @@
     - src/features/entrenamiento/rutinas/rutinas.ia.diagnostics.js
     - src/features/entrenamiento/rutinas/rutinas.delete-actions.js
     - src/features/entrenamiento/rutinas/rutinas.time-help.js
+    - src/features/entrenamiento/rutinas/rutinas.time-view.js
     - src/features/entrenamiento/entrenamiento.module.js
 */
 
@@ -29,6 +30,7 @@ import { ejecutarDiagnosticoRutinaIA, insertarPanelDiagnosticoRutinaIA } from ".
 import { convertirRutinaIAATextoSimple, interpretarRutinaIA } from "./rutinas.parser.js";
 import { crearRutinasService } from "./rutinas.service.js";
 import { insertarAyudaTiempoRutinas } from "./rutinas.time-help.js";
+import { mejorarVistaTiempoRutinas } from "./rutinas.time-view.js";
 import { crearEntrenamientoRutinasView } from "./rutinas.view.js";
 
 function primerEjercicioConValor(rutina, clave) {
@@ -48,6 +50,10 @@ function crearDatosFormularioDesdeRutinaIA(resultado) {
   const descanso = primerEjercicioConValor(rutina, "descansoSegundos") || 60;
   const series = primerEjercicioConValor(rutina, "series") || 3;
   const repeticiones = primerEjercicioConValor(rutina, "repeticiones") || 10;
+  const medicion = primerEjercicioConValor(rutina, "medicion") || "repeticiones";
+  const duracionMinutos = primerEjercicioConValor(rutina, "duracionMinutos") || 0;
+  const duracionSegundos = primerEjercicioConValor(rutina, "duracionSegundos") || 0;
+  const distanciaKm = primerEjercicioConValor(rutina, "distanciaKm") || "";
 
   return {
     nombre: rutina.nombre || "Rutina generada por IA",
@@ -56,6 +62,10 @@ function crearDatosFormularioDesdeRutinaIA(resultado) {
     descansoSegundos: String(descanso),
     series: String(series),
     repeticiones: String(repeticiones),
+    medicion: String(medicion),
+    duracionMinutos: String(duracionMinutos),
+    duracionSegundos: String(duracionSegundos),
+    distanciaKm: String(distanciaKm || ""),
     ejerciciosTexto: convertirRutinaIAATextoSimple(rutina)
   };
 }
@@ -78,6 +88,10 @@ export function crearEntrenamientoRutinasController() {
     return service.crearDesdeRutinaIA(resultadoIA);
   }
 
+  function guardarRutinaManual(datos) {
+    return service.crearDesdeFormulario(datos);
+  }
+
   function diagnosticarFlujoIA() {
     return ejecutarDiagnosticoRutinaIA({
       interpretarTextoRutinaIA,
@@ -97,7 +111,7 @@ export function crearEntrenamientoRutinasController() {
       mensaje,
       onInterpretarRutinaIA: interpretarTextoRutinaIA,
       onGuardarRutinaIA: (resultadoIA) => refrescar(guardarRutinaIA(resultadoIA)),
-      onGuardar: (datos) => refrescar(service.crearDesdeFormulario(datos)),
+      onGuardar: (datos) => refrescar(guardarRutinaManual(datos)),
       onActivar: (rutinaId) => refrescar(service.activar(rutinaId)),
       onEditarNombre: (rutinaId, datos) => refrescar(service.editarNombre(rutinaId, datos)),
       onActualizarPlan: (rutinaId, datos) => refrescar(service.actualizarDesdeFormulario(rutinaId, datos)),
@@ -109,6 +123,10 @@ export function crearEntrenamientoRutinasController() {
 
     contenedorActual.appendChild(vista);
     insertarAyudaTiempoRutinas(vista);
+    mejorarVistaTiempoRutinas(vista, {
+      rutinas,
+      onGuardar: (datos) => refrescar(guardarRutinaManual(datos))
+    });
     insertarBotonesBorrarRutina(vista, {
       rutinas,
       onBorrar: (rutinaId) => refrescar(service.borrar(rutinaId))
