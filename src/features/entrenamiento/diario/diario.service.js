@@ -4,18 +4,20 @@
 
   Función o funciones:
     - Preparar la rutina activa del día.
-    - Iniciar y completar sesiones diarias con guardado local.
+    - Iniciar, guardar progreso y completar sesiones diarias con guardado local.
     - Calcular ejercicios, series, repeticiones y tiempo estimado.
 
   Se conecta con:
     - src/features/entrenamiento/entrenamiento.service.js
     - src/features/entrenamiento/entrenamiento.constants.js
+    - src/features/entrenamiento/diario/diario.mapper.js
     - src/features/entrenamiento/diario/diario.controller.js
 */
 
 import { ENTRENAMIENTO_ESTADOS_SESION } from "../entrenamiento.constants.js";
 import { crearEntrenamientoService } from "../entrenamiento.service.js";
 import { fechaEntrenamientoHoy } from "../entrenamiento.state.js";
+import { crearDetalleBaseDesdeDia, mapearFormularioDiario, validarCierreSesion } from "./diario.mapper.js";
 
 function sumarEjercicios(dia) {
   return Array.isArray(dia?.ejercicios) ? dia.ejercicios.length : 0;
@@ -45,6 +47,22 @@ function buscarSesionHoy(estado, rutinaId, diaRutinaId) {
   return estado.sesiones.find((sesion) => {
     return sesion.fecha === hoy && sesion.rutinaId === rutinaId && sesion.diaRutinaId === diaRutinaId;
   }) || null;
+}
+
+function crearSesionBase(rutina, dia, estado = ENTRENAMIENTO_ESTADOS_SESION.INICIADA) {
+  return {
+    rutinaId: rutina.id,
+    diaRutinaId: dia.id,
+    estado,
+    ejerciciosCompletados: 0,
+    seriesCompletadas: 0,
+    repeticionesCompletadas: 0,
+    tiempoMinutos: 0,
+    dificultadGeneral: "media",
+    molestias: "",
+    detalleEjercicios: crearDetalleBaseDesdeDia(dia),
+    notas: "Sesión creada desde Diario."
+  };
 }
 
 export function crearDiarioService(entrenamientoService = crearEntrenamientoService()) {
@@ -95,19 +113,44 @@ export function crearDiarioService(entrenamientoService = crearEntrenamientoServ
       };
     }
 
-    return entrenamientoService.guardarSesion({
-      rutinaId: rutina.id,
-      diaRutinaId: dia.id,
-      estado: ENTRENAMIENTO_ESTADOS_SESION.INICIADA,
-      ejerciciosCompletados: 0,
-      seriesCompletadas: 0,
-      repeticionesCompletadas: 0,
-      tiempoMinutos: 0,
-      notas: "Sesión iniciada desde Diario."
-    });
+    return entrenamientoService.guardarSesion(crearSesionBase(rutina, dia, ENTRENAMIENTO_ESTADOS_SESION.INICIADA));
   }
 
-  function completarSesion() {
+  function guardarProgreso(datosFormulario = {}) {
+    const diario = obtenerDiario();
+    const { rutina, dia } = diario.rutinaDelDia;
+
+    if (!rutina || !dia) {
+      return {
+        ok: false,
+        mensaje: "Primero crea y activa una rutina."
+      };
+    }
+
+    if (diario.sesionHoy?.estado === ENTRENAMIENTO_ESTADOS_SESION.COMPLETADA) {
+      return {
+        ok: false,
+        mensaje: "La sesión ya está completada."
+      };
+    }
+
+    const datosSesion = {
+      ...mapearFormularioDiario(datosFormulario, dia),
+      rutinaId: rutina.id,
+      diaRutinaId: dia.id,
+      estado: ENTRENAMIENTO_ESTADOS_SESION.INICIADA
+    };
+
+    if (diario.sesionHoy) {
+      const resultado = entrenamientoService.actualizarSesion(diario.sesionHoy.id, datosSesion);
+      return { ...resultado, mensaje: "Progreso guardado." };
+    }
+
+    const resultado = entrenamientoService.guardarSesion(datosSesion);
+    return { ...resultado, mensaje: "Progreso guardado." };
+  }
+
+  function completarSesion(datosFormulario = {}) {
     const diario = obtenerDiario();
     const { rutina, dia } = diario.rutinaDelDia;
 
@@ -126,20 +169,35 @@ export function crearDiarioService(entrenamientoService = crearEntrenamientoServ
       };
     }
 
-    return entrenamientoService.completarSesion({
+    const datosSesion = {
+      ...mapearFormularioDiario(datosFormulario, dia),
       rutinaId: rutina.id,
       diaRutinaId: dia.id,
-      ejerciciosCompletados: diario.metricas.ejercicios,
-      seriesCompletadas: diario.metricas.series,
-      repeticionesCompletadas: diario.metricas.repeticiones,
-      tiempoMinutos: diario.metricas.tiempoEstimadoMinutos,
-      notas: "Sesión completada desde Diario."
-    });
+      estado: ENTRENAMIENTO_ESTADOS_SESION.COMPLETADA
+    };
+    const validacion = validarCierreSesion(datosSesion);
+
+    if (!validacion.ok) {
+      return {
+        ok: false,
+        mensaje: validacion.errores[0],
+        errores: validacion.errores
+      };
+    }
+
+    if (diario.sesionHoy) {
+      const resultado = entrenamientoService.actualizarSesion(diario.sesionHoy.id, datosSesion);
+      return { ...resultado, mensaje: "Sesión completada con detalle." };
+    }
+
+    const resultado = entrenamientoService.completarSesion(datosSesion);
+    return { ...resultado, mensaje: "Sesión completada con detalle." };
   }
 
   return {
     obtenerDiario,
     iniciarSesion,
+    guardarProgreso,
     completarSesion
   };
 }
