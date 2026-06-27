@@ -14,25 +14,52 @@
 
 import "./rutinas.css";
 
-const FORMATO_RUTINA_COPIABLE = `Día 1
-Sentadillas
-Flexiones
-Plancha
+const PROMPT_RUTINA_COPIABLE = `PROMPT PARA CREAR UNA RUTINA EN FITJEFF
 
-Día 2
-Caminata
-Abdominales
-Estiramientos
+Actúa como entrenador personal y crea una rutina clara, segura y organizada para registrar en mi app FitJeff.
 
-Día 3
-Peso muerto
-Remo
-Curl de bíceps
+DATOS DE LA RUTINA
+- Objetivo principal: [bajar grasa / ganar fuerza / ganar músculo / resistencia / salud general]
+- Nivel: [principiante / intermedio / avanzado]
+- Lugar de entrenamiento: [casa / gimnasio / parque]
+- Equipo disponible: [mancuernas / barra / máquinas / ligas / sin equipo]
+- Días por semana: [4]
+- Duración por sesión: [45 a 60 minutos]
+- Limitaciones o molestias: [ninguna / rodilla / espalda / hombro / otra]
+- Enfoque deseado: [fuerza / cardio / movilidad / cuerpo completo / tren superior / tren inferior]
 
-Día 4
-Cardio
-Movilidad
-Estiramiento`;
+INSTRUCCIONES
+1. Organiza la rutina por días.
+2. Cada día debe tener un enfoque claro.
+3. Usa ejercicios concretos y fáciles de entender.
+4. Evita ejercicios peligrosos o demasiado avanzados si el nivel no corresponde.
+5. No uses tablas, emojis, explicaciones largas, viñetas ni numeración.
+6. Devuelve solo el formato final para copiarlo y pegarlo en FitJeff.
+
+FORMATO OBLIGATORIO DE RESPUESTA
+Día 1 - [enfoque del día]
+Ejercicio
+Ejercicio
+Ejercicio
+Ejercicio
+
+Día 2 - [enfoque del día]
+Ejercicio
+Ejercicio
+Ejercicio
+Ejercicio
+
+Día 3 - [enfoque del día]
+Ejercicio
+Ejercicio
+Ejercicio
+Ejercicio
+
+Día 4 - [enfoque del día]
+Ejercicio
+Ejercicio
+Ejercicio
+Ejercicio`;
 
 function crearElemento(etiqueta, clase = "", texto = "") {
   const elemento = document.createElement(etiqueta);
@@ -121,23 +148,23 @@ function copiarTextoConFallback(texto) {
   document.body.removeChild(temporal);
 }
 
-async function copiarFormatoRutina() {
+async function copiarPromptRutina() {
   if (navigator.clipboard?.writeText) {
-    await navigator.clipboard.writeText(FORMATO_RUTINA_COPIABLE);
+    await navigator.clipboard.writeText(PROMPT_RUTINA_COPIABLE);
     return;
   }
 
-  copiarTextoConFallback(FORMATO_RUTINA_COPIABLE);
+  copiarTextoConFallback(PROMPT_RUTINA_COPIABLE);
 }
 
 function crearBotonCopiarFormato() {
-  const boton = crearBoton("Copiar formato", "entreno-rutinas-button--copy", async () => {
+  const boton = crearBoton("Copiar prompt", "entreno-rutinas-button--copy", async () => {
     const textoOriginal = boton.textContent;
     boton.disabled = true;
 
     try {
-      await copiarFormatoRutina();
-      boton.textContent = "Formato copiado";
+      await copiarPromptRutina();
+      boton.textContent = "Prompt copiado";
     } catch (error) {
       boton.textContent = "No se pudo copiar";
     }
@@ -148,7 +175,7 @@ function crearBotonCopiarFormato() {
     }, 1600);
   });
 
-  boton.title = "Copia un ejemplo con días y ejercicios para pegarlo en el campo inferior.";
+  boton.title = "Copia un prompt completo para pedir una rutina organizada y pegar luego el resultado en FitJeff.";
   return boton;
 }
 
