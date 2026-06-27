@@ -6,6 +6,7 @@
     - Construir la pantalla Diario de Entrenamiento.
     - Mostrar rutina activa, ejercicios y estado de la sesión diaria.
     - Permitir marcar ejercicios, guardar progreso y completar sesión con detalle.
+    - Registrar ejercicios por repeticiones, por tiempo, mixtos o por distancia.
 
   Se conecta con:
     - src/features/entrenamiento/diario/diario.controller.js
@@ -19,6 +20,11 @@ function crearElemento(etiqueta, clase = "", texto = "") {
   if (clase) elemento.className = clase;
   if (texto !== undefined && texto !== null) elemento.textContent = String(texto);
   return elemento;
+}
+
+function numero(valor, defecto = 0) {
+  const convertido = Number(valor);
+  return Number.isFinite(convertido) ? convertido : defecto;
 }
 
 function crearBoton(texto, clase, accion, deshabilitado = false) {
@@ -50,13 +56,14 @@ function obtenerDetalle(sesion, ejercicioId) {
   return (sesion?.detalleEjercicios || []).find((item) => item.ejercicioId === ejercicioId) || null;
 }
 
-function crearInput({ nombre, tipo = "text", valor = "", min = "0", placeholder = "" }) {
+function crearInput({ nombre, tipo = "text", valor = "", min = "0", placeholder = "", step = "1" }) {
   const input = document.createElement("input");
   input.name = nombre;
   input.type = tipo;
   input.value = valor ?? "";
   input.min = min;
   input.placeholder = placeholder;
+  if (tipo === "number") input.step = step;
   return input;
 }
 
@@ -73,10 +80,105 @@ function crearSelect(nombre, valorActual = "media") {
   return select;
 }
 
+function crearCampoMini(label, control) {
+  const grupo = crearElemento("label", "entreno-diario-mini");
+  grupo.appendChild(crearElemento("span", "", label));
+  grupo.appendChild(control);
+  return grupo;
+}
+
+function crearCheckMini(label, nombre, activo = false) {
+  const grupo = crearElemento("label", "entreno-diario-mini entreno-diario-mini--check");
+  const input = document.createElement("input");
+  input.type = "checkbox";
+  input.name = nombre;
+  input.checked = Boolean(activo);
+  grupo.appendChild(input);
+  grupo.appendChild(crearElemento("span", "", label));
+  return grupo;
+}
+
+function medicionEjercicio(ejercicio = {}) {
+  const medicion = ejercicio.medicion || "repeticiones";
+  if (["repeticiones", "tiempo", "mixto", "distancia"].includes(medicion)) return medicion;
+  if (numero(ejercicio.duracionMinutos, 0) > 0 || numero(ejercicio.duracionSegundos, 0) > 0) return "tiempo";
+  if (numero(ejercicio.distanciaKm, 0) > 0) return "distancia";
+  return "repeticiones";
+}
+
+function formatearDuracion(ejercicio = {}) {
+  const minutos = numero(ejercicio.duracionMinutos, 0);
+  const segundos = numero(ejercicio.duracionSegundos, 0);
+
+  if (segundos > 0 && segundos < 60) return `${segundos}s`;
+  if (minutos > 0) return `${minutos} min`;
+  if (segundos >= 60) return `${Math.round((segundos / 60) * 100) / 100} min`;
+  if (ejercicio.duracion) return ejercicio.duracion;
+  return "";
+}
+
+function crearChip(textoChip, clase = "") {
+  return crearElemento("span", `entreno-diario-chip ${clase}`.trim(), textoChip);
+}
+
+function describirEjercicioPlan(ejercicio = {}) {
+  const medicion = medicionEjercicio(ejercicio);
+  const partes = [];
+  const duracion = formatearDuracion(ejercicio);
+  const distancia = numero(ejercicio.distanciaKm, 0);
+
+  if (medicion === "tiempo") {
+    if (duracion) partes.push(duracion);
+  } else if (medicion === "mixto") {
+    if (ejercicio.series) partes.push(`${ejercicio.series} serie(s)`);
+    if (ejercicio.repeticiones) partes.push(`${ejercicio.repeticiones} rep.`);
+    if (duracion) partes.push(duracion);
+  } else if (medicion === "distancia") {
+    if (distancia > 0) partes.push(`${distancia} km`);
+    if (duracion) partes.push(duracion);
+  } else {
+    if (ejercicio.series && ejercicio.repeticiones) partes.push(`${ejercicio.series}x${ejercicio.repeticiones}`);
+    else if (ejercicio.series) partes.push(`${ejercicio.series} serie(s)`);
+    else if (ejercicio.repeticiones) partes.push(`${ejercicio.repeticiones} rep.`);
+  }
+
+  if (ejercicio.descansoSegundos) partes.push(`descanso ${ejercicio.descansoSegundos}s`);
+  if (ejercicio.intensidad) partes.push(ejercicio.intensidad);
+  if (ejercicio.notas) partes.push(ejercicio.notas);
+
+  return partes.join(" · ") || "Sin detalle planificado";
+}
+
+function agregarCamposRepeticiones(grid, ejercicio, detalle) {
+  const medicion = medicionEjercicio(ejercicio);
+  if (!["repeticiones", "mixto"].includes(medicion)) return;
+
+  grid.appendChild(crearCampoMini("Series hechas", crearInput({ nombre: `series_${ejercicio.id}`, tipo: "number", valor: detalle?.seriesCompletadas ?? 0 })));
+  grid.appendChild(crearCampoMini("Reps hechas", crearInput({ nombre: `reps_${ejercicio.id}`, tipo: "number", valor: detalle?.repeticionesCompletadas ?? 0 })));
+}
+
+function agregarCamposTiempo(grid, ejercicio, detalle) {
+  const medicion = medicionEjercicio(ejercicio);
+  if (!["tiempo", "mixto", "distancia"].includes(medicion)) return;
+
+  grid.appendChild(crearCampoMini("Tiempo real min", crearInput({ nombre: `tiempo_min_${ejercicio.id}`, tipo: "number", valor: detalle?.tiempoCompletadoMinutos ?? 0, min: "0", step: "0.1", placeholder: "10" })));
+  grid.appendChild(crearCampoMini("Tiempo real s", crearInput({ nombre: `tiempo_seg_${ejercicio.id}`, tipo: "number", valor: detalle?.tiempoCompletadoSegundos ?? 0, min: "0", placeholder: "45" })));
+}
+
+function agregarCamposDistancia(grid, ejercicio, detalle) {
+  const medicion = medicionEjercicio(ejercicio);
+  if (medicion !== "distancia") return;
+
+  grid.appendChild(crearCampoMini("Distancia real km", crearInput({ nombre: `distancia_${ejercicio.id}`, tipo: "number", valor: detalle?.distanciaCompletadaKm ?? "", min: "0", step: "0.1", placeholder: String(ejercicio.distanciaKm || "") })));
+}
+
 function crearEjercicio(ejercicio, indice, sesion) {
   const detalle = obtenerDetalle(sesion, ejercicio.id);
+  const medicion = medicionEjercicio(ejercicio);
   const item = crearElemento("article", "entreno-diario-exercise");
   const top = crearElemento("label", "entreno-diario-exercise__top");
+  const titulo = crearElemento("div", "entreno-diario-exercise__title");
+  const chips = crearElemento("div", "entreno-diario-chips");
   const check = document.createElement("input");
   const grid = crearElemento("div", "entreno-diario-exercise__grid");
   const nota = document.createElement("textarea");
@@ -85,30 +187,31 @@ function crearEjercicio(ejercicio, indice, sesion) {
   check.name = `ejercicio_${ejercicio.id}_completado`;
   check.checked = Boolean(detalle?.completado);
 
-  top.appendChild(check);
-  top.appendChild(crearElemento("strong", "", `${indice + 1}. ${ejercicio.nombre}`));
-  item.appendChild(top);
-  item.appendChild(crearElemento("span", "entreno-diario-exercise__base", `${ejercicio.series} series · ${ejercicio.repeticiones} reps · descanso ${ejercicio.descansoSegundos}s`));
+  chips.appendChild(crearChip(medicion, `entreno-diario-chip--${medicion}`));
+  if (ejercicio.tipo) chips.appendChild(crearChip(ejercicio.tipo));
 
-  grid.appendChild(crearCampoMini("Series hechas", crearInput({ nombre: `series_${ejercicio.id}`, tipo: "number", valor: detalle?.seriesCompletadas ?? 0 })));
-  grid.appendChild(crearCampoMini("Reps hechas", crearInput({ nombre: `reps_${ejercicio.id}`, tipo: "number", valor: detalle?.repeticionesCompletadas ?? 0 })));
+  titulo.appendChild(crearElemento("strong", "", `${indice + 1}. ${ejercicio.nombre}`));
+  titulo.appendChild(chips);
+
+  top.appendChild(check);
+  top.appendChild(titulo);
+  item.appendChild(top);
+  item.appendChild(crearElemento("span", "entreno-diario-exercise__base", describirEjercicioPlan(ejercicio)));
+
+  agregarCamposRepeticiones(grid, ejercicio, detalle);
+  agregarCamposTiempo(grid, ejercicio, detalle);
+  agregarCamposDistancia(grid, ejercicio, detalle);
   grid.appendChild(crearCampoMini("Dificultad", crearSelect(`dificultad_${ejercicio.id}`, detalle?.dificultad || "media")));
+  grid.appendChild(crearCheckMini("Al fallo", `fallo_${ejercicio.id}`, detalle?.alFallo));
 
   nota.name = `nota_${ejercicio.id}`;
   nota.rows = 2;
-  nota.placeholder = "Nota del ejercicio";
+  nota.placeholder = "Nota del ejercicio. Ejemplo: al fallo, peso usado, molestia o ajuste.";
   nota.value = detalle?.notas || "";
 
   item.appendChild(grid);
   item.appendChild(nota);
   return item;
-}
-
-function crearCampoMini(label, control) {
-  const grupo = crearElemento("label", "entreno-diario-mini");
-  grupo.appendChild(crearElemento("span", "", label));
-  grupo.appendChild(control);
-  return grupo;
 }
 
 function leerFormulario(formulario, dia) {
@@ -122,9 +225,15 @@ function leerFormulario(formulario, dia) {
     detalleEjercicios: (dia?.ejercicios || []).map((ejercicio) => ({
       ejercicioId: ejercicio.id,
       nombre: ejercicio.nombre,
+      tipo: ejercicio.tipo || "otro",
+      medicion: medicionEjercicio(ejercicio),
       completado: datos.get(`ejercicio_${ejercicio.id}_completado`) === "on",
-      seriesCompletadas: datos.get(`series_${ejercicio.id}`),
-      repeticionesCompletadas: datos.get(`reps_${ejercicio.id}`),
+      seriesCompletadas: datos.get(`series_${ejercicio.id}`) || 0,
+      repeticionesCompletadas: datos.get(`reps_${ejercicio.id}`) || 0,
+      tiempoCompletadoMinutos: datos.get(`tiempo_min_${ejercicio.id}`) || 0,
+      tiempoCompletadoSegundos: datos.get(`tiempo_seg_${ejercicio.id}`) || 0,
+      distanciaCompletadaKm: datos.get(`distancia_${ejercicio.id}`) || "",
+      alFallo: datos.get(`fallo_${ejercicio.id}`) === "on",
       dificultad: datos.get(`dificultad_${ejercicio.id}`),
       notas: datos.get(`nota_${ejercicio.id}`)
     }))
@@ -162,9 +271,11 @@ export function crearEntrenamientoDiarioView({ diario = {}, mensaje = null, onIn
     metricas.appendChild(crearMetrica("Ejercicios", datos.ejercicios || 0, "preparados"));
     metricas.appendChild(crearMetrica("Series", sesion?.seriesCompletadas ?? 0, `${datos.series || 0} planificadas`));
     metricas.appendChild(crearMetrica("Reps", sesion?.repeticionesCompletadas ?? 0, `${datos.repeticiones || 0} planificadas`));
-    metricas.appendChild(crearMetrica("Tiempo", `${sesion?.tiempoMinutos || datos.tiempoEstimadoMinutos || 0} min`, "registrado/estimado"));
+    metricas.appendChild(crearMetrica("Tiempo", `${sesion?.tiempoMinutos || datos.tiempoEstimadoMinutos || 0} min`, `${datos.tiempoPlanificadoMinutos || 0} min planificados`));
+    metricas.appendChild(crearMetrica("Distancia", `${sesion?.distanciaCompletadaKm || 0} km`, `${datos.distanciaPlanificadaKm || 0} km planificados`));
+    metricas.appendChild(crearMetrica("Medición", `${datos.porTiempo || 0} tiempo`, `${datos.porRepeticiones || 0} reps · ${datos.mixtos || 0} mixto · ${datos.porDistancia || 0} distancia`));
 
-    controles.appendChild(crearCampoMini("Tiempo real min", crearInput({ nombre: "tiempoMinutos", tipo: "number", valor: sesion?.tiempoMinutos || datos.tiempoEstimadoMinutos || 0, min: "0" })));
+    controles.appendChild(crearCampoMini("Tiempo real min", crearInput({ nombre: "tiempoMinutos", tipo: "number", valor: sesion?.tiempoMinutos || datos.tiempoEstimadoMinutos || 0, min: "0", step: "0.1" })));
     controles.appendChild(crearCampoMini("Dificultad general", crearSelect("dificultadGeneral", sesion?.dificultadGeneral || "media")));
     controles.appendChild(crearCampoMini("Molestias", crearInput({ nombre: "molestias", valor: sesion?.molestias || "", placeholder: "Ejemplo: ninguna" })));
     controles.appendChild(crearCampoMini("Notas", crearInput({ nombre: "notas", valor: sesion?.notas || "", placeholder: "Nota general" })));
@@ -194,6 +305,7 @@ export function crearEntrenamientoDiarioView({ diario = {}, mensaje = null, onIn
   estadoBox.appendChild(crearElemento("h3", "", "Estado"));
   estadoBox.appendChild(crearElemento("p", "", `Sesión: ${sesion?.estado || "sin iniciar"}`));
   estadoBox.appendChild(crearElemento("p", "", `Completados: ${sesion?.ejerciciosCompletados || 0} ejercicio(s)`));
+  estadoBox.appendChild(crearElemento("p", "", `Tiempo: ${sesion?.tiempoMinutos || 0} min · Distancia: ${sesion?.distanciaCompletadaKm || 0} km`));
   estadoBox.appendChild(crearElemento("p", "", `IA: ${diario.resumen?.iaActiva ? "activa" : "inactiva"} · Voz: ${diario.resumen?.vozActiva ? "activa" : "inactiva"}`));
   estadoBox.appendChild(crearElemento("p", "entreno-diario-safe", "Ajusta la sesión a tu nivel. Si hay dolor fuerte, mareo o malestar, detén la actividad y descansa."));
 
