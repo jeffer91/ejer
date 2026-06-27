@@ -28,7 +28,7 @@ import {
   normalizarCardioEntrenamiento,
   normalizarRutinaEntrenamiento,
   normalizarSesionEntrenamiento
-} from "./entrenamiento.schema.js";
+} from "./entrenamiento.schema.tiempo.js";
 
 function ordenarPorFechaDesc(a, b) {
   return String(b.fecha || b.creadoEn || "").localeCompare(String(a.fecha || a.creadoEn || ""));
