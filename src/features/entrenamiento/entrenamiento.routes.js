@@ -5,7 +5,7 @@
   Función o funciones:
     - Definir las rutas internas del módulo Entrenamiento.
     - Evitar conflictos con rutas de otros módulos usando ids únicos.
-    - Preparar Stats, Diario, Rutinas, HIT y Ajustes.
+    - Preparar Progreso, Diario, Rutinas, HIIT y Ajustes.
 
   Se conecta con:
     - src/features/entrenamiento/entrenamiento.menu.js
@@ -24,33 +24,33 @@ export const ENTRENAMIENTO_ROUTES = {
 export const ENTRENAMIENTO_ROUTE_ITEMS = [
   {
     id: ENTRENAMIENTO_ROUTES.STATS,
-    label: "Estadísticas",
-    shortLabel: "Stats",
-    description: "Dashboard de rendimiento"
+    label: "Progreso",
+    shortLabel: "Progreso",
+    description: "Resumen de rendimiento"
   },
   {
     id: ENTRENAMIENTO_ROUTES.DIARIO,
-    label: "Diario",
+    label: "Diario de entrenamiento",
     shortLabel: "Diario",
-    description: "Rutina del día"
+    description: "Registrar rutina de hoy"
   },
   {
     id: ENTRENAMIENTO_ROUTES.RUTINAS,
     label: "Rutinas",
     shortLabel: "Rutinas",
-    description: "Planes activos e inactivos"
+    description: "Planes y ejercicios"
   },
   {
     id: ENTRENAMIENTO_ROUTES.HIT,
-    label: "HIT",
-    shortLabel: "HIT",
-    description: "Intervalos, caminata y bicicleta"
+    label: "HIIT",
+    shortLabel: "HIIT",
+    description: "Intervalos y cardio"
   },
   {
     id: ENTRENAMIENTO_ROUTES.AJUSTES,
     label: "Ajustes",
     shortLabel: "Ajustes",
-    description: "Gemini, voz y conexión"
+    description: "IA, voz y preferencias"
   }
 ];
 
