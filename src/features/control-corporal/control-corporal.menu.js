@@ -20,8 +20,8 @@ export const CONTROL_CORPORAL_MENU = {
   id: CONTROL_CORPORAL_MODULE_ID,
   label: "Control corporal",
   shortLabel: "Corporal",
-  description: "Peso, medidas, progreso e historial.",
+  description: "Peso, medidas y evolución personal.",
   defaultRoute: CONTROL_CORPORAL_ROUTES.ESTADISTICAS,
-  status: "Datos al día",
+  status: "Listo para registrar",
   routes: CONTROL_CORPORAL_ROUTE_ITEMS
 };
