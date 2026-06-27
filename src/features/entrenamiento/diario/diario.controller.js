@@ -5,7 +5,7 @@
   Función o funciones:
     - Montar la pantalla Diario del módulo Entrenamiento.
     - Cargar la rutina activa del día.
-    - Iniciar y completar sesiones con guardado local.
+    - Iniciar, guardar progreso y completar sesiones con detalle.
 
   Se conecta con:
     - src/features/entrenamiento/diario/diario.service.js
@@ -30,7 +30,8 @@ export function crearEntrenamientoDiarioController() {
       diario: service.obtenerDiario(),
       mensaje,
       onIniciar: () => refrescar(service.iniciarSesion()),
-      onCompletar: () => refrescar(service.completarSesion())
+      onGuardarProgreso: (datos) => refrescar(service.guardarProgreso(datos)),
+      onCompletar: (datos) => refrescar(service.completarSesion(datos))
     }));
   }
 
