@@ -18,7 +18,8 @@ export const ENTRENAMIENTO_STORAGE_KEYS = {
 
 export const ENTRENAMIENTO_ESTADOS_RUTINA = {
   ACTIVA: "activa",
-  INACTIVA: "inactiva"
+  INACTIVA: "inactiva",
+  ARCHIVADA: "archivada"
 };
 
 export const ENTRENAMIENTO_ESTADOS_SESION = {
