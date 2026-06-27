@@ -7,6 +7,7 @@
 .entreno-ajustes-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 8px; }
 .entreno-ajustes-field { display: grid; gap: 6px; color: var(--fj-muted, #8ba3c2); font-size: 0.78rem; font-weight: 850; }
 .entreno-ajustes-field input, .entreno-ajustes-field select { width: 100%; min-height: 38px; border-radius: 10px; padding: 8px; }
+.entreno-ajustes-help { color: var(--fj-cyan, #00f5ff); font-size: 0.72rem; line-height: 1.35; }
 .entreno-ajustes-check { grid-column: 1 / -1; display: flex; gap: 9px; align-items: flex-start; border: 1px solid var(--fj-border, #1e2a44); border-radius: 10px; padding: 9px; color: var(--fj-muted, #8ba3c2); }
 .entreno-ajustes-check strong { display: block; color: var(--fj-text, #e0f2ff); }
 .entreno-ajustes-check span { display: block; margin-top: 3px; font-size: 0.78rem; }
