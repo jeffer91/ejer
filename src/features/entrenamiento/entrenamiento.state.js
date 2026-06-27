@@ -6,6 +6,7 @@
     - Crear el estado inicial del módulo Entrenamiento.
     - Crear objetos base para rutinas, sesiones, cardio y ajustes.
     - Mantener estructuras consistentes para guardado local.
+    - Permitir ejercicios por repeticiones, por tiempo o mixtos.
 */
 
 import {
@@ -51,9 +52,14 @@ export function crearEjercicioEntrenamientoBase(datos = {}) {
   return {
     id: generarEntrenamientoId("ejercicio"),
     nombre: "",
+    medicion: "repeticiones",
     series: 3,
     repeticiones: 10,
+    duracionMinutos: 0,
+    duracionSegundos: 0,
+    distanciaKm: null,
     descansoSegundos: 60,
+    intensidad: "media",
     notas: "",
     completado: false,
     ...datos
@@ -64,9 +70,13 @@ export function crearDetalleEjercicioSesionBase(datos = {}) {
   return {
     ejercicioId: null,
     nombre: "",
+    medicion: "repeticiones",
     completado: false,
     seriesCompletadas: 0,
     repeticionesCompletadas: 0,
+    tiempoCompletadoMinutos: 0,
+    tiempoCompletadoSegundos: 0,
+    distanciaCompletadaKm: null,
     dificultad: "media",
     notas: "",
     ...datos
