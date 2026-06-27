@@ -7,6 +7,7 @@
     - Crear rutinas reales con datos del formulario.
     - Interpretar rutinas generadas por IA con el contrato FITJEFF_RUTINA_V1.
     - Preparar la rutina IA interpretada para cargarla en el formulario manual.
+    - Guardar rutinas IA interpretadas como rutinas reales de FitJeff.
     - Editar, duplicar, activar, archivar y restaurar rutinas guardadas.
 
   Se conecta con:
@@ -63,6 +64,10 @@ export function crearEntrenamientoRutinasController() {
     };
   }
 
+  function guardarRutinaIA(resultadoIA) {
+    return service.crearDesdeRutinaIA(resultadoIA);
+  }
+
   function refrescar(mensaje = mensajeActual) {
     if (!contenedorActual) return;
 
@@ -72,6 +77,7 @@ export function crearEntrenamientoRutinasController() {
       rutinas: service.obtenerRutinas(),
       mensaje,
       onInterpretarRutinaIA: interpretarTextoRutinaIA,
+      onGuardarRutinaIA: (resultadoIA) => refrescar(guardarRutinaIA(resultadoIA)),
       onGuardar: (datos) => refrescar(service.crearDesdeFormulario(datos)),
       onActivar: (rutinaId) => refrescar(service.activar(rutinaId)),
       onEditarNombre: (rutinaId, datos) => refrescar(service.editarNombre(rutinaId, datos)),
