@@ -7,6 +7,7 @@
     - Cargar Vite en desarrollo y dist en producción.
     - Mantener configuración segura: sin nodeIntegration y con preload.
     - Abrir enlaces externos en el navegador del sistema.
+    - Permitir micrófono/audio para Jarvis dentro de Electron.
     - Mostrar errores reales cuando Electron no logra cargar la app.
 
   Se conecta con:
@@ -46,6 +47,33 @@ function configurarEventosDeCarga(ventana) {
   });
 }
 
+function esPermisoMicrofono(permission, details = {}) {
+  const mediaTypes = Array.isArray(details.mediaTypes) ? details.mediaTypes : [];
+
+  if (["audioCapture", "microphone"].includes(permission)) return true;
+  if (permission === "media" && mediaTypes.length === 0) return true;
+  if (permission === "media" && mediaTypes.includes("audio")) return true;
+
+  return false;
+}
+
+function configurarPermisosJarvis(ventana) {
+  const sesion = ventana.webContents.session;
+
+  sesion.setPermissionRequestHandler((_webContents, permission, callback, details) => {
+    if (esPermisoMicrofono(permission, details)) {
+      callback(true);
+      return;
+    }
+
+    callback(false);
+  });
+
+  sesion.setPermissionCheckHandler((_webContents, permission, _origin, details) => {
+    return esPermisoMicrofono(permission, details);
+  });
+}
+
 async function cargarContenido(ventana) {
   if (estaEnDesarrolloElectron()) {
     const url = obtenerDevUrl();
@@ -82,6 +110,7 @@ export function crearVentanaPrincipal() {
   });
 
   configurarEventosDeCarga(ventana);
+  configurarPermisosJarvis(ventana);
 
   ventana.once("ready-to-show", () => {
     ventana.show();
