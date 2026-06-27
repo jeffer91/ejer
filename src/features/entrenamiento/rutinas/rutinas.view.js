@@ -8,6 +8,7 @@
     - Pegar e interpretar rutinas generadas por IA con el contrato FITJEFF_RUTINA_V1.
     - Mostrar una vista previa antes de guardar una rutina interpretada por IA.
     - Mostrar rutinas guardadas con bloques, tipos, cardio, fútbol, duración y notas.
+    - Editar rutinas IA por bloques sin perder estructura avanzada.
     - Cargar una rutina interpretada por IA dentro del formulario manual.
     - Guardar una rutina interpretada por IA como rutina real de FitJeff.
     - Editar, duplicar, activar, archivar y restaurar rutinas guardadas.
@@ -16,8 +17,10 @@
     - src/features/entrenamiento/rutinas/rutinas.controller.js
     - src/features/entrenamiento/rutinas/rutinas.css
     - src/features/entrenamiento/rutinas/rutinas.prompt.js
+    - src/features/entrenamiento/rutinas/rutinas.advanced-editor.js
 */
 
+import { crearEditorAvanzadoRutina } from "./rutinas.advanced-editor.js";
 import { PROMPT_RUTINA_COPIABLE } from "./rutinas.prompt.js";
 import "./rutinas.css";
 
@@ -568,6 +571,10 @@ function crearRutinaCard(rutina, acciones) {
   const totales = calcularTotales(rutina);
   const archivada = rutina.estado === "archivada";
   const metaRutina = crearMetaRutinaGuardada(rutina);
+  const editorAvanzado = crearEditorAvanzadoRutina({
+    rutina,
+    onActualizarEjercicioAvanzado: acciones.onActualizarEjercicioAvanzado
+  });
 
   inputNombre.name = "nombre";
   inputNombre.value = rutina.nombre;
@@ -599,12 +606,17 @@ function crearRutinaCard(rutina, acciones) {
   card.appendChild(botones);
   card.appendChild(formNombre);
   card.appendChild(crearResumenDias(rutina));
-  if (!archivada) card.appendChild(crearFormularioEdicionPlan(rutina, acciones.onActualizarPlan));
+
+  if (!archivada && editorAvanzado) {
+    card.appendChild(editorAvanzado);
+  } else if (!archivada) {
+    card.appendChild(crearFormularioEdicionPlan(rutina, acciones.onActualizarPlan));
+  }
 
   return card;
 }
 
-export function crearEntrenamientoRutinasView({ rutinas = [], mensaje = null, onInterpretarRutinaIA, onGuardarRutinaIA, onGuardar, onActivar, onEditarNombre, onActualizarPlan, onDuplicar, onArchivar, onRestaurar } = {}) {
+export function crearEntrenamientoRutinasView({ rutinas = [], mensaje = null, onInterpretarRutinaIA, onGuardarRutinaIA, onGuardar, onActivar, onEditarNombre, onActualizarPlan, onActualizarEjercicioAvanzado, onDuplicar, onArchivar, onRestaurar } = {}) {
   const pantalla = crearElemento("section", "entreno-rutinas-screen");
   const header = crearElemento("div", "entreno-rutinas-header");
   const formBox = crearElemento("section", "entreno-rutinas-form");
@@ -618,7 +630,7 @@ export function crearEntrenamientoRutinasView({ rutinas = [], mensaje = null, on
   const guardar = crearElemento("button", "entreno-rutinas-save", "Guardar rutina");
   const activar = crearElemento("label", "entreno-rutinas-check");
   const check = document.createElement("input");
-  const accionesCard = { onActivar, onEditarNombre, onActualizarPlan, onDuplicar, onArchivar, onRestaurar };
+  const accionesCard = { onActivar, onEditarNombre, onActualizarPlan, onActualizarEjercicioAvanzado, onDuplicar, onArchivar, onRestaurar };
 
   header.appendChild(crearElemento("p", "entreno-rutinas-kicker", "Planes"));
   header.appendChild(crearElemento("h2", "", "Rutinas"));
