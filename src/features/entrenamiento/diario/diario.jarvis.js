@@ -5,21 +5,27 @@
   Función o funciones:
     - Insertar el panel Jarvis dentro de Diario.
     - Activar y detener micrófono desde un botón visible.
-    - Preparar reconocimiento de voz local del navegador/Electron.
-    - Detectar frase inicial: "hey jarvis" o "jarvis".
-    - Dejar lista la base para que el siguiente bloque conecte comandos inteligentes con contexto completo.
+    - Mantener reconocimiento de voz local del navegador/Electron.
+    - Enviar contexto completo al cerebro de Jarvis en cada comando.
+    - Ejecutar comandos inteligentes: iniciar, siguiente, registrar reps, tiempo, distancia, fallo, guardar y completar.
 
   Se conecta con:
     - src/features/entrenamiento/diario/diario.controller.js
     - src/features/entrenamiento/diario/diario.view.js
+    - src/features/entrenamiento/diario/diario.jarvis.brain.js
     - src/features/entrenamiento/diario/diario.css
 */
+
+import { crearContextoJarvisCompleto, procesarComandoJarvis } from "./diario.jarvis.brain.js";
 
 const JARVIS_NOMBRE = "Jarvis";
 const FRASES_ACTIVACION = ["hey jarvis", "jarvis", "oye jarvis"];
 
 let reconocimientoActivo = null;
 let jarvisEscuchando = false;
+let jarvisInteractuando = false;
+let ultimaFraseFinal = "";
+let ultimoTiempoFrase = 0;
 
 function crearElemento(etiqueta, clase = "", texto = "") {
   const elemento = document.createElement(etiqueta);
@@ -45,7 +51,7 @@ function puedeHablar() {
 }
 
 function hablarJarvis(mensaje) {
-  if (!puedeHablar()) return;
+  if (!puedeHablar() || !mensaje) return;
 
   try {
     window.speechSynthesis.cancel();
@@ -60,20 +66,18 @@ function hablarJarvis(mensaje) {
 }
 
 function crearContextoResumen(diario = {}) {
-  const rutina = diario.rutinaDelDia?.rutina;
-  const dia = diario.rutinaDelDia?.dia;
-  const metricas = diario.metricas || {};
+  const contexto = crearContextoJarvisCompleto({ diario });
 
   return {
-    rutina: rutina?.nombre || "sin rutina activa",
-    dia: dia?.nombre || "sin día activo",
-    ejercicios: metricas.ejercicios || 0,
-    tiempoEstimadoMinutos: metricas.tiempoEstimadoMinutos || 0,
-    porTiempo: metricas.porTiempo || 0,
-    porRepeticiones: metricas.porRepeticiones || 0,
-    mixtos: metricas.mixtos || 0,
-    porDistancia: metricas.porDistancia || 0,
-    sesion: diario.sesionHoy?.estado || "sin iniciar"
+    rutina: contexto.rutina?.nombre || "sin rutina activa",
+    dia: contexto.dia?.nombre || "sin día activo",
+    ejercicios: contexto.dia?.totalEjercicios || 0,
+    tiempoEstimadoMinutos: contexto.metricas?.tiempoEstimadoMinutos || 0,
+    porTiempo: contexto.metricas?.porTiempo || 0,
+    porRepeticiones: contexto.metricas?.porRepeticiones || 0,
+    mixtos: contexto.metricas?.mixtos || 0,
+    porDistancia: contexto.metricas?.porDistancia || 0,
+    sesion: contexto.sesion?.estado || "sin iniciar"
   };
 }
 
@@ -81,6 +85,23 @@ function actualizarEstado(estadoNodo, textoEstado, activo = false) {
   if (!estadoNodo) return;
   estadoNodo.textContent = textoEstado;
   estadoNodo.className = activo ? "entreno-diario-jarvis-status entreno-diario-jarvis-status--on" : "entreno-diario-jarvis-status";
+}
+
+function actualizarContexto(contextoNodo, contexto = {}) {
+  if (!contextoNodo) return;
+
+  contextoNodo.textContent = `Contexto completo: ${contexto.rutina?.nombre || "sin rutina"} · ${contexto.dia?.nombre || "sin día"} · ejercicio actual: ${contexto.ejercicioActual?.nombre || "pendiente"} · sesión: ${contexto.sesion?.estado || "sin iniciar"}.`;
+}
+
+function agregarLog(logNodo, textoLog) {
+  if (!logNodo || !textoLog) return;
+
+  const linea = crearElemento("div", "entreno-diario-jarvis-log-line", textoLog);
+  logNodo.prepend(linea);
+
+  while (logNodo.children.length > 8) {
+    logNodo.removeChild(logNodo.lastChild);
+  }
 }
 
 async function pedirPermisoMicrofono() {
@@ -105,12 +126,17 @@ async function pedirPermisoMicrofono() {
 
 function extraerTextoResultado(evento) {
   let textoFinal = "";
+  let esFinal = false;
 
   for (let indice = evento.resultIndex; indice < evento.results.length; indice += 1) {
     textoFinal += evento.results[indice][0]?.transcript || "";
+    if (evento.results[indice].isFinal) esFinal = true;
   }
 
-  return texto(textoFinal).toLowerCase();
+  return {
+    texto: texto(textoFinal).toLowerCase(),
+    esFinal
+  };
 }
 
 function contieneActivacionJarvis(frase = "") {
@@ -118,8 +144,20 @@ function contieneActivacionJarvis(frase = "") {
   return FRASES_ACTIVACION.some((activador) => limpio.includes(activador));
 }
 
+function esFraseRepetida(frase = "") {
+  const ahora = Date.now();
+  const limpia = texto(frase).toLowerCase();
+
+  if (limpia === ultimaFraseFinal && ahora - ultimoTiempoFrase < 1500) return true;
+
+  ultimaFraseFinal = limpia;
+  ultimoTiempoFrase = ahora;
+  return false;
+}
+
 function detenerJarvis({ boton, estadoNodo, transcripcionNodo } = {}) {
   jarvisEscuchando = false;
+  jarvisInteractuando = false;
 
   try {
     reconocimientoActivo?.stop?.();
@@ -133,7 +171,7 @@ function detenerJarvis({ boton, estadoNodo, transcripcionNodo } = {}) {
   if (transcripcionNodo) transcripcionNodo.textContent = "Micrófono detenido.";
 }
 
-async function activarJarvis({ diario, boton, estadoNodo, transcripcionNodo, contextoNodo } = {}) {
+async function activarJarvis({ diario, pantalla, boton, estadoNodo, transcripcionNodo, contextoNodo, logNodo } = {}) {
   const SpeechRecognition = obtenerSpeechRecognition();
 
   if (!SpeechRecognition) {
@@ -152,6 +190,7 @@ async function activarJarvis({ diario, boton, estadoNodo, transcripcionNodo, con
   const recognition = new SpeechRecognition();
   reconocimientoActivo = recognition;
   jarvisEscuchando = true;
+  jarvisInteractuando = false;
 
   recognition.lang = "es-ES";
   recognition.continuous = true;
@@ -161,20 +200,37 @@ async function activarJarvis({ diario, boton, estadoNodo, transcripcionNodo, con
   recognition.onstart = () => {
     if (boton) boton.textContent = "Detener Jarvis";
     actualizarEstado(estadoNodo, "Jarvis escuchando. Di: hey Jarvis, iniciemos.", true);
-    if (contextoNodo) contextoNodo.textContent = `Contexto listo: ${contexto.rutina} · ${contexto.dia} · ${contexto.ejercicios} ejercicio(s).`;
+    actualizarContexto(contextoNodo, crearContextoJarvisCompleto({ diario, pantalla }));
+    agregarLog(logNodo, `Jarvis activo · ${contexto.rutina} · ${contexto.dia} · ${contexto.ejercicios} ejercicio(s).`);
     hablarJarvis(`Jarvis activo. Tengo lista la rutina ${contexto.rutina}, ${contexto.dia}. Di hey Jarvis, iniciemos.`);
   };
 
   recognition.onresult = (evento) => {
-    const frase = extraerTextoResultado(evento);
-    if (!frase) return;
+    const resultado = extraerTextoResultado(evento);
+    if (!resultado.texto) return;
 
-    if (transcripcionNodo) transcripcionNodo.textContent = frase;
+    if (transcripcionNodo) transcripcionNodo.textContent = `Escuché: ${resultado.texto}`;
+    if (!resultado.esFinal || esFraseRepetida(resultado.texto)) return;
 
-    if (contieneActivacionJarvis(frase)) {
-      actualizarEstado(estadoNodo, "Jarvis activado por voz. Listo para iniciar interacción.", true);
-      hablarJarvis("Te escucho. En el siguiente bloque podré guiar y registrar la rutina con comandos inteligentes.");
+    if (contieneActivacionJarvis(resultado.texto)) {
+      jarvisInteractuando = true;
+      actualizarEstado(estadoNodo, "Jarvis interactuando. Puedes hablar sin repetir hey Jarvis.", true);
     }
+
+    if (!jarvisInteractuando) return;
+
+    procesarComandoJarvis({
+      frase: resultado.texto,
+      diario,
+      pantalla,
+      responder: (mensaje, contextoCompleto) => {
+        actualizarEstado(estadoNodo, mensaje, true);
+        actualizarContexto(contextoNodo, contextoCompleto);
+        agregarLog(logNodo, `Tú: ${resultado.texto}`);
+        agregarLog(logNodo, `Jarvis: ${mensaje}`);
+        hablarJarvis(mensaje);
+      }
+    });
   };
 
   recognition.onerror = (evento) => {
@@ -182,6 +238,7 @@ async function activarJarvis({ diario, boton, estadoNodo, transcripcionNodo, con
       ? "Permiso de micrófono bloqueado."
       : `Error de micrófono: ${evento?.error || "desconocido"}.`;
     actualizarEstado(estadoNodo, mensaje, false);
+    agregarLog(logNodo, mensaje);
   };
 
   recognition.onend = () => {
@@ -191,6 +248,7 @@ async function activarJarvis({ diario, boton, estadoNodo, transcripcionNodo, con
       } catch {
         actualizarEstado(estadoNodo, "Jarvis pausado. Presiona Activar Jarvis para reiniciar.", false);
         jarvisEscuchando = false;
+        jarvisInteractuando = false;
         if (boton) boton.textContent = "Activar Jarvis";
       }
     }
@@ -201,6 +259,7 @@ async function activarJarvis({ diario, boton, estadoNodo, transcripcionNodo, con
   } catch {
     actualizarEstado(estadoNodo, "No se pudo iniciar Jarvis. Intenta de nuevo.", false);
     jarvisEscuchando = false;
+    jarvisInteractuando = false;
   }
 }
 
@@ -216,8 +275,9 @@ export function insertarPanelJarvisDiario(pantalla, { diario = {} } = {}) {
   const acciones = crearElemento("div", "entreno-diario-actions entreno-diario-actions--jarvis");
   const boton = crearElemento("button", "entreno-diario-button entreno-diario-button--jarvis", "Activar Jarvis");
   const estado = crearElemento("p", "entreno-diario-jarvis-status", "Jarvis apagado.");
-  const contexto = crearElemento("small", "entreno-diario-jarvis-context", "Al activar, FitJeff preparará el contexto actual del día.");
+  const contexto = crearElemento("small", "entreno-diario-jarvis-context", "Al activar, FitJeff enviará a Jarvis el contexto completo del día en cada comando.");
   const transcripcion = crearElemento("article", "entreno-diario-jarvis-log", "Transcripción: sin audio todavía.");
+  const log = crearElemento("article", "entreno-diario-jarvis-log entreno-diario-jarvis-log--history", "Historial Jarvis: sin comandos todavía.");
 
   boton.type = "button";
   boton.disabled = !diario.rutinaDelDia?.rutina || !diario.rutinaDelDia?.dia;
@@ -227,11 +287,11 @@ export function insertarPanelJarvisDiario(pantalla, { diario = {} } = {}) {
       return;
     }
 
-    activarJarvis({ diario, boton, estadoNodo: estado, transcripcionNodo: transcripcion, contextoNodo: contexto });
+    activarJarvis({ diario, pantalla, boton, estadoNodo: estado, transcripcionNodo: transcripcion, contextoNodo: contexto, logNodo: log });
   });
 
   textos.appendChild(crearElemento("h3", "", JARVIS_NOMBRE));
-  textos.appendChild(crearElemento("p", "", "Activa el micrófono para preparar la interacción por voz del entrenamiento diario."));
+  textos.appendChild(crearElemento("p", "", "Activa el micrófono para que Jarvis te guíe y registre comandos durante el entrenamiento diario."));
   top.appendChild(textos);
 
   acciones.appendChild(boton);
@@ -239,6 +299,8 @@ export function insertarPanelJarvisDiario(pantalla, { diario = {} } = {}) {
   panel.appendChild(estado);
   panel.appendChild(contexto);
   panel.appendChild(transcripcion);
+  panel.appendChild(log);
+  panel.appendChild(crearElemento("small", "entreno-diario-jarvis-context", "Comandos: hey Jarvis iniciemos · siguiente · hice 12 repeticiones · hice 10 minutos · al fallo · guarda · completa sesión."));
   panel.appendChild(acciones);
 
   panelPrincipal.after(panel);
