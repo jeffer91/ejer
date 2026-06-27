@@ -5,7 +5,8 @@
   Función o funciones:
     - Insertar el panel Jarvis dentro de Diario.
     - Activar y detener micrófono desde un botón visible.
-    - Mantener reconocimiento de voz local del navegador/Electron.
+    - Mantener reconocimiento de voz local del navegador/Electron cuando el entorno lo permite.
+    - Cortar el reinicio automático si SpeechRecognition devuelve errores fatales como network.
     - Mostrar diagnóstico visible cuando el botón se presiona.
     - Enviar contexto completo al cerebro de Jarvis en cada comando.
     - Ejecutar comandos inteligentes: iniciar, siguiente, registrar reps, tiempo, distancia, fallo, guardar y completar.
@@ -22,6 +23,7 @@ import { crearContextoJarvisCompleto, procesarComandoJarvis } from "./diario.jar
 
 const JARVIS_NOMBRE = "Jarvis";
 const FRASES_ACTIVACION = ["hey jarvis", "jarvis", "oye jarvis"];
+const ERRORES_RECONOCIMIENTO_FATALES = ["network", "not-allowed", "service-not-allowed", "audio-capture", "language-not-supported"];
 
 let reconocimientoActivo = null;
 let jarvisEscuchando = false;
@@ -183,23 +185,50 @@ function esFraseRepetida(frase = "") {
   return false;
 }
 
-function detenerJarvis({ boton, estadoNodo, transcripcionNodo } = {}) {
-  jarvisEscuchando = false;
-  jarvisInteractuando = false;
+function restaurarBotonJarvis(boton) {
+  if (!boton) return;
+  boton.textContent = "Activar Jarvis";
+  boton.disabled = false;
+}
 
+function detenerReconocimientoActivo() {
   try {
-    reconocimientoActivo?.stop?.();
+    reconocimientoActivo?.abort?.();
   } catch {
-    // Si ya estaba detenido, no hacemos nada.
+    try {
+      reconocimientoActivo?.stop?.();
+    } catch {
+      // Si ya estaba detenido, no hacemos nada.
+    }
   }
 
   reconocimientoActivo = null;
-  if (boton) {
-    boton.textContent = "Activar Jarvis";
-    boton.disabled = false;
-  }
+}
+
+function detenerJarvis({ boton, estadoNodo, transcripcionNodo } = {}) {
+  jarvisEscuchando = false;
+  jarvisInteractuando = false;
+  detenerReconocimientoActivo();
+  restaurarBotonJarvis(boton);
   actualizarEstado(estadoNodo, "Jarvis apagado.", false);
   if (transcripcionNodo) transcripcionNodo.textContent = "Micrófono detenido.";
+}
+
+function manejarErrorFatalReconocimiento({ error, boton, estadoNodo, transcripcionNodo, logNodo } = {}) {
+  const detalle = error || "desconocido";
+  const mensaje = detalle === "network"
+    ? "Reconocimiento de voz no disponible por error de red del motor de voz. Detuve Jarvis para evitar el bucle; usa el comando escrito mientras revisamos el entorno."
+    : detalle === "not-allowed"
+      ? "Permiso de micrófono bloqueado. Revisa privacidad de Windows y permisos de Electron."
+      : `Reconocimiento de voz detenido por error: ${detalle}. Usa el comando escrito como respaldo.`;
+
+  jarvisEscuchando = false;
+  jarvisInteractuando = false;
+  detenerReconocimientoActivo();
+  restaurarBotonJarvis(boton);
+  actualizarEstado(estadoNodo, mensaje, false);
+  if (transcripcionNodo) transcripcionNodo.textContent = `Jarvis detenido: ${detalle}. El modo escrito sigue disponible.`;
+  agregarLog(logNodo, mensaje);
 }
 
 function responderJarvis({ mensaje, contextoCompleto, resultadoTexto, estadoNodo, contextoNodo, logNodo } = {}) {
@@ -242,10 +271,7 @@ async function activarJarvis({ diario, pantalla, boton, estadoNodo, transcripcio
   agregarLog(logNodo, `Diagnóstico: ${describirDiagnosticoJarvis()}`);
 
   if (!SpeechRecognition) {
-    if (boton) {
-      boton.disabled = false;
-      boton.textContent = "Activar Jarvis";
-    }
+    restaurarBotonJarvis(boton);
     actualizarEstado(estadoNodo, "El botón sí responde, pero este entorno no tiene reconocimiento de voz activo. Usa el comando escrito de Jarvis o prueba en Chrome/Electron actualizado.", false);
     if (transcripcionNodo) transcripcionNodo.textContent = "Reconocimiento de voz no disponible. El modo escrito queda activo como respaldo.";
     agregarLog(logNodo, "Reconocimiento de voz no disponible. Modo escrito activo.");
@@ -254,10 +280,7 @@ async function activarJarvis({ diario, pantalla, boton, estadoNodo, transcripcio
 
   const permiso = await pedirPermisoMicrofono();
   if (!permiso.ok) {
-    if (boton) {
-      boton.disabled = false;
-      boton.textContent = "Activar Jarvis";
-    }
+    restaurarBotonJarvis(boton);
     actualizarEstado(estadoNodo, permiso.mensaje, false);
     agregarLog(logNodo, permiso.mensaje);
     return;
@@ -275,6 +298,7 @@ async function activarJarvis({ diario, pantalla, boton, estadoNodo, transcripcio
   recognition.maxAlternatives = 1;
 
   recognition.onstart = () => {
+    if (!jarvisEscuchando) return;
     if (boton) {
       boton.textContent = "Detener Jarvis";
       boton.disabled = false;
@@ -302,30 +326,28 @@ async function activarJarvis({ diario, pantalla, boton, estadoNodo, transcripcio
   };
 
   recognition.onerror = (evento) => {
-    const mensaje = evento?.error === "not-allowed"
-      ? "Permiso de micrófono bloqueado. Revisa privacidad de Windows y permisos de Electron."
-      : `Error de micrófono: ${evento?.error || "desconocido"}.`;
+    const error = evento?.error || "desconocido";
+
+    if (ERRORES_RECONOCIMIENTO_FATALES.includes(error)) {
+      manejarErrorFatalReconocimiento({ error, boton, estadoNodo, transcripcionNodo, logNodo });
+      return;
+    }
+
+    const mensaje = `Error de micrófono: ${error}.`;
     actualizarEstado(estadoNodo, mensaje, false);
     agregarLog(logNodo, mensaje);
-    if (boton && !jarvisEscuchando) {
-      boton.textContent = "Activar Jarvis";
-      boton.disabled = false;
-    }
   };
 
   recognition.onend = () => {
-    if (jarvisEscuchando) {
-      try {
-        recognition.start();
-      } catch {
-        actualizarEstado(estadoNodo, "Jarvis pausado. Presiona Activar Jarvis para reiniciar.", false);
-        jarvisEscuchando = false;
-        jarvisInteractuando = false;
-        if (boton) {
-          boton.textContent = "Activar Jarvis";
-          boton.disabled = false;
-        }
-      }
+    if (!jarvisEscuchando) return;
+
+    try {
+      recognition.start();
+    } catch {
+      actualizarEstado(estadoNodo, "Jarvis pausado. Presiona Activar Jarvis para reiniciar.", false);
+      jarvisEscuchando = false;
+      jarvisInteractuando = false;
+      restaurarBotonJarvis(boton);
     }
   };
 
@@ -336,10 +358,7 @@ async function activarJarvis({ diario, pantalla, boton, estadoNodo, transcripcio
     agregarLog(logNodo, `No se pudo iniciar reconocimiento: ${error?.message || error?.name || "sin detalle"}`);
     jarvisEscuchando = false;
     jarvisInteractuando = false;
-    if (boton) {
-      boton.textContent = "Activar Jarvis";
-      boton.disabled = false;
-    }
+    restaurarBotonJarvis(boton);
   }
 }
 
@@ -395,8 +414,7 @@ export function insertarPanelJarvisDiario(pantalla, { diario = {} } = {}) {
     activarJarvis({ diario, pantalla, boton, estadoNodo: estado, transcripcionNodo: transcripcion, contextoNodo: contexto, logNodo: log }).catch((error) => {
       actualizarEstado(estado, `Jarvis falló al activarse: ${error?.message || error?.name || "sin detalle"}.`, false);
       agregarLog(log, `Error al activar Jarvis: ${error?.stack || error?.message || error?.name || "sin detalle"}`);
-      boton.textContent = "Activar Jarvis";
-      boton.disabled = false;
+      restaurarBotonJarvis(boton);
     });
   });
 
