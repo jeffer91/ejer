@@ -6,6 +6,7 @@
     - Interpretar respuestas de IA generadas con el contrato FITJEFF_RUTINA_V1.
     - Separar rutina, días, bloques y ejercicios.
     - Detectar fuerza, cardio, fútbol, movilidad, técnica, core y otros bloques.
+    - Detectar medición por repeticiones, tiempo, mixto o distancia.
     - Normalizar campos clave para que luego el controller y service puedan guardar la rutina.
     - Apoyarse en validaciones y autocorrecciones para respuestas IA incompletas.
 
@@ -31,6 +32,8 @@ export const TIPOS_BLOQUE_RUTINA_IA = [
   "otro"
 ];
 
+const MEDICIONES_EJERCICIO = ["repeticiones", "tiempo", "mixto", "distancia"];
+
 const MARCADORES = {
   RUTINA: "[RUTINA]",
   FIN_RUTINA_DATOS: "[FIN_RUTINA_DATOS]",
@@ -44,10 +47,13 @@ const MARCADORES = {
 const CLAVES_EJERCICIO = [
   "ejercicio",
   "tipo",
+  "medicion",
   "series",
   "repeticiones",
   "descanso",
   "duracion",
+  "duracion_segundos",
+  "distancia_km",
   "intensidad",
   "notas"
 ];
@@ -136,27 +142,71 @@ function asignarClave(objetivo, linea) {
   return true;
 }
 
-function convertirSegundos(valor = "") {
-  const limpio = quitarAcentos(valor).toLowerCase();
-  const numero = Number((limpio.match(/\d+(?:[.,]\d+)?/) || [])[0]?.replace(",", "."));
+function convertirNumero(valor = "") {
+  if (valor === null || valor === undefined || texto(valor) === "") return null;
+  const numero = Number(texto(valor).replace(",", "."));
+  return Number.isFinite(numero) ? numero : null;
+}
+
+function obtenerNumeroConUnidad(valor = "") {
+  const limpio = quitarAcentos(valor).toLowerCase().replace(",", ".");
+  const numero = Number((limpio.match(/\d+(?:\.\d+)?/) || [])[0]);
 
   if (!Number.isFinite(numero)) return null;
-  if (/min|minuto|minutos/.test(limpio)) return Math.round(numero * 60);
-  return Math.round(numero);
+
+  return {
+    numero,
+    esMinuto: /min|minuto|minutos/.test(limpio),
+    esSegundo: /seg|segundo|segundos|\bs\b/.test(limpio),
+    texto: texto(valor)
+  };
+}
+
+function convertirSegundos(valor = "") {
+  const dato = obtenerNumeroConUnidad(valor);
+
+  if (!dato) return null;
+  if (dato.esMinuto) return Math.round(dato.numero * 60);
+  return Math.round(dato.numero);
 }
 
 function convertirMinutos(valor = "") {
-  const limpio = quitarAcentos(valor).toLowerCase();
-  const numero = Number((limpio.match(/\d+(?:[.,]\d+)?/) || [])[0]?.replace(",", "."));
+  const dato = obtenerNumeroConUnidad(valor);
 
-  if (!Number.isFinite(numero)) return null;
-  if (/seg|segundo|segundos|s\b/.test(limpio) && !/min/.test(limpio)) return Math.round(numero / 60);
-  return Math.round(numero);
+  if (!dato) return null;
+  if (dato.esSegundo && !dato.esMinuto) return Math.round((dato.numero / 60) * 100) / 100;
+  return dato.numero;
 }
 
-function convertirNumero(valor = "") {
-  const numero = Number(texto(valor).replace(",", "."));
-  return Number.isFinite(numero) ? numero : null;
+function convertirDistanciaKm(valor = "") {
+  const limpio = quitarAcentos(valor).toLowerCase().replace(",", ".");
+  const numero = Number((limpio.match(/\d+(?:\.\d+)?/) || [])[0]);
+
+  if (!Number.isFinite(numero)) return null;
+  if (/\bm\b|metro|metros/.test(limpio) && !/km|kilometro|kilometros/.test(limpio)) return Math.round((numero / 1000) * 100) / 100;
+  return numero;
+}
+
+function normalizarMedicion(valor = "") {
+  const limpio = quitarAcentos(valor).toLowerCase().replace(/\s+/g, "_");
+
+  if (["tiempo", "duracion", "minutos", "segundos"].includes(limpio)) return "tiempo";
+  if (["repeticiones", "reps", "rep", "series_reps"].includes(limpio)) return "repeticiones";
+  if (["mixto", "series_tiempo", "tiempo_series"].includes(limpio)) return "mixto";
+  if (["distancia", "km", "kilometros"].includes(limpio)) return "distancia";
+  return "";
+}
+
+function inferirMedicion({ medicion, tipo, series, repeticiones, duracionMinutos, duracionSegundos, distanciaKm }) {
+  const medicionNormalizada = normalizarMedicion(medicion);
+  if (medicionNormalizada) return medicionNormalizada;
+
+  if (Number(distanciaKm || 0) > 0) return "distancia";
+  if (Number(duracionMinutos || 0) > 0 || Number(duracionSegundos || 0) > 0) {
+    return Number(series || 0) > 0 && Number(repeticiones || 0) > 0 ? "mixto" : "tiempo";
+  }
+  if (["cardio", "movilidad", "calentamiento", "descanso_activo"].includes(tipo) && !Number(repeticiones || 0)) return "tiempo";
+  return "repeticiones";
 }
 
 function crearRutinaBase() {
@@ -218,18 +268,35 @@ function parsearEjercicio(linea = "", bloqueActual = {}) {
   const series = convertirNumero(datos.series);
   const repeticiones = convertirNumero(datos.repeticiones);
   const descansoSegundos = convertirSegundos(datos.descanso);
-  const duracionMinutos = convertirMinutos(datos.duracion);
+  const duracionFuente = datos.duracion || datos.tiempo || datos.minutos || datos.duracion_minutos || "";
+  const duracionMinutos = convertirMinutos(duracionFuente);
+  const duracionSegundos = convertirSegundos(datos.duracion_segundos || duracionFuente);
+  const distanciaKm = convertirDistanciaKm(datos.distancia_km || datos.distancia || datos.km);
+  const medicion = inferirMedicion({
+    medicion: datos.medicion || datos.tipo_medicion || datos.unidad_medicion,
+    tipo,
+    series,
+    repeticiones,
+    duracionMinutos,
+    duracionSegundos,
+    distanciaKm
+  });
+  const seriesFinal = medicion === "tiempo" ? 0 : series;
+  const repeticionesFinal = medicion === "tiempo" || medicion === "mixto" ? (repeticiones || 0) : repeticiones;
 
   return {
     nombre,
     tipo,
+    medicion,
     bloque: bloqueActual.nombre || tipo,
-    series,
-    repeticiones,
+    series: seriesFinal,
+    repeticiones: repeticionesFinal,
     descanso: texto(datos.descanso),
     descansoSegundos,
-    duracion: texto(datos.duracion),
+    duracion: texto(duracionFuente),
     duracionMinutos,
+    duracionSegundos,
+    distanciaKm,
     intensidad: texto(datos.intensidad),
     notas: texto(datos.notas),
     fuente: linea,
@@ -259,12 +326,18 @@ function cerrarBloque(diaActual, bloqueActual) {
 
 function crearResumen(rutina) {
   const tipos = {};
+  const mediciones = {};
   const totalBloques = rutina.dias.reduce((total, dia) => total + dia.bloques.length, 0);
   const totalEjercicios = rutina.dias.reduce((total, dia) => total + dia.ejercicios.length, 0);
+  const tiempoMinutos = rutina.dias.reduce((total, dia) => total + (dia.ejercicios || []).reduce((sub, ejercicio) => sub + Number(ejercicio.duracionMinutos || 0), 0), 0);
 
   rutina.dias.forEach((dia) => {
     dia.bloques.forEach((bloque) => {
       tipos[bloque.tipo] = (tipos[bloque.tipo] || 0) + 1;
+    });
+    dia.ejercicios.forEach((ejercicio) => {
+      const medicion = ejercicio.medicion || "repeticiones";
+      mediciones[medicion] = (mediciones[medicion] || 0) + 1;
     });
   });
 
@@ -272,7 +345,9 @@ function crearResumen(rutina) {
     dias: rutina.dias.length,
     bloques: totalBloques,
     ejercicios: totalEjercicios,
-    tipos
+    tiempoMinutos,
+    tipos,
+    mediciones
   };
 }
 
@@ -395,9 +470,19 @@ export function interpretarRutinaIA(textoFuente = "") {
   };
 }
 
+function describirEjercicioSimple(ejercicio = {}) {
+  const partes = [ejercicio.nombre].filter(Boolean);
+
+  if (ejercicio.duracion) partes.push(`duracion=${ejercicio.duracion}`);
+  else if (ejercicio.duracionMinutos) partes.push(`duracion=${ejercicio.duracionMinutos}min`);
+  if (ejercicio.distanciaKm) partes.push(`distancia_km=${ejercicio.distanciaKm}`);
+
+  return partes.join(" | ");
+}
+
 export function convertirRutinaIAATextoSimple(rutina = {}) {
   return (rutina.dias || []).map((dia) => {
-    const ejercicios = (dia.ejercicios || []).map((ejercicio) => ejercicio.nombre).filter(Boolean).join("\n");
+    const ejercicios = (dia.ejercicios || []).map(describirEjercicioSimple).filter(Boolean).join("\n");
     return `${dia.nombre || "Día"}\n${ejercicios}`.trim();
   }).join("\n\n");
 }
