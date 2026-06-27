@@ -5,7 +5,8 @@
   Función o funciones:
     - Preparar la rutina activa del día.
     - Iniciar, guardar progreso y completar sesiones diarias con guardado local.
-    - Calcular ejercicios, series, repeticiones y tiempo estimado.
+    - Calcular ejercicios, series, repeticiones, tiempo y distancia estimada.
+    - Registrar sesiones con ejercicios por repeticiones, tiempo, mixtos o distancia.
 
   Se conecta con:
     - src/features/entrenamiento/entrenamiento.service.js
@@ -19,26 +20,66 @@ import { crearEntrenamientoService } from "../entrenamiento.service.js";
 import { fechaEntrenamientoHoy } from "../entrenamiento.state.js";
 import { crearDetalleBaseDesdeDia, mapearFormularioDiario, validarCierreSesion } from "./diario.mapper.js";
 
+function ejerciciosDia(dia) {
+  return Array.isArray(dia?.ejercicios) ? dia.ejercicios : [];
+}
+
 function sumarEjercicios(dia) {
-  return Array.isArray(dia?.ejercicios) ? dia.ejercicios.length : 0;
+  return ejerciciosDia(dia).length;
+}
+
+function usaRepeticiones(ejercicio = {}) {
+  const medicion = ejercicio.medicion || "repeticiones";
+  return medicion === "repeticiones" || medicion === "mixto";
+}
+
+function usaTiempo(ejercicio = {}) {
+  const medicion = ejercicio.medicion || "repeticiones";
+  return medicion === "tiempo" || medicion === "mixto";
+}
+
+function usaDistancia(ejercicio = {}) {
+  return (ejercicio.medicion || "") === "distancia" || Number(ejercicio.distanciaKm || 0) > 0;
 }
 
 function sumarSeries(dia) {
-  return (dia?.ejercicios || []).reduce((total, ejercicio) => total + Number(ejercicio.series || 0), 0);
+  return ejerciciosDia(dia).reduce((total, ejercicio) => {
+    return total + (usaRepeticiones(ejercicio) ? Number(ejercicio.series || 0) : 0);
+  }, 0);
 }
 
 function sumarRepeticiones(dia) {
-  return (dia?.ejercicios || []).reduce((total, ejercicio) => {
+  return ejerciciosDia(dia).reduce((total, ejercicio) => {
+    if (!usaRepeticiones(ejercicio)) return total;
     return total + Number(ejercicio.series || 0) * Number(ejercicio.repeticiones || 0);
   }, 0);
 }
 
+function sumarTiempoPlanificado(dia) {
+  return ejerciciosDia(dia).reduce((total, ejercicio) => {
+    const minutos = Number(ejercicio.duracionMinutos || 0);
+    const segundos = Number(ejercicio.duracionSegundos || 0);
+    return total + minutos + segundos / 60;
+  }, 0);
+}
+
+function sumarDistanciaPlanificada(dia) {
+  return ejerciciosDia(dia).reduce((total, ejercicio) => total + Number(ejercicio.distanciaKm || 0), 0);
+}
+
+function contarPorMedicion(dia, medicion) {
+  return ejerciciosDia(dia).filter((ejercicio) => (ejercicio.medicion || "repeticiones") === medicion).length;
+}
+
 function calcularTiempoEstimado(dia) {
+  const tiempoPlanificado = sumarTiempoPlanificado(dia);
   const totalSeries = sumarSeries(dia);
   const descanso = Number(dia?.descansoGeneralSegundos || 60);
-  const segundosTrabajo = totalSeries * 45;
+  const segundosTrabajoSeries = totalSeries * 45;
   const segundosDescanso = Math.max(totalSeries - 1, 0) * descanso;
-  return Math.max(1, Math.round((segundosTrabajo + segundosDescanso) / 60));
+  const estimadoPorSeries = (segundosTrabajoSeries + segundosDescanso) / 60;
+
+  return Math.max(1, Math.round((tiempoPlanificado + estimadoPorSeries) * 100) / 100);
 }
 
 function buscarSesionHoy(estado, rutinaId, diaRutinaId) {
@@ -58,6 +99,7 @@ function crearSesionBase(rutina, dia, estado = ENTRENAMIENTO_ESTADOS_SESION.INIC
     seriesCompletadas: 0,
     repeticionesCompletadas: 0,
     tiempoMinutos: 0,
+    distanciaCompletadaKm: 0,
     dificultadGeneral: "media",
     molestias: "",
     detalleEjercicios: crearDetalleBaseDesdeDia(dia),
@@ -73,6 +115,8 @@ export function crearDiarioService(entrenamientoService = crearEntrenamientoServ
     const rutina = rutinaDelDia.rutina;
     const dia = rutinaDelDia.dia;
     const sesionHoy = rutina && dia ? buscarSesionHoy(estado, rutina.id, dia.id) : null;
+    const tiempoPlanificadoMinutos = Math.round(sumarTiempoPlanificado(dia) * 100) / 100;
+    const distanciaPlanificadaKm = Math.round(sumarDistanciaPlanificada(dia) * 100) / 100;
 
     return {
       rutinaDelDia,
@@ -82,7 +126,13 @@ export function crearDiarioService(entrenamientoService = crearEntrenamientoServ
         ejercicios: sumarEjercicios(dia),
         series: sumarSeries(dia),
         repeticiones: sumarRepeticiones(dia),
-        tiempoEstimadoMinutos: calcularTiempoEstimado(dia)
+        tiempoPlanificadoMinutos,
+        distanciaPlanificadaKm,
+        tiempoEstimadoMinutos: calcularTiempoEstimado(dia),
+        porRepeticiones: contarPorMedicion(dia, "repeticiones"),
+        porTiempo: contarPorMedicion(dia, "tiempo"),
+        mixtos: contarPorMedicion(dia, "mixto"),
+        porDistancia: contarPorMedicion(dia, "distancia")
       }
     };
   }
