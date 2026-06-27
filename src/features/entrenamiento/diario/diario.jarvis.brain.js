@@ -8,6 +8,7 @@
     - Actualizar el formulario del Diario con repeticiones, tiempo, distancia, fallo, notas y progreso.
     - Ejecutar acciones de Diario desde voz: iniciar, guardar, completar, siguiente y repetir.
     - Evitar que Jarvis quede activo sobre una vista vieja cuando Diario se recarga.
+    - Evitar errores si se crea contexto sin nodo de pantalla.
 
   Se conecta con:
     - src/features/entrenamiento/diario/diario.jarvis.js
@@ -36,9 +37,21 @@ function obtenerNumero(frase = "") {
   return match ? numero(match[0], null) : null;
 }
 
+function esNodoDom(valor) {
+  return Boolean(valor && typeof valor.querySelector === "function" && typeof valor.querySelectorAll === "function");
+}
+
+function buscarUno(pantalla, selector) {
+  return esNodoDom(pantalla) ? pantalla.querySelector(selector) : null;
+}
+
+function buscarTodos(pantalla, selector) {
+  return esNodoDom(pantalla) ? [...pantalla.querySelectorAll(selector)] : [];
+}
+
 function obtenerBotonPorTexto(pantalla, textoBoton) {
   const buscado = normalizar(textoBoton);
-  return [...(pantalla?.querySelectorAll("button") || [])].find((boton) => normalizar(boton.textContent).includes(buscado));
+  return buscarTodos(pantalla, "button").find((boton) => normalizar(boton.textContent).includes(buscado));
 }
 
 function hacerClickAccion(pantalla, textoBoton) {
@@ -49,7 +62,7 @@ function hacerClickAccion(pantalla, textoBoton) {
 }
 
 function detenerJarvisAntesDeRecargar(pantalla) {
-  const botonJarvis = pantalla?.querySelector(".entreno-diario-button--jarvis");
+  const botonJarvis = buscarUno(pantalla, ".entreno-diario-button--jarvis");
   if (botonJarvis && normalizar(botonJarvis.textContent).includes("detener")) {
     botonJarvis.click();
   }
@@ -98,7 +111,7 @@ function agregarNota(formulario, nombre, nota) {
 }
 
 function obtenerFormDiario(pantalla) {
-  return pantalla?.querySelector("form.entreno-diario-form") || null;
+  return buscarUno(pantalla, "form.entreno-diario-form");
 }
 
 function ejerciciosDelDia(diario = {}) {
@@ -170,7 +183,7 @@ function leerEstadoFormulario(pantalla, diario = {}) {
   }));
 }
 
-export function crearContextoJarvisCompleto({ diario = {}, pantalla = {}, frase = "" } = {}) {
+export function crearContextoJarvisCompleto({ diario = {}, pantalla = null, frase = "" } = {}) {
   const rutina = diario.rutinaDelDia?.rutina;
   const dia = diario.rutinaDelDia?.dia;
   const metricas = diario.metricas || {};
@@ -346,7 +359,7 @@ function responderEjercicioActual(diario) {
   return ejercicio ? `Ejercicio actual: ${describirEjercicio(ejercicio)}` : "No hay ejercicio activo.";
 }
 
-export function procesarComandoJarvis({ frase = "", diario = {}, pantalla = {}, responder } = {}) {
+export function procesarComandoJarvis({ frase = "", diario = {}, pantalla = null, responder } = {}) {
   const limpia = limpiarFrase(frase);
 
   if (!limpia || esComandoDuplicado(limpia)) return null;
