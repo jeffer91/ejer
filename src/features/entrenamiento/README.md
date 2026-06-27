@@ -80,3 +80,19 @@ La lógica vive en `diario/diario.service.js` para mantener separada la pantalla
 - Últimos registros.
 
 La lógica de guardado vive en `hit/hit.service.js` y el reloj vive en `hit/hit.timer.js`.
+
+## Estado del bloque 7
+
+`Ajustes` ahora permite configurar IA y voz:
+
+- Guardar API Key de Gemini localmente.
+- Configurar modelo Gemini.
+- Activar o desactivar IA.
+- Activar o desactivar voz automática.
+- Seleccionar voz del sistema cuando esté disponible.
+- Ajustar volumen y velocidad.
+- Probar Gemini.
+- Probar voz.
+- Borrar API Key.
+
+Gemini vive en `ajustes/gemini.service.js`, la voz vive en `ajustes/voice.service.js` y la coordinación vive en `ajustes/ajustes.service.js`.
