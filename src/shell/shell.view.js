@@ -22,6 +22,20 @@ function crearElemento(etiqueta, clase = "", texto = "") {
   return elemento;
 }
 
+function crearNavLabel(titulo, descripcion = "") {
+  const contenedor = crearElemento("div", "fj-shell__nav-label");
+  const tituloElemento = crearElemento("span", "fj-shell__nav-label-title", titulo);
+  const descripcionElemento = crearElemento("span", "fj-shell__nav-label-desc", descripcion);
+
+  contenedor.appendChild(tituloElemento);
+
+  if (descripcion) {
+    contenedor.appendChild(descripcionElemento);
+  }
+
+  return contenedor;
+}
+
 function crearModuloButton({ modulo, activo, onSeleccionarModulo }) {
   const boton = crearElemento("button", "fj-shell__module-button");
   boton.type = "button";
@@ -29,6 +43,7 @@ function crearModuloButton({ modulo, activo, onSeleccionarModulo }) {
 
   if (activo) {
     boton.classList.add("fj-shell__module-button--active");
+    boton.setAttribute("aria-current", "page");
   }
 
   const nombre = crearElemento("span", "fj-shell__module-name", modulo.label);
@@ -48,6 +63,7 @@ function crearRutaButton({ ruta, activo, onSeleccionarRuta }) {
 
   if (activo) {
     boton.classList.add("fj-shell__route-button--active");
+    boton.setAttribute("aria-current", "page");
   }
 
   boton.addEventListener("click", () => onSeleccionarRuta(ruta.id));
@@ -71,6 +87,9 @@ export function montarShellView({ raiz, modulos, ubicacion, onSeleccionarModulo,
   const routesNav = crearElemento("nav", "fj-shell__subnav");
   const main = crearElemento("main", "fj-main fj-shell__content");
 
+  modulesNav.setAttribute("aria-label", "Módulos principales");
+  routesNav.setAttribute("aria-label", `Opciones internas de ${ubicacion.modulo.label}`);
+
   brandText.appendChild(appName);
   brandText.appendChild(appMode);
   brand.appendChild(logo);
@@ -83,6 +102,8 @@ export function montarShellView({ raiz, modulos, ubicacion, onSeleccionarModulo,
   topbar.appendChild(brand);
   topbar.appendChild(activeBox);
 
+  modulesNav.appendChild(crearNavLabel("Módulos principales", "Elige el área de trabajo"));
+
   modulos.forEach((modulo) => {
     modulesNav.appendChild(
       crearModuloButton({
@@ -92,6 +113,8 @@ export function montarShellView({ raiz, modulos, ubicacion, onSeleccionarModulo,
       })
     );
   });
+
+  routesNav.appendChild(crearNavLabel("Opciones internas", ubicacion.modulo.label));
 
   ubicacion.modulo.routes.forEach((ruta) => {
     routesNav.appendChild(
