@@ -5,7 +5,7 @@
   Función o funciones:
     - Convertir el formulario de Rutinas en una rutina guardable.
     - Crear días iguales o días diferentes por bloques.
-    - Guardar rutinas interpretadas desde IA conservando días, bloques, tipos, cardio, fútbol, duración y notas.
+    - Guardar rutinas interpretadas desde IA conservando días, bloques, tipos, medición, cardio, fútbol, duración y notas.
     - Editar ejercicios avanzados de rutinas IA sin perder estructura.
     - Editar, duplicar, activar, archivar, restaurar y borrar rutinas.
 
@@ -70,20 +70,42 @@ function obtenerPrimerDescanso(dia = {}) {
   return numero(ejercicio?.descansoSegundos, 60);
 }
 
+function normalizarMedicionIA(ejercicio = {}, tipo = "otro") {
+  const medicion = texto(ejercicio.medicion || ejercicio.tipoMedicion || ejercicio.unidadMedicion).toLowerCase();
+  const duracionMinutos = numero(ejercicio.duracionMinutos, 0);
+  const duracionSegundos = numero(ejercicio.duracionSegundos, 0);
+  const distanciaKm = numero(ejercicio.distanciaKm, 0);
+
+  if (["tiempo", "mixto", "distancia", "repeticiones"].includes(medicion)) return medicion;
+  if (distanciaKm > 0) return "distancia";
+  if (duracionMinutos > 0 || duracionSegundos > 0) return numero(ejercicio.series, 0) > 0 && numero(ejercicio.repeticiones, 0) > 0 ? "mixto" : "tiempo";
+  if (["cardio", "movilidad", "calentamiento", "descanso_activo"].includes(tipo)) return "tiempo";
+  return "repeticiones";
+}
+
 function mapearEjercicioIA(ejercicio = {}, bloque = {}) {
   const tipo = texto(ejercicio.tipo || bloque.tipo || "otro") || "otro";
-  const tieneDuracion = Number(ejercicio.duracionMinutos || 0) > 0;
   const esCardioOTecnica = ["cardio", "futbol", "tecnica", "movilidad", "calentamiento", "descanso_activo"].includes(tipo);
+  const duracionMinutos = numero(ejercicio.duracionMinutos, 0);
+  const duracionSegundos = numero(ejercicio.duracionSegundos, duracionMinutos > 0 ? Math.round(duracionMinutos * 60) : 0);
+  const distanciaKm = numero(ejercicio.distanciaKm, 0);
+  const medicion = normalizarMedicionIA({ ...ejercicio, duracionMinutos, duracionSegundos, distanciaKm }, tipo);
+  const usaTiempoSolo = medicion === "tiempo";
+  const usaMixto = medicion === "mixto";
+  const usaDistancia = medicion === "distancia";
 
   return crearEjercicioEntrenamientoBase({
     nombre: texto(ejercicio.nombre) || "Ejercicio IA",
     tipo,
+    medicion,
     bloque: texto(ejercicio.bloque || bloque.nombre || tipo),
-    series: numero(ejercicio.series, esCardioOTecnica ? 1 : 3),
-    repeticiones: numero(ejercicio.repeticiones, esCardioOTecnica || tieneDuracion ? 1 : 10),
-    descansoSegundos: numero(ejercicio.descansoSegundos, esCardioOTecnica ? 0 : 60),
+    series: usaTiempoSolo || usaDistancia ? 0 : numero(ejercicio.series, esCardioOTecnica ? 0 : 3),
+    repeticiones: usaTiempoSolo || usaDistancia || usaMixto ? numero(ejercicio.repeticiones, 0) : numero(ejercicio.repeticiones, 10),
+    descansoSegundos: numero(ejercicio.descansoSegundos, esCardioOTecnica || usaTiempoSolo ? 0 : 60),
     duracion: texto(ejercicio.duracion),
-    duracionMinutos: numero(ejercicio.duracionMinutos, 0),
+    duracionMinutos,
+    duracionSegundos,
+    distanciaKm: distanciaKm || null,
     intensidad: texto(ejercicio.intensidad) || "media",
     notas: texto(ejercicio.notas),
     fuenteIA: texto(ejercicio.fuente),
@@ -148,17 +170,23 @@ function numeroCampo(valor, defecto = 0) {
 function actualizarEjercicioPreservandoIA(ejercicio = {}, datos = {}) {
   const tipo = texto(datos.tipo) || ejercicio.tipo || "otro";
   const duracionMinutos = numeroCampo(datos.duracionMinutos, ejercicio.duracionMinutos || 0);
+  const duracionSegundos = numeroCampo(datos.duracionSegundos, ejercicio.duracionSegundos || (duracionMinutos > 0 ? Math.round(duracionMinutos * 60) : 0));
+  const distanciaKm = numeroCampo(datos.distanciaKm, ejercicio.distanciaKm || 0);
+  const medicion = normalizarMedicionIA({ ...ejercicio, ...datos, duracionMinutos, duracionSegundos, distanciaKm }, tipo);
 
   return {
     ...ejercicio,
     nombre: texto(datos.nombre) || ejercicio.nombre,
     tipo,
+    medicion,
     bloque: texto(datos.bloque) || ejercicio.bloque || tipo,
-    series: numeroCampo(datos.series, ejercicio.series || 0),
-    repeticiones: numeroCampo(datos.repeticiones, ejercicio.repeticiones || 0),
+    series: medicion === "tiempo" || medicion === "distancia" ? 0 : numeroCampo(datos.series, ejercicio.series || 0),
+    repeticiones: medicion === "tiempo" || medicion === "distancia" ? 0 : numeroCampo(datos.repeticiones, ejercicio.repeticiones || 0),
     descansoSegundos: numeroCampo(datos.descansoSegundos, ejercicio.descansoSegundos || 0),
     duracionMinutos,
+    duracionSegundos,
     duracion: duracionMinutos > 0 ? `${duracionMinutos}min` : texto(ejercicio.duracion),
+    distanciaKm: distanciaKm || null,
     intensidad: texto(datos.intensidad) || ejercicio.intensidad || "media",
     notas: texto(datos.notas),
     actualizadoEn: new Date().toISOString()
@@ -222,7 +250,7 @@ export function crearRutinasService(entrenamientoService = crearEntrenamientoSer
 
     return {
       ...resultado,
-      mensaje: "Rutina IA guardada con días, bloques y tipos de ejercicio."
+      mensaje: "Rutina IA guardada con días, bloques, medición y tipos de ejercicio."
     };
   }
 
