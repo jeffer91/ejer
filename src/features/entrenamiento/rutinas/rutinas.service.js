@@ -5,10 +5,12 @@
   Función o funciones:
     - Convertir el formulario de Rutinas en una rutina guardable.
     - Crear días iguales o días diferentes por bloques.
+    - Guardar rutinas interpretadas desde IA conservando días, bloques, tipos, cardio, fútbol, duración y notas.
     - Editar, duplicar, activar, archivar y restaurar rutinas.
 
   Se conecta con:
     - src/features/entrenamiento/entrenamiento.service.js
+    - src/features/entrenamiento/entrenamiento.state.js
     - src/features/entrenamiento/rutinas/rutinas.mapper.js
     - src/features/entrenamiento/rutinas/rutinas.validator.js
     - src/features/entrenamiento/rutinas/rutinas.controller.js
@@ -16,11 +18,17 @@
 
 import { ENTRENAMIENTO_ESTADOS_RUTINA } from "../entrenamiento.constants.js";
 import { crearEntrenamientoService } from "../entrenamiento.service.js";
-import { validarFormularioRutina } from "./rutinas.validator.js";
+import { crearDiaRutinaBase, crearEjercicioEntrenamientoBase } from "../entrenamiento.state.js";
 import { crearDiasRutinaDesdeFormulario } from "./rutinas.mapper.js";
+import { validarFormularioRutina } from "./rutinas.validator.js";
 
 function texto(valor) {
   return typeof valor === "string" ? valor.trim() : "";
+}
+
+function numero(valor, defecto = 0) {
+  const convertido = Number(valor);
+  return Number.isFinite(convertido) ? convertido : defecto;
 }
 
 function ordenarRutinas(rutinas = []) {
@@ -56,6 +64,81 @@ function clonarDias(dias = []) {
   });
 }
 
+function obtenerPrimerDescanso(dia = {}) {
+  const ejercicio = (dia.ejercicios || []).find((item) => Number.isFinite(Number(item.descansoSegundos)));
+  return numero(ejercicio?.descansoSegundos, 60);
+}
+
+function mapearEjercicioIA(ejercicio = {}, bloque = {}) {
+  const tipo = texto(ejercicio.tipo || bloque.tipo || "otro") || "otro";
+  const tieneDuracion = Number(ejercicio.duracionMinutos || 0) > 0;
+  const esCardioOTecnica = ["cardio", "futbol", "tecnica", "movilidad", "calentamiento", "descanso_activo"].includes(tipo);
+
+  return crearEjercicioEntrenamientoBase({
+    nombre: texto(ejercicio.nombre) || "Ejercicio IA",
+    tipo,
+    bloque: texto(ejercicio.bloque || bloque.nombre || tipo),
+    series: numero(ejercicio.series, esCardioOTecnica ? 1 : 3),
+    repeticiones: numero(ejercicio.repeticiones, esCardioOTecnica || tieneDuracion ? 1 : 10),
+    descansoSegundos: numero(ejercicio.descansoSegundos, esCardioOTecnica ? 0 : 60),
+    duracion: texto(ejercicio.duracion),
+    duracionMinutos: numero(ejercicio.duracionMinutos, 0),
+    intensidad: texto(ejercicio.intensidad) || "media",
+    notas: texto(ejercicio.notas),
+    fuenteIA: texto(ejercicio.fuente),
+    camposOriginales: ejercicio.camposOriginales || {},
+    completado: false
+  });
+}
+
+function mapearBloquesIA(bloques = []) {
+  return bloques.map((bloque) => ({
+    tipo: texto(bloque.tipo) || "otro",
+    nombre: texto(bloque.nombre || bloque.tipo || "Bloque"),
+    totalEjercicios: (bloque.ejercicios || []).length
+  }));
+}
+
+function mapearDiaIA(dia = {}, indice = 0) {
+  const bloques = Array.isArray(dia.bloques) && dia.bloques.length
+    ? dia.bloques
+    : [{ tipo: "otro", nombre: "Bloque general", ejercicios: dia.ejercicios || [] }];
+  const ejercicios = bloques.flatMap((bloque) => (bloque.ejercicios || []).map((ejercicio) => mapearEjercicioIA(ejercicio, bloque)));
+
+  return crearDiaRutinaBase({
+    nombre: texto(dia.nombre) || `Día ${indice + 1}`,
+    orden: indice + 1,
+    numeroIA: dia.numero || indice + 1,
+    enfoque: texto(dia.enfoque),
+    calentamiento: texto(dia.calentamiento),
+    descansoGeneralSegundos: obtenerPrimerDescanso({ ejercicios }),
+    bloques: mapearBloquesIA(bloques),
+    ejercicios
+  });
+}
+
+function crearRutinaGuardableDesdeIA(resultadoIA = {}, opciones = {}) {
+  const rutinaIA = resultadoIA.rutina || {};
+  const dias = (rutinaIA.dias || []).map(mapearDiaIA).filter((dia) => dia.ejercicios.length > 0);
+  const activar = Boolean(opciones.activa);
+
+  return {
+    nombre: texto(rutinaIA.nombre) || "Rutina generada por IA",
+    estado: activar ? ENTRENAMIENTO_ESTADOS_RUTINA.ACTIVA : ENTRENAMIENTO_ESTADOS_RUTINA.INACTIVA,
+    origen: "ia",
+    formatoVersion: resultadoIA.formatoVersion || rutinaIA.formatoVersion || "FITJEFF_RUTINA_V1",
+    objetivo: texto(rutinaIA.objetivo),
+    nivel: texto(rutinaIA.nivel),
+    lugar: texto(rutinaIA.lugar),
+    equipo: texto(rutinaIA.equipo),
+    duracionSesion: texto(rutinaIA.duracionSesion || rutinaIA.duracion_sesion),
+    notasGenerales: texto(rutinaIA.notasGenerales || rutinaIA.notas_generales),
+    resumenIA: resultadoIA.resumen || null,
+    advertenciasIA: resultadoIA.advertencias || [],
+    dias
+  };
+}
+
 export function crearRutinasService(entrenamientoService = crearEntrenamientoService()) {
   function obtenerRutinas() {
     return ordenarRutinas(entrenamientoService.obtenerEstado().rutinas);
@@ -84,6 +167,37 @@ export function crearRutinasService(entrenamientoService = crearEntrenamientoSer
     }
 
     return resultado;
+  }
+
+  function crearDesdeRutinaIA(resultadoIA = {}, opciones = {}) {
+    if (!resultadoIA.ok) {
+      return {
+        ok: false,
+        mensaje: resultadoIA.mensaje || "La rutina IA no está lista para guardar.",
+        errores: resultadoIA.errores || []
+      };
+    }
+
+    const datosRutina = crearRutinaGuardableDesdeIA(resultadoIA, opciones);
+
+    if (!datosRutina.dias.length) {
+      return {
+        ok: false,
+        mensaje: "La rutina IA no tiene días con ejercicios para guardar.",
+        errores: ["No se detectaron ejercicios guardables."]
+      };
+    }
+
+    const resultado = entrenamientoService.guardarRutina(datosRutina);
+
+    if (resultado.ok && opciones.activa) {
+      return entrenamientoService.activarRutina(resultado.rutina.id);
+    }
+
+    return {
+      ...resultado,
+      mensaje: "Rutina IA guardada con días, bloques y tipos de ejercicio."
+    };
   }
 
   function activar(rutinaId) {
@@ -149,6 +263,7 @@ export function crearRutinasService(entrenamientoService = crearEntrenamientoSer
   return {
     obtenerRutinas,
     crearDesdeFormulario,
+    crearDesdeRutinaIA,
     activar,
     editarNombre,
     actualizarDesdeFormulario,
