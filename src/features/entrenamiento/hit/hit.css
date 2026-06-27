@@ -23,4 +23,14 @@
 .entreno-hit-record { display: grid; gap: 3px; border: 1px solid var(--fj-border, #1e2a44); border-radius: 10px; padding: 9px; background: rgba(255, 255, 255, 0.02); }
 .entreno-hit-record strong { color: var(--fj-text, #e0f2ff); text-transform: capitalize; }
 .entreno-hit-record span, .entreno-hit-record small { color: var(--fj-muted, #8ba3c2); font-size: 0.78rem; font-weight: 800; }
-@media (max-width: 640px) { .entreno-hit-timer-form, .entreno-hit-form, .entreno-hit-actions { grid-template-columns: 1fr; } }
+.entreno-hit-jarvis { display: grid; gap: 8px; border-color: rgba(34, 255, 136, 0.28); background: linear-gradient(145deg, rgba(18, 26, 43, 0.98), rgba(10, 20, 18, 0.92)); }
+.entreno-hit-jarvis__top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; flex-wrap: wrap; }
+.entreno-hit-button--jarvis { border-color: rgba(34, 255, 136, 0.38); background: rgba(34, 255, 136, 0.12); color: var(--fj-green, #22ff88); }
+.entreno-hit-jarvis-status { border: 1px solid var(--fj-border, #1e2a44); border-radius: 10px; padding: 8px; margin: 0 !important; color: var(--fj-muted, #8ba3c2); background: rgba(255, 255, 255, 0.025); font-weight: 850; }
+.entreno-hit-jarvis-status--on { border-color: rgba(34, 255, 136, 0.32); color: var(--fj-green, #22ff88) !important; background: rgba(34, 255, 136, 0.07); }
+.entreno-hit-jarvis-context { color: var(--fj-cyan, #00f5ff); font-size: 0.76rem; font-weight: 850; }
+.entreno-hit-jarvis-log { border: 1px dashed rgba(0, 245, 255, 0.26); border-radius: 10px; padding: 8px; color: var(--fj-muted, #8ba3c2); font-size: 0.82rem; background: rgba(0, 245, 255, 0.035); }
+.entreno-hit-jarvis-log-line { padding: 3px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.04); }
+.entreno-hit-jarvis-manual { display: grid; grid-template-columns: minmax(180px, 1fr) 170px; gap: 8px; }
+.entreno-hit-jarvis-manual input { min-height: 40px; border: 1px solid var(--fj-border, #1e2a44); border-radius: 10px; background: var(--fj-surface-2, #162036); color: var(--fj-text, #e0f2ff); padding: 8px 10px; font-weight: 800; }
+@media (max-width: 640px) { .entreno-hit-timer-form, .entreno-hit-form, .entreno-hit-actions, .entreno-hit-jarvis-manual { grid-template-columns: 1fr; } .entreno-hit-jarvis__top { align-items: flex-start; } }
