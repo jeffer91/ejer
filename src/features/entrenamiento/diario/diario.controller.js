@@ -6,13 +6,16 @@
     - Montar la pantalla Diario del módulo Entrenamiento.
     - Cargar la rutina activa del día.
     - Iniciar, guardar progreso y completar sesiones con detalle.
+    - Insertar el botón/panel Jarvis para activar micrófono desde Diario.
 
   Se conecta con:
     - src/features/entrenamiento/diario/diario.service.js
     - src/features/entrenamiento/diario/diario.view.js
+    - src/features/entrenamiento/diario/diario.jarvis.js
     - src/features/entrenamiento/entrenamiento.module.js
 */
 
+import { insertarPanelJarvisDiario } from "./diario.jarvis.js";
 import { crearDiarioService } from "./diario.service.js";
 import { crearEntrenamientoDiarioView } from "./diario.view.js";
 
@@ -26,13 +29,18 @@ export function crearEntrenamientoDiarioController() {
 
     mensajeActual = mensaje;
     contenedorActual.innerHTML = "";
-    contenedorActual.appendChild(crearEntrenamientoDiarioView({
-      diario: service.obtenerDiario(),
+
+    const diario = service.obtenerDiario();
+    const vista = crearEntrenamientoDiarioView({
+      diario,
       mensaje,
       onIniciar: () => refrescar(service.iniciarSesion()),
       onGuardarProgreso: (datos) => refrescar(service.guardarProgreso(datos)),
       onCompletar: (datos) => refrescar(service.completarSesion(datos))
-    }));
+    });
+
+    contenedorActual.appendChild(vista);
+    insertarPanelJarvisDiario(vista, { diario });
   }
 
   function montar(contenedor) {
