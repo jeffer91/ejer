@@ -4,8 +4,8 @@
 
   Función o funciones:
     - Construir la pantalla Rutinas de Entrenamiento.
-    - Permitir crear rutinas locales con formulario real.
-    - Mostrar rutinas guardadas y activar una rutina.
+    - Permitir crear rutinas locales con días iguales o diferentes.
+    - Editar, duplicar, activar, archivar y restaurar rutinas guardadas.
 
   Se conecta con:
     - src/features/entrenamiento/rutinas/rutinas.controller.js
@@ -28,7 +28,7 @@ function crearCampo({ nombre, label, placeholder, tipo = "text", valor = "" }) {
 
   input.name = nombre;
   input.type = tipo;
-  input.placeholder = placeholder;
+  input.placeholder = placeholder || "";
   input.value = valor;
   input.min = tipo === "number" ? "1" : "";
 
@@ -37,14 +37,15 @@ function crearCampo({ nombre, label, placeholder, tipo = "text", valor = "" }) {
   return grupo;
 }
 
-function crearArea({ nombre, label, placeholder }) {
+function crearArea({ nombre, label, placeholder, valor = "" }) {
   const grupo = crearElemento("label", "entreno-rutinas-field entreno-rutinas-field--full");
   const texto = crearElemento("span", "", label);
   const area = document.createElement("textarea");
 
   area.name = nombre;
-  area.rows = 5;
-  area.placeholder = placeholder;
+  area.rows = 6;
+  area.placeholder = placeholder || "";
+  area.value = valor;
 
   grupo.appendChild(texto);
   grupo.appendChild(area);
@@ -81,27 +82,138 @@ function crearMensaje(mensaje) {
   return caja;
 }
 
-function crearRutinaCard(rutina, onActivar) {
-  const card = crearElemento("article", "entreno-rutinas-card");
+function crearBoton(texto, clase = "", accion) {
+  const boton = crearElemento("button", `entreno-rutinas-button ${clase}`.trim(), texto);
+  boton.type = "button";
+  boton.addEventListener("click", () => accion?.());
+  return boton;
+}
+
+function calcularTotales(rutina) {
+  const dias = rutina.dias || [];
+  return {
+    dias: dias.length,
+    ejercicios: dias.reduce((total, dia) => total + (dia.ejercicios || []).length, 0),
+    series: dias.reduce((total, dia) => total + (dia.ejercicios || []).reduce((subtotal, ejercicio) => subtotal + Number(ejercicio.series || 0), 0), 0)
+  };
+}
+
+function rutinaATexto(rutina) {
+  return (rutina.dias || []).map((dia, indice) => {
+    const ejercicios = (dia.ejercicios || []).map((ejercicio) => ejercicio.nombre).join("\n");
+    return `${dia.nombre || `Día ${indice + 1}`}\n${ejercicios}`.trim();
+  }).join("\n\n");
+}
+
+function obtenerBaseEdicion(rutina) {
+  const primerDia = (rutina.dias || [])[0] || {};
+  const primerEjercicio = (primerDia.ejercicios || [])[0] || {};
+
+  return {
+    nombre: rutina.nombre || "",
+    totalDias: (rutina.dias || []).length || 1,
+    calentamiento: primerDia.calentamiento || "",
+    descansoSegundos: primerDia.descansoGeneralSegundos || primerEjercicio.descansoSegundos || 60,
+    series: primerEjercicio.series || 3,
+    repeticiones: primerEjercicio.repeticiones || 10,
+    ejerciciosTexto: rutinaATexto(rutina)
+  };
+}
+
+function crearResumenDias(rutina) {
+  const wrapper = crearElemento("div", "entreno-rutinas-days");
+
+  (rutina.dias || []).forEach((dia) => {
+    const bloque = crearElemento("article", "entreno-rutinas-day");
+    bloque.appendChild(crearElemento("strong", "", dia.nombre));
+    bloque.appendChild(crearElemento("span", "", `${(dia.ejercicios || []).length} ejercicio(s)`));
+    (dia.ejercicios || []).slice(0, 5).forEach((ejercicio) => {
+      bloque.appendChild(crearElemento("small", "", `• ${ejercicio.nombre}`));
+    });
+    wrapper.appendChild(bloque);
+  });
+
+  return wrapper;
+}
+
+function crearFormularioEdicionPlan(rutina, onActualizarPlan) {
+  const base = obtenerBaseEdicion(rutina);
+  const details = crearElemento("details", "entreno-rutinas-details");
+  const summary = crearElemento("summary", "", "Editar plan completo");
+  const form = crearElemento("form", "entreno-rutinas-grid entreno-rutinas-grid--edit");
+  const guardar = crearElemento("button", "entreno-rutinas-save", "Guardar cambios del plan");
+
+  form.appendChild(crearCampo({ nombre: "nombre", label: "Nombre", valor: base.nombre }));
+  form.appendChild(crearCampo({ nombre: "totalDias", label: "Días", tipo: "number", valor: String(base.totalDias) }));
+  form.appendChild(crearCampo({ nombre: "calentamiento", label: "Calentamiento", valor: base.calentamiento }));
+  form.appendChild(crearCampo({ nombre: "descansoSegundos", label: "Descanso", tipo: "number", valor: String(base.descansoSegundos) }));
+  form.appendChild(crearCampo({ nombre: "series", label: "Series", tipo: "number", valor: String(base.series) }));
+  form.appendChild(crearCampo({ nombre: "repeticiones", label: "Repeticiones", tipo: "number", valor: String(base.repeticiones) }));
+  form.appendChild(crearArea({
+    nombre: "ejerciciosTexto",
+    label: "Días y ejercicios",
+    valor: base.ejerciciosTexto,
+    placeholder: "Día 1\nSentadillas\nFlexiones\n\nDía 2\nCaminata\nPlancha"
+  }));
+
+  guardar.type = "submit";
+  form.appendChild(guardar);
+  form.addEventListener("submit", (evento) => {
+    evento.preventDefault();
+    onActualizarPlan?.(rutina.id, leerFormulario(form));
+  });
+
+  details.appendChild(summary);
+  details.appendChild(form);
+  return details;
+}
+
+function crearRutinaCard(rutina, acciones) {
+  const card = crearElemento("article", `entreno-rutinas-card entreno-rutinas-card--${rutina.estado}`);
   const top = crearElemento("div", "entreno-rutinas-card__top");
   const info = crearElemento("div", "");
-  const boton = crearElemento("button", "entreno-rutinas-activate", rutina.estado === "activa" ? "Activa" : "Activar");
-  const totalEjercicios = rutina.dias.reduce((total, dia) => total + dia.ejercicios.length, 0);
+  const formNombre = crearElemento("form", "entreno-rutinas-name-form");
+  const inputNombre = document.createElement("input");
+  const guardarNombre = crearElemento("button", "entreno-rutinas-button", "Guardar nombre");
+  const botones = crearElemento("div", "entreno-rutinas-card__actions");
+  const totales = calcularTotales(rutina);
+  const archivada = rutina.estado === "archivada";
 
-  boton.type = "button";
-  boton.disabled = rutina.estado === "activa";
-  boton.addEventListener("click", () => onActivar?.(rutina.id));
+  inputNombre.name = "nombre";
+  inputNombre.value = rutina.nombre;
+  inputNombre.placeholder = "Nombre de rutina";
+  guardarNombre.type = "submit";
+
+  formNombre.appendChild(inputNombre);
+  formNombre.appendChild(guardarNombre);
+  formNombre.addEventListener("submit", (evento) => {
+    evento.preventDefault();
+    acciones.onEditarNombre?.(rutina.id, { nombre: new FormData(formNombre).get("nombre") });
+  });
 
   info.appendChild(crearElemento("strong", "", rutina.nombre));
-  info.appendChild(crearElemento("span", "", `${rutina.dias.length} día(s) · ${totalEjercicios} ejercicio(s) · ${rutina.estado}`));
+  info.appendChild(crearElemento("span", "", `${totales.dias} día(s) · ${totales.ejercicios} ejercicio(s) · ${totales.series} serie(s) · ${rutina.estado}`));
   top.appendChild(info);
-  top.appendChild(boton);
+
+  if (!archivada) {
+    botones.appendChild(crearBoton(rutina.estado === "activa" ? "Activa" : "Activar", rutina.estado === "activa" ? "entreno-rutinas-button--ok" : "", () => acciones.onActivar?.(rutina.id)));
+    botones.appendChild(crearBoton("Duplicar", "", () => acciones.onDuplicar?.(rutina.id)));
+    botones.appendChild(crearBoton("Archivar", "entreno-rutinas-button--danger", () => acciones.onArchivar?.(rutina.id)));
+  } else {
+    botones.appendChild(crearBoton("Restaurar", "", () => acciones.onRestaurar?.(rutina.id)));
+    botones.appendChild(crearBoton("Duplicar", "", () => acciones.onDuplicar?.(rutina.id)));
+  }
+
   card.appendChild(top);
+  card.appendChild(botones);
+  card.appendChild(formNombre);
+  card.appendChild(crearResumenDias(rutina));
+  if (!archivada) card.appendChild(crearFormularioEdicionPlan(rutina, acciones.onActualizarPlan));
 
   return card;
 }
 
-export function crearEntrenamientoRutinasView({ rutinas = [], mensaje = null, onGuardar, onActivar } = {}) {
+export function crearEntrenamientoRutinasView({ rutinas = [], mensaje = null, onGuardar, onActivar, onEditarNombre, onActualizarPlan, onDuplicar, onArchivar, onRestaurar } = {}) {
   const pantalla = crearElemento("section", "entreno-rutinas-screen");
   const header = crearElemento("div", "entreno-rutinas-header");
   const formBox = crearElemento("section", "entreno-rutinas-form");
@@ -113,10 +225,11 @@ export function crearEntrenamientoRutinasView({ rutinas = [], mensaje = null, on
   const guardar = crearElemento("button", "entreno-rutinas-save", "Guardar rutina");
   const activar = crearElemento("label", "entreno-rutinas-check");
   const check = document.createElement("input");
+  const accionesCard = { onActivar, onEditarNombre, onActualizarPlan, onDuplicar, onArchivar, onRestaurar };
 
   header.appendChild(crearElemento("p", "entreno-rutinas-kicker", "Planes"));
   header.appendChild(crearElemento("h2", "", "Rutinas"));
-  header.appendChild(crearElemento("p", "", "Crea entrenamientos por días con calentamiento, ejercicios, descansos, series y repeticiones."));
+  header.appendChild(crearElemento("p", "", "Crea, edita, duplica y archiva entrenamientos por días."));
 
   formulario.appendChild(crearCampo({ nombre: "nombre", label: "Nombre", placeholder: "Ejemplo: Casa 4 días" }));
   formulario.appendChild(crearCampo({ nombre: "totalDias", label: "Días", placeholder: "4", tipo: "number", valor: "4" }));
@@ -124,7 +237,11 @@ export function crearEntrenamientoRutinasView({ rutinas = [], mensaje = null, on
   formulario.appendChild(crearCampo({ nombre: "descansoSegundos", label: "Descanso", placeholder: "60", tipo: "number", valor: "60" }));
   formulario.appendChild(crearCampo({ nombre: "series", label: "Series", placeholder: "3", tipo: "number", valor: "3" }));
   formulario.appendChild(crearCampo({ nombre: "repeticiones", label: "Repeticiones", placeholder: "10", tipo: "number", valor: "10" }));
-  formulario.appendChild(crearArea({ nombre: "ejerciciosTexto", label: "Ejercicios", placeholder: "Sentadillas\nFlexiones\nPlancha" }));
+  formulario.appendChild(crearArea({
+    nombre: "ejerciciosTexto",
+    label: "Ejercicios o días diferentes",
+    placeholder: "Simple:\nSentadillas\nFlexiones\nPlancha\n\nAvanzado:\nDía 1\nSentadillas\nFlexiones\n\nDía 2\nCaminata\nPlancha"
+  }));
 
   check.type = "checkbox";
   check.name = "activa";
@@ -150,7 +267,7 @@ export function crearEntrenamientoRutinasView({ rutinas = [], mensaje = null, on
   if (rutinas.length === 0) {
     lista.appendChild(crearElemento("p", "", "Todavía no hay rutinas guardadas."));
   } else {
-    rutinas.forEach((rutina) => rutinasGrid.appendChild(crearRutinaCard(rutina, onActivar)));
+    rutinas.forEach((rutina) => rutinasGrid.appendChild(crearRutinaCard(rutina, accionesCard)));
     lista.appendChild(rutinasGrid);
   }
 
