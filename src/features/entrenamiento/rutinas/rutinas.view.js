@@ -5,14 +5,17 @@
   Función o funciones:
     - Construir la pantalla Rutinas de Entrenamiento.
     - Permitir crear rutinas locales con días iguales o diferentes.
+    - Pegar e interpretar rutinas generadas por IA con el contrato FITJEFF_RUTINA_V1.
     - Editar, duplicar, activar, archivar y restaurar rutinas guardadas.
 
   Se conecta con:
     - src/features/entrenamiento/rutinas/rutinas.controller.js
     - src/features/entrenamiento/rutinas/rutinas.css
     - src/features/entrenamiento/rutinas/rutinas.prompt.js
+    - src/features/entrenamiento/rutinas/rutinas.parser.js
 */
 
+import { interpretarRutinaIA } from "./rutinas.parser.js";
 import { PROMPT_RUTINA_COPIABLE } from "./rutinas.prompt.js";
 import "./rutinas.css";
 
@@ -21,6 +24,12 @@ function crearElemento(etiqueta, clase = "", texto = "") {
   if (clase) elemento.className = clase;
   if (texto !== undefined && texto !== null) elemento.textContent = String(texto);
   return elemento;
+}
+
+function limpiarNodo(nodo) {
+  while (nodo.firstChild) {
+    nodo.removeChild(nodo.firstChild);
+  }
 }
 
 function crearCampo({ nombre, label, placeholder, tipo = "text", valor = "" }) {
@@ -132,6 +141,77 @@ function crearBotonCopiarFormato() {
 
   boton.title = "Copia el contrato FITJEFF_RUTINA_V1 para generar una rutina que luego pueda interpretar la app.";
   return boton;
+}
+
+function crearResumenInterpretacion(resultado) {
+  const resumen = resultado?.resumen || {};
+  const contenedor = crearElemento("div", resultado?.ok ? "entreno-rutinas-ia-result entreno-rutinas-ia-result--ok" : "entreno-rutinas-ia-result entreno-rutinas-ia-result--error");
+  const titulo = crearElemento("strong", "", resultado?.ok ? "Rutina detectada" : "No se pudo interpretar");
+  const datos = crearElemento("span", "", `${resumen.dias || 0} día(s) · ${resumen.bloques || 0} bloque(s) · ${resumen.ejercicios || 0} ejercicio(s)`);
+  const chips = crearElemento("div", "entreno-rutinas-ia-chips");
+
+  contenedor.appendChild(titulo);
+  contenedor.appendChild(datos);
+
+  Object.entries(resumen.tipos || {}).forEach(([tipo, total]) => {
+    chips.appendChild(crearElemento("small", "", `${tipo}: ${total}`));
+  });
+
+  if (chips.childNodes.length) {
+    contenedor.appendChild(chips);
+  }
+
+  (resultado?.errores || []).slice(0, 3).forEach((error) => {
+    contenedor.appendChild(crearElemento("small", "", `Error: ${error}`));
+  });
+
+  (resultado?.advertencias || []).slice(0, 3).forEach((advertencia) => {
+    contenedor.appendChild(crearElemento("small", "", `Aviso: ${advertencia}`));
+  });
+
+  return contenedor;
+}
+
+function crearPanelRutinaIA() {
+  const panel = crearElemento("section", "entreno-rutinas-ia");
+  const top = crearElemento("div", "entreno-rutinas-form__top");
+  const textoTop = crearElemento("div", "");
+  const area = document.createElement("textarea");
+  const acciones = crearElemento("div", "entreno-rutinas-actions entreno-rutinas-actions--ia");
+  const interpretar = crearBoton("Interpretar rutina", "entreno-rutinas-button--ia", () => {
+    limpiarNodo(resultadoBox);
+
+    const contenido = area.value.trim();
+    if (!contenido) {
+      resultadoBox.appendChild(crearResumenInterpretacion({
+        ok: false,
+        resumen: { dias: 0, bloques: 0, ejercicios: 0, tipos: {} },
+        errores: ["Pega primero la respuesta generada por la IA."],
+        advertencias: []
+      }));
+      return;
+    }
+
+    resultadoBox.appendChild(crearResumenInterpretacion(interpretarRutinaIA(contenido)));
+  });
+  const resultadoBox = crearElemento("div", "entreno-rutinas-ia-output");
+
+  textoTop.appendChild(crearElemento("h3", "", "Rutina generada por IA"));
+  textoTop.appendChild(crearElemento("p", "", "Copia el prompt, úsalo con la IA y pega aquí la respuesta para que FitJeff la pueda leer."));
+  top.appendChild(textoTop);
+  top.appendChild(crearBotonCopiarFormato());
+
+  area.className = "entreno-rutinas-ia-textarea";
+  area.placeholder = "Pega aquí la respuesta que empiece con FITJEFF_RUTINA_V1 y termine con FIN_RUTINA.";
+  area.rows = 10;
+
+  acciones.appendChild(interpretar);
+  panel.appendChild(top);
+  panel.appendChild(area);
+  panel.appendChild(acciones);
+  panel.appendChild(resultadoBox);
+
+  return panel;
 }
 
 function calcularTotales(rutina) {
@@ -261,6 +341,7 @@ function crearRutinaCard(rutina, acciones) {
 export function crearEntrenamientoRutinasView({ rutinas = [], mensaje = null, onGuardar, onActivar, onEditarNombre, onActualizarPlan, onDuplicar, onArchivar, onRestaurar } = {}) {
   const pantalla = crearElemento("section", "entreno-rutinas-screen");
   const header = crearElemento("div", "entreno-rutinas-header");
+  const iaBox = crearPanelRutinaIA();
   const formBox = crearElemento("section", "entreno-rutinas-form");
   const formHeader = crearElemento("div", "entreno-rutinas-form__top");
   const formulario = crearElemento("form", "entreno-rutinas-grid");
@@ -275,7 +356,7 @@ export function crearEntrenamientoRutinasView({ rutinas = [], mensaje = null, on
 
   header.appendChild(crearElemento("p", "entreno-rutinas-kicker", "Planes"));
   header.appendChild(crearElemento("h2", "", "Rutinas"));
-  header.appendChild(crearElemento("p", "", "Crea, edita, duplica y archiva entrenamientos por días."));
+  header.appendChild(crearElemento("p", "", "Crea rutinas manuales o interpreta una rutina generada por IA con el formato de FitJeff."));
 
   formulario.appendChild(crearCampo({ nombre: "nombre", label: "Nombre", placeholder: "Ejemplo: Casa 4 días" }));
   formulario.appendChild(crearCampo({ nombre: "totalDias", label: "Días", placeholder: "4", tipo: "number", valor: "4" }));
@@ -304,8 +385,7 @@ export function crearEntrenamientoRutinasView({ rutinas = [], mensaje = null, on
     onGuardar?.(leerFormulario(formulario));
   });
 
-  formHeader.appendChild(crearElemento("h3", "", "Crear rutina"));
-  formHeader.appendChild(crearBotonCopiarFormato());
+  formHeader.appendChild(crearElemento("h3", "", "Crear rutina manual"));
   formBox.appendChild(formHeader);
   if (mensajeNodo) formBox.appendChild(mensajeNodo);
   formBox.appendChild(formulario);
@@ -320,6 +400,7 @@ export function crearEntrenamientoRutinasView({ rutinas = [], mensaje = null, on
   }
 
   pantalla.appendChild(header);
+  pantalla.appendChild(iaBox);
   pantalla.appendChild(formBox);
   pantalla.appendChild(lista);
   return pantalla;
