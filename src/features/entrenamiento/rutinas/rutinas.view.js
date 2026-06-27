@@ -6,6 +6,7 @@
     - Construir la pantalla Rutinas de Entrenamiento.
     - Permitir crear rutinas locales con días iguales o diferentes.
     - Pegar e interpretar rutinas generadas por IA con el contrato FITJEFF_RUTINA_V1.
+    - Mostrar una vista previa antes de guardar una rutina interpretada por IA.
     - Cargar una rutina interpretada por IA dentro del formulario manual.
     - Guardar una rutina interpretada por IA como rutina real de FitJeff.
     - Editar, duplicar, activar, archivar y restaurar rutinas guardadas.
@@ -153,6 +154,120 @@ function llenarFormularioConRutinaIA(formulario, resultado) {
   });
 }
 
+function crearDatoPreview(label, valor) {
+  if (!valor && valor !== 0) return null;
+  const dato = crearElemento("span", "entreno-rutinas-ia-meta-item");
+  dato.appendChild(crearElemento("strong", "", `${label}: `));
+  dato.appendChild(document.createTextNode(String(valor)));
+  return dato;
+}
+
+function crearMetaEjercicioIA(ejercicio = {}) {
+  const partes = [];
+
+  if (ejercicio.series && ejercicio.repeticiones) partes.push(`${ejercicio.series}x${ejercicio.repeticiones}`);
+  else if (ejercicio.series) partes.push(`${ejercicio.series} serie(s)`);
+  else if (ejercicio.repeticiones) partes.push(`${ejercicio.repeticiones} rep.`);
+
+  if (ejercicio.duracionMinutos) partes.push(`${ejercicio.duracionMinutos} min`);
+  if (ejercicio.descansoSegundos) partes.push(`descanso ${ejercicio.descansoSegundos}s`);
+  if (ejercicio.intensidad) partes.push(`intensidad ${ejercicio.intensidad}`);
+  if (ejercicio.notas) partes.push(ejercicio.notas);
+
+  return partes.join(" · ");
+}
+
+function crearEjercicioPreviewIA(ejercicio = {}) {
+  const item = crearElemento("div", "entreno-rutinas-ia-exercise");
+  const titulo = crearElemento("strong", "", ejercicio.nombre || "Ejercicio");
+  const meta = crearMetaEjercicioIA(ejercicio);
+
+  item.appendChild(titulo);
+  item.appendChild(crearElemento("span", "", meta || ejercicio.tipo || "Sin detalle"));
+  return item;
+}
+
+function crearBloquePreviewIA(bloque = {}) {
+  const bloqueNodo = crearElemento("article", "entreno-rutinas-ia-block");
+  const encabezado = crearElemento("div", "entreno-rutinas-ia-block__head");
+  const nombre = crearElemento("strong", "", bloque.nombre || bloque.tipo || "Bloque");
+  const tipo = crearElemento("span", "", bloque.tipo || "otro");
+
+  encabezado.appendChild(nombre);
+  encabezado.appendChild(tipo);
+  bloqueNodo.appendChild(encabezado);
+
+  if (!Array.isArray(bloque.ejercicios) || bloque.ejercicios.length === 0) {
+    bloqueNodo.appendChild(crearElemento("small", "", "Sin ejercicios detectados en este bloque."));
+    return bloqueNodo;
+  }
+
+  bloque.ejercicios.forEach((ejercicio) => {
+    bloqueNodo.appendChild(crearEjercicioPreviewIA(ejercicio));
+  });
+
+  return bloqueNodo;
+}
+
+function crearDiaPreviewIA(dia = {}, indice = 0) {
+  const diaNodo = crearElemento("article", "entreno-rutinas-ia-day-preview");
+  const titulo = crearElemento("div", "entreno-rutinas-ia-day-preview__head");
+  const meta = crearElemento("div", "entreno-rutinas-ia-meta");
+
+  titulo.appendChild(crearElemento("strong", "", dia.nombre || `Día ${indice + 1}`));
+  titulo.appendChild(crearElemento("span", "", `${(dia.bloques || []).length} bloque(s) · ${(dia.ejercicios || []).length} ejercicio(s)`));
+  diaNodo.appendChild(titulo);
+
+  [
+    crearDatoPreview("Enfoque", dia.enfoque),
+    crearDatoPreview("Calentamiento", dia.calentamiento)
+  ].filter(Boolean).forEach((nodo) => meta.appendChild(nodo));
+
+  if (meta.childNodes.length) diaNodo.appendChild(meta);
+
+  if (!Array.isArray(dia.bloques) || dia.bloques.length === 0) {
+    diaNodo.appendChild(crearElemento("small", "", "No se detectaron bloques en este día."));
+    return diaNodo;
+  }
+
+  dia.bloques.forEach((bloque) => diaNodo.appendChild(crearBloquePreviewIA(bloque)));
+  return diaNodo;
+}
+
+function crearVistaPreviaRutinaIA(resultado = {}) {
+  const rutina = resultado.rutina || {};
+  const detalles = crearElemento("details", "entreno-rutinas-ia-preview");
+  const resumen = crearElemento("summary", "", "Vista previa antes de guardar");
+  const meta = crearElemento("div", "entreno-rutinas-ia-meta entreno-rutinas-ia-meta--routine");
+  const dias = crearElemento("div", "entreno-rutinas-ia-days-preview");
+
+  detalles.open = true;
+  detalles.appendChild(resumen);
+
+  [
+    crearDatoPreview("Nombre", rutina.nombre),
+    crearDatoPreview("Objetivo", rutina.objetivo),
+    crearDatoPreview("Nivel", rutina.nivel),
+    crearDatoPreview("Lugar", rutina.lugar),
+    crearDatoPreview("Equipo", rutina.equipo),
+    crearDatoPreview("Duración", rutina.duracionSesion || rutina.duracion_sesion)
+  ].filter(Boolean).forEach((nodo) => meta.appendChild(nodo));
+
+  if (meta.childNodes.length) detalles.appendChild(meta);
+
+  (rutina.dias || []).forEach((dia, indice) => {
+    dias.appendChild(crearDiaPreviewIA(dia, indice));
+  });
+
+  if (dias.childNodes.length) {
+    detalles.appendChild(dias);
+  } else {
+    detalles.appendChild(crearElemento("small", "", "No hay días suficientes para mostrar vista previa."));
+  }
+
+  return detalles;
+}
+
 function crearResumenInterpretacion(resultado, { onCargarFormulario, onGuardarRutinaIA } = {}) {
   const resumen = resultado?.resumen || {};
   const contenedor = crearElemento("div", resultado?.ok ? "entreno-rutinas-ia-result entreno-rutinas-ia-result--ok" : "entreno-rutinas-ia-result entreno-rutinas-ia-result--error");
@@ -180,6 +295,8 @@ function crearResumenInterpretacion(resultado, { onCargarFormulario, onGuardarRu
   });
 
   if (resultado?.ok) {
+    contenedor.appendChild(crearVistaPreviaRutinaIA(resultado));
+
     const acciones = crearElemento("div", "entreno-rutinas-ia-result-actions");
 
     if (resultado?.formulario && typeof onCargarFormulario === "function") {
