@@ -5,10 +5,11 @@
   Función o funciones:
     - Construir el dashboard de rendimiento del módulo Entrenamiento.
     - Calcular semana, racha, tiempo, fuerza, cardio y alertas simples.
-    - Mantener los cálculos separados de la vista.
+    - Integrar diagnóstico básico del módulo para cierre de primera versión.
 
   Se conecta con:
     - src/features/entrenamiento/entrenamiento.service.js
+    - src/features/entrenamiento/entrenamiento.diagnostics.js
     - src/features/entrenamiento/stats/stats.controller.js
 */
 
@@ -17,6 +18,7 @@ import {
   ENTRENAMIENTO_ESTADOS_SESION,
   ENTRENAMIENTO_TIPOS_CARDIO
 } from "../entrenamiento.constants.js";
+import { diagnosticarEntrenamiento } from "../entrenamiento.diagnostics.js";
 import { crearEntrenamientoService } from "../entrenamiento.service.js";
 import { fechaEntrenamientoHoy } from "../entrenamiento.state.js";
 
@@ -88,7 +90,7 @@ function construirSemana(estado) {
   return ultimosDias(7).map((fecha) => actividadPorFecha(estado, fecha));
 }
 
-function construirAlertas({ estado, semana, resumen, racha }) {
+function construirAlertas({ estado, semana, resumen, racha, diagnostico }) {
   const alertas = [];
   const rutinaActiva = estado.rutinas.find((rutina) => rutina.estado === ENTRENAMIENTO_ESTADOS_RUTINA.ACTIVA);
   const actividadHoy = semana[semana.length - 1];
@@ -109,6 +111,10 @@ function construirAlertas({ estado, semana, resumen, racha }) {
     alertas.push({ tipo: "info", texto: "Gemini está pendiente. La guía inteligente se activará desde Ajustes." });
   }
 
+  if (diagnostico && !diagnostico.ok) {
+    diagnostico.alertas.forEach((alerta) => alertas.push(alerta));
+  }
+
   if (alertas.length === 0) {
     alertas.push({ tipo: "ok", texto: "Entrenamiento sin alertas importantes." });
   }
@@ -120,6 +126,7 @@ export function crearEntrenamientoStatsService(entrenamientoService = crearEntre
   function obtenerDashboard() {
     const estado = entrenamientoService.obtenerEstado();
     const resumen = entrenamientoService.obtenerResumen();
+    const diagnostico = diagnosticarEntrenamiento(estado);
     const semana = construirSemana(estado);
     const semanaActiva = semana.filter((dia) => dia.tiempo > 0);
     const sesionesSemana = semana.reduce((total, dia) => total + dia.sesiones, 0);
@@ -148,11 +155,12 @@ export function crearEntrenamientoStatsService(entrenamientoService = crearEntre
 
     return {
       resumen,
+      diagnostico,
       rutinaActiva,
       semana,
       barras,
       tarjetas,
-      alertas: construirAlertas({ estado, semana, resumen, racha }),
+      alertas: construirAlertas({ estado, semana, resumen, racha, diagnostico }),
       estadoGeneral: rutinaActiva ? "Rutina activa" : "Sin rutina activa"
     };
   }
