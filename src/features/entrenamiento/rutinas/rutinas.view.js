@@ -14,6 +14,26 @@
 
 import "./rutinas.css";
 
+const FORMATO_RUTINA_COPIABLE = `Día 1
+Sentadillas
+Flexiones
+Plancha
+
+Día 2
+Caminata
+Abdominales
+Estiramientos
+
+Día 3
+Peso muerto
+Remo
+Curl de bíceps
+
+Día 4
+Cardio
+Movilidad
+Estiramiento`;
+
 function crearElemento(etiqueta, clase = "", texto = "") {
   const elemento = document.createElement(etiqueta);
   if (clase) elemento.className = clase;
@@ -86,6 +106,49 @@ function crearBoton(texto, clase = "", accion) {
   const boton = crearElemento("button", `entreno-rutinas-button ${clase}`.trim(), texto);
   boton.type = "button";
   boton.addEventListener("click", () => accion?.());
+  return boton;
+}
+
+function copiarTextoConFallback(texto) {
+  const temporal = document.createElement("textarea");
+  temporal.value = texto;
+  temporal.setAttribute("readonly", "");
+  temporal.style.position = "fixed";
+  temporal.style.left = "-9999px";
+  document.body.appendChild(temporal);
+  temporal.select();
+  document.execCommand("copy");
+  document.body.removeChild(temporal);
+}
+
+async function copiarFormatoRutina() {
+  if (navigator.clipboard?.writeText) {
+    await navigator.clipboard.writeText(FORMATO_RUTINA_COPIABLE);
+    return;
+  }
+
+  copiarTextoConFallback(FORMATO_RUTINA_COPIABLE);
+}
+
+function crearBotonCopiarFormato() {
+  const boton = crearBoton("Copiar formato", "entreno-rutinas-button--copy", async () => {
+    const textoOriginal = boton.textContent;
+    boton.disabled = true;
+
+    try {
+      await copiarFormatoRutina();
+      boton.textContent = "Formato copiado";
+    } catch (error) {
+      boton.textContent = "No se pudo copiar";
+    }
+
+    window.setTimeout(() => {
+      boton.textContent = textoOriginal;
+      boton.disabled = false;
+    }, 1600);
+  });
+
+  boton.title = "Copia un ejemplo con días y ejercicios para pegarlo en el campo inferior.";
   return boton;
 }
 
@@ -217,6 +280,7 @@ export function crearEntrenamientoRutinasView({ rutinas = [], mensaje = null, on
   const pantalla = crearElemento("section", "entreno-rutinas-screen");
   const header = crearElemento("div", "entreno-rutinas-header");
   const formBox = crearElemento("section", "entreno-rutinas-form");
+  const formHeader = crearElemento("div", "entreno-rutinas-form__top");
   const formulario = crearElemento("form", "entreno-rutinas-grid");
   const lista = crearElemento("section", "entreno-rutinas-list");
   const rutinasGrid = crearElemento("div", "entreno-rutinas-saved");
@@ -258,7 +322,9 @@ export function crearEntrenamientoRutinasView({ rutinas = [], mensaje = null, on
     onGuardar?.(leerFormulario(formulario));
   });
 
-  formBox.appendChild(crearElemento("h3", "", "Crear rutina"));
+  formHeader.appendChild(crearElemento("h3", "", "Crear rutina"));
+  formHeader.appendChild(crearBotonCopiarFormato());
+  formBox.appendChild(formHeader);
   if (mensajeNodo) formBox.appendChild(mensajeNodo);
   formBox.appendChild(formulario);
 
