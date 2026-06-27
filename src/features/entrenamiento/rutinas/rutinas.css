@@ -18,6 +18,7 @@
 .entreno-rutinas-ia-result span, .entreno-rutinas-ia-result small { color: var(--fj-muted, #8ba3c2); }
 .entreno-rutinas-ia-chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .entreno-rutinas-ia-chips small { border: 1px solid rgba(0, 245, 255, 0.2); border-radius: 999px; padding: 3px 7px; background: rgba(0, 245, 255, 0.08); color: var(--fj-cyan, #00f5ff); font-weight: 850; }
+.entreno-rutinas-ia-result-actions { display: flex; justify-content: flex-end; gap: 7px; flex-wrap: wrap; margin-top: 4px; }
 .entreno-rutinas-actions { grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
 .entreno-rutinas-actions--ia { justify-content: flex-end; margin-top: 0; }
 .entreno-rutinas-check { display: inline-flex; align-items: center; gap: 8px; color: var(--fj-muted, #8ba3c2); font-size: 0.82rem; font-weight: 850; }
@@ -25,6 +26,7 @@
 .entreno-rutinas-save:disabled, .entreno-rutinas-button:disabled { cursor: wait; opacity: 0.78; }
 .entreno-rutinas-button--copy { border-color: rgba(34, 255, 136, 0.32); background: rgba(34, 255, 136, 0.1); color: var(--fj-green, #22ff88); }
 .entreno-rutinas-button--ia { border-color: rgba(167, 139, 250, 0.34); background: rgba(167, 139, 250, 0.12); color: #c4b5fd; }
+.entreno-rutinas-button--ia-load { border-color: rgba(34, 255, 136, 0.34); background: rgba(34, 255, 136, 0.12); color: var(--fj-green, #22ff88); }
 .entreno-rutinas-button--ok { border-color: rgba(34, 255, 136, 0.28); color: var(--fj-green, #22ff88); }
 .entreno-rutinas-button--danger { border-color: rgba(255, 59, 92, 0.34); color: var(--fj-red, #ff3b5c); }
 .entreno-rutinas-message { display: grid; gap: 3px; border: 1px solid var(--fj-border, #1e2a44); border-radius: 10px; padding: 9px; margin-top: 9px; font-size: 0.82rem; }
