@@ -6,6 +6,7 @@
     - Dar estilo propio a la pantalla Estadísticas.
     - Convertir el dashboard en una vista oscura, compacta y tecnológica.
     - Usar indicadores neon para progreso, pendiente, alerta e información.
+    - Mostrar hero visual, barra de meta, mensaje inteligente y gráfico de peso.
 
   Se conecta con:
     - src/features/control-corporal/estadisticas/estadisticas.view.js
@@ -18,6 +19,9 @@
 }
 
 .estadisticas-header,
+.estadisticas-hero,
+.estadisticas-progress-card,
+.estadisticas-insight,
 .estadisticas-chart-card,
 .estadisticas-measures {
   position: relative;
@@ -30,6 +34,9 @@
 }
 
 .estadisticas-header::before,
+.estadisticas-hero::before,
+.estadisticas-progress-card::before,
+.estadisticas-insight::before,
 .estadisticas-chart-card::before,
 .estadisticas-measures::before {
   content: "";
@@ -50,6 +57,9 @@
 }
 
 .estadisticas-header h2,
+.estadisticas-hero h2,
+.estadisticas-progress-card h3,
+.estadisticas-insight h3,
 .estadisticas-chart-card h3,
 .estadisticas-measures h3 {
   margin: 0 0 6px;
@@ -58,11 +68,33 @@
   line-height: 1.15;
 }
 
-.estadisticas-header p:last-child {
+.estadisticas-header p:last-child,
+.estadisticas-hero p,
+.estadisticas-insight p,
+.estadisticas-insight small {
   margin: 0;
   color: var(--fj-muted, #8ba3c2);
   font-size: 0.84rem;
   line-height: 1.35;
+}
+
+.estadisticas-hero {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) minmax(280px, 1.2fr);
+  gap: 10px;
+  align-items: stretch;
+}
+
+.estadisticas-hero__text {
+  display: grid;
+  gap: 5px;
+  align-content: center;
+}
+
+.estadisticas-hero__quick {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
 }
 
 .estadisticas-cards,
@@ -168,6 +200,35 @@
   min-height: 70px;
 }
 
+.estadisticas-progress-card {
+  display: grid;
+  gap: 8px;
+}
+
+.estadisticas-progress-card__top,
+.estadisticas-progress-card__detail {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.estadisticas-progress-card__top strong {
+  color: var(--fj-green, #22ff88);
+  font-size: 1.1rem;
+}
+
+.estadisticas-progress-card__detail span {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  padding: 5px 8px;
+  color: var(--fj-muted, #8ba3c2);
+  background: rgba(255, 255, 255, 0.025);
+  font-size: 0.74rem;
+  font-weight: 800;
+}
+
 .estadisticas-progress {
   position: relative;
   overflow: hidden;
@@ -183,6 +244,7 @@
   border-radius: 999px;
   background: linear-gradient(90deg, var(--fj-green, #22ff88), var(--fj-cyan, #00f5ff));
   box-shadow: 0 0 18px rgba(34, 255, 136, 0.35);
+  transition: width 220ms ease;
 }
 
 .estadisticas-progress__text {
@@ -194,6 +256,12 @@
   font-size: 0.82rem;
   font-weight: 900;
   text-shadow: 0 1px 8px rgba(0, 0, 0, 0.45);
+}
+
+.estadisticas-insight {
+  display: grid;
+  gap: 5px;
+  border-color: rgba(0, 245, 255, 0.24);
 }
 
 .estadisticas-chart {
@@ -208,6 +276,12 @@
   border: 1px solid var(--fj-border, #1e2a44);
   border-radius: var(--fj-radius, 12px);
   filter: drop-shadow(0 0 10px rgba(0, 245, 255, 0.16));
+}
+
+.estadisticas-chart__area {
+  fill: currentColor;
+  opacity: 0.12;
+  stroke: none;
 }
 
 .estadisticas-chart__detail,
@@ -225,14 +299,24 @@
   padding: 10px 11px;
 }
 
+@media (max-width: 920px) {
+  .estadisticas-hero {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 760px) {
   .estadisticas-cards,
-  .estadisticas-measures__grid {
+  .estadisticas-measures__grid,
+  .estadisticas-hero__quick {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 7px;
   }
 
   .estadisticas-header,
+  .estadisticas-hero,
+  .estadisticas-progress-card,
+  .estadisticas-insight,
   .estadisticas-chart-card,
   .estadisticas-measures,
   .estadisticas-card {
@@ -242,7 +326,8 @@
 
 @media (max-width: 460px) {
   .estadisticas-cards,
-  .estadisticas-measures__grid {
+  .estadisticas-measures__grid,
+  .estadisticas-hero__quick {
     grid-template-columns: 1fr;
   }
 }
