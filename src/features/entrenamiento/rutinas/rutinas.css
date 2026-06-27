@@ -27,6 +27,7 @@
 .entreno-rutinas-button--copy { border-color: rgba(34, 255, 136, 0.32); background: rgba(34, 255, 136, 0.1); color: var(--fj-green, #22ff88); }
 .entreno-rutinas-button--ia { border-color: rgba(167, 139, 250, 0.34); background: rgba(167, 139, 250, 0.12); color: #c4b5fd; }
 .entreno-rutinas-button--ia-load { border-color: rgba(34, 255, 136, 0.34); background: rgba(34, 255, 136, 0.12); color: var(--fj-green, #22ff88); }
+.entreno-rutinas-button--ia-save { border-color: rgba(0, 245, 255, 0.38); background: rgba(0, 245, 255, 0.13); color: var(--fj-cyan, #00f5ff); }
 .entreno-rutinas-button--ok { border-color: rgba(34, 255, 136, 0.28); color: var(--fj-green, #22ff88); }
 .entreno-rutinas-button--danger { border-color: rgba(255, 59, 92, 0.34); color: var(--fj-red, #ff3b5c); }
 .entreno-rutinas-message { display: grid; gap: 3px; border: 1px solid var(--fj-border, #1e2a44); border-radius: 10px; padding: 9px; margin-top: 9px; font-size: 0.82rem; }
