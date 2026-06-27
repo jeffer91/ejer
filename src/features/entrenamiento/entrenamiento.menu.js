@@ -20,8 +20,8 @@ export const ENTRENAMIENTO_MENU = {
   id: ENTRENAMIENTO_MODULE_ID,
   label: "Entrenamiento",
   shortLabel: "Entreno",
-  description: "Rutinas, diario, HIT e IA.",
+  description: "Rutinas, diario, cardio e IA.",
   defaultRoute: ENTRENAMIENTO_ROUTES.STATS,
-  status: "Base lista",
+  status: "Listo para entrenar",
   routes: ENTRENAMIENTO_ROUTE_ITEMS
 };
