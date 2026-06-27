@@ -3,9 +3,10 @@
   Ruta o ubicación: src/features/control-corporal/estadisticas/estadisticas.calculations.js
 
   Función o funciones:
-    - Calcular peso actual, cambios, tendencia, IMC y próxima medición.
-    - Preparar datos simples para tarjetas y gráfico de peso.
+    - Calcular peso actual, peso inicial, cambio total, tendencia, IMC y próxima medición.
+    - Preparar datos visuales para tarjetas, gráfico, barra de progreso y mensaje inteligente.
     - Evitar conclusiones falsas cuando hay pocos registros.
+    - Interpretar progreso de peso sin promover cambios extremos.
 
   Se conecta con:
     - src/features/control-corporal/estadisticas/estadisticas.service.js
@@ -25,6 +26,38 @@ function redondear(valor, decimales = 1) {
 
   const factor = 10 ** decimales;
   return Math.round(valor * factor) / factor;
+}
+
+function diasEntre(fechaInicio, fechaFin) {
+  const inicio = new Date(`${fechaInicio}T12:00:00`);
+  const fin = new Date(`${fechaFin}T12:00:00`);
+
+  if (Number.isNaN(inicio.getTime()) || Number.isNaN(fin.getTime())) return null;
+  return Math.max(Math.round((fin - inicio) / 86400000), 0);
+}
+
+function buscarPesoDesde(pesos, diasAtras) {
+  if (!pesos.length) return null;
+
+  const ultimo = pesos[pesos.length - 1];
+  const fechaUltima = new Date(`${ultimo.fecha}T12:00:00`);
+
+  if (Number.isNaN(fechaUltima.getTime())) return null;
+
+  const fechaLimite = new Date(fechaUltima);
+  fechaLimite.setDate(fechaLimite.getDate() - diasAtras);
+
+  const candidatos = pesos.filter((registro) => {
+    const fecha = new Date(`${registro.fecha}T12:00:00`);
+    return !Number.isNaN(fecha.getTime()) && fecha <= fechaLimite;
+  });
+
+  return candidatos[candidatos.length - 1] || pesos[0] || null;
+}
+
+function calcularCambioContra(pesoActual, registroReferencia) {
+  if (!pesoActual || !registroReferencia?.datos?.pesoKg) return null;
+  return redondear(Number(pesoActual) - Number(registroReferencia.datos.pesoKg), 1);
 }
 
 export function obtenerRegistrosPeso(registros) {
@@ -95,11 +128,48 @@ export function calcularProgresoObjetivo(pesoInicialKg, pesoActualKg, pesoObjeti
     return 0;
   }
 
-  const avance = pesoInicialKg - pesoActualKg;
-  const meta = pesoInicialKg - pesoObjetivoKg;
-  const porcentaje = (avance / meta) * 100;
+  const distanciaTotal = Math.abs(pesoInicialKg - pesoObjetivoKg);
+  const distanciaPendiente = Math.abs(pesoActualKg - pesoObjetivoKg);
+  const porcentaje = ((distanciaTotal - distanciaPendiente) / distanciaTotal) * 100;
 
   return Math.max(0, Math.min(100, Math.round(porcentaje)));
+}
+
+function calcularFaltanteObjetivo(pesoActualKg, pesoObjetivoKg) {
+  if (!pesoActualKg || !pesoObjetivoKg) return null;
+  return redondear(Math.abs(Number(pesoActualKg) - Number(pesoObjetivoKg)), 1);
+}
+
+function obtenerDireccionObjetivo(pesoInicialKg, pesoObjetivoKg) {
+  if (!pesoInicialKg || !pesoObjetivoKg || pesoInicialKg === pesoObjetivoKg) return "mantener";
+  return pesoObjetivoKg < pesoInicialKg ? "bajar" : "subir";
+}
+
+function construirMensajeInteligente({ pesos, pesoInicial, pesoActual, pesoObjetivo, cambioTotalKg, faltanteObjetivoKg, progresoObjetivo, tendencia }) {
+  if (!pesoActual) return "Registra tu primer peso para activar el panel visual de progreso.";
+  if (pesos.length < 2) return "Ya tienes tu primer registro. Agrega otro peso en unos días para ver tendencia.";
+  if (!pesoObjetivo) return "Agrega una meta de peso para ver la barra de avance y el faltante.";
+
+  const direccion = obtenerDireccionObjetivo(pesoInicial, pesoObjetivo);
+  const partes = [];
+
+  if (cambioTotalKg !== null) {
+    const cambioTexto = cambioTotalKg > 0 ? `subido ${Math.abs(cambioTotalKg)} kg` : `bajado ${Math.abs(cambioTotalKg)} kg`;
+    partes.push(`Desde el inicio has ${cambioTexto}.`);
+  }
+
+  if (progresoObjetivo >= 100) {
+    partes.push("Llegaste a tu meta registrada; ahora conviene mantener registros constantes.");
+  } else if (faltanteObjetivoKg !== null) {
+    partes.push(`Te faltan ${faltanteObjetivoKg} kg para tu meta de ${pesoObjetivo} kg.`);
+  }
+
+  if (tendencia === ESTADISTICAS_TENDENCIAS.BAJANDO && direccion === "bajar") partes.push("La tendencia reciente va alineada con tu objetivo." );
+  if (tendencia === ESTADISTICAS_TENDENCIAS.SUBIENDO && direccion === "subir") partes.push("La tendencia reciente va alineada con tu objetivo." );
+  if (tendencia === ESTADISTICAS_TENDENCIAS.ESTABLE) partes.push("Tu peso está estable; revisa también medidas y energía, no solo la báscula.");
+  if (tendencia === ESTADISTICAS_TENDENCIAS.INSUFICIENTE) partes.push("Aún faltan registros para una tendencia confiable.");
+
+  return partes.filter(Boolean).join(" ");
 }
 
 export function calcularProximaMedicion(medidas) {
@@ -138,21 +208,48 @@ export function prepararGraficoPeso(pesos) {
 export function construirResumenEstadisticas(estado) {
   const pesos = obtenerRegistrosPeso(estado.registros || []);
   const medidas = obtenerRegistrosMedidas(estado.registros || []);
-  const primerPeso = pesos[0]?.datos?.pesoKg || null;
+  const primerRegistroPeso = pesos[0] || null;
+  const registroSemana = buscarPesoDesde(pesos, 7);
+  const registroMes = buscarPesoDesde(pesos, 30);
+  const primerPeso = primerRegistroPeso?.datos?.pesoKg || null;
   const pesoAnterior = pesos.length > 1 ? pesos[pesos.length - 2].datos.pesoKg : null;
   const pesoActual = pesos[pesos.length - 1]?.datos?.pesoKg || null;
   const pesoObjetivo = estado.objetivo?.pesoObjetivoKg || null;
   const cambioKg = pesoAnterior && pesoActual ? redondear(pesoActual - pesoAnterior, 1) : null;
+  const cambioTotalKg = pesoActual && primerPeso ? redondear(pesoActual - primerPeso, 1) : null;
+  const cambioSemanaKg = calcularCambioContra(pesoActual, registroSemana);
+  const cambioMesKg = calcularCambioContra(pesoActual, registroMes);
   const imc = calcularImc(pesoActual, estado.perfil?.alturaCm);
+  const progresoObjetivo = calcularProgresoObjetivo(primerPeso, pesoActual, pesoObjetivo);
+  const tendencia = calcularTendencia(pesos);
+  const faltanteObjetivoKg = calcularFaltanteObjetivo(pesoActual, pesoObjetivo);
+  const diasRegistro = primerRegistroPeso && pesos[pesos.length - 1] ? diasEntre(primerRegistroPeso.fecha, pesos[pesos.length - 1].fecha) : null;
 
   return {
+    pesoInicialKg: primerPeso,
     pesoActualKg: pesoActual,
     pesoObjetivoKg: pesoObjetivo,
     cambioKg,
-    tendencia: calcularTendencia(pesos),
+    cambioTotalKg,
+    cambioSemanaKg,
+    cambioMesKg,
+    faltanteObjetivoKg,
+    direccionObjetivo: obtenerDireccionObjetivo(primerPeso, pesoObjetivo),
+    diasRegistro,
+    tendencia,
     edad: calcularEdad(estado.perfil?.fechaNacimiento),
     imc,
-    progresoObjetivo: calcularProgresoObjetivo(primerPeso, pesoActual, pesoObjetivo),
+    progresoObjetivo,
+    mensajeInteligente: construirMensajeInteligente({
+      pesos,
+      pesoInicial: primerPeso,
+      pesoActual,
+      pesoObjetivo,
+      cambioTotalKg,
+      faltanteObjetivoKg,
+      progresoObjetivo,
+      tendencia
+    }),
     proximaMedicion: calcularProximaMedicion(medidas),
     ultimasMedidas: obtenerUltimasMedidas(medidas),
     graficoPeso: prepararGraficoPeso(pesos),
