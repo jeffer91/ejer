@@ -5,21 +5,63 @@
   Función o funciones:
     - Montar la pantalla Rutinas del módulo Entrenamiento.
     - Crear rutinas reales con datos del formulario.
+    - Interpretar rutinas generadas por IA con el contrato FITJEFF_RUTINA_V1.
+    - Preparar la rutina IA interpretada para cargarla en el formulario manual.
     - Editar, duplicar, activar, archivar y restaurar rutinas guardadas.
 
   Se conecta con:
     - src/features/entrenamiento/rutinas/rutinas.service.js
     - src/features/entrenamiento/rutinas/rutinas.view.js
+    - src/features/entrenamiento/rutinas/rutinas.parser.js
     - src/features/entrenamiento/entrenamiento.module.js
 */
 
+import { convertirRutinaIAATextoSimple, interpretarRutinaIA } from "./rutinas.parser.js";
 import { crearRutinasService } from "./rutinas.service.js";
 import { crearEntrenamientoRutinasView } from "./rutinas.view.js";
+
+function primerEjercicioConValor(rutina, clave) {
+  for (const dia of rutina?.dias || []) {
+    for (const ejercicio of dia.ejercicios || []) {
+      const valor = ejercicio?.[clave];
+      if (valor !== null && valor !== undefined && valor !== "") return valor;
+    }
+  }
+
+  return null;
+}
+
+function crearDatosFormularioDesdeRutinaIA(resultado) {
+  const rutina = resultado?.rutina || {};
+  const primerDia = (rutina.dias || [])[0] || {};
+  const descanso = primerEjercicioConValor(rutina, "descansoSegundos") || 60;
+  const series = primerEjercicioConValor(rutina, "series") || 3;
+  const repeticiones = primerEjercicioConValor(rutina, "repeticiones") || 10;
+
+  return {
+    nombre: rutina.nombre || "Rutina generada por IA",
+    totalDias: String((rutina.dias || []).length || rutina.diasDeclarados || 1),
+    calentamiento: primerDia.calentamiento || "",
+    descansoSegundos: String(descanso),
+    series: String(series),
+    repeticiones: String(repeticiones),
+    ejerciciosTexto: convertirRutinaIAATextoSimple(rutina)
+  };
+}
 
 export function crearEntrenamientoRutinasController() {
   const service = crearRutinasService();
   let contenedorActual = null;
   let mensajeActual = null;
+
+  function interpretarTextoRutinaIA(textoFuente = "") {
+    const resultado = interpretarRutinaIA(textoFuente);
+
+    return {
+      ...resultado,
+      formulario: resultado.ok ? crearDatosFormularioDesdeRutinaIA(resultado) : null
+    };
+  }
 
   function refrescar(mensaje = mensajeActual) {
     if (!contenedorActual) return;
@@ -29,6 +71,7 @@ export function crearEntrenamientoRutinasController() {
     contenedorActual.appendChild(crearEntrenamientoRutinasView({
       rutinas: service.obtenerRutinas(),
       mensaje,
+      onInterpretarRutinaIA: interpretarTextoRutinaIA,
       onGuardar: (datos) => refrescar(service.crearDesdeFormulario(datos)),
       onActivar: (rutinaId) => refrescar(service.activar(rutinaId)),
       onEditarNombre: (rutinaId, datos) => refrescar(service.editarNombre(rutinaId, datos)),
