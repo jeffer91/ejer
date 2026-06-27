@@ -40,6 +40,7 @@ function crearModuloButton({ modulo, activo, onSeleccionarModulo }) {
   const boton = crearElemento("button", "fj-shell__module-button");
   boton.type = "button";
   boton.title = modulo.description || modulo.label;
+  boton.dataset.moduleId = modulo.id;
 
   if (activo) {
     boton.classList.add("fj-shell__module-button--active");
@@ -47,10 +48,8 @@ function crearModuloButton({ modulo, activo, onSeleccionarModulo }) {
   }
 
   const nombre = crearElemento("span", "fj-shell__module-name", modulo.label);
-  const descripcion = crearElemento("span", "fj-shell__module-desc", modulo.description || "");
 
   boton.appendChild(nombre);
-  boton.appendChild(descripcion);
   boton.addEventListener("click", () => onSeleccionarModulo(modulo.id));
 
   return boton;
@@ -102,7 +101,7 @@ export function montarShellView({ raiz, modulos, ubicacion, onSeleccionarModulo,
   topbar.appendChild(brand);
   topbar.appendChild(activeBox);
 
-  modulesNav.appendChild(crearNavLabel("Módulos principales", "Elige el área de trabajo"));
+  modulesNav.appendChild(crearNavLabel("Módulos principales"));
 
   modulos.forEach((modulo) => {
     modulesNav.appendChild(
