@@ -6,6 +6,7 @@
     - Convertir el formulario de Rutinas en una rutina guardable.
     - Crear días iguales o días diferentes por bloques.
     - Guardar rutinas interpretadas desde IA conservando días, bloques, tipos, cardio, fútbol, duración y notas.
+    - Editar ejercicios avanzados de rutinas IA sin perder estructura.
     - Editar, duplicar, activar, archivar y restaurar rutinas.
 
   Se conecta con:
@@ -139,6 +140,31 @@ function crearRutinaGuardableDesdeIA(resultadoIA = {}, opciones = {}) {
   };
 }
 
+function numeroCampo(valor, defecto = 0) {
+  if (valor === "" || valor === null || valor === undefined) return defecto;
+  return numero(valor, defecto);
+}
+
+function actualizarEjercicioPreservandoIA(ejercicio = {}, datos = {}) {
+  const tipo = texto(datos.tipo) || ejercicio.tipo || "otro";
+  const duracionMinutos = numeroCampo(datos.duracionMinutos, ejercicio.duracionMinutos || 0);
+
+  return {
+    ...ejercicio,
+    nombre: texto(datos.nombre) || ejercicio.nombre,
+    tipo,
+    bloque: texto(datos.bloque) || ejercicio.bloque || tipo,
+    series: numeroCampo(datos.series, ejercicio.series || 0),
+    repeticiones: numeroCampo(datos.repeticiones, ejercicio.repeticiones || 0),
+    descansoSegundos: numeroCampo(datos.descansoSegundos, ejercicio.descansoSegundos || 0),
+    duracionMinutos,
+    duracion: duracionMinutos > 0 ? `${duracionMinutos}min` : texto(ejercicio.duracion),
+    intensidad: texto(datos.intensidad) || ejercicio.intensidad || "media",
+    notas: texto(datos.notas),
+    actualizadoEn: new Date().toISOString()
+  };
+}
+
 export function crearRutinasService(entrenamientoService = crearEntrenamientoService()) {
   function obtenerRutinas() {
     return ordenarRutinas(entrenamientoService.obtenerEstado().rutinas);
@@ -197,6 +223,42 @@ export function crearRutinasService(entrenamientoService = crearEntrenamientoSer
     return {
       ...resultado,
       mensaje: "Rutina IA guardada con días, bloques y tipos de ejercicio."
+    };
+  }
+
+  function actualizarEjercicioAvanzado(rutinaId, diaId, ejercicioId, datos = {}) {
+    const rutina = obtenerRutinas().find((item) => item.id === rutinaId);
+    let ejercicioEncontrado = false;
+
+    if (!rutina) {
+      return { ok: false, mensaje: "No se encontró la rutina para editar." };
+    }
+
+    const dias = (rutina.dias || []).map((dia) => {
+      if (dia.id !== diaId) return dia;
+
+      const ejercicios = (dia.ejercicios || []).map((ejercicio) => {
+        if (ejercicio.id !== ejercicioId) return ejercicio;
+        ejercicioEncontrado = true;
+        return actualizarEjercicioPreservandoIA(ejercicio, datos);
+      });
+
+      return {
+        ...dia,
+        ejercicios,
+        descansoGeneralSegundos: obtenerPrimerDescanso({ ejercicios })
+      };
+    });
+
+    if (!ejercicioEncontrado) {
+      return { ok: false, mensaje: "No se encontró el ejercicio para editar." };
+    }
+
+    const resultado = entrenamientoService.actualizarRutina(rutinaId, { dias });
+
+    return {
+      ...resultado,
+      mensaje: resultado.ok ? "Ejercicio actualizado sin perder la estructura IA." : resultado.mensaje
     };
   }
 
@@ -264,6 +326,7 @@ export function crearRutinasService(entrenamientoService = crearEntrenamientoSer
     obtenerRutinas,
     crearDesdeFormulario,
     crearDesdeRutinaIA,
+    actualizarEjercicioAvanzado,
     activar,
     editarNombre,
     actualizarDesdeFormulario,
