@@ -115,6 +115,14 @@ textarea:focus {
   box-shadow: 0 0 0 3px var(--fj-cyan-soft);
 }
 
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--fj-border-active);
+  outline-offset: 2px;
+}
+
 ::placeholder {
   color: rgba(139, 163, 194, 0.68);
 }
@@ -211,6 +219,12 @@ textarea:focus {
   color: var(--fj-blue);
 }
 
+@media (max-width: 900px) {
+  .fj-app-shell {
+    padding: 10px;
+  }
+}
+
 @media (max-width: 640px) {
   .fj-app-shell {
     padding: 9px;
@@ -236,5 +250,16 @@ textarea:focus {
     min-height: 38px;
     padding: 9px;
     font-size: 0.84rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
   }
 }
