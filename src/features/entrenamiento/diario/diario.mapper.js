@@ -79,10 +79,11 @@ function minutosTotalesDetalle(item = {}) {
 export function mapearFormularioDiario(datos = {}, dia = {}) {
   const detalleEjercicios = (datos.detalleEjercicios || []).map(mapearDetalleEjercicio);
   const ejerciciosCompletados = detalleEjercicios.filter((item) => item.completado).length;
-  const seriesCompletadas = detalleEjercicios.reduce((total, item) => total + Number(item.seriesCompletadas || 0), 0);
-  const repeticionesCompletadas = detalleEjercicios.reduce((total, item) => total + Number(item.repeticionesCompletadas || 0), 0);
-  const tiempoDesdeEjercicios = detalleEjercicios.reduce((total, item) => total + minutosTotalesDetalle(item), 0);
-  const distanciaCompletadaKm = detalleEjercicios.reduce((total, item) => total + Number(item.distanciaCompletadaKm || 0), 0);
+  const completados = detalleEjercicios.filter((item) => item.completado);
+  const seriesCompletadas = completados.reduce((total, item) => total + Number(item.seriesCompletadas || 0), 0);
+  const repeticionesCompletadas = completados.reduce((total, item) => total + Number(item.repeticionesCompletadas || 0), 0);
+  const tiempoDesdeEjercicios = completados.reduce((total, item) => total + minutosTotalesDetalle(item), 0);
+  const distanciaCompletadaKm = completados.reduce((total, item) => total + Number(item.distanciaCompletadaKm || 0), 0);
   const tiempoFormulario = Math.max(numero(datos.tiempoMinutos, 0), 0);
 
   return {
