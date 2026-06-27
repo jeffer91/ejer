@@ -6,6 +6,7 @@
     - Guardar ajustes locales de Gemini, IA y voz.
     - Probar conexión Gemini sin exponer la API Key.
     - Probar voz automática con speechSynthesis.
+    - Migrar modelos Gemini antiguos a un modelo vigente.
 
   Se conecta con:
     - src/features/entrenamiento/entrenamiento.service.js
@@ -15,7 +16,7 @@
 */
 
 import { crearEntrenamientoService } from "../entrenamiento.service.js";
-import { crearGeminiService } from "./gemini.service.js";
+import { crearGeminiService, GEMINI_MODELO_RECOMENDADO } from "./gemini.service.js";
 import { crearVoiceService } from "./voice.service.js";
 
 function texto(valor, defecto = "") {
@@ -34,6 +35,11 @@ function ocultarKey(apiKey = "") {
   return `${key.slice(0, 4)}••••${key.slice(-4)}`;
 }
 
+function normalizarModeloGemini(modelo, defecto = GEMINI_MODELO_RECOMENDADO) {
+  const valor = texto(modelo, defecto);
+  return /^gemini-1\.5/i.test(valor) ? defecto : valor;
+}
+
 export function crearAjustesEntrenamientoService(entrenamientoService = crearEntrenamientoService()) {
   const gemini = crearGeminiService();
   const voz = crearVoiceService();
@@ -44,6 +50,7 @@ export function crearAjustesEntrenamientoService(entrenamientoService = crearEnt
     return {
       ajustes: {
         ...ajustes,
+        geminiModelo: normalizarModeloGemini(ajustes.geminiModelo),
         geminiApiKeyVisible: ocultarKey(ajustes.geminiApiKey)
       },
       voces: voz.obtenerVoces(),
@@ -57,7 +64,7 @@ export function crearAjustesEntrenamientoService(entrenamientoService = crearEnt
     const ajustes = {
       ...actuales,
       geminiApiKey: apiKeyNueva || actuales.geminiApiKey,
-      geminiModelo: texto(datos.geminiModelo, actuales.geminiModelo || "gemini-1.5-flash"),
+      geminiModelo: normalizarModeloGemini(datos.geminiModelo, normalizarModeloGemini(actuales.geminiModelo)),
       iaActiva: Boolean(datos.iaActiva),
       vozActiva: Boolean(datos.vozActiva),
       vozNombre: texto(datos.vozNombre, actuales.vozNombre),
@@ -84,14 +91,21 @@ export function crearAjustesEntrenamientoService(entrenamientoService = crearEnt
 
   async function probarGemini() {
     const actuales = entrenamientoService.obtenerEstado().ajustes;
-    const resultado = await gemini.probarConexion(actuales);
+    const ajustesPrueba = {
+      ...actuales,
+      geminiModelo: normalizarModeloGemini(actuales.geminiModelo)
+    };
+    const resultado = await gemini.probarConexion(ajustesPrueba);
 
     entrenamientoService.guardarAjustes({
-      ...actuales,
+      ...ajustesPrueba,
+      geminiModelo: resultado.modeloUsado || ajustesPrueba.geminiModelo,
       ultimaPruebaGemini: {
         ok: resultado.ok,
         fecha: new Date().toISOString(),
-        mensaje: resultado.mensaje
+        mensaje: resultado.modeloUsado
+          ? `${resultado.mensaje} Modelo usado: ${resultado.modeloUsado}.`
+          : resultado.mensaje
       }
     });
 
