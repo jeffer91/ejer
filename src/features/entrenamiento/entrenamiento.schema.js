@@ -41,6 +41,11 @@ function lista(valor) {
   return Array.isArray(valor) ? valor : [];
 }
 
+function normalizarModeloGemini(modelo) {
+  const valor = texto(modelo, "gemini-2.5-flash");
+  return /^gemini-1\.5/i.test(valor) ? "gemini-2.5-flash" : valor;
+}
+
 export function normalizarEjercicioEntrenamiento(datos = {}) {
   const base = crearEjercicioEntrenamientoBase(datos);
 
@@ -145,7 +150,7 @@ export function normalizarAjustesEntrenamiento(datos = {}) {
   return {
     ...base,
     geminiApiKey: texto(base.geminiApiKey),
-    geminiModelo: texto(base.geminiModelo, "gemini-1.5-flash"),
+    geminiModelo: normalizarModeloGemini(base.geminiModelo),
     iaActiva: Boolean(base.iaActiva),
     vozActiva: Boolean(base.vozActiva),
     vozNombre: texto(base.vozNombre),
