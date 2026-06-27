@@ -6,6 +6,7 @@
     - Definir las rutas internas de Control corporal.
     - Evitar rutas escritas manualmente en varios archivos.
     - Preparar el módulo para crecer sin tocar el shell global.
+    - Agregar acceso directo a la guía visual de medidas corporales.
 
   Se conecta con:
     - src/features/control-corporal/control-corporal.menu.js
@@ -16,6 +17,7 @@
 export const CONTROL_CORPORAL_ROUTES = {
   ESTADISTICAS: "estadisticas",
   REGISTRO: "registro",
+  GUIA_MEDIDAS: "guia-medidas",
   HISTORIAL: "historial"
 };
 
@@ -31,6 +33,12 @@ export const CONTROL_CORPORAL_ROUTE_ITEMS = [
     label: "Registrar datos",
     shortLabel: "Registrar",
     description: "Agregar peso y medidas"
+  },
+  {
+    id: CONTROL_CORPORAL_ROUTES.GUIA_MEDIDAS,
+    label: "Guía de medidas",
+    shortLabel: "Guía",
+    description: "Dónde y cómo medirte"
   },
   {
     id: CONTROL_CORPORAL_ROUTES.HISTORIAL,
