@@ -113,3 +113,17 @@ Gemini vive en `ajustes/gemini.service.js`, la voz vive en `ajustes/voice.servic
 - Completar sesión con datos reales.
 
 La conversión del formulario vive en `diario/diario.mapper.js` y `entrenamiento.service.js` ahora puede actualizar sesiones existentes.
+
+## Estado del bloque 9
+
+`Rutinas` ahora tiene administración avanzada:
+
+- Crear días iguales o diferentes usando bloques por día.
+- Editar nombre de rutina.
+- Editar plan completo de una rutina.
+- Duplicar rutina.
+- Archivar rutina.
+- Restaurar rutina archivada.
+- Ver detalle de días y ejercicios.
+
+La conversión de texto a días vive en `rutinas/rutinas.mapper.js`. También se agregó el estado `archivada` para conservar rutinas sin borrarlas.
