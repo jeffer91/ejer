@@ -14,14 +14,21 @@ import {
   ENTRENAMIENTO_TIPOS_CARDIO
 } from "./entrenamiento.constants.js";
 
+function dosDigitos(valor) {
+  return String(valor).padStart(2, "0");
+}
+
 export function generarEntrenamientoId(prefijo = "ent") {
   const fecha = Date.now().toString(36);
   const aleatorio = Math.random().toString(36).slice(2, 8);
   return `${prefijo}-${fecha}-${aleatorio}`;
 }
 
-export function fechaEntrenamientoHoy() {
-  return new Date().toISOString().slice(0, 10);
+export function fechaEntrenamientoHoy(fecha = new Date()) {
+  const anio = fecha.getFullYear();
+  const mes = dosDigitos(fecha.getMonth() + 1);
+  const dia = dosDigitos(fecha.getDate());
+  return `${anio}-${mes}-${dia}`;
 }
 
 export function crearAjustesEntrenamientoBase(datos = {}) {
