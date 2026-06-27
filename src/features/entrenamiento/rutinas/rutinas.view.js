@@ -6,16 +6,15 @@
     - Construir la pantalla Rutinas de Entrenamiento.
     - Permitir crear rutinas locales con días iguales o diferentes.
     - Pegar e interpretar rutinas generadas por IA con el contrato FITJEFF_RUTINA_V1.
+    - Cargar una rutina interpretada por IA dentro del formulario manual.
     - Editar, duplicar, activar, archivar y restaurar rutinas guardadas.
 
   Se conecta con:
     - src/features/entrenamiento/rutinas/rutinas.controller.js
     - src/features/entrenamiento/rutinas/rutinas.css
     - src/features/entrenamiento/rutinas/rutinas.prompt.js
-    - src/features/entrenamiento/rutinas/rutinas.parser.js
 */
 
-import { interpretarRutinaIA } from "./rutinas.parser.js";
 import { PROMPT_RUTINA_COPIABLE } from "./rutinas.prompt.js";
 import "./rutinas.css";
 
@@ -143,7 +142,17 @@ function crearBotonCopiarFormato() {
   return boton;
 }
 
-function crearResumenInterpretacion(resultado) {
+function llenarFormularioConRutinaIA(formulario, resultado) {
+  const datos = resultado?.formulario || {};
+
+  Object.entries(datos).forEach(([nombre, valor]) => {
+    const campo = formulario.elements.namedItem(nombre);
+    if (!campo) return;
+    campo.value = valor ?? "";
+  });
+}
+
+function crearResumenInterpretacion(resultado, onCargarFormulario) {
   const resumen = resultado?.resumen || {};
   const contenedor = crearElemento("div", resultado?.ok ? "entreno-rutinas-ia-result entreno-rutinas-ia-result--ok" : "entreno-rutinas-ia-result entreno-rutinas-ia-result--error");
   const titulo = crearElemento("strong", "", resultado?.ok ? "Rutina detectada" : "No se pudo interpretar");
@@ -169,10 +178,22 @@ function crearResumenInterpretacion(resultado) {
     contenedor.appendChild(crearElemento("small", "", `Aviso: ${advertencia}`));
   });
 
+  if (resultado?.ok && resultado?.formulario && typeof onCargarFormulario === "function") {
+    const acciones = crearElemento("div", "entreno-rutinas-ia-result-actions");
+    const cargar = crearBoton("Cargar en formulario manual", "entreno-rutinas-button--ia-load", () => {
+      onCargarFormulario(resultado);
+      cargar.textContent = "Formulario cargado";
+      cargar.disabled = true;
+    });
+
+    acciones.appendChild(cargar);
+    contenedor.appendChild(acciones);
+  }
+
   return contenedor;
 }
 
-function crearPanelRutinaIA() {
+function crearPanelRutinaIA({ onInterpretarRutinaIA, formulario }) {
   const panel = crearElemento("section", "entreno-rutinas-ia");
   const top = crearElemento("div", "entreno-rutinas-form__top");
   const textoTop = crearElemento("div", "");
@@ -192,7 +213,16 @@ function crearPanelRutinaIA() {
       return;
     }
 
-    resultadoBox.appendChild(crearResumenInterpretacion(interpretarRutinaIA(contenido)));
+    const resultado = onInterpretarRutinaIA?.(contenido) || {
+      ok: false,
+      resumen: { dias: 0, bloques: 0, ejercicios: 0, tipos: {} },
+      errores: ["El intérprete de rutinas IA no está conectado."],
+      advertencias: []
+    };
+
+    resultadoBox.appendChild(crearResumenInterpretacion(resultado, (resultadoInterpretado) => {
+      llenarFormularioConRutinaIA(formulario, resultadoInterpretado);
+    }));
   });
   const resultadoBox = crearElemento("div", "entreno-rutinas-ia-output");
 
@@ -338,13 +368,13 @@ function crearRutinaCard(rutina, acciones) {
   return card;
 }
 
-export function crearEntrenamientoRutinasView({ rutinas = [], mensaje = null, onGuardar, onActivar, onEditarNombre, onActualizarPlan, onDuplicar, onArchivar, onRestaurar } = {}) {
+export function crearEntrenamientoRutinasView({ rutinas = [], mensaje = null, onInterpretarRutinaIA, onGuardar, onActivar, onEditarNombre, onActualizarPlan, onDuplicar, onArchivar, onRestaurar } = {}) {
   const pantalla = crearElemento("section", "entreno-rutinas-screen");
   const header = crearElemento("div", "entreno-rutinas-header");
-  const iaBox = crearPanelRutinaIA();
   const formBox = crearElemento("section", "entreno-rutinas-form");
   const formHeader = crearElemento("div", "entreno-rutinas-form__top");
   const formulario = crearElemento("form", "entreno-rutinas-grid");
+  const iaBox = crearPanelRutinaIA({ onInterpretarRutinaIA, formulario });
   const lista = crearElemento("section", "entreno-rutinas-list");
   const rutinasGrid = crearElemento("div", "entreno-rutinas-saved");
   const mensajeNodo = crearMensaje(mensaje);
