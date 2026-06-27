@@ -127,3 +127,20 @@ La conversión del formulario vive en `diario/diario.mapper.js` y `entrenamiento
 - Ver detalle de días y ejercicios.
 
 La conversión de texto a días vive en `rutinas/rutinas.mapper.js`. También se agregó el estado `archivada` para conservar rutinas sin borrarlas.
+
+## Estado del bloque 10
+
+Revisión final de primera versión:
+
+- Validación reforzada de rutinas para evitar títulos sin ejercicios reales.
+- Diagnóstico básico del módulo en `entrenamiento.diagnostics.js`.
+- Stats ahora integra alertas de diagnóstico.
+- Checklist de prueba creado en `QA.md`.
+
+Comandos sugeridos para probar en PC:
+
+```bash
+npm run dev
+npm run build
+npm run electron:dev
+```
