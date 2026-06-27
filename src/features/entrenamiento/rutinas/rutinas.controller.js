@@ -5,7 +5,7 @@
   Función o funciones:
     - Montar la pantalla Rutinas del módulo Entrenamiento.
     - Crear rutinas reales con datos del formulario.
-    - Activar rutinas guardadas y refrescar la pantalla.
+    - Editar, duplicar, activar, archivar y restaurar rutinas guardadas.
 
   Se conecta con:
     - src/features/entrenamiento/rutinas/rutinas.service.js
@@ -29,14 +29,13 @@ export function crearEntrenamientoRutinasController() {
     contenedorActual.appendChild(crearEntrenamientoRutinasView({
       rutinas: service.obtenerRutinas(),
       mensaje,
-      onGuardar: (datos) => {
-        const resultado = service.crearDesdeFormulario(datos);
-        refrescar(resultado);
-      },
-      onActivar: (rutinaId) => {
-        const resultado = service.activar(rutinaId);
-        refrescar(resultado);
-      }
+      onGuardar: (datos) => refrescar(service.crearDesdeFormulario(datos)),
+      onActivar: (rutinaId) => refrescar(service.activar(rutinaId)),
+      onEditarNombre: (rutinaId, datos) => refrescar(service.editarNombre(rutinaId, datos)),
+      onActualizarPlan: (rutinaId, datos) => refrescar(service.actualizarDesdeFormulario(rutinaId, datos)),
+      onDuplicar: (rutinaId) => refrescar(service.duplicar(rutinaId)),
+      onArchivar: (rutinaId) => refrescar(service.archivar(rutinaId)),
+      onRestaurar: (rutinaId) => refrescar(service.restaurar(rutinaId))
     }));
   }
 
