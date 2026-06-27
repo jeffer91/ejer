@@ -39,10 +39,10 @@ function normalizarMedicion(datos = {}) {
   const duracionSegundos = Math.max(numero(datos.duracionSegundos, 0), 0);
   const distanciaKm = datos.distanciaKm === null ? null : Math.max(numero(datos.distanciaKm, 0), 0);
 
-  if (MEDICIONES.includes(medicion)) return medicion;
+  if (["tiempo", "mixto", "distancia"].includes(medicion)) return medicion;
   if (duracionMinutos > 0 || duracionSegundos > 0) return "tiempo";
   if (distanciaKm && distanciaKm > 0) return "distancia";
-  return "repeticiones";
+  return MEDICIONES.includes(medicion) ? medicion : "repeticiones";
 }
 
 export function normalizarEjercicioEntrenamiento(datos = {}) {
