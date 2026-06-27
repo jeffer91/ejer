@@ -185,7 +185,49 @@ export function crearEntrenamientoService(repository = crearEntrenamientoReposit
     };
   }
 
+  function actualizarSesion(sesionId, cambios) {
+    const estado = obtenerEstado();
+    const anterior = estado.sesiones.find((sesion) => sesion.id === sesionId);
+
+    if (!anterior) {
+      return { ok: false, mensaje: "No se encontró la sesión." };
+    }
+
+    const sesiones = estado.sesiones.map((sesion) => {
+      if (sesion.id !== sesionId) return sesion;
+      return normalizarSesionEntrenamiento({
+        ...sesion,
+        ...cambios,
+        id: sesion.id,
+        creadoEn: sesion.creadoEn
+      });
+    }).sort(ordenarPorFechaDesc);
+    const actualizada = sesiones.find((sesion) => sesion.id === sesionId);
+
+    repository.guardarSesiones(sesiones);
+    registrarCambio(estado, {
+      accion: "actualizar-sesion",
+      entidad: "sesion",
+      entidadId: sesionId,
+      antes: anterior,
+      despues: actualizada
+    });
+
+    return {
+      ok: true,
+      mensaje: "Sesión actualizada.",
+      sesion: actualizada
+    };
+  }
+
   function completarSesion(datosSesion = {}) {
+    if (datosSesion.id) {
+      return actualizarSesion(datosSesion.id, {
+        ...datosSesion,
+        estado: ENTRENAMIENTO_ESTADOS_SESION.COMPLETADA
+      });
+    }
+
     return guardarSesion({
       ...datosSesion,
       estado: ENTRENAMIENTO_ESTADOS_SESION.COMPLETADA
@@ -276,6 +318,7 @@ export function crearEntrenamientoService(repository = crearEntrenamientoReposit
     obtenerRutinaActiva,
     obtenerRutinaDelDia,
     guardarSesion,
+    actualizarSesion,
     completarSesion,
     guardarCardio,
     guardarAjustes,
