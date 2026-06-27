@@ -18,6 +18,23 @@
 .entreno-rutinas-ia-result span, .entreno-rutinas-ia-result small { color: var(--fj-muted, #8ba3c2); }
 .entreno-rutinas-ia-chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .entreno-rutinas-ia-chips small { border: 1px solid rgba(0, 245, 255, 0.2); border-radius: 999px; padding: 3px 7px; background: rgba(0, 245, 255, 0.08); color: var(--fj-cyan, #00f5ff); font-weight: 850; }
+.entreno-rutinas-ia-preview { display: grid; gap: 8px; border: 1px dashed rgba(0, 245, 255, 0.22); border-radius: 10px; padding: 9px; margin-top: 4px; background: rgba(0, 245, 255, 0.035); }
+.entreno-rutinas-ia-preview summary { color: var(--fj-cyan, #00f5ff); cursor: pointer; font-weight: 950; }
+.entreno-rutinas-ia-meta { display: flex; flex-wrap: wrap; gap: 6px; }
+.entreno-rutinas-ia-meta--routine { margin-top: 7px; }
+.entreno-rutinas-ia-meta-item { border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 999px; padding: 4px 8px; background: rgba(255, 255, 255, 0.035); font-size: 0.76rem; }
+.entreno-rutinas-ia-meta-item strong { color: var(--fj-text, #e0f2ff); }
+.entreno-rutinas-ia-days-preview { display: grid; gap: 8px; margin-top: 8px; }
+.entreno-rutinas-ia-day-preview { display: grid; gap: 7px; border: 1px solid rgba(34, 255, 136, 0.16); border-radius: 10px; padding: 8px; background: rgba(255, 255, 255, 0.025); }
+.entreno-rutinas-ia-day-preview__head, .entreno-rutinas-ia-block__head { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.entreno-rutinas-ia-day-preview__head strong { color: var(--fj-text, #e0f2ff); }
+.entreno-rutinas-ia-day-preview__head span { color: var(--fj-muted, #8ba3c2); font-size: 0.76rem; font-weight: 850; }
+.entreno-rutinas-ia-block { display: grid; gap: 6px; border: 1px solid rgba(167, 139, 250, 0.18); border-radius: 9px; padding: 7px; background: rgba(167, 139, 250, 0.045); }
+.entreno-rutinas-ia-block__head strong { color: #c4b5fd; }
+.entreno-rutinas-ia-block__head span { border: 1px solid rgba(167, 139, 250, 0.24); border-radius: 999px; padding: 2px 7px; color: #c4b5fd; font-size: 0.72rem; font-weight: 900; }
+.entreno-rutinas-ia-exercise { display: grid; gap: 2px; border-left: 2px solid rgba(0, 245, 255, 0.32); padding: 5px 7px; background: rgba(0, 245, 255, 0.035); border-radius: 7px; }
+.entreno-rutinas-ia-exercise strong { color: var(--fj-text, #e0f2ff); }
+.entreno-rutinas-ia-exercise span { color: var(--fj-muted, #8ba3c2); font-size: 0.75rem; }
 .entreno-rutinas-ia-result-actions { display: flex; justify-content: flex-end; gap: 7px; flex-wrap: wrap; margin-top: 4px; }
 .entreno-rutinas-actions { grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
 .entreno-rutinas-actions--ia { justify-content: flex-end; margin-top: 0; }
@@ -47,4 +64,4 @@
 .entreno-rutinas-day small { color: var(--fj-muted, #8ba3c2); font-size: 0.76rem; }
 .entreno-rutinas-details { border: 1px dashed var(--fj-border, #1e2a44); border-radius: 10px; padding: 9px; }
 .entreno-rutinas-details summary { color: var(--fj-cyan, #00f5ff); font-weight: 950; cursor: pointer; }
-@media (max-width: 640px) { .entreno-rutinas-actions, .entreno-rutinas-card__top, .entreno-rutinas-form__top { align-items: stretch; flex-direction: column; } .entreno-rutinas-save, .entreno-rutinas-button { width: 100%; } .entreno-rutinas-name-form { grid-template-columns: 1fr; } }
+@media (max-width: 640px) { .entreno-rutinas-actions, .entreno-rutinas-card__top, .entreno-rutinas-form__top, .entreno-rutinas-ia-day-preview__head, .entreno-rutinas-ia-block__head { align-items: stretch; flex-direction: column; } .entreno-rutinas-save, .entreno-rutinas-button { width: 100%; } .entreno-rutinas-name-form { grid-template-columns: 1fr; } }
