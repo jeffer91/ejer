@@ -1,19 +1,30 @@
 .entreno-rutinas-screen { display: grid; gap: 10px; }
-.entreno-rutinas-header, .entreno-rutinas-form, .entreno-rutinas-list { border: 1px solid var(--fj-border, #1e2a44); border-radius: var(--fj-radius, 12px); background: var(--fj-surface, #121a2b); padding: 11px; box-shadow: var(--fj-shadow, none); }
-.entreno-rutinas-header h2, .entreno-rutinas-form h3, .entreno-rutinas-list h3 { margin: 0; }
-.entreno-rutinas-header p, .entreno-rutinas-list p { color: var(--fj-muted, #8ba3c2); font-size: 0.84rem; }
+.entreno-rutinas-header, .entreno-rutinas-ia, .entreno-rutinas-form, .entreno-rutinas-list { border: 1px solid var(--fj-border, #1e2a44); border-radius: var(--fj-radius, 12px); background: var(--fj-surface, #121a2b); padding: 11px; box-shadow: var(--fj-shadow, none); }
+.entreno-rutinas-header h2, .entreno-rutinas-ia h3, .entreno-rutinas-form h3, .entreno-rutinas-list h3 { margin: 0; }
+.entreno-rutinas-header p, .entreno-rutinas-ia p, .entreno-rutinas-list p { color: var(--fj-muted, #8ba3c2); font-size: 0.84rem; }
 .entreno-rutinas-kicker { color: var(--fj-cyan, #00f5ff) !important; font-size: 0.72rem !important; font-weight: 950; text-transform: uppercase; }
 .entreno-rutinas-form__top { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
 .entreno-rutinas-grid, .entreno-rutinas-saved { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px; margin-top: 9px; }
 .entreno-rutinas-grid--edit { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
 .entreno-rutinas-field { display: grid; gap: 5px; color: var(--fj-muted, #8ba3c2); font-size: 0.78rem; font-weight: 850; }
 .entreno-rutinas-field--full { grid-column: 1 / -1; }
-.entreno-rutinas-field input, .entreno-rutinas-field textarea, .entreno-rutinas-name-form input { width: 100%; min-height: 38px; border-radius: 10px; padding: 8px; resize: vertical; }
+.entreno-rutinas-field input, .entreno-rutinas-field textarea, .entreno-rutinas-name-form input, .entreno-rutinas-ia-textarea { width: 100%; min-height: 38px; border-radius: 10px; padding: 8px; resize: vertical; }
+.entreno-rutinas-ia { display: grid; gap: 9px; border-color: rgba(34, 255, 136, 0.22); background: linear-gradient(145deg, rgba(18, 26, 43, 0.98), rgba(10, 15, 28, 0.9)); }
+.entreno-rutinas-ia-textarea { min-height: 190px; font-size: 0.82rem; line-height: 1.45; }
+.entreno-rutinas-ia-output { display: grid; gap: 8px; }
+.entreno-rutinas-ia-result { display: grid; gap: 5px; border: 1px solid var(--fj-border, #1e2a44); border-radius: 10px; padding: 9px; font-size: 0.82rem; }
+.entreno-rutinas-ia-result--ok { border-color: rgba(34, 255, 136, 0.3); color: var(--fj-green, #22ff88); }
+.entreno-rutinas-ia-result--error { border-color: rgba(255, 59, 92, 0.34); color: var(--fj-red, #ff3b5c); }
+.entreno-rutinas-ia-result span, .entreno-rutinas-ia-result small { color: var(--fj-muted, #8ba3c2); }
+.entreno-rutinas-ia-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.entreno-rutinas-ia-chips small { border: 1px solid rgba(0, 245, 255, 0.2); border-radius: 999px; padding: 3px 7px; background: rgba(0, 245, 255, 0.08); color: var(--fj-cyan, #00f5ff); font-weight: 850; }
 .entreno-rutinas-actions { grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.entreno-rutinas-actions--ia { justify-content: flex-end; margin-top: 0; }
 .entreno-rutinas-check { display: inline-flex; align-items: center; gap: 8px; color: var(--fj-muted, #8ba3c2); font-size: 0.82rem; font-weight: 850; }
 .entreno-rutinas-save, .entreno-rutinas-button { border: 1px solid var(--fj-cyan, #00f5ff); border-radius: 10px; background: rgba(0, 245, 255, 0.12); color: var(--fj-cyan, #00f5ff); padding: 8px 11px; font-weight: 950; cursor: pointer; }
 .entreno-rutinas-save:disabled, .entreno-rutinas-button:disabled { cursor: wait; opacity: 0.78; }
 .entreno-rutinas-button--copy { border-color: rgba(34, 255, 136, 0.32); background: rgba(34, 255, 136, 0.1); color: var(--fj-green, #22ff88); }
+.entreno-rutinas-button--ia { border-color: rgba(167, 139, 250, 0.34); background: rgba(167, 139, 250, 0.12); color: #c4b5fd; }
 .entreno-rutinas-button--ok { border-color: rgba(34, 255, 136, 0.28); color: var(--fj-green, #22ff88); }
 .entreno-rutinas-button--danger { border-color: rgba(255, 59, 92, 0.34); color: var(--fj-red, #ff3b5c); }
 .entreno-rutinas-message { display: grid; gap: 3px; border: 1px solid var(--fj-border, #1e2a44); border-radius: 10px; padding: 9px; margin-top: 9px; font-size: 0.82rem; }
