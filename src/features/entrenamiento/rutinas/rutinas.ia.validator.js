@@ -6,6 +6,7 @@
     - Normalizar respuestas de IA antes de que el parser las lea.
     - Corregir variaciones comunes del formato FITJEFF_RUTINA_V1.
     - Validar y autocorregir rutinas IA ya interpretadas.
+    - Permitir ejercicios por repeticiones, por tiempo, mixtos o por distancia.
     - Evitar que la app se rompa cuando la IA entregue datos incompletos.
 
   Se conecta con:
@@ -26,6 +27,8 @@ const TIPOS_PERMITIDOS = [
   "descanso_activo",
   "otro"
 ];
+
+const MEDICIONES_PERMITIDAS = ["repeticiones", "tiempo", "mixto", "distancia"];
 
 const CLAVES_ALIAS = {
   "nombre de rutina": "nombre",
@@ -48,6 +51,22 @@ const CLAVES_ALIAS = {
   "duración": "duracion",
   "duracion minutos": "duracion",
   "duracion_minutos": "duracion",
+  "tiempo": "duracion",
+  "minutos": "duracion",
+  "duración segundos": "duracion_segundos",
+  "duracion segundos": "duracion_segundos",
+  "duracion_segundos": "duracion_segundos",
+  "segundos": "duracion_segundos",
+  "distancia": "distancia_km",
+  "distancia km": "distancia_km",
+  "distancia_km": "distancia_km",
+  "km": "distancia_km",
+  "tipo medicion": "medicion",
+  "tipo_medicion": "medicion",
+  "unidad medicion": "medicion",
+  "unidad_medicion": "medicion",
+  "medición": "medicion",
+  "medicion": "medicion",
   "reps": "repeticiones",
   "rep": "repeticiones",
   "repeticion": "repeticiones",
@@ -78,6 +97,34 @@ function normalizarTipo(valor = "") {
   if (["descanso", "recuperacion", "recuperacion activa"].includes(limpio)) return "descanso_activo";
 
   return TIPOS_PERMITIDOS.includes(limpio.replace(/\s+/g, "_")) ? limpio.replace(/\s+/g, "_") : "otro";
+}
+
+function normalizarMedicion(valor = "") {
+  const limpio = quitarAcentos(valor).toLowerCase().replace(/[_-]+/g, " ").trim();
+
+  if (["tiempo", "duracion", "minutos", "segundos"].includes(limpio)) return "tiempo";
+  if (["repeticiones", "reps", "rep", "series reps"].includes(limpio)) return "repeticiones";
+  if (["mixto", "series tiempo", "tiempo series"].includes(limpio)) return "mixto";
+  if (["distancia", "km", "kilometros"].includes(limpio)) return "distancia";
+  return MEDICIONES_PERMITIDAS.includes(limpio.replace(/\s+/g, "_")) ? limpio.replace(/\s+/g, "_") : "";
+}
+
+function numero(valor, defecto = 0) {
+  const convertido = Number(String(valor ?? "").replace(",", "."));
+  return Number.isFinite(convertido) ? convertido : defecto;
+}
+
+function tieneDuracion(ejercicio = {}) {
+  return Number(ejercicio.duracionMinutos || 0) > 0 || Number(ejercicio.duracionSegundos || 0) > 0 || Boolean(texto(ejercicio.duracion));
+}
+
+function inferirMedicion(ejercicio = {}) {
+  const explicita = normalizarMedicion(ejercicio.medicion);
+  if (explicita) return explicita;
+  if (Number(ejercicio.distanciaKm || 0) > 0) return "distancia";
+  if (tieneDuracion(ejercicio)) return Number(ejercicio.series || 0) > 0 && Number(ejercicio.repeticiones || 0) > 0 ? "mixto" : "tiempo";
+  if (["cardio", "movilidad", "calentamiento", "descanso_activo"].includes(ejercicio.tipo)) return "tiempo";
+  return "repeticiones";
 }
 
 function esTipoPermitidoLinea(linea = "") {
@@ -117,7 +164,7 @@ function normalizarLineaEjercicio(linea = "") {
   let limpio = texto(linea).replace(/^[-•]\s*/, "");
 
   if (/^ejercicio\s*[:=]/i.test(quitarAcentos(limpio)) || /^actividad\s*[:=]/i.test(quitarAcentos(limpio))) {
-    return `- ${normalizarClaveValor(limpio)}`;
+    return `- ${limpio.split("|").map(normalizarClaveValor).join(" | ")}`;
   }
 
   if (/ejercicio\s*=/i.test(quitarAcentos(limpio))) {
@@ -130,7 +177,7 @@ function normalizarLineaEjercicio(linea = "") {
     return [`- ejercicio=${nombre}`, ...resto.map(normalizarClaveValor)].join(" | ");
   }
 
-  return `- ejercicio=${limpio} | tipo=otro | series= | repeticiones= | descanso= | duracion= | intensidad=media | notas=`;
+  return `- ejercicio=${limpio} | tipo=otro | medicion=repeticiones | series= | repeticiones= | descanso= | duracion= | duracion_segundos= | distancia_km= | intensidad=media | notas=`;
 }
 
 function normalizarLinea(linea = "") {
@@ -148,9 +195,9 @@ function normalizarLinea(linea = "") {
 
   const diaConNombre = limpio.match(/^d[ií]a\s*(\d+)\s*[-:.]?\s*(.*)$/i);
   if (diaConNombre) {
-    const numero = diaConNombre[1];
+    const numeroDia = diaConNombre[1];
     const nombre = texto(diaConNombre[2]);
-    return ["[DIA]", `numero=${numero}`, `nombre=Día ${numero}${nombre ? ` - ${nombre}` : ""}`];
+    return ["[DIA]", `numero=${numeroDia}`, `nombre=Día ${numeroDia}${nombre ? ` - ${nombre}` : ""}`];
   }
 
   const bloqueConTipo = limpio.match(/^\[?bloque\]?\s*[-:.]?\s*(.*)$/i);
@@ -204,8 +251,13 @@ export function normalizarTextoRutinaIA(textoFuente = "", advertencias = []) {
 }
 
 function obtenerTipoPredeterminado(ejercicio = {}) {
+  const medicion = inferirMedicion(ejercicio);
+
+  if (medicion === "tiempo") return { series: 0, repeticiones: 0, descansoSegundos: 0 };
+  if (medicion === "mixto") return { series: 3, repeticiones: 0, descansoSegundos: 45 };
+  if (medicion === "distancia") return { series: 0, repeticiones: 0, descansoSegundos: 0 };
   return ["cardio", "futbol", "tecnica", "movilidad", "calentamiento", "descanso_activo"].includes(ejercicio.tipo)
-    ? { series: 1, repeticiones: 1, descansoSegundos: 0 }
+    ? { series: 0, repeticiones: 0, descansoSegundos: 0 }
     : { series: 3, repeticiones: 10, descansoSegundos: 60 };
 }
 
@@ -270,7 +322,9 @@ export function corregirRutinaInterpretadaIA(rutina = {}, errores = [], adverten
       }
       nombresUsados.add(claveDuplicado);
 
+      ejercicio.medicion = inferirMedicion(ejercicio);
       const defaults = obtenerTipoPredeterminado(ejercicio);
+
       if (ejercicio.series === null || ejercicio.series === undefined || ejercicio.series === "") {
         ejercicio.series = defaults.series;
         correcciones += 1;
@@ -283,13 +337,27 @@ export function corregirRutinaInterpretadaIA(rutina = {}, errores = [], adverten
         ejercicio.descansoSegundos = defaults.descansoSegundos;
         correcciones += 1;
       }
+
+      if (ejercicio.medicion === "tiempo") {
+        ejercicio.series = 0;
+        ejercicio.repeticiones = 0;
+      }
+
+      if (ejercicio.medicion === "mixto" && !Number(ejercicio.repeticiones || 0)) {
+        ejercicio.repeticiones = 0;
+      }
+
       if (!texto(ejercicio.intensidad)) {
         ejercicio.intensidad = "media";
         correcciones += 1;
       }
 
-      if (["cardio", "futbol", "tecnica"].includes(ejercicio.tipo) && !Number(ejercicio.duracionMinutos || 0) && !Number(ejercicio.repeticiones || 0)) {
-        advertencias.push(`${ejercicio.nombre} no tiene duración ni repeticiones claras.`);
+      if (["tiempo", "mixto"].includes(ejercicio.medicion) && !tieneDuracion(ejercicio)) {
+        advertencias.push(`${ejercicio.nombre} está marcado por tiempo, pero no tiene duración clara.`);
+      }
+
+      if (ejercicio.medicion === "distancia" && !Number(ejercicio.distanciaKm || 0)) {
+        advertencias.push(`${ejercicio.nombre} está marcado por distancia, pero no tiene distancia clara.`);
       }
     });
   });
