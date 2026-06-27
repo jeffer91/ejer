@@ -34,7 +34,7 @@ export function fechaEntrenamientoHoy(fecha = new Date()) {
 export function crearAjustesEntrenamientoBase(datos = {}) {
   return {
     geminiApiKey: "",
-    geminiModelo: "gemini-1.5-flash",
+    geminiModelo: "gemini-2.5-flash",
     iaActiva: false,
     vozActiva: false,
     vozNombre: "",
