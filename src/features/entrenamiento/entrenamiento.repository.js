@@ -15,7 +15,7 @@ import {
   normalizarCardioEntrenamiento,
   normalizarRutinaEntrenamiento,
   normalizarSesionEntrenamiento
-} from "./entrenamiento.schema.js";
+} from "./entrenamiento.schema.tiempo.js";
 
 function leerJson(clave, valorDefecto) {
   try {
