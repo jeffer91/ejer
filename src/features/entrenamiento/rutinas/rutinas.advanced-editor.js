@@ -4,7 +4,8 @@
 
   Función o funciones:
     - Construir el editor avanzado de rutinas IA guardadas.
-    - Editar ejercicios por día y bloque sin perder tipo, cardio, fútbol, duración, descanso ni notas.
+    - Editar ejercicios por día y bloque sin perder tipo, medición, cardio, fútbol, duración, descanso ni notas.
+    - Permitir editar ejercicios por repeticiones, tiempo, mixto o distancia.
     - Mantener separado este editor para no sobrecargar rutinas.view.js.
 
   Se conecta con:
@@ -25,6 +26,13 @@ const TIPOS_EJERCICIO_AVANZADO = [
   "otro"
 ];
 
+const MEDICIONES_EJERCICIO = [
+  "repeticiones",
+  "tiempo",
+  "mixto",
+  "distancia"
+];
+
 function crearElemento(etiqueta, clase = "", texto = "") {
   const elemento = document.createElement(etiqueta);
   if (clase) elemento.className = clase;
@@ -32,7 +40,7 @@ function crearElemento(etiqueta, clase = "", texto = "") {
   return elemento;
 }
 
-function crearInput({ nombre, label, valor = "", tipo = "text", min = "" }) {
+function crearInput({ nombre, label, valor = "", tipo = "text", min = "", step = "1" }) {
   const grupo = crearElemento("label", "entreno-rutinas-advanced-field");
   const texto = crearElemento("span", "", label);
   const input = document.createElement("input");
@@ -41,30 +49,39 @@ function crearInput({ nombre, label, valor = "", tipo = "text", min = "" }) {
   input.type = tipo;
   input.value = valor ?? "";
   if (min !== "") input.min = min;
+  if (tipo === "number") input.step = step;
 
   grupo.appendChild(texto);
   grupo.appendChild(input);
   return grupo;
 }
 
-function crearSelectTipo(valorActual = "") {
+function crearSelect(nombre, label, opciones = [], valorActual = "") {
   const grupo = crearElemento("label", "entreno-rutinas-advanced-field");
-  const texto = crearElemento("span", "", "Tipo");
+  const texto = crearElemento("span", "", label);
   const select = document.createElement("select");
 
-  select.name = "tipo";
+  select.name = nombre;
 
-  TIPOS_EJERCICIO_AVANZADO.forEach((tipo) => {
+  opciones.forEach((valor) => {
     const option = document.createElement("option");
-    option.value = tipo;
-    option.textContent = tipo;
-    option.selected = tipo === valorActual;
+    option.value = valor;
+    option.textContent = valor;
+    option.selected = valor === valorActual;
     select.appendChild(option);
   });
 
   grupo.appendChild(texto);
   grupo.appendChild(select);
   return grupo;
+}
+
+function crearSelectTipo(valorActual = "") {
+  return crearSelect("tipo", "Tipo", TIPOS_EJERCICIO_AVANZADO, valorActual || "otro");
+}
+
+function crearSelectMedicion(valorActual = "") {
+  return crearSelect("medicion", "Medición", MEDICIONES_EJERCICIO, valorActual || "repeticiones");
 }
 
 function crearAreaNotas(valor = "") {
@@ -87,11 +104,14 @@ function leerDatosEjercicio(formulario) {
   return {
     nombre: datos.get("nombre"),
     tipo: datos.get("tipo"),
+    medicion: datos.get("medicion"),
     bloque: datos.get("bloque"),
     series: datos.get("series"),
     repeticiones: datos.get("repeticiones"),
     descansoSegundos: datos.get("descansoSegundos"),
     duracionMinutos: datos.get("duracionMinutos"),
+    duracionSegundos: datos.get("duracionSegundos"),
+    distanciaKm: datos.get("distanciaKm"),
     intensidad: datos.get("intensidad"),
     notas: datos.get("notas")
   };
@@ -113,11 +133,14 @@ function crearFormularioEjercicio({ rutina, dia, bloque, ejercicio, onActualizar
 
   form.appendChild(crearInput({ nombre: "nombre", label: "Ejercicio", valor: ejercicio.nombre }));
   form.appendChild(crearSelectTipo(ejercicio.tipo || bloque.tipo || "otro"));
+  form.appendChild(crearSelectMedicion(ejercicio.medicion || "repeticiones"));
   form.appendChild(crearInput({ nombre: "bloque", label: "Bloque", valor: ejercicio.bloque || bloque.nombre || bloque.tipo || "" }));
   form.appendChild(crearInput({ nombre: "series", label: "Series", valor: ejercicio.series ?? "", tipo: "number", min: "0" }));
   form.appendChild(crearInput({ nombre: "repeticiones", label: "Reps", valor: ejercicio.repeticiones ?? "", tipo: "number", min: "0" }));
   form.appendChild(crearInput({ nombre: "descansoSegundos", label: "Descanso s", valor: ejercicio.descansoSegundos ?? "", tipo: "number", min: "0" }));
-  form.appendChild(crearInput({ nombre: "duracionMinutos", label: "Duración min", valor: ejercicio.duracionMinutos ?? "", tipo: "number", min: "0" }));
+  form.appendChild(crearInput({ nombre: "duracionMinutos", label: "Duración min", valor: ejercicio.duracionMinutos ?? "", tipo: "number", min: "0", step: "0.1" }));
+  form.appendChild(crearInput({ nombre: "duracionSegundos", label: "Duración s", valor: ejercicio.duracionSegundos ?? "", tipo: "number", min: "0" }));
+  form.appendChild(crearInput({ nombre: "distanciaKm", label: "Distancia km", valor: ejercicio.distanciaKm ?? "", tipo: "number", min: "0", step: "0.1" }));
   form.appendChild(crearInput({ nombre: "intensidad", label: "Intensidad", valor: ejercicio.intensidad || "media" }));
   form.appendChild(crearAreaNotas(ejercicio.notas));
 
@@ -176,7 +199,7 @@ export function crearEditorAvanzadoRutina({ rutina, onActualizarEjercicioAvanzad
 
   const details = crearElemento("details", "entreno-rutinas-advanced-editor");
   const summary = crearElemento("summary", "", "Editar bloques IA sin perder estructura");
-  const ayuda = crearElemento("p", "", "Edita ejercicios, tipo, bloque, series, repeticiones, duración, descanso, intensidad y notas sin convertir la rutina IA en una rutina manual.");
+  const ayuda = crearElemento("p", "", "Edita ejercicios, tipo, medición, bloque, series, repeticiones, duración, distancia, descanso, intensidad y notas sin convertir la rutina IA en una rutina manual.");
 
   details.appendChild(summary);
   details.appendChild(ayuda);
