@@ -4,7 +4,8 @@
 
   Función o funciones:
     - Coordinar la lógica principal del módulo Entrenamiento.
-    - Guardar rutinas, sesiones, cardio y ajustes usando repository.
+    - Guardar, actualizar, activar y eliminar rutinas usando repository.
+    - Guardar sesiones, cardio y ajustes usando repository.
     - Calcular resumen básico para Stats y Diario.
 */
 
@@ -103,6 +104,38 @@ export function crearEntrenamientoService(repository = crearEntrenamientoReposit
       ok: true,
       mensaje: "Rutina actualizada.",
       rutina: actualizada
+    };
+  }
+
+  function eliminarRutina(rutinaId) {
+    const estado = obtenerEstado();
+    const anterior = estado.rutinas.find((rutina) => rutina.id === rutinaId);
+
+    if (!anterior) {
+      return { ok: false, mensaje: "No se encontró la rutina para borrar." };
+    }
+
+    const rutinas = estado.rutinas.filter((rutina) => rutina.id !== rutinaId);
+    const sesionesRelacionadas = estado.sesiones.filter((sesion) => sesion.rutinaId === rutinaId).length;
+
+    repository.guardarRutinas(rutinas);
+    registrarCambio(estado, {
+      accion: "eliminar-rutina",
+      entidad: "rutina",
+      entidadId: rutinaId,
+      antes: anterior,
+      despues: {
+        eliminada: true,
+        sesionesRelacionadas
+      }
+    });
+
+    return {
+      ok: true,
+      mensaje: sesionesRelacionadas > 0
+        ? `Rutina borrada. Se conservaron ${sesionesRelacionadas} sesión(es) históricas.`
+        : "Rutina borrada definitivamente.",
+      rutina: anterior
     };
   }
 
@@ -314,6 +347,7 @@ export function crearEntrenamientoService(repository = crearEntrenamientoReposit
     obtenerEstado,
     guardarRutina,
     actualizarRutina,
+    eliminarRutina,
     activarRutina,
     obtenerRutinaActiva,
     obtenerRutinaDelDia,
