@@ -129,20 +129,22 @@ const blockedPatterns = [
 ];
 
 const semanticChecks = [
-  { file: "README.md", mustInclude: ["Bloque 20 - Dispositivos", "Cubitt CT4", "Google Fit"], message: "README debe documentar el bloque 20." },
+  { file: "README.md", mustInclude: ["Bloque 21 - Analisis y correccion de errores", "preservar configuracion", "refresca el panel"], message: "README debe documentar el bloque 21." },
   { file: "src/app/app.css", mustInclude: ["@import \"./theme-light.css\";", "@import \"./status-colors.css\";"], message: "app.css debe cargar tema claro y estados." },
+  { file: "src/features/actividad/actividad.menu.js", mustInclude: ["conexiones preparadas", "Manual y conexiones"], message: "Menu de Actividad debe reflejar conexiones." },
   { file: "src/features/actividad/actividad.routes.js", mustInclude: ["DISPOSITIVOS", "actividad-dispositivos", "Cubitt CT4 y Google Fit"], message: "Actividad debe tener ruta de dispositivos." },
   { file: "src/features/actividad/actividad.module.js", mustInclude: ["crearDispositivosController", "ACTIVIDAD_ROUTES.DISPOSITIVOS"], message: "Actividad debe montar la pantalla de dispositivos." },
   { file: "src/features/actividad/actividad.service.js", mustInclude: ["obtenerResumenDispositivos", "dispositivos"], message: "Resumen de Actividad debe incluir dispositivos." },
   { file: "src/features/actividad/resumen/resumen.view.js", mustInclude: ["crearPanelDispositivos", "Preparar dispositivos", "ACTIVIDAD_ROUTES.DISPOSITIVOS"], message: "Resumen debe enlazar Dispositivos." },
   { file: "src/features/actividad/dispositivos/dispositivos.constants.js", mustInclude: ["DISPOSITIVOS_STORAGE_KEY", "Cubitt", "Google Fit", "AVISO_PRIVADO"], message: "Dispositivos debe tener constantes base." },
   { file: "src/features/actividad/dispositivos/dispositivos.repository.js", mustInclude: ["crearDispositivosRepository", "localStorage", "mezclarEstado"], message: "Dispositivos debe persistir localmente." },
-  { file: "src/features/actividad/dispositivos/dispositivos.service.js", mustInclude: ["crearDispositivosService", "crearCubittAdapter", "crearGoogleFitAdapter", "obtenerResumenDispositivos"], message: "Dispositivos debe tener service y adapters." },
+  { file: "src/features/actividad/dispositivos/dispositivos.service.js", mustInclude: ["crearDispositivosService", "preservarTexto", "identificadorLocal: preservarTexto", "cuenta: preservarTexto", "obtenerResumenDispositivos"], message: "Dispositivos debe preservar configuracion guardada." },
+  { file: "src/features/actividad/dispositivos/dispositivos.controller.js", mustInclude: ["renderizar", "guardado.estado", "pintarMensajeDispositivos"], message: "Dispositivos debe refrescar estado despues de guardar." },
   { file: "src/features/actividad/dispositivos/adapters/cubitt.adapter.js", mustInclude: ["crearCubittAdapter", "normalizarActividadLectura"], message: "Debe existir adapter Cubitt." },
   { file: "src/features/actividad/dispositivos/adapters/google-fit.adapter.js", mustInclude: ["crearGoogleFitAdapter", "normalizarActividadLectura"], message: "Debe existir adapter Google Fit." },
   { file: "src/features/actividad/dispositivos/dispositivos.view.js", mustInclude: ["crearDispositivosView", "identificador local", "Google Fit", "Puente FitJeff"], message: "Debe existir vista de dispositivos." },
   { file: "src/features/actividad/dispositivos/dispositivos.css", mustInclude: ["dispositivos-screen", "dispositivos-status-grid", "dispositivos-button--primary"], message: "Debe existir estilo de dispositivos." },
-  { file: "src/features/control-corporal/analisis-corporal/analisis-corporal.calculations.js", mustInclude: ["construirAnalisisCorporal", "relacionCinturaAltura", "nivelMuscular"], message: "Debe existir análisis corporal inteligente." },
+  { file: "src/features/control-corporal/analisis-corporal/analisis-corporal.calculations.js", mustInclude: ["construirAnalisisCorporal", "relacionCinturaAltura", "nivelMuscular"], message: "Debe existir analisis corporal inteligente." },
   { file: "src/features/entrenamiento/rutinas/rutinas.view.js", mustInclude: ["crearRutinasStepper", "RUTINAS_STEPS", "Avanza por pasos"], message: "Vista de Rutinas debe usar pasos." },
   { file: "src/features/entrenamiento/jarvis/jarvis-panel.css", mustInclude: [".entreno-diario-jarvis", ".entreno-hit-jarvis", "background: linear-gradient"], message: "Jarvis debe tener estilos claros compartidos." }
 ];
@@ -217,6 +219,7 @@ function run() {
     console.log("Bloque 18 aplicado: Jarvis claro en Diario y HIT.");
     console.log("Bloque 19 aplicado: Control corporal inteligente.");
     console.log("Bloque 20 aplicado: Dispositivos, Cubitt CT4 y Google Fit preparados.");
+    console.log("Bloque 21 aplicado: Analisis y correccion de errores.");
     return;
   }
 
