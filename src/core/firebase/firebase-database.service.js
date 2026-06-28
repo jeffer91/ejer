@@ -6,6 +6,7 @@
     - Leer y escribir datos de FitJeff en Firestore.
     - Guardar perfil, objetivo, registros y estado de sincronización.
     - Leer un respaldo completo para restaurar la app instalada.
+    - Conservar registros guardados dentro del documento principal si la subcolección está vacía.
     - Mantener Firebase como respaldo oculto, no como pantalla visible.
 
   Se conecta con:
@@ -134,6 +135,14 @@ export function crearFirebaseDatabaseService(firebaseAppService = crearFirebaseA
     }
   }
 
+  function obtenerRegistrosDesdeDocumento(data = {}) {
+    if (Array.isArray(data.registros)) return data.registros;
+    if (Array.isArray(data.controlCorporal?.registros)) return data.controlCorporal.registros;
+    if (Array.isArray(data.registroCorporal?.registros)) return data.registroCorporal.registros;
+    if (Array.isArray(data.registro?.registros)) return data.registro.registros;
+    return [];
+  }
+
   async function leerEstadoCompleto() {
     const estadoGeneral = await leerEstadoGeneral();
 
@@ -155,12 +164,16 @@ export function crearFirebaseDatabaseService(firebaseAppService = crearFirebaseA
       return registros;
     }
 
+    const registrosDocumento = obtenerRegistrosDesdeDocumento(estadoGeneral.data || {});
+    const registrosSubcoleccion = registros.registros || [];
+    const registrosFinales = registrosSubcoleccion.length > 0 ? registrosSubcoleccion : registrosDocumento;
+
     return {
       ok: true,
       existe: true,
       data: {
         ...(estadoGeneral.data || {}),
-        registros: registros.registros || []
+        registros: registrosFinales
       }
     };
   }
