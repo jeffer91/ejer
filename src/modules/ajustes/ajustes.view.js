@@ -7,6 +7,7 @@
     - Mostrar formularios simples para perfil y objetivo.
     - Crear boton para reabrir Inicio.
     - Crear bloque simple de copia de seguridad.
+    - Crear bloque de sincronización manual sin exponer detalles técnicos pesados.
     - Mantener la vista sin logica de guardado.
 
   Se conecta con:
@@ -57,6 +58,21 @@ function crearCampo({ id, label, tipo, placeholder, valor, inputMode }) {
   grupo.appendChild(error);
 
   return grupo;
+}
+
+function fechaCorta(valor) {
+  if (!valor) return "Sin registro";
+
+  const fecha = new Date(valor);
+  if (Number.isNaN(fecha.getTime())) return valor;
+
+  return fecha.toLocaleString("es-EC", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit"
+  });
 }
 
 function crearFormularioPerfil(datos) {
@@ -157,6 +173,31 @@ function crearBloqueBackup() {
   };
 }
 
+function crearBloqueSync() {
+  const bloque = crearElemento("article", "ajustes-card ajustes-card--sync");
+  const acciones = crearElemento("div", "ajustes-backup-actions");
+  const estado = crearElemento("div", "ajustes-sync-status");
+  const mensaje = crearElemento("p", "ajustes-message");
+  const sincronizarBoton = crearElemento("button", "ajustes-button", "Sincronizar ahora");
+
+  sincronizarBoton.type = "button";
+  sincronizarBoton.dataset.action = "sincronizar-manual";
+
+  acciones.appendChild(sincronizarBoton);
+  bloque.appendChild(crearElemento("h3", "ajustes-card__title", "Sincronización"));
+  bloque.appendChild(crearElemento("p", "ajustes-card__text", "FitJeff sincroniza en segundo plano una vez al día y solo envía cambios pendientes."));
+  bloque.appendChild(estado);
+  bloque.appendChild(acciones);
+  bloque.appendChild(mensaje);
+
+  return {
+    bloque,
+    sincronizarBoton,
+    estado,
+    mensaje
+  };
+}
+
 export function crearAjustesView(datos) {
   const pantalla = crearElemento("section", "ajustes-screen");
   const header = crearElemento("div", "ajustes-header");
@@ -164,6 +205,7 @@ export function crearAjustesView(datos) {
   const perfil = crearFormularioPerfil(datos);
   const objetivo = crearFormularioObjetivo(datos);
   const inicio = crearBloqueInicio();
+  const sync = crearBloqueSync();
   const backup = crearBloqueBackup();
 
   header.appendChild(crearElemento("p", "ajustes-kicker", "Configuración"));
@@ -173,6 +215,7 @@ export function crearAjustesView(datos) {
   layout.appendChild(perfil.form);
   layout.appendChild(objetivo.form);
   layout.appendChild(inicio.bloque);
+  layout.appendChild(sync.bloque);
   layout.appendChild(backup.bloque);
 
   pantalla.appendChild(header);
@@ -185,11 +228,34 @@ export function crearAjustesView(datos) {
     objetivoForm: objetivo.form,
     objetivoMensaje: objetivo.mensaje,
     reabrirInicioBoton: inicio.boton,
+    syncBoton: sync.sincronizarBoton,
+    syncEstado: sync.estado,
+    syncMensaje: sync.mensaje,
     backupExportarBoton: backup.exportarBoton,
     backupImportarBoton: backup.importarBoton,
     backupInputArchivo: backup.inputArchivo,
     backupMensaje: backup.mensaje
   };
+}
+
+export function actualizarEstadoSync(vista, estado = {}) {
+  if (!vista?.syncEstado) return;
+
+  const modulos = (estado.modulosSucios || []).map((modulo) => modulo.nombre).join(", ") || "Ninguno";
+  vista.syncEstado.innerHTML = "";
+
+  [
+    ["Cola pendiente", `${estado.colaPendiente || 0} cambio(s)`],
+    ["Cambios por módulo", modulos],
+    ["Último automático", fechaCorta(estado.ultimoAutoSyncEn)],
+    ["Último manual", fechaCorta(estado.ultimoManualSyncEn)],
+    ["Último resultado", estado.ultimoResultado || "Sin registro"]
+  ].forEach(([label, value]) => {
+    const fila = crearElemento("p", "ajustes-sync-status__row");
+    fila.appendChild(crearElemento("strong", "", label));
+    fila.appendChild(crearElemento("span", "", value));
+    vista.syncEstado.appendChild(fila);
+  });
 }
 
 export function leerFormularioAjustes(formulario) {
