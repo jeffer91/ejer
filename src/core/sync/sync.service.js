@@ -4,9 +4,10 @@
 
   Función o funciones:
     - Coordinar la sincronización local con Firebase.
-    - Detectar si Firebase está configurado antes de encolar o enviar datos.
+    - Detectar si Firebase está configurado antes de enviar datos.
     - Mantener la app en modo local sin marcar error cuando Firebase está deshabilitado.
-    - Enviar estado general y registros pendientes cuando Firebase esté listo.
+    - Procesar solo cambios pendientes ya guardados en la cola local.
+    - Evitar que el arranque de la app encole y suba todo el estado local.
     - Mantener cambios en cola si Firebase está habilitado pero falla la conexión.
     - Evitar que un estado local vacío reemplace un respaldo válido en Firebase.
     - No mostrar opciones técnicas al usuario.
@@ -76,10 +77,6 @@ export function crearSyncService({
   }
 
   function encolarEstadoActual() {
-    if (!puedeSincronizar()) {
-      return responderModoLocal();
-    }
-
     const estado = registroService.obtenerEstado();
 
     if (!estadoTieneDatos(estado)) {
@@ -145,10 +142,10 @@ export function crearSyncService({
     const pendientes = queue.listar();
 
     if (pendientes.length === 0) {
-      status.marcarDatosAlDia();
+      status.marcarDatosAlDia("Sin cambios pendientes");
       return {
         ok: true,
-        mensaje: "Datos al día",
+        mensaje: "Sin cambios pendientes",
         procesados: 0
       };
     }
@@ -184,18 +181,6 @@ export function crearSyncService({
   async function sincronizarAhora() {
     if (!puedeSincronizar()) {
       return responderModoLocal();
-    }
-
-    if (queue.listar().length === 0) {
-      const encolado = encolarEstadoActual();
-
-      if (!encolado.ok) {
-        return {
-          ok: true,
-          mensaje: encolado.mensaje,
-          procesados: 0
-        };
-      }
     }
 
     return sincronizarPendientes();
