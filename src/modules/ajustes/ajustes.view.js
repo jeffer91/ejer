@@ -1,13 +1,13 @@
 /*
   Nombre completo: ajustes.view.js
-  Ruta o ubicación: src/modules/ajustes/ajustes.view.js
+  Ruta o ubicacion: src/modules/ajustes/ajustes.view.js
 
-  Función o funciones:
+  Funcion o funciones:
     - Construir la pantalla visual de Ajustes.
     - Mostrar formularios simples para perfil y objetivo.
-    - Crear botón para reabrir Inicio.
+    - Crear boton para reabrir Inicio.
     - Crear bloque simple de copia de seguridad.
-    - Mantener la vista sin lógica de guardado.
+    - Mantener la vista sin logica de guardado.
 
   Se conecta con:
     - src/modules/ajustes/ajustes.controller.js
@@ -32,7 +32,7 @@ function crearElemento(etiqueta, clase, texto) {
   return elemento;
 }
 
-function crearCampo({ id, label, tipo, placeholder, valor }) {
+function crearCampo({ id, label, tipo, placeholder, valor, inputMode }) {
   const grupo = crearElemento("label", "ajustes-field");
   const texto = crearElemento("span", "ajustes-field__label", label);
   const input = crearElemento("input", "ajustes-field__input");
@@ -43,6 +43,10 @@ function crearCampo({ id, label, tipo, placeholder, valor }) {
   input.type = tipo || "text";
   input.placeholder = placeholder || "";
   input.autocomplete = "off";
+
+  if (inputMode) {
+    input.inputMode = inputMode;
+  }
 
   if (valor !== undefined && valor !== null) {
     input.value = valor;
@@ -66,7 +70,8 @@ function crearFormularioPerfil(datos) {
     id: AJUSTES_CAMPOS.ALTURA_CM,
     label: "Altura",
     placeholder: "Ejemplo: 1.75 o 175 cm",
-    valor: datos.perfil?.alturaCm || ""
+    valor: datos.perfil?.alturaCm || "",
+    inputMode: "decimal"
   }));
   form.appendChild(crearCampo({
     id: AJUSTES_CAMPOS.FECHA_NACIMIENTO,
@@ -93,7 +98,8 @@ function crearFormularioObjetivo(datos) {
     id: AJUSTES_CAMPOS.PESO_OBJETIVO_KG,
     label: "Peso objetivo",
     placeholder: "Ejemplo: 80 kg",
-    valor: datos.objetivo?.pesoObjetivoKg || ""
+    valor: datos.objetivo?.pesoObjetivoKg || "",
+    inputMode: "decimal"
   }));
 
   boton.type = "submit";
