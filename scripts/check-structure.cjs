@@ -71,6 +71,12 @@ const requiredFiles = [
   "src/features/entrenamiento/ajustes/gemini-settings.repository.js",
   "src/features/entrenamiento/ajustes/gemini-settings.service.js",
   "src/features/entrenamiento/ajustes/gemini-settings.migration.js",
+  "src/features/entrenamiento/rutinas/rutinas.controller.js",
+  "src/features/entrenamiento/rutinas/rutinas.view.js",
+  "src/features/entrenamiento/rutinas/rutinas.css",
+  "src/features/entrenamiento/rutinas/rutinas.steps.js",
+  "src/features/entrenamiento/rutinas/rutinas.stepper.view.js",
+  "src/features/entrenamiento/rutinas/rutinas.stepper.css",
   "src/features/entrenamiento/stats/stats.controller.js",
   "src/features/entrenamiento/stats/stats.view.js",
   "src/features/entrenamiento/stats/stats.css",
@@ -96,181 +102,33 @@ const blockedPatterns = [
 ];
 
 const semanticChecks = [
-  {
-    file: "README.md",
-    mustInclude: ["Bloque 16 - Medidas con popup visual", "popup visual", "medidas-modal"],
-    message: "README debe documentar el bloque 16 de medidas con popup visual."
-  },
-  {
-    file: "docs/fase-visual-2026-cierre.md",
-    mustInclude: ["Fase visual: cerrada", "Bloques completados: 12 de 12", "Siguiente fase recomendada"],
-    message: "Debe existir documento de cierre de fase visual."
-  },
-  {
-    file: "src/core/utils/date.util.js",
-    mustInclude: ["formatearFechaLocalISO", "getFullYear", "getMonth", "getDate"],
-    message: "date.util debe usar fecha local para evitar desfases por UTC."
-  },
-  {
-    file: "src/features/control-corporal/registro/ingreso.parser.js",
-    mustInclude: ["obtenerFechaHoyISO"],
-    message: "Ingreso debe usar fecha local centralizada."
-  },
-  {
-    file: "src/features/control-corporal/hoy/hoy.rules.js",
-    mustInclude: ["obtenerFechaHoyISO"],
-    message: "Hoy debe detectar el dia actual con fecha local."
-  },
-  {
-    file: "src/features/control-corporal/registro.service.js",
-    mustInclude: ["obtenerFechaHoyISO"],
-    message: "Registro service debe usar fecha local para registros diarios."
-  },
-  {
-    file: "src/features/actividad/actividad.service.js",
-    mustInclude: ["sumarDiasISO", "fechaHoyISO"],
-    message: "Actividad debe calcular hoy y semana con fecha local."
-  },
-  {
-    file: "src/app/app.css",
-    mustInclude: ["@import \"./theme-light.css\";", "@import \"./status-colors.css\";"],
-    message: "app.css debe cargar theme-light.css y status-colors.css."
-  },
-  {
-    file: "src/features/control-corporal/control-corporal.routes.js",
-    mustInclude: ["HOY: \"hoy\"", "label: \"Hoy\""],
-    message: "Control corporal debe tener ruta Hoy en el menu."
-  },
-  {
-    file: "src/features/control-corporal/control-corporal.menu.js",
-    mustInclude: ["defaultRoute: CONTROL_CORPORAL_ROUTES.HOY"],
-    message: "Control corporal debe abrir Hoy por defecto."
-  },
-  {
-    file: "src/features/features.registry.js",
-    mustInclude: ["ACTIVIDAD_MENU", "montarPantallaActividad", "FEATURE_DEFAULT_ROUTE_ID = CONTROL_CORPORAL_ROUTES.HOY"],
-    message: "Features Registry debe registrar Actividad y mantener Hoy como ruta inicial."
-  },
-  {
-    file: "src/app/app-router.js",
-    mustInclude: ["alNavegar: navegar"],
-    message: "app-router debe pasar navegacion interna a los modulos."
-  },
-  {
-    file: "src/features/control-corporal/inicio/inicio.constants.js",
-    mustInclude: ["Guardar y abrir Hoy", "Abriendo Hoy"],
-    message: "Inicio debe dirigir al usuario hacia Hoy."
-  },
-  {
-    file: "src/features/control-corporal/inicio/inicio.css",
-    mustInclude: ["var(--fj-action-bg", "background: #ffffff", "var(--fj-text-strong"],
-    message: "Inicio debe estar alineado al modo claro."
-  },
-  {
-    file: "src/features/control-corporal/registro/ingreso.view.js",
-    mustInclude: ["crearMedidasModal", "abrirAyuda", "medidas-modal/medidas-modal.view.js"],
-    message: "Registro debe abrir popup visual de medidas desde el boton ?."
-  },
-  {
-    file: "src/features/control-corporal/registro/medidas-modal/medidas-modal.constants.js",
-    mustInclude: ["MEDIDAS_MODAL_INFO", "Dónde medir", "obtenerMedidaModalInfo"],
-    message: "Modal de medidas debe tener textos claros por campo."
-  },
-  {
-    file: "src/features/control-corporal/registro/medidas-modal/medidas-figura.svg.js",
-    mustInclude: ["crearFiguraMedicion", "medidas-figura__cinta", "ZONAS_LINEA"],
-    message: "Modal de medidas debe incluir figura visual."
-  },
-  {
-    file: "src/features/control-corporal/registro/medidas-modal/medidas-modal.view.js",
-    mustInclude: ["role", "dialog", "crearFiguraMedicion", "Escape"],
-    message: "Modal de medidas debe tener dialogo accesible y cierre."
-  },
-  {
-    file: "src/features/control-corporal/registro/medidas-modal/medidas-modal.css",
-    mustInclude: [".medidas-modal", ".medidas-figura__cinta", "background: rgba(7, 17, 31, 0.42)"],
-    message: "Modal de medidas debe tener estilos claros y figura visual."
-  },
-  {
-    file: "src/features/control-corporal/estadisticas/estadisticas.view.js",
-    mustInclude: ["prepararVistaEstadisticas"],
-    message: "Progreso debe usar presenter para ordenar la vista."
-  },
-  {
-    file: "src/features/control-corporal/historial/historial.css",
-    mustInclude: ["background: rgba(255, 255, 255, 0.94)", "var(--fj-text-strong", "historial-button--borrar"],
-    message: "Historial debe estar alineado al modo claro."
-  },
-  {
-    file: "src/features/actividad/actividad.menu.js",
-    mustInclude: ["ACTIVIDAD_MODULE_ID", "Registro manual", "ACTIVIDAD_ROUTES.RESUMEN"],
-    message: "Actividad debe tener menu independiente."
-  },
-  {
-    file: "src/features/actividad/actividad.service.js",
-    mustInclude: ["guardarActividad", "obtenerResumen", "bicicletaKm"],
-    message: "Actividad debe manejar pasos y bicicleta manual."
-  },
-  {
-    file: "src/features/actividad/resumen/resumen.css",
-    mustInclude: ["background: rgba(255, 255, 255, 0.94)", "actividad-card--success", "actividad-card--pending"],
-    message: "Resumen de Actividad debe estar alineado al modo claro."
-  },
-  {
-    file: "src/features/actividad/registro/registro.view.js",
-    mustInclude: ["pasos", "bicicletaMin", "bicicletaKm"],
-    message: "Registro de Actividad debe permitir pasos y bicicleta."
-  },
-  {
-    file: "src/features/entrenamiento/entrenamiento.constants.js",
-    mustInclude: ["GEMINI_SETTINGS_STORAGE_KEY", "fitjeff.entrenamiento.gemini.settings.v1"],
-    message: "Entrenamiento debe tener clave separada para Gemini."
-  },
-  {
-    file: "src/features/entrenamiento/ajustes/gemini-settings.repository.js",
-    mustInclude: ["GEMINI_SETTINGS_STORAGE_KEY", "localStorage", "borrarApiKey"],
-    message: "Gemini settings repository debe guardar en almacenamiento separado."
-  },
-  {
-    file: "src/features/entrenamiento/ajustes/gemini-settings.migration.js",
-    mustInclude: ["migrarGeminiSettingsDesdeAjustes", "geminiApiKey", "migradoDesdeAjustes"],
-    message: "Gemini settings debe migrar claves antiguas desde ajustes."
-  },
-  {
-    file: "src/features/entrenamiento/ajustes/gemini-settings.service.js",
-    mustInclude: ["sincronizarDesdeAjustes", "guardarDesdeFormulario", "actualizarPruebaGemini"],
-    message: "Gemini settings service debe blindar guardado y pruebas."
-  },
-  {
-    file: "src/features/entrenamiento/ajustes/ajustes.service.js",
-    mustInclude: ["crearGeminiSettingsService", "guardarAjustesSinPerderGemini", "obtenerVistaSegura"],
-    message: "Ajustes de entrenamiento deben usar Gemini persistente."
-  },
-  {
-    file: "src/features/entrenamiento/ajustes/ajustes.view.js",
-    mustInclude: ["Persistencia Gemini", "Si dejas este campo vacío", "Borrar Key"],
-    message: "Vista de ajustes debe mostrar estado de persistencia Gemini."
-  },
-  {
-    file: "src/features/entrenamiento/ajustes/ajustes.css",
-    mustInclude: ["background: rgba(255, 255, 255, 0.94)", "var(--fj-action-bg", "entreno-ajustes-pill--on"],
-    message: "Ajustes de entrenamiento debe estar alineado al modo claro."
-  },
-  {
-    file: "src/modules/ajustes/ajustes.css",
-    mustInclude: ["background: rgba(255, 255, 255, 0.94)", "var(--fj-action-bg", "background: #ffffff"],
-    message: "Ajustes debe estar alineado al modo claro."
-  },
-  {
-    file: "src/modules/actualizaciones/actualizaciones.css",
-    mustInclude: ["background: rgba(255, 255, 255, 0.94)", "var(--fj-action-bg", "fj-update-progress__bar"],
-    message: "Actualizaciones debe estar alineado al modo claro."
-  },
-  {
-    file: "src/features/entrenamiento/stats/stats.css",
-    mustInclude: ["background: rgba(255, 255, 255, 0.94)", "var(--fj-text-strong", "entreno-stats-card--ok"],
-    message: "Stats de Entrenamiento debe estar alineado al modo claro."
-  }
+  { file: "README.md", mustInclude: ["Bloque 17 - Rutinas claro + pasos", "rutinas.stepper", "modo claro"], message: "README debe documentar el bloque 17 de Rutinas." },
+  { file: "src/core/utils/date.util.js", mustInclude: ["formatearFechaLocalISO", "getFullYear", "getMonth", "getDate"], message: "date.util debe usar fecha local." },
+  { file: "src/app/app.css", mustInclude: ["@import \"./theme-light.css\";", "@import \"./status-colors.css\";"], message: "app.css debe cargar tema claro y estados." },
+  { file: "src/features/control-corporal/control-corporal.routes.js", mustInclude: ["HOY: \"hoy\"", "label: \"Hoy\""], message: "Control corporal debe tener Hoy." },
+  { file: "src/features/control-corporal/control-corporal.menu.js", mustInclude: ["defaultRoute: CONTROL_CORPORAL_ROUTES.HOY"], message: "Control corporal debe abrir Hoy." },
+  { file: "src/features/features.registry.js", mustInclude: ["ACTIVIDAD_MENU", "montarPantallaActividad", "FEATURE_DEFAULT_ROUTE_ID = CONTROL_CORPORAL_ROUTES.HOY"], message: "Features Registry debe registrar Actividad y mantener Hoy." },
+  { file: "src/app/app-router.js", mustInclude: ["alNavegar: navegar"], message: "app-router debe pasar navegación interna." },
+  { file: "src/features/control-corporal/inicio/inicio.constants.js", mustInclude: ["Guardar y abrir Hoy", "Abriendo Hoy"], message: "Inicio debe dirigir hacia Hoy." },
+  { file: "src/features/control-corporal/registro/ingreso.view.js", mustInclude: ["crearMedidasModal", "abrirAyuda", "medidas-modal/medidas-modal.view.js"], message: "Registro debe abrir popup visual de medidas." },
+  { file: "src/features/control-corporal/registro/medidas-modal/medidas-modal.constants.js", mustInclude: ["MEDIDAS_MODAL_INFO", "Dónde medir", "obtenerMedidaModalInfo"], message: "Modal de medidas debe tener textos claros." },
+  { file: "src/features/control-corporal/registro/medidas-modal/medidas-figura.svg.js", mustInclude: ["crearFiguraMedicion", "medidas-figura__cinta", "ZONAS_LINEA"], message: "Modal de medidas debe incluir figura visual." },
+  { file: "src/features/control-corporal/registro/medidas-modal/medidas-modal.view.js", mustInclude: ["role", "dialog", "crearFiguraMedicion", "Escape"], message: "Modal de medidas debe tener diálogo accesible." },
+  { file: "src/features/control-corporal/registro/medidas-modal/medidas-modal.css", mustInclude: [".medidas-modal", ".medidas-figura__cinta", "background: rgba(7, 17, 31, 0.42)"], message: "Modal de medidas debe tener estilos." },
+  { file: "src/features/control-corporal/estadisticas/estadisticas.view.js", mustInclude: ["prepararVistaEstadisticas"], message: "Progreso debe usar presenter." },
+  { file: "src/features/actividad/actividad.service.js", mustInclude: ["sumarDiasISO", "fechaHoyISO", "bicicletaKm"], message: "Actividad debe usar fecha local y bicicleta." },
+  { file: "src/features/entrenamiento/entrenamiento.constants.js", mustInclude: ["GEMINI_SETTINGS_STORAGE_KEY", "fitjeff.entrenamiento.gemini.settings.v1"], message: "Entrenamiento debe tener clave separada para Gemini." },
+  { file: "src/features/entrenamiento/ajustes/gemini-settings.repository.js", mustInclude: ["GEMINI_SETTINGS_STORAGE_KEY", "localStorage", "borrarApiKey"], message: "Gemini debe guardar en almacenamiento separado." },
+  { file: "src/features/entrenamiento/ajustes/gemini-settings.service.js", mustInclude: ["sincronizarDesdeAjustes", "guardarDesdeFormulario", "actualizarPruebaGemini"], message: "Gemini service debe blindar guardado." },
+  { file: "src/features/entrenamiento/ajustes/ajustes.view.js", mustInclude: ["Persistencia Gemini", "Si dejas este campo vacío", "Borrar Key"], message: "Ajustes debe mostrar estado de Gemini." },
+  { file: "src/features/entrenamiento/rutinas/rutinas.steps.js", mustInclude: ["RUTINAS_STEPS", "IA", "Manual", "Guardadas"], message: "Rutinas debe definir pasos." },
+  { file: "src/features/entrenamiento/rutinas/rutinas.stepper.view.js", mustInclude: ["crearRutinasStepper", "rutinas-stepper__tab", "Siguiente"], message: "Rutinas debe tener stepper." },
+  { file: "src/features/entrenamiento/rutinas/rutinas.stepper.css", mustInclude: [".rutinas-stepper", ".rutinas-stepper__tab--active", "grid-template-columns"], message: "Stepper de Rutinas debe tener estilos." },
+  { file: "src/features/entrenamiento/rutinas/rutinas.view.js", mustInclude: ["crearRutinasStepper", "RUTINAS_STEPS", "Avanza por pasos"], message: "Vista de Rutinas debe usar pasos." },
+  { file: "src/features/entrenamiento/rutinas/rutinas.css", mustInclude: ["background: rgba(255, 255, 255, 0.94)", "var(--fj-action-bg", "entreno-rutinas-summary"], message: "Rutinas debe estar en modo claro." },
+  { file: "src/features/entrenamiento/stats/stats.css", mustInclude: ["background: rgba(255, 255, 255, 0.94)", "var(--fj-text-strong", "entreno-stats-card--ok"], message: "Stats debe estar en modo claro." },
+  { file: "src/modules/ajustes/ajustes.css", mustInclude: ["background: rgba(255, 255, 255, 0.94)", "var(--fj-action-bg", "background: #ffffff"], message: "Ajustes debe estar en modo claro." },
+  { file: "src/modules/actualizaciones/actualizaciones.css", mustInclude: ["background: rgba(255, 255, 255, 0.94)", "var(--fj-action-bg", "fj-update-progress__bar"], message: "Actualizaciones debe estar en modo claro." }
 ];
 
 function fileExists(relativePath) {
@@ -283,13 +141,10 @@ function readFile(relativePath) {
 
 function walkFiles(directory) {
   const absoluteDirectory = path.join(ROOT, directory);
+  if (!fs.existsSync(absoluteDirectory)) return [];
 
-  if (!fs.existsSync(absoluteDirectory)) {
-    return [];
-  }
-
-  const entries = fs.readdirSync(absoluteDirectory, { withFileTypes: true });
   const files = [];
+  const entries = fs.readdirSync(absoluteDirectory, { withFileTypes: true });
 
   for (const entry of entries) {
     const absolutePath = path.join(absoluteDirectory, entry.name);
@@ -297,10 +152,7 @@ function walkFiles(directory) {
 
     if (entry.isDirectory()) {
       files.push(...walkFiles(relativePath));
-      continue;
-    }
-
-    if (/\.(js|cjs|mjs|css|html|json|md)$/.test(entry.name)) {
+    } else if (/\.(js|cjs|mjs|css|html|json|md)$/.test(entry.name)) {
       files.push(relativePath);
     }
   }
@@ -313,16 +165,12 @@ function checkRequiredFiles() {
 }
 
 function checkBlockedImports() {
-  const files = walkFiles("src");
   const findings = [];
 
-  for (const file of files) {
+  for (const file of walkFiles("src")) {
     const content = readFile(file);
-
     for (const pattern of blockedPatterns) {
-      if (content.includes(pattern)) {
-        findings.push(`${file} -> ${pattern}`);
-      }
+      if (content.includes(pattern)) findings.push(`${file} -> ${pattern}`);
     }
   }
 
@@ -340,10 +188,7 @@ function checkSemanticRules() {
 
     const content = readFile(check.file);
     const missing = check.mustInclude.filter((pattern) => !content.includes(pattern));
-
-    if (missing.length > 0) {
-      findings.push(`${check.file} -> ${check.message} Faltan: ${missing.join(", ")}`);
-    }
+    if (missing.length > 0) findings.push(`${check.file} -> ${check.message} Faltan: ${missing.join(", ")}`);
   }
 
   return findings;
@@ -361,16 +206,10 @@ function run() {
     console.log("Bloque 14 aplicado: revision local completa.");
     console.log("Bloque 15 aplicado: Gemini con persistencia blindada.");
     console.log("Bloque 16 aplicado: medidas con popup visual.");
-    console.log("Control corporal vive en src/features/control-corporal.");
-    console.log("Hoy es la pantalla principal de Control corporal.");
-    console.log("El tema claro global esta registrado.");
-    console.log("Inicio abre hacia Hoy y usa modo claro.");
+    console.log("Bloque 17 aplicado: Rutinas claro + pasos.");
     console.log("Registro integra ayuda ? con popup visual y mapa corporal.");
-    console.log("Progreso usa presenter para una vista ordenada.");
-    console.log("Actividad manual esta registrada como modulo independiente.");
+    console.log("Rutinas usa flujo por pasos y modo claro.");
     console.log("Gemini guarda API Key en almacenamiento separado.");
-    console.log("Historial, Ajustes, Actualizaciones y Stats usan modo claro.");
-    console.log("Documento de cierre disponible en docs/fase-visual-2026-cierre.md.");
     return;
   }
 
