@@ -3,15 +3,17 @@
   Ruta o ubicación: src/features/actividad/actividad.repository.js
 
   Función o funciones:
-    - Leer y guardar registros manuales de Actividad con almacenamiento local seguro.
+    - Leer y guardar registros manuales o importados de Actividad con almacenamiento local seguro.
     - Mantener un solo registro principal por fecha.
     - Reparar duplicados antiguos conservando el registro más reciente por día.
+    - Conservar metadata de importación como fuente, origen e importadoEn.
     - Evitar que un JSON dañado rompa el módulo Actividad.
     - Mantener Actividad independiente de Control corporal y Entrenamiento.
 
   Se conecta con:
     - src/features/actividad/actividad.service.js
     - src/features/actividad/actividad.constants.js
+    - src/features/actividad/dispositivos/dispositivos-import-bridge.service.js
     - src/core/storage/safe-local-storage.service.js
 */
 
@@ -41,6 +43,10 @@ function normalizarNumero(valor) {
   return Number.isFinite(numero) ? numero : 0;
 }
 
+function limpiarTexto(valor, max = 160) {
+  return String(valor || "").trim().slice(0, max);
+}
+
 function normalizarRegistro(registro) {
   if (!registro || typeof registro !== "object") {
     return null;
@@ -60,6 +66,10 @@ function normalizarRegistro(registro) {
     bicicletaMin: normalizarNumero(registro.bicicletaMin),
     bicicletaKm: normalizarNumero(registro.bicicletaKm),
     nota: String(registro.nota || ""),
+    fuente: limpiarTexto(registro.fuente || registro.source || "manual", 40),
+    origen: limpiarTexto(registro.origen || "manual", 60),
+    importado: Boolean(registro.importado),
+    importadoEn: registro.importadoEn || "",
     creadoEn: registro.creadoEn || new Date().toISOString(),
     actualizadoEn: registro.actualizadoEn || registro.creadoEn || new Date().toISOString()
   };
