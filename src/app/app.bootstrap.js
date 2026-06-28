@@ -3,8 +3,9 @@
   Ruta o ubicación: src/app/app.bootstrap.js
 
   Función o funciones:
-    - Iniciar FitJeff en modo web o PWA.
+    - Iniciar FitJeff en modo web, PWA o Electron.
     - Instalar captura global de errores simples.
+    - Restaurar datos locales/Firebase antes de decidir si mostrar Inicio.
     - Montar la estructura principal dentro de #app.
     - Registrar el service worker si el navegador lo permite.
 
@@ -12,24 +13,22 @@
     - index.html
     - src/app/app-router.js
     - src/app/app.css
+    - src/core/bootstrap/app-data-hydration.service.js
     - src/core/errors/app-error-handler.service.js
     - service-worker.js
 */
 
 import "./app.css";
 import { crearAppErrorHandlerService } from "../core/errors/app-error-handler.service.js";
+import { prepararDatosAntesDeRouter } from "../core/bootstrap/app-data-hydration.service.js";
 import { crearRouterFitJeff } from "./app-router.js";
 
 const errorHandler = crearAppErrorHandlerService();
 errorHandler.instalarCapturaGlobal();
 
 const raiz = document.getElementById("app");
-const perfilInicialCompletado = localStorage.getItem("fitjeff:onboarding-completed") === "true";
 
-try {
-  const router = crearRouterFitJeff({ raiz, perfilInicialCompletado });
-  router.iniciar();
-} catch (error) {
+function renderizarErrorInicio(error) {
   const resultado = errorHandler.registrarError(error, {
     modulo: "app",
     accion: "inicio",
@@ -40,6 +39,19 @@ try {
     raiz.textContent = resultado.mensaje;
   }
 }
+
+async function iniciarFitJeff() {
+  const preparacionDatos = await prepararDatosAntesDeRouter();
+
+  const router = crearRouterFitJeff({
+    raiz,
+    perfilInicialCompletado: preparacionDatos.perfilInicialCompletado
+  });
+
+  router.iniciar();
+}
+
+iniciarFitJeff().catch(renderizarErrorInicio);
 
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("./service-worker.js").catch((error) => {
