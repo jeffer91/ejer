@@ -2,7 +2,32 @@
 
 App personal local-first para control corporal, actividad, entrenamiento, progreso visual, historial, backups, PWA y escritorio Electron.
 
-## Estado actual
+## Estado actual real
+
+FitJeff tiene una base modular funcional y visualmente clara. La app ya puede trabajar en modo local-first con Control corporal, Actividad, Entrenamiento y Sistema, pero algunas integraciones siguen en estado preparado y no deben considerarse conexiones reales todavía.
+
+### Terminado y funcional local
+
+- Tema claro global.
+- Shell principal por secciones.
+- Pantalla Hoy como entrada principal.
+- Registro corporal con ayuda visual.
+- Progreso con analisis corporal inteligente.
+- Historial de control corporal.
+- Actividad manual.
+- Rutinas, Diario, HIIT, Stats y Ajustes de entrenamiento.
+- Actualizaciones preparadas para Electron instalado.
+- PWA base real con manifest claro y service worker de cache basico.
+
+### Preparado, pero pendiente de conexion real
+
+- Firebase esta preparado como respaldo, pero no esta activo mientras `enabled` siga en `false` y la configuracion este vacia.
+- Cubitt CT4 esta preparado como pantalla/configuracion, pero no lee datos reales del reloj todavia.
+- Google Fit esta preparado como pantalla/configuracion, pero no tiene autorizacion ni lectura real todavia.
+- Android/APK esta preparado a nivel de scripts, pero falta proyecto Android/Capacitor para generar APK real.
+- GitHub Releases esta preparado para actualizaciones, pero requiere publicar instalador y `latest.yml`.
+
+## Estado de bloques
 
 Fase visual 2026 cerrada: 12 de 12 bloques.
 
@@ -10,13 +35,14 @@ Bloques funcionales y correctivos aplicados:
 
 - Bloque 13: revision para solucionar errores.
 - Bloque 14: revision local completa.
-- Bloque 15: Gemini persistencia blindada.
+- Bloque 15: Gemini persistencia separada.
 - Bloque 16: Medidas con popup visual.
 - Bloque 17: Rutinas claro + pasos.
 - Bloque 18: Jarvis claro.
 - Bloque 19: Control corporal inteligente.
 - Bloque 20: Dispositivos / Cubitt CT4 / Google Fit preparado.
 - Bloque 21: Analisis y correccion de errores.
+- Bloque 22: Base PWA clara y estado real.
 
 ## Pantalla principal
 
@@ -35,6 +61,8 @@ Bloques funcionales y correctivos aplicados:
 - Registrar
 - Progreso
 - Historial
+
+La guia visual de medidas existe como ruta interna y ayuda complementaria. No se muestra en el menu principal para mantener Registro simple.
 
 ## Menu de Actividad
 
@@ -65,9 +93,9 @@ Resultado: fechas locales corregidas para evitar desfases por UTC.
 
 Resultado: comando `npm run check:local` para revisar herramientas, estructura modular y build de Vite.
 
-### Bloque 15 - Gemini persistencia blindada
+### Bloque 15 - Gemini persistencia separada
 
-Resultado: Gemini guarda API Key en almacenamiento separado y solo se borra desde accion explicita.
+Resultado: Gemini guarda API Key en almacenamiento separado y solo se borra desde accion explicita. Pendiente: mejorar texto de seguridad para no llamar blindado a un dato que sigue guardado localmente.
 
 ### Bloque 16 - Medidas con popup visual
 
@@ -118,6 +146,19 @@ Corregido:
 - `README.md`
 
 Resultado: Actividad muestra el menu alineado con conexiones, Dispositivos refresca el panel despues de guardar y el service ayuda a preservar configuracion guardada.
+
+### Bloque 22 - Base PWA clara y estado real
+
+Corregido:
+
+- `index.html`
+- `manifest.webmanifest`
+- `service-worker.js`
+- `src/app/app.bootstrap.js`
+- `scripts/check-structure.cjs`
+- `README.md`
+
+Resultado: la app declara modo claro tambien en metadatos, el manifest queda alineado al tema claro, el service worker deja de ser un archivo vacio y la PWA base real queda activada solo en produccion web para no mezclar cache viejo en desarrollo o Electron.
 
 ## Comandos
 
@@ -171,16 +212,23 @@ npm run desktop:win
 - Registro debe mantener ayuda ? integrada.
 - Progreso debe ser detalle, no dashboard saturado.
 - Actividad manual debe conservarse aunque existan conexiones automaticas.
-- La API Key de Gemini debe conservarse en almacenamiento separado.
+- La API Key de Gemini debe conservarse en almacenamiento separado y poder borrarse de forma explicita.
 - Rutinas debe mantenerse en modo claro y por pasos.
 - Jarvis debe mantenerse en modo claro compartido para Diario y HIT.
 - Control corporal debe cruzar IMC con medidas y contexto muscular antes de sacar conclusiones.
+- PWA debe registrarse solo en produccion web para evitar cache viejo durante desarrollo.
 
 ## Siguiente fase recomendada
 
-Conectores reales y sincronizacion:
+Correcciones pendientes por prioridad:
 
-1. Confirmar fuente real de datos del reloj.
-2. Implementar lectura real cuando exista fuente disponible.
-3. Conectar Google Fit con autorizacion real.
-4. Unificar datos importados con Actividad evitando duplicados.
+1. Unificar almacenamiento seguro para todos los repositories.
+2. Corregir memoria de ultima pantalla y textos del shell.
+3. Mejorar reglas de Control corporal: onboarding, medidas semanales y comparaciones.
+4. Corregir duplicados de Actividad.
+5. Aclarar o implementar conexiones reales de Dispositivos.
+6. Mejorar Rutinas y seleccion del dia de entrenamiento.
+7. Revisar seguridad y texto de Gemini API Key.
+8. Decidir Firebase activo o modo local-only.
+9. Publicar primer release Windows real.
+10. Crear proyecto Android/Capacitor solo cuando se vaya a generar APK real.
