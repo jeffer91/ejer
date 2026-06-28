@@ -6,6 +6,7 @@
     - Auditar FitJeff de forma estática antes de abrir, compilar o publicar.
     - Verificar package.json, scripts principales, archivos críticos y rutas de imports locales.
     - Detectar configuradores Firebase no solicitados, archivos faltantes y referencias rotas.
+    - Verificar que exista metadata de sincronización local-first.
     - Reportar avisos sin bloquear cuando son configuración pendiente, no errores de código.
 
   Se conecta con:
@@ -14,6 +15,7 @@
     - scripts/check-structure.cjs
     - src/app/app.bootstrap.js
     - src/core/config/firebase.project.config.js
+    - src/core/sync/sync-metadata.service.js
 */
 
 const fs = require("node:fs");
@@ -22,6 +24,7 @@ const path = require("node:path");
 const ROOT = path.resolve(__dirname, "..");
 const EXTENSIONES_RESOLUCION = ["", ".js", ".cjs", ".mjs", ".json", ".css"];
 const DIRECTORIOS_AUDITADOS = ["src", "electron", "scripts"];
+const DIRECTORIOS_IGNORADOS = new Set(["node_modules", "dist", "release", ".git", ".vite", ".idea", ".vscode"]);
 
 const archivosCriticos = [
   "package.json",
@@ -42,6 +45,9 @@ const archivosCriticos = [
   "src/core/config/firebase.config.js",
   "src/core/config/firebase.project.config.js",
   "src/core/bootstrap/app-data-hydration.service.js",
+  "src/core/sync/sync.service.js",
+  "src/core/sync/sync-queue.service.js",
+  "src/core/sync/sync-metadata.service.js",
   "src/features/features.registry.js"
 ];
 
@@ -88,7 +94,7 @@ function listarArchivos(directorio, acumulado = []) {
     const rutaRel = path.relative(ROOT, rutaAbs).replaceAll(path.sep, "/");
 
     if (item.isDirectory()) {
-      if (!["node_modules", "dist", "release", ".git"].includes(item.name)) {
+      if (!DIRECTORIOS_IGNORADOS.has(item.name)) {
         listarArchivos(rutaRel, acumulado);
       }
     } else if (/\.(js|cjs|mjs)$/.test(item.name)) {
