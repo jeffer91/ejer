@@ -4,24 +4,25 @@
 
   Función o funciones:
     - Construir la pantalla Rutinas de Entrenamiento.
+    - Organizar el flujo en pasos: IA, Manual y Guardadas.
     - Permitir crear rutinas locales con días iguales o diferentes.
     - Pegar e interpretar rutinas generadas por IA con el contrato FITJEFF_RUTINA_V1.
-    - Mostrar una vista previa antes de guardar una rutina interpretada por IA.
-    - Mostrar rutinas guardadas con bloques, tipos, cardio, fútbol, duración y notas.
-    - Editar rutinas IA por bloques sin perder estructura avanzada.
-    - Cargar una rutina interpretada por IA dentro del formulario manual.
-    - Guardar una rutina interpretada por IA como rutina real de FitJeff.
+    - Mostrar vista previa antes de guardar una rutina interpretada por IA.
     - Editar, duplicar, activar, archivar y restaurar rutinas guardadas.
 
   Se conecta con:
     - src/features/entrenamiento/rutinas/rutinas.controller.js
     - src/features/entrenamiento/rutinas/rutinas.css
+    - src/features/entrenamiento/rutinas/rutinas.stepper.view.js
+    - src/features/entrenamiento/rutinas/rutinas.steps.js
     - src/features/entrenamiento/rutinas/rutinas.prompt.js
     - src/features/entrenamiento/rutinas/rutinas.advanced-editor.js
 */
 
 import { crearEditorAvanzadoRutina } from "./rutinas.advanced-editor.js";
 import { PROMPT_RUTINA_COPIABLE } from "./rutinas.prompt.js";
+import { crearRutinasStepper } from "./rutinas.stepper.view.js";
+import { RUTINAS_STEPS } from "./rutinas.steps.js";
 import "./rutinas.css";
 
 function crearElemento(etiqueta, clase = "", texto = "") {
@@ -32,9 +33,7 @@ function crearElemento(etiqueta, clase = "", texto = "") {
 }
 
 function limpiarNodo(nodo) {
-  while (nodo.firstChild) {
-    nodo.removeChild(nodo.firstChild);
-  }
+  while (nodo.firstChild) nodo.removeChild(nodo.firstChild);
 }
 
 function crearCampo({ nombre, label, placeholder, tipo = "text", valor = "" }) {
@@ -134,7 +133,7 @@ function crearBotonCopiarFormato() {
     try {
       await copiarPromptRutina();
       boton.textContent = "Prompt copiado";
-    } catch (error) {
+    } catch {
       boton.textContent = "No se pudo copiar";
     }
 
@@ -144,7 +143,7 @@ function crearBotonCopiarFormato() {
     }, 1600);
   });
 
-  boton.title = "Copia el contrato FITJEFF_RUTINA_V1 para generar una rutina que luego pueda interpretar la app.";
+  boton.title = "Copia el contrato FITJEFF_RUTINA_V1 para generar una rutina compatible.";
   return boton;
 }
 
@@ -183,22 +182,16 @@ function crearMetaEjercicioIA(ejercicio = {}) {
 
 function crearEjercicioPreviewIA(ejercicio = {}) {
   const item = crearElemento("div", "entreno-rutinas-ia-exercise");
-  const titulo = crearElemento("strong", "", ejercicio.nombre || "Ejercicio");
-  const meta = crearMetaEjercicioIA(ejercicio);
-
-  item.appendChild(titulo);
-  item.appendChild(crearElemento("span", "", meta || ejercicio.tipo || "Sin detalle"));
+  item.appendChild(crearElemento("strong", "", ejercicio.nombre || "Ejercicio"));
+  item.appendChild(crearElemento("span", "", crearMetaEjercicioIA(ejercicio) || ejercicio.tipo || "Sin detalle"));
   return item;
 }
 
 function crearBloquePreviewIA(bloque = {}) {
   const bloqueNodo = crearElemento("article", "entreno-rutinas-ia-block");
   const encabezado = crearElemento("div", "entreno-rutinas-ia-block__head");
-  const nombre = crearElemento("strong", "", bloque.nombre || bloque.tipo || "Bloque");
-  const tipo = crearElemento("span", "", bloque.tipo || "otro");
-
-  encabezado.appendChild(nombre);
-  encabezado.appendChild(tipo);
+  encabezado.appendChild(crearElemento("strong", "", bloque.nombre || bloque.tipo || "Bloque"));
+  encabezado.appendChild(crearElemento("span", "", bloque.tipo || "otro"));
   bloqueNodo.appendChild(encabezado);
 
   if (!Array.isArray(bloque.ejercicios) || bloque.ejercicios.length === 0) {
@@ -206,10 +199,7 @@ function crearBloquePreviewIA(bloque = {}) {
     return bloqueNodo;
   }
 
-  bloque.ejercicios.forEach((ejercicio) => {
-    bloqueNodo.appendChild(crearEjercicioPreviewIA(ejercicio));
-  });
-
+  bloque.ejercicios.forEach((ejercicio) => bloqueNodo.appendChild(crearEjercicioPreviewIA(ejercicio)));
   return bloqueNodo;
 }
 
@@ -258,55 +248,33 @@ function crearVistaPreviaRutinaIA(resultado = {}) {
   ].filter(Boolean).forEach((nodo) => meta.appendChild(nodo));
 
   if (meta.childNodes.length) detalles.appendChild(meta);
-
-  (rutina.dias || []).forEach((dia, indice) => {
-    dias.appendChild(crearDiaPreviewIA(dia, indice));
-  });
-
-  if (dias.childNodes.length) {
-    detalles.appendChild(dias);
-  } else {
-    detalles.appendChild(crearElemento("small", "", "No hay días suficientes para mostrar vista previa."));
-  }
-
+  (rutina.dias || []).forEach((dia, indice) => dias.appendChild(crearDiaPreviewIA(dia, indice)));
+  detalles.appendChild(dias.childNodes.length ? dias : crearElemento("small", "", "No hay días suficientes para mostrar vista previa."));
   return detalles;
 }
 
 function crearResumenInterpretacion(resultado, { onCargarFormulario, onGuardarRutinaIA } = {}) {
   const resumen = resultado?.resumen || {};
   const contenedor = crearElemento("div", resultado?.ok ? "entreno-rutinas-ia-result entreno-rutinas-ia-result--ok" : "entreno-rutinas-ia-result entreno-rutinas-ia-result--error");
-  const titulo = crearElemento("strong", "", resultado?.ok ? "Rutina detectada" : "No se pudo interpretar");
-  const datos = crearElemento("span", "", `${resumen.dias || 0} día(s) · ${resumen.bloques || 0} bloque(s) · ${resumen.ejercicios || 0} ejercicio(s)`);
   const chips = crearElemento("div", "entreno-rutinas-ia-chips");
 
-  contenedor.appendChild(titulo);
-  contenedor.appendChild(datos);
+  contenedor.appendChild(crearElemento("strong", "", resultado?.ok ? "Rutina detectada" : "No se pudo interpretar"));
+  contenedor.appendChild(crearElemento("span", "", `${resumen.dias || 0} día(s) · ${resumen.bloques || 0} bloque(s) · ${resumen.ejercicios || 0} ejercicio(s)`));
 
-  Object.entries(resumen.tipos || {}).forEach(([tipo, total]) => {
-    chips.appendChild(crearElemento("small", "", `${tipo}: ${total}`));
-  });
+  Object.entries(resumen.tipos || {}).forEach(([tipo, total]) => chips.appendChild(crearElemento("small", "", `${tipo}: ${total}`)));
+  if (chips.childNodes.length) contenedor.appendChild(chips);
 
-  if (chips.childNodes.length) {
-    contenedor.appendChild(chips);
-  }
-
-  (resultado?.errores || []).slice(0, 3).forEach((error) => {
-    contenedor.appendChild(crearElemento("small", "", `Error: ${error}`));
-  });
-
-  (resultado?.advertencias || []).slice(0, 3).forEach((advertencia) => {
-    contenedor.appendChild(crearElemento("small", "", `Aviso: ${advertencia}`));
-  });
+  (resultado?.errores || []).slice(0, 3).forEach((error) => contenedor.appendChild(crearElemento("small", "", `Error: ${error}`)));
+  (resultado?.advertencias || []).slice(0, 3).forEach((advertencia) => contenedor.appendChild(crearElemento("small", "", `Aviso: ${advertencia}`)));
 
   if (resultado?.ok) {
     contenedor.appendChild(crearVistaPreviaRutinaIA(resultado));
-
     const acciones = crearElemento("div", "entreno-rutinas-ia-result-actions");
 
     if (resultado?.formulario && typeof onCargarFormulario === "function") {
-      const cargar = crearBoton("Cargar en formulario manual", "entreno-rutinas-button--ia-load", () => {
+      const cargar = crearBoton("Cargar en paso Manual", "entreno-rutinas-button--ia-load", () => {
         onCargarFormulario(resultado);
-        cargar.textContent = "Formulario cargado";
+        cargar.textContent = "Cargada en Manual";
         cargar.disabled = true;
       });
       acciones.appendChild(cargar);
@@ -321,9 +289,7 @@ function crearResumenInterpretacion(resultado, { onCargarFormulario, onGuardarRu
       acciones.appendChild(guardar);
     }
 
-    if (acciones.childNodes.length) {
-      contenedor.appendChild(acciones);
-    }
+    if (acciones.childNodes.length) contenedor.appendChild(acciones);
   }
 
   return contenedor;
@@ -335,10 +301,11 @@ function crearPanelRutinaIA({ onInterpretarRutinaIA, onGuardarRutinaIA, formular
   const textoTop = crearElemento("div", "");
   const area = document.createElement("textarea");
   const acciones = crearElemento("div", "entreno-rutinas-actions entreno-rutinas-actions--ia");
+  const resultadoBox = crearElemento("div", "entreno-rutinas-ia-output");
   const interpretar = crearBoton("Interpretar rutina", "entreno-rutinas-button--ia", () => {
     limpiarNodo(resultadoBox);
-
     const contenido = area.value.trim();
+
     if (!contenido) {
       resultadoBox.appendChild(crearResumenInterpretacion({
         ok: false,
@@ -361,10 +328,9 @@ function crearPanelRutinaIA({ onInterpretarRutinaIA, onGuardarRutinaIA, formular
       onGuardarRutinaIA
     }));
   });
-  const resultadoBox = crearElemento("div", "entreno-rutinas-ia-output");
 
   textoTop.appendChild(crearElemento("h3", "", "Rutina generada por IA"));
-  textoTop.appendChild(crearElemento("p", "", "Copia el prompt, úsalo con la IA y pega aquí la respuesta para que FitJeff la pueda leer o guardar."));
+  textoTop.appendChild(crearElemento("p", "", "Copia el prompt, úsalo con la IA y pega aquí la respuesta. Luego avanza al paso Manual o guarda la rutina IA."));
   top.appendChild(textoTop);
   top.appendChild(crearBotonCopiarFormato());
 
@@ -377,7 +343,6 @@ function crearPanelRutinaIA({ onInterpretarRutinaIA, onGuardarRutinaIA, formular
   panel.appendChild(area);
   panel.appendChild(acciones);
   panel.appendChild(resultadoBox);
-
   return panel;
 }
 
@@ -401,7 +366,6 @@ function rutinaATexto(rutina) {
 function obtenerBaseEdicion(rutina) {
   const primerDia = (rutina.dias || [])[0] || {};
   const primerEjercicio = (primerDia.ejercicios || [])[0] || {};
-
   return {
     nombre: rutina.nombre || "",
     totalDias: (rutina.dias || []).length || 1,
@@ -420,45 +384,38 @@ function crearChipRutina(textoChip, clase = "") {
 
 function crearMetaRutinaGuardada(rutina = {}) {
   const meta = crearElemento("div", "entreno-rutinas-card-meta");
-  const chips = [
+  [
     rutina.origen === "ia" ? crearChipRutina("IA", "entreno-rutinas-chip--ia") : null,
     crearChipRutina(rutina.objetivo),
     crearChipRutina(rutina.nivel),
     crearChipRutina(rutina.lugar),
     crearChipRutina(rutina.equipo),
     crearChipRutina(rutina.duracionSesion)
-  ].filter(Boolean);
-
-  chips.forEach((chip) => meta.appendChild(chip));
+  ].filter(Boolean).forEach((chip) => meta.appendChild(chip));
   return meta.childNodes.length ? meta : null;
 }
 
 function crearDetalleEjercicioGuardado(ejercicio = {}) {
   const partes = [];
-
   if (ejercicio.series && ejercicio.repeticiones) partes.push(`${ejercicio.series}x${ejercicio.repeticiones}`);
   else if (ejercicio.series) partes.push(`${ejercicio.series} serie(s)`);
   else if (ejercicio.repeticiones) partes.push(`${ejercicio.repeticiones} rep.`);
-
   if (ejercicio.duracionMinutos) partes.push(`${ejercicio.duracionMinutos} min`);
   if (ejercicio.descansoSegundos) partes.push(`descanso ${ejercicio.descansoSegundos}s`);
   if (ejercicio.intensidad) partes.push(ejercicio.intensidad);
   if (ejercicio.notas) partes.push(ejercicio.notas);
-
   return partes.join(" · ");
 }
 
 function crearEjercicioGuardado(ejercicio = {}) {
   const item = crearElemento("div", "entreno-rutinas-saved-exercise");
-  const nombre = crearElemento("strong", "", ejercicio.nombre || "Ejercicio");
-  const tipo = crearChipRutina(ejercicio.tipo || "manual", `entreno-rutinas-chip--type entreno-rutinas-chip--${ejercicio.tipo || "manual"}`);
-  const detalle = crearDetalleEjercicioGuardado(ejercicio);
   const top = crearElemento("div", "entreno-rutinas-saved-exercise__top");
+  const tipo = crearChipRutina(ejercicio.tipo || "manual", `entreno-rutinas-chip--type entreno-rutinas-chip--${ejercicio.tipo || "manual"}`);
 
-  top.appendChild(nombre);
+  top.appendChild(crearElemento("strong", "", ejercicio.nombre || "Ejercicio"));
   if (tipo) top.appendChild(tipo);
   item.appendChild(top);
-  item.appendChild(crearElemento("span", "", detalle || "Sin detalle adicional"));
+  item.appendChild(crearElemento("span", "", crearDetalleEjercicioGuardado(ejercicio) || "Sin detalle adicional"));
   return item;
 }
 
@@ -467,7 +424,6 @@ function obtenerEjerciciosDeBloque(dia = {}, bloque = {}) {
   const tipoBloque = bloque.tipo || "";
   const ejercicios = dia.ejercicios || [];
   const porNombre = ejercicios.filter((ejercicio) => ejercicio.bloque && ejercicio.bloque === nombreBloque);
-
   if (porNombre.length) return porNombre;
   return ejercicios.filter((ejercicio) => tipoBloque && ejercicio.tipo === tipoBloque);
 }
@@ -476,10 +432,9 @@ function crearBloqueGuardado(dia = {}, bloque = {}) {
   const bloqueNodo = crearElemento("article", "entreno-rutinas-saved-block");
   const encabezado = crearElemento("div", "entreno-rutinas-saved-block__head");
   const ejercicios = obtenerEjerciciosDeBloque(dia, bloque);
-  const nombre = crearElemento("strong", "", bloque.nombre || bloque.tipo || "Bloque");
   const tipo = crearChipRutina(bloque.tipo || "otro", `entreno-rutinas-chip--type entreno-rutinas-chip--${bloque.tipo || "otro"}`);
 
-  encabezado.appendChild(nombre);
+  encabezado.appendChild(crearElemento("strong", "", bloque.nombre || bloque.tipo || "Bloque"));
   if (tipo) encabezado.appendChild(tipo);
   bloqueNodo.appendChild(encabezado);
 
@@ -512,16 +467,10 @@ function crearResumenDias(rutina) {
 
     if (meta.childNodes.length) bloque.appendChild(meta);
 
-    if (bloques.length > 0) {
-      const bloquesNodo = crearElemento("div", "entreno-rutinas-saved-blocks");
-      bloques.forEach((bloqueDia) => bloquesNodo.appendChild(crearBloqueGuardado(dia, bloqueDia)));
-      bloque.appendChild(bloquesNodo);
-    } else {
-      const listaSimple = crearElemento("div", "entreno-rutinas-saved-blocks");
-      (dia.ejercicios || []).slice(0, 8).forEach((ejercicio) => listaSimple.appendChild(crearEjercicioGuardado(ejercicio)));
-      if (listaSimple.childNodes.length) bloque.appendChild(listaSimple);
-    }
-
+    const bloquesNodo = crearElemento("div", "entreno-rutinas-saved-blocks");
+    if (bloques.length > 0) bloques.forEach((bloqueDia) => bloquesNodo.appendChild(crearBloqueGuardado(dia, bloqueDia)));
+    else (dia.ejercicios || []).slice(0, 8).forEach((ejercicio) => bloquesNodo.appendChild(crearEjercicioGuardado(ejercicio)));
+    if (bloquesNodo.childNodes.length) bloque.appendChild(bloquesNodo);
     wrapper.appendChild(bloque);
   });
 
@@ -541,12 +490,7 @@ function crearFormularioEdicionPlan(rutina, onActualizarPlan) {
   form.appendChild(crearCampo({ nombre: "descansoSegundos", label: "Descanso", tipo: "number", valor: String(base.descansoSegundos) }));
   form.appendChild(crearCampo({ nombre: "series", label: "Series", tipo: "number", valor: String(base.series) }));
   form.appendChild(crearCampo({ nombre: "repeticiones", label: "Repeticiones", tipo: "number", valor: String(base.repeticiones) }));
-  form.appendChild(crearArea({
-    nombre: "ejerciciosTexto",
-    label: "Días y ejercicios",
-    valor: base.ejerciciosTexto,
-    placeholder: "Día 1\nSentadillas\nFlexiones\n\nDía 2\nCaminata\nPlancha"
-  }));
+  form.appendChild(crearArea({ nombre: "ejerciciosTexto", label: "Días y ejercicios", valor: base.ejerciciosTexto, placeholder: "Día 1\nSentadillas\nFlexiones\n\nDía 2\nCaminata\nPlancha" }));
 
   guardar.type = "submit";
   form.appendChild(guardar);
@@ -571,16 +515,12 @@ function crearRutinaCard(rutina, acciones) {
   const totales = calcularTotales(rutina);
   const archivada = rutina.estado === "archivada";
   const metaRutina = crearMetaRutinaGuardada(rutina);
-  const editorAvanzado = crearEditorAvanzadoRutina({
-    rutina,
-    onActualizarEjercicioAvanzado: acciones.onActualizarEjercicioAvanzado
-  });
+  const editorAvanzado = crearEditorAvanzadoRutina({ rutina, onActualizarEjercicioAvanzado: acciones.onActualizarEjercicioAvanzado });
 
   inputNombre.name = "nombre";
   inputNombre.value = rutina.nombre;
   inputNombre.placeholder = "Nombre de rutina";
   guardarNombre.type = "submit";
-
   formNombre.appendChild(inputNombre);
   formNombre.appendChild(guardarNombre);
   formNombre.addEventListener("submit", (evento) => {
@@ -607,13 +547,21 @@ function crearRutinaCard(rutina, acciones) {
   card.appendChild(formNombre);
   card.appendChild(crearResumenDias(rutina));
 
-  if (!archivada && editorAvanzado) {
-    card.appendChild(editorAvanzado);
-  } else if (!archivada) {
-    card.appendChild(crearFormularioEdicionPlan(rutina, acciones.onActualizarPlan));
-  }
+  if (!archivada && editorAvanzado) card.appendChild(editorAvanzado);
+  else if (!archivada) card.appendChild(crearFormularioEdicionPlan(rutina, acciones.onActualizarPlan));
 
   return card;
+}
+
+function crearResumenSuperior(rutinas = []) {
+  const resumen = crearElemento("section", "entreno-rutinas-summary");
+  const activas = rutinas.filter((rutina) => rutina.estado === "activa").length;
+  const archivadas = rutinas.filter((rutina) => rutina.estado === "archivada").length;
+
+  resumen.appendChild(crearElemento("span", "", `${rutinas.length} rutina(s)`));
+  resumen.appendChild(crearElemento("span", "", `${activas} activa(s)`));
+  resumen.appendChild(crearElemento("span", "", `${archivadas} archivada(s)`));
+  return resumen;
 }
 
 export function crearEntrenamientoRutinasView({ rutinas = [], mensaje = null, onInterpretarRutinaIA, onGuardarRutinaIA, onGuardar, onActivar, onEditarNombre, onActualizarPlan, onActualizarEjercicioAvanzado, onDuplicar, onArchivar, onRestaurar } = {}) {
@@ -634,7 +582,8 @@ export function crearEntrenamientoRutinasView({ rutinas = [], mensaje = null, on
 
   header.appendChild(crearElemento("p", "entreno-rutinas-kicker", "Planes"));
   header.appendChild(crearElemento("h2", "", "Rutinas"));
-  header.appendChild(crearElemento("p", "", "Crea rutinas manuales o interpreta una rutina generada por IA con el formato de FitJeff."));
+  header.appendChild(crearElemento("p", "", "Avanza por pasos: interpreta una rutina IA, crea o ajusta manualmente y administra tus rutinas guardadas."));
+  header.appendChild(crearResumenSuperior(rutinas));
 
   formulario.appendChild(crearCampo({ nombre: "nombre", label: "Nombre", placeholder: "Ejemplo: Casa 4 días" }));
   formulario.appendChild(crearCampo({ nombre: "totalDias", label: "Días", placeholder: "4", tipo: "number", valor: "4" }));
@@ -652,24 +601,22 @@ export function crearEntrenamientoRutinasView({ rutinas = [], mensaje = null, on
   check.name = "activa";
   activar.appendChild(check);
   activar.appendChild(crearElemento("span", "", "Guardar como rutina activa"));
-
   guardar.type = "submit";
   acciones.appendChild(activar);
   acciones.appendChild(guardar);
   formulario.appendChild(acciones);
-
   formulario.addEventListener("submit", (evento) => {
     evento.preventDefault();
     onGuardar?.(leerFormulario(formulario));
   });
 
   formHeader.appendChild(crearElemento("h3", "", "Crear rutina manual"));
+  formHeader.appendChild(crearElemento("p", "", "Completa los datos básicos. Los campos de tiempo y distancia se agregan automáticamente para cardio, movilidad o ejercicios por duración."));
   formBox.appendChild(formHeader);
   if (mensajeNodo) formBox.appendChild(mensajeNodo);
   formBox.appendChild(formulario);
 
   lista.appendChild(crearElemento("h3", "", "Rutinas guardadas"));
-
   if (rutinas.length === 0) {
     lista.appendChild(crearElemento("p", "", "Todavía no hay rutinas guardadas."));
   } else {
@@ -677,9 +624,15 @@ export function crearEntrenamientoRutinasView({ rutinas = [], mensaje = null, on
     lista.appendChild(rutinasGrid);
   }
 
+  const stepper = crearRutinasStepper({
+    steps: RUTINAS_STEPS.map((step) => ({
+      ...step,
+      contenido: step.id === "ia" ? iaBox : step.id === "manual" ? formBox : lista
+    })),
+    initialStepId: rutinas.length > 0 ? "guardadas" : "ia"
+  });
+
   pantalla.appendChild(header);
-  pantalla.appendChild(iaBox);
-  pantalla.appendChild(formBox);
-  pantalla.appendChild(lista);
+  pantalla.appendChild(stepper.elemento);
   return pantalla;
 }
