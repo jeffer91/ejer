@@ -1,68 +1,23 @@
 /*
   Nombre completo: app.css
-  Ruta o ubicación: src/app/app.css
+  Ruta o ubicacion: src/app/app.css
 
-  Función o funciones:
+  Funcion o funciones:
     - Definir la base visual global de FitJeff.
-    - Aplicar modo oscuro tecnológico para Electron, PWA y futura APK.
-    - Centralizar variables de color, compactación, bordes y glow neon.
-    - Mantener un shell compacto para que los módulos hereden una base premium.
+    - Cargar el tema claro y los indicadores de estado.
+    - Mantener una interfaz limpia para Electron, PWA y futura APK.
+    - Centralizar espaciado, tarjetas, botones, formularios y accesibilidad visual.
 
   Se conecta con:
+    - src/app/theme-light.css
+    - src/app/status-colors.css
     - src/app/app.bootstrap.js
     - src/app/app-router.js
-    - src/modules/actualizaciones/actualizaciones.css
+    - src/shell/shell.css
 */
 
-:root {
-  color-scheme: dark;
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
-
-  --fj-bg: #0a0f1c;
-  --fj-bg-soft: #0e1627;
-  --fj-surface: #121a2b;
-  --fj-surface-2: #162036;
-  --fj-surface-3: #1b2842;
-
-  --fj-border: #1e2a44;
-  --fj-border-soft: rgba(139, 163, 194, 0.16);
-  --fj-border-strong: rgba(0, 245, 255, 0.34);
-  --fj-border-active: rgba(0, 245, 255, 0.75);
-
-  --fj-cyan: #00f5ff;
-  --fj-cyan-soft: rgba(0, 245, 255, 0.12);
-  --fj-cyan-mid: rgba(0, 245, 255, 0.24);
-  --fj-cyan-strong: rgba(0, 245, 255, 0.42);
-
-  --fj-green: #22ff88;
-  --fj-red: #ff3b5c;
-  --fj-blue: #4d9fff;
-
-  --fj-text: #e0f2ff;
-  --fj-text-strong: #ffffff;
-  --fj-muted: #8ba3c2;
-  --fj-muted-soft: rgba(139, 163, 194, 0.72);
-
-  --fj-module-bg: rgba(18, 26, 43, 0.78);
-  --fj-module-bg-hover: rgba(22, 32, 54, 0.98);
-  --fj-module-bg-active: linear-gradient(135deg, rgba(0, 245, 255, 0.2), rgba(18, 26, 43, 0.98));
-
-  --fj-route-bg: rgba(10, 15, 28, 0.64);
-  --fj-route-bg-hover: rgba(18, 26, 43, 0.82);
-  --fj-route-bg-active: rgba(0, 245, 255, 0.12);
-
-  --fj-action-bg: linear-gradient(135deg, rgba(0, 245, 255, 0.95), rgba(77, 159, 255, 0.9));
-  --fj-action-text: #03111f;
-
-  --fj-shadow: 0 8px 20px rgba(0, 245, 255, 0.08);
-  --fj-shadow-soft: 0 8px 18px rgba(0, 0, 0, 0.22);
-  --fj-shadow-strong: 0 0 0 1px rgba(0, 245, 255, 0.2), 0 10px 28px rgba(0, 245, 255, 0.12);
-
-  --fj-radius: 12px;
-  --fj-radius-sm: 10px;
-  --fj-radius-xs: 8px;
-  --fj-gap: 10px;
-}
+@import "./theme-light.css";
+@import "./status-colors.css";
 
 * {
   box-sizing: border-box;
@@ -77,15 +32,17 @@ body {
   min-height: 100vh;
   margin: 0;
   background:
-    radial-gradient(circle at top left, rgba(0, 245, 255, 0.12), transparent 34rem),
-    radial-gradient(circle at bottom right, rgba(34, 255, 136, 0.08), transparent 30rem),
-    var(--fj-bg);
+    radial-gradient(circle at top left, rgba(14, 165, 233, 0.12), transparent 32rem),
+    radial-gradient(circle at bottom right, rgba(22, 163, 74, 0.08), transparent 30rem),
+    linear-gradient(180deg, #ffffff 0%, var(--fj-bg) 46%, #eef4fb 100%);
   color: var(--fj-text);
+  font-family: var(--fj-font-family, Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif);
+  text-rendering: optimizeLegibility;
 }
 
 body::selection {
-  background: rgba(0, 245, 255, 0.28);
-  color: #ffffff;
+  background: rgba(37, 99, 235, 0.2);
+  color: var(--fj-text-strong);
 }
 
 button,
@@ -99,11 +56,17 @@ button {
   min-height: 40px;
 }
 
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
 input,
 select,
 textarea {
   border: 1px solid var(--fj-border);
-  background: var(--fj-bg-soft);
+  border-radius: var(--fj-radius-xs);
+  background: var(--fj-surface);
   color: var(--fj-text);
   outline: none;
 }
@@ -112,10 +75,11 @@ input:focus,
 select:focus,
 textarea:focus {
   border-color: var(--fj-border-active);
-  box-shadow: 0 0 0 3px var(--fj-cyan-soft);
+  box-shadow: 0 0 0 3px var(--fj-blue-soft);
 }
 
 button:focus-visible,
+a:focus-visible,
 input:focus-visible,
 select:focus-visible,
 textarea:focus-visible {
@@ -124,7 +88,7 @@ textarea:focus-visible {
 }
 
 ::placeholder {
-  color: rgba(139, 163, 194, 0.68);
+  color: rgba(100, 116, 139, 0.72);
 }
 
 #app {
@@ -134,13 +98,13 @@ textarea:focus-visible {
 .fj-app-shell {
   width: min(100%, 1120px);
   margin: 0 auto;
-  padding: 12px;
+  padding: 14px;
 }
 
 .fj-header,
 .fj-nav,
 .fj-main {
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
 
 .fj-header {
@@ -150,14 +114,15 @@ textarea:focus-visible {
   gap: var(--fj-gap);
   border: 1px solid var(--fj-border);
   border-radius: var(--fj-radius);
-  background: linear-gradient(135deg, rgba(18, 26, 43, 0.96), rgba(10, 15, 28, 0.92));
-  padding: 10px 11px;
+  background: rgba(255, 255, 255, 0.92);
+  padding: 12px;
   box-shadow: var(--fj-shadow);
+  backdrop-filter: blur(12px);
 }
 
 .fj-header h1 {
   margin: 0;
-  color: var(--fj-text);
+  color: var(--fj-text-strong);
   font-size: clamp(1.15rem, 2vw, 1.55rem);
   line-height: 1.1;
   letter-spacing: -0.03em;
@@ -171,7 +136,7 @@ textarea:focus-visible {
   background: var(--fj-surface);
   color: var(--fj-text);
   padding: 10px 11px;
-  box-shadow: var(--fj-shadow);
+  box-shadow: var(--fj-shadow-soft);
 }
 
 .fj-nav {
@@ -183,7 +148,7 @@ textarea:focus-visible {
 .fj-nav__button {
   cursor: pointer;
   font-size: 0.9rem;
-  font-weight: 800;
+  font-weight: 850;
   letter-spacing: 0.01em;
   transition: transform 160ms ease, border-color 160ms ease, background 160ms ease, box-shadow 160ms ease, color 160ms ease;
 }
@@ -199,7 +164,7 @@ textarea:focus-visible {
 .fj-nav__button--active {
   border-color: var(--fj-border-active);
   background: var(--fj-module-bg-active);
-  color: var(--fj-cyan);
+  color: var(--fj-blue);
   box-shadow: var(--fj-shadow-strong);
 }
 
@@ -211,12 +176,6 @@ textarea:focus-visible {
   white-space: nowrap;
   font-size: 0.82rem;
   font-weight: 900;
-}
-
-.fj-status--info {
-  border-color: rgba(77, 159, 255, 0.34);
-  background: rgba(77, 159, 255, 0.1);
-  color: var(--fj-blue);
 }
 
 @media (max-width: 900px) {
