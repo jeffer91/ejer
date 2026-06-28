@@ -10,6 +10,8 @@ Bloques completados: 12 de 12.
 
 Bloque 13 aplicado: revision para solucionar errores.
 
+Bloque 14 aplicado: revision local completa.
+
 La app queda con una base clara, simple y modular para continuar con mejoras funcionales sin mezclar responsabilidades.
 
 ## Pantalla principal
@@ -214,6 +216,19 @@ Corregido:
 
 Resultado: Fechas locales corregidas para evitar desfases por UTC en Hoy, Registro, Inicio, Progreso y Actividad.
 
+### Bloque 14 - Revision local completa
+
+Creado:
+
+- `scripts/check-local.cjs`
+
+Corregido:
+
+- `package.json`
+- `README.md`
+
+Resultado: nuevo comando `npm run check:local` para revisar herramientas, estructura modular y build de Vite antes de abrir la app.
+
 ## Documento de cierre
 
 El cierre detallado de esta fase esta en:
@@ -228,6 +243,12 @@ Instalar dependencias:
 
 ```bash
 npm install
+```
+
+Revision local completa:
+
+```bash
+npm run check:local
 ```
 
 Revisar estructura:
@@ -270,6 +291,7 @@ npm run desktop:win
 - Progreso debe ser detalle, no dashboard saturado.
 - Actividad manual debe crecer antes de conectar sensores o apps externas.
 - Las fechas diarias deben usar fecha local, no UTC.
+- Antes de seguir con nuevos bloques, ejecutar `npm run check:local`.
 
 ## Siguiente fase recomendada
 
