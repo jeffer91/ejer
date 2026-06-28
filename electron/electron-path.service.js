@@ -6,12 +6,13 @@
     - Resolver rutas internas de FitJeff en modo Electron.
     - Diferenciar carga de Vite en desarrollo y dist en producción.
     - Entregar la ruta segura del preload y del index construido.
-    - Centralizar la URL de desarrollo para que Electron cargue la misma URL que funciona en Chrome.
+    - Centralizar la URL de desarrollo para que Electron cargue el puerto real elegido por npm start.
 
   Se conecta con:
     - electron/main.js
     - electron/electron-window.service.js
     - electron/preload.cjs
+    - scripts/start-electron-dev.cjs
     - package.json
 */
 
@@ -40,7 +41,7 @@ export function obtenerDistIndexPath() {
 }
 
 export function obtenerDevUrl() {
-  return "http://localhost:5173/";
+  return process.env.FITJEFF_DEV_SERVER_URL || "http://localhost:5173/";
 }
 
 export function estaEnDesarrolloElectron() {
