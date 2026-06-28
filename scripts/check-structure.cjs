@@ -4,6 +4,8 @@ const path = require("node:path");
 const ROOT = process.cwd();
 
 const requiredFiles = [
+  "README.md",
+  "docs/fase-visual-2026-cierre.md",
   "src/app/app-router.js",
   "src/app/app.css",
   "src/app/theme-light.css",
@@ -79,6 +81,16 @@ const blockedPatterns = [
 ];
 
 const semanticChecks = [
+  {
+    file: "README.md",
+    mustInclude: ["Bloque 12 - Cierre", "Fase visual 2026 cerrada", "Bloques completados: 12 de 12"],
+    message: "README debe documentar el cierre de la fase visual."
+  },
+  {
+    file: "docs/fase-visual-2026-cierre.md",
+    mustInclude: ["Fase visual: cerrada", "Bloques completados: 12 de 12", "Siguiente fase recomendada"],
+    message: "Debe existir documento de cierre de fase visual."
+  },
   {
     file: "src/app/app.css",
     mustInclude: ["@import \"./theme-light.css\";", "@import \"./status-colors.css\";"],
@@ -249,6 +261,7 @@ function run() {
 
   if (missingFiles.length === 0 && blockedImports.length === 0 && semanticFindings.length === 0) {
     console.log("Estructura modular OK.");
+    console.log("Fase visual 2026 cerrada: 12/12 bloques completados.");
     console.log("Control corporal vive en src/features/control-corporal.");
     console.log("Hoy es la pantalla principal de Control corporal.");
     console.log("El tema claro global esta registrado.");
@@ -257,6 +270,7 @@ function run() {
     console.log("Progreso usa presenter para una vista ordenada.");
     console.log("Actividad manual esta registrada como modulo independiente.");
     console.log("Historial, Ajustes, Actualizaciones y Stats usan modo claro.");
+    console.log("Documento de cierre disponible en docs/fase-visual-2026-cierre.md.");
     return;
   }
 
