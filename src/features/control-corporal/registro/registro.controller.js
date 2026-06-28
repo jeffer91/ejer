@@ -1,19 +1,22 @@
 /*
   Nombre completo: registro.controller.js
-  Ruta o ubicación: src/features/control-corporal/registro/registro.controller.js
+  Ruta o ubicacion: src/features/control-corporal/registro/registro.controller.js
 
-  Función o funciones:
+  Funcion o funciones:
     - Montar la pantalla de Registro / Ingreso dentro de Control corporal.
     - Validar y guardar peso diario.
     - Validar y guardar medidas semanales.
-    - Pedir confirmación cuando hay cambios poco comunes.
+    - Pedir confirmacion cuando hay cambios poco comunes.
+    - Restaurar fecha local despues de guardar medidas.
 
   Se conecta con:
     - src/features/control-corporal/registro/ingreso.view.js
     - src/features/control-corporal/registro/ingreso.validator.js
     - src/features/control-corporal/registro.service.js
+    - src/core/utils/date.util.js
 */
 
+import { obtenerFechaHoyISO } from "../../../core/utils/date.util.js";
 import { crearRegistroService } from "../registro.service.js";
 import { leerFormulario, crearIngresoView, mostrarErroresIngreso, mostrarMensajeIngreso } from "./ingreso.view.js";
 import { validarMedidasIngreso, validarPesoIngreso } from "./ingreso.validator.js";
@@ -78,7 +81,7 @@ export function crearIngresoController({ alGuardar } = {}) {
     if (resultado.ok) {
       vista.medidasForm.reset();
       const fecha = vista.medidasForm.querySelector("input[name='fecha']");
-      if (fecha) fecha.value = new Date().toISOString().slice(0, 10);
+      if (fecha) fecha.value = obtenerFechaHoyISO();
       if (typeof alGuardar === "function") alGuardar(resultado);
     }
   }
