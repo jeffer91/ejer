@@ -6,16 +6,19 @@
     - Leer perfil y objetivo actuales desde Control corporal.
     - Guardar cambios de altura, fecha de nacimiento y peso objetivo.
     - Permitir reabrir Inicio sin borrar los datos guardados.
+    - Usar almacenamiento seguro para cambiar el estado de Inicio.
 
   Se conecta con:
     - src/features/control-corporal/registro.service.js
     - src/features/control-corporal/inicio/inicio.validator.js
+    - src/core/storage/safe-local-storage.service.js
     - src/modules/ajustes/ajustes.constants.js
     - src/modules/ajustes/ajustes.controller.js
 */
 
 import { convertirAlturaACm, convertirPesoAKg } from "../../features/control-corporal/inicio/inicio.validator.js";
 import { crearRegistroService } from "../../features/control-corporal/registro.service.js";
+import { crearSafeLocalStorageService } from "../../core/storage/safe-local-storage.service.js";
 import { AJUSTES_STORAGE_KEYS } from "./ajustes.constants.js";
 
 function fechaNacimientoValida(fecha) {
@@ -27,7 +30,7 @@ function fechaNacimientoValida(fecha) {
   return !Number.isNaN(valor.getTime()) && valor < new Date();
 }
 
-export function crearAjustesService(registroService = crearRegistroService()) {
+export function crearAjustesService(registroService = crearRegistroService(), storage = crearSafeLocalStorageService()) {
   function obtenerDatos() {
     const estado = registroService.obtenerEstado();
 
@@ -98,7 +101,7 @@ export function crearAjustesService(registroService = crearRegistroService()) {
   }
 
   function reabrirInicio() {
-    localStorage.removeItem(AJUSTES_STORAGE_KEYS.INICIO_COMPLETADO);
+    storage.eliminar(AJUSTES_STORAGE_KEYS.INICIO_COMPLETADO);
     return {
       ok: true,
       mensaje: "Inicio listo para abrirse otra vez."
