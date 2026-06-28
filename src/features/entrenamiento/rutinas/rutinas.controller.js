@@ -26,6 +26,7 @@
     - src/features/entrenamiento/entrenamiento.module.js
 */
 
+import "./rutinas-day-selector.css";
 import { insertarBotonesBorrarRutina } from "./rutinas.delete-actions.js";
 import { ejecutarDiagnosticoRutinaIA, insertarPanelDiagnosticoRutinaIA } from "./rutinas.ia.diagnostics.js";
 import { convertirRutinaIAATextoSimple, interpretarRutinaIA } from "./rutinas.parser.js";
