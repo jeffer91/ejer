@@ -41,6 +41,7 @@ const requiredFiles = [
   "src/core/sync/sync.service.js",
   "src/core/sync/sync-status.service.js",
   "src/core/sync/sync-queue.service.js",
+  "src/core/sync/sync-metadata.service.js",
   "src/app/app-router.js",
   "src/app/app.bootstrap.js",
   "src/app/app.css",
@@ -85,19 +86,20 @@ const blockedPatterns = [
 ];
 
 const semanticChecks = [
-  { file: "README.md", mustInclude: ["Bloque 32 - Local-first real", "Firebase en segundo plano", "Bloques pendientes"], message: "README debe documentar el bloque 32 y pendientes." },
+  { file: "README.md", mustInclude: ["Bloque 33 - Metadata de sincronización", "sync-metadata.service.js", "Bloques pendientes"], message: "README debe documentar el bloque 33 y pendientes." },
   { file: "package.json", mustInclude: ["\"start\": \"node scripts/start-electron-dev.cjs\"", "\"audit:app\": \"node scripts/auditar-app.cjs\"", "publicar:automatico"], message: "package.json debe usar inicio seguro y auditoria." },
   { file: "scripts/check-local.cjs", mustInclude: ["Auditoría estática", "scripts/auditar-app.cjs", "Build de Vite"], message: "check-local debe ejecutar auditoria antes del build." },
   { file: "scripts/check-tools.cjs", mustInclude: ["audit:app", "publicar:automatico", "No debe existir configurar:firebase"], message: "check-tools debe validar auditoria y no permitir configurar:firebase." },
   { file: "scripts/auditar-app.cjs", mustInclude: ["auditarImportsLocales", "archivosNoPermitidos", "Resultado: auditoría sin errores críticos"], message: "Debe existir auditoria estatica integral." },
+  { file: "src/core/sync/sync-metadata.service.js", mustInclude: ["SYNC_METADATA_KEY", "SYNC_MODULES", "marcarModuloSucio", "ultimoPullFirebaseEn", "obtenerModulosSucios"], message: "Debe existir metadata de sincronización por módulo." },
   { file: "src/app/app.bootstrap.js", mustInclude: ["prepararDatosAntesDeRouter", "restaurarFirebaseSinBloquear", "restaurarFirebaseEnSegundoPlano", "router.iniciar()"], message: "Bootstrap debe montar local primero y restaurar Firebase despues." },
   { file: "src/app/app-router.js", mustInclude: ["marcarPerfilCompletadoDesdeSync", "FitJeff no puede renderizar", "rutaActual = SHELL_DEFAULT_ROUTE_ID"], message: "Router debe permitir entrada a Hoy tras restauracion." },
   { file: "src/core/config/firebase.project.config.js", mustInclude: ["FIREBASE_PROJECT_CONFIG", "apiKey", "collection: \"fitjeff\"", "userDocument: \"jeff\""], message: "Debe existir configuracion Firebase desde codigo." },
   { file: "src/core/config/firebase.config.js", mustInclude: ["FIREBASE_PROJECT_CONFIG", "leerValor", "resolverFirebaseEnabled", "obtenerEstadoFirebaseConexion"], message: "Firebase config debe leer variables o configuracion desde codigo." },
-  { file: "src/core/bootstrap/app-data-hydration.service.js", mustInclude: ["restaurarFirebaseEnSegundoPlano", "local-vacio", "firebasePendienteSegundoPlano", "repository.guardarEstado"], message: "Hidratacion debe ser local-first y restaurar Firebase en segundo plano." },
+  { file: "src/core/bootstrap/app-data-hydration.service.js", mustInclude: ["restaurarFirebaseEnSegundoPlano", "marcarPullFirebase", "firebasePendienteSegundoPlano", "repository.guardarEstado"], message: "Hidratacion debe ser local-first y registrar pull remoto." },
   { file: "src/core/firebase/firebase-database.service.js", mustInclude: ["obtenerRegistrosDesdeDocumento", "registrosSubcoleccion.length > 0", "registrosFinales"], message: "Firebase database debe conservar registros remotos del documento." },
-  { file: "src/core/sync/sync.service.js", mustInclude: ["Sin cambios pendientes", "return sincronizarPendientes();", "Evitar que el arranque de la app encole"], message: "Sync no debe subir estado completo al iniciar." },
-  { file: "src/features/control-corporal/registro.service.js", mustInclude: ["Guardar local primero", "Encolar cambios locales aunque Firebase todavia no este listo", "puedeEncolarSync()"], message: "Control corporal debe guardar local y encolar aunque Firebase no este listo." },
+  { file: "src/core/sync/sync.service.js", mustInclude: ["syncMetadata", "marcarModuloSincronizado", "marcarIntentoSync", "return sincronizarPendientes();"], message: "Sync debe usar metadata por modulo." },
+  { file: "src/features/control-corporal/registro.service.js", mustInclude: ["marcarCambioLocal", "SYNC_MODULES.CONTROL_CORPORAL", "crearSyncMetadataService"], message: "Control corporal debe marcar metadata sucia." },
   { file: "scripts/start-electron-dev.cjs", mustInclude: ["encontrarPuertoDisponible", "PUERTO_BASE", "FITJEFF_DEV_SERVER_URL", "concurrently"], message: "npm start debe buscar puerto libre y pasar URL a Electron." },
   { file: "electron/electron-path.service.js", mustInclude: ["FITJEFF_DEV_SERVER_URL", "http://localhost:5173/"], message: "Electron debe leer la URL real de desarrollo." },
   { file: "electron/electron-window.service.js", mustInclude: ["backgroundColor: \"#f8fafc\"", "obtenerDevUrl"], message: "Ventana Electron debe mantener tema claro y URL dinamica." },
@@ -207,6 +209,7 @@ function run() {
     console.log("Bloque 30 aplicado: Firebase resuelto desde codigo.");
     console.log("Bloque 31 aplicado: Auditoria integral.");
     console.log("Bloque 32 aplicado: Local-first real.");
+    console.log("Bloque 33 aplicado: Metadata de sincronizacion por modulo.");
     return;
   }
 
