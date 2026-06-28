@@ -18,6 +18,8 @@ Bloque 16 aplicado: Medidas con popup visual.
 
 Bloque 17 aplicado: Rutinas claro + pasos.
 
+Bloque 18 aplicado: Jarvis claro.
+
 La app queda con una base clara, simple y modular para continuar con mejoras funcionales sin mezclar responsabilidades.
 
 ## Pantalla principal
@@ -292,6 +294,22 @@ Corregido:
 
 Resultado: Rutinas queda en modo claro y ahora se organiza por pasos con `rutinas.stepper`: IA, Manual y Guardadas. El usuario puede avanzar con anterior/siguiente sin ver toda la pantalla saturada.
 
+### Bloque 18 - Jarvis claro
+
+Creado:
+
+- `src/features/entrenamiento/jarvis/jarvis-panel.view.js`
+- `src/features/entrenamiento/jarvis/jarvis-panel.css`
+
+Corregido:
+
+- `src/features/entrenamiento/diario/diario.css`
+- `src/features/entrenamiento/hit/hit.css`
+- `scripts/check-structure.cjs`
+- `README.md`
+
+Resultado: Jarvis de Diario y Jarvis HIT quedan en modo claro con panel compartido `jarvis-panel`, tarjetas blancas, texto oscuro, estados verdes, historial legible y comando escrito con input claro. Diario y HIT también quedan alineados visualmente al modo claro.
+
 ## Documento de cierre
 
 El cierre detallado de la fase visual esta en:
@@ -356,11 +374,11 @@ npm run desktop:win
 - La API Key de Gemini debe conservarse en almacenamiento separado y solo borrarse desde la accion explicita.
 - Las medidas corporales deben explicarse con popup visual, no solo con texto corto.
 - Rutinas debe mantenerse en modo claro y por pasos, no como una pantalla larga saturada.
+- Jarvis debe mantenerse en modo claro compartido para Diario y HIT.
 
 ## Siguiente fase recomendada
 
 Fase funcional de Actividad y Entrenamiento:
 
-1. Jarvis claro.
-2. Control corporal inteligente.
-3. Dispositivos / Cubitt CT4 / Google Fit preparado.
+1. Control corporal inteligente.
+2. Dispositivos / Cubitt CT4 / Google Fit preparado.
