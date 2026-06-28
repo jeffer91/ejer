@@ -16,6 +16,7 @@
     - src/features/entrenamiento/entrenamiento.module.js
 */
 
+import "./diario-day-selector.css";
 import { insertarPanelJarvisDiario } from "./diario.jarvis.js";
 import { crearDiarioService } from "./diario.service.js";
 import { crearEntrenamientoDiarioView } from "./diario.view.js";
