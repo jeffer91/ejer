@@ -24,31 +24,6 @@ function clasificarImc(valor) {
   return { estado: "alert", texto: "IMC muy alto", nivel: "alto" };
 }
 
-function estimarGrasaNavy({ sexoBiologico, alturaCm, cinturaCm, cuelloCm, caderaCm }) {
-  const altura = numero(alturaCm);
-  const cintura = numero(cinturaCm);
-  const cuello = numero(cuelloCm);
-  const cadera = numero(caderaCm);
-  const sexo = String(sexoBiologico || "").toLowerCase();
-
-  if (!altura || !cintura || !cuello) return null;
-
-  if (sexo === "hombre") {
-    const base = cintura - cuello;
-    if (base <= 0) return null;
-    return redondear(86.01 * Math.log10(base) - 70.041 * Math.log10(altura) + 36.76, 1);
-  }
-
-  if (sexo === "mujer") {
-    if (!cadera) return null;
-    const base = cintura + cadera - cuello;
-    if (base <= 0) return null;
-    return redondear(163.205 * Math.log10(base) - 97.684 * Math.log10(altura) - 78.387, 1);
-  }
-
-  return null;
-}
-
 function interpretarCombinado({ imcClasificacion, cinturaClasificacion, nivelMuscular }) {
   const muscular = ["medio", "alto"].includes(String(nivelMuscular || "").toLowerCase());
 
@@ -72,7 +47,7 @@ function interpretarCombinado({ imcClasificacion, cinturaClasificacion, nivelMus
     return {
       estado: "info",
       titulo: "IMC elevado, falta contexto",
-      resumen: "El peso en relación con la altura está elevado. La lectura mejora con cuello, cintura, cadera y nivel muscular."
+      resumen: "El peso en relación con la altura está elevado. La lectura mejora con cuello, cintura y contexto muscular."
     };
   }
 
@@ -95,8 +70,7 @@ function construirFaltantes({ perfil, pesoActualKg, medidas }) {
   const faltantes = [];
   if (!pesoActualKg) faltantes.push("peso actual");
   if (!perfil?.alturaCm) faltantes.push("altura");
-  if (!perfil?.sexoBiologico || perfil.sexoBiologico === "no-especificado") faltantes.push("sexo para fórmula técnica opcional");
-  if (!perfil?.nivelMuscular) faltantes.push("nivel muscular");
+  if (!perfil?.nivelMuscular) faltantes.push("contexto muscular");
   if (!medidas?.cinturaCm) faltantes.push("cintura");
   if (!medidas?.cuelloCm) faltantes.push("cuello");
   return faltantes;
@@ -110,13 +84,6 @@ export function construirAnalisisCorporal({ perfil = {}, pesoActualKg = null, me
   const imcValor = numero(imc?.valor);
   const imcClasificacion = clasificarImc(imcValor);
   const cinturaClasificacion = clasificarCinturaAltura(relacionCinturaAltura);
-  const grasaEstimada = estimarGrasaNavy({
-    sexoBiologico: perfil.sexoBiologico,
-    alturaCm,
-    cinturaCm,
-    cuelloCm,
-    caderaCm: medidas.caderaCm
-  });
   const lectura = interpretarCombinado({
     imcClasificacion,
     cinturaClasificacion,
@@ -134,15 +101,13 @@ export function construirAnalisisCorporal({ perfil = {}, pesoActualKg = null, me
     datos: {
       pesoActualKg: numero(pesoActualKg),
       alturaCm,
-      sexoBiologico: perfil.sexoBiologico || "no-especificado",
       nivelMuscular: perfil.nivelMuscular || "sin-dato",
       imc: imcValor,
       imcTexto: imcClasificacion.texto,
       relacionCinturaAltura,
       cinturaAlturaTexto: cinturaClasificacion.texto,
-      grasaEstimada,
-      cinturaCm,
       cuelloCm,
+      cinturaCm,
       caderaCm: numero(medidas.caderaCm)
     },
     avatar: {
