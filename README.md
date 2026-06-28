@@ -16,6 +16,8 @@ Bloque 15 aplicado: Gemini persistencia blindada.
 
 Bloque 16 aplicado: Medidas con popup visual.
 
+Bloque 17 aplicado: Rutinas claro + pasos.
+
 La app queda con una base clara, simple y modular para continuar con mejoras funcionales sin mezclar responsabilidades.
 
 ## Pantalla principal
@@ -273,6 +275,23 @@ Corregido:
 
 Resultado: cada boton ? de Registro abre un popup visual con muñeco, zona de medicion resaltada, explicacion clara, errores comunes y consejo para repetir la medicion.
 
+### Bloque 17 - Rutinas claro + pasos
+
+Creado:
+
+- `src/features/entrenamiento/rutinas/rutinas.steps.js`
+- `src/features/entrenamiento/rutinas/rutinas.stepper.view.js`
+- `src/features/entrenamiento/rutinas/rutinas.stepper.css`
+
+Corregido:
+
+- `src/features/entrenamiento/rutinas/rutinas.view.js`
+- `src/features/entrenamiento/rutinas/rutinas.css`
+- `scripts/check-structure.cjs`
+- `README.md`
+
+Resultado: Rutinas queda en modo claro y ahora se organiza por pasos con `rutinas.stepper`: IA, Manual y Guardadas. El usuario puede avanzar con anterior/siguiente sin ver toda la pantalla saturada.
+
 ## Documento de cierre
 
 El cierre detallado de la fase visual esta en:
@@ -336,12 +355,12 @@ npm run desktop:win
 - Actividad manual debe crecer antes de conectar sensores o apps externas.
 - La API Key de Gemini debe conservarse en almacenamiento separado y solo borrarse desde la accion explicita.
 - Las medidas corporales deben explicarse con popup visual, no solo con texto corto.
+- Rutinas debe mantenerse en modo claro y por pasos, no como una pantalla larga saturada.
 
 ## Siguiente fase recomendada
 
 Fase funcional de Actividad y Entrenamiento:
 
-1. Rutinas claro + pasos.
-2. Jarvis claro.
-3. Control corporal inteligente.
-4. Dispositivos / Cubitt CT4 / Google Fit preparado.
+1. Jarvis claro.
+2. Control corporal inteligente.
+3. Dispositivos / Cubitt CT4 / Google Fit preparado.
