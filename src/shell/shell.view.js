@@ -7,6 +7,7 @@
     - Mostrar secciones principales con lenguaje simple.
     - Mostrar acciones internas de la seccion activa sin texto tecnico.
     - Entregar el contenedor main donde se monta cada pantalla.
+    - Mantener textos visibles corregidos y consistentes.
 
   Se conecta con:
     - src/shell/shell.controller.js
@@ -79,7 +80,7 @@ export function montarShellView({ raiz, modulos, ubicacion, onSeleccionarModulo,
   const appName = crearElemento("strong", "fj-shell__app-name", "FitJeff");
   const appMode = crearElemento("span", "fj-shell__app-mode", "Tu control diario");
   const activeBox = crearElemento("div", "fj-shell__active");
-  const activeLabel = crearElemento("span", "fj-shell__active-label", "Estas en");
+  const activeLabel = crearElemento("span", "fj-shell__active-label", "Estás en");
   const activeModule = crearElemento("strong", "fj-shell__active-module", ubicacion.ruta.label || ubicacion.modulo.label);
   const routeDescription = crearElemento("span", "fj-shell__route-description", ubicacion.modulo.label);
   const modulesNav = crearElemento("nav", "fj-shell__modules");
