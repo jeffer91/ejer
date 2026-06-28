@@ -3,33 +3,32 @@
   Ruta o ubicación: src/features/control-corporal/registro.repository.js
 
   Función o funciones:
-    - Guardar y leer los datos de Control corporal en almacenamiento local.
+    - Guardar y leer los datos de Control corporal en almacenamiento local seguro.
     - Mantener una capa de acceso a datos separada de las pantallas.
+    - Evitar que JSON dañado o localStorage no disponible rompa la app.
     - Preparar el camino para sincronizar después con Firebase sin cambiar las vistas.
 
   Se conecta con:
     - src/features/control-corporal/registro.service.js
     - src/features/control-corporal/registro.state.js
     - src/features/control-corporal/registro.constants.js
+    - src/core/storage/safe-local-storage.service.js
 */
 
+import { crearSafeLocalStorageService } from "../../core/storage/safe-local-storage.service.js";
 import { REGISTRO_STORAGE_KEYS } from "./registro.constants.js";
 import { crearEstadoRegistroInicial } from "./registro.state.js";
 
-function leerJson(clave, valorDefecto) {
-  try {
-    const texto = localStorage.getItem(clave);
-    return texto ? JSON.parse(texto) : valorDefecto;
-  } catch {
-    return valorDefecto;
+export function crearRegistroRepository(storage = crearSafeLocalStorageService()) {
+  function leerJson(clave, valorDefecto) {
+    return storage.leerJson(clave, valorDefecto);
   }
-}
 
-function guardarJson(clave, valor) {
-  localStorage.setItem(clave, JSON.stringify(valor));
-}
+  function guardarJson(clave, valor) {
+    storage.guardarJson(clave, valor);
+    return valor;
+  }
 
-export function crearRegistroRepository() {
   function obtenerEstado() {
     const inicial = crearEstadoRegistroInicial();
 
@@ -44,28 +43,23 @@ export function crearRegistroRepository() {
   }
 
   function guardarPerfil(perfil) {
-    guardarJson(REGISTRO_STORAGE_KEYS.PERFIL, perfil);
-    return perfil;
+    return guardarJson(REGISTRO_STORAGE_KEYS.PERFIL, perfil);
   }
 
   function guardarObjetivo(objetivo) {
-    guardarJson(REGISTRO_STORAGE_KEYS.OBJETIVO, objetivo);
-    return objetivo;
+    return guardarJson(REGISTRO_STORAGE_KEYS.OBJETIVO, objetivo);
   }
 
   function guardarRegistros(registros) {
-    guardarJson(REGISTRO_STORAGE_KEYS.REGISTROS, registros);
-    return registros;
+    return guardarJson(REGISTRO_STORAGE_KEYS.REGISTROS, registros);
   }
 
   function guardarHistorialCambios(cambios) {
-    guardarJson(REGISTRO_STORAGE_KEYS.HISTORIAL_CAMBIOS, cambios);
-    return cambios;
+    return guardarJson(REGISTRO_STORAGE_KEYS.HISTORIAL_CAMBIOS, cambios);
   }
 
   function guardarPapelera(papelera) {
-    guardarJson(REGISTRO_STORAGE_KEYS.PAPELERA, papelera);
-    return papelera;
+    return guardarJson(REGISTRO_STORAGE_KEYS.PAPELERA, papelera);
   }
 
   function guardarEstado(estado) {
