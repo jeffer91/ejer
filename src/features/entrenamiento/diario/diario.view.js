@@ -4,7 +4,8 @@
 
   Función o funciones:
     - Construir la pantalla Diario de Entrenamiento.
-    - Mostrar rutina activa, ejercicios y estado de la sesión diaria.
+    - Mostrar rutina activa, día seleccionado, ejercicios y estado de la sesión diaria.
+    - Permitir cambiar manualmente qué día de rutina se cargará hoy.
     - Permitir marcar ejercicios, guardar progreso y completar sesión con detalle.
     - Registrar ejercicios por repeticiones, por tiempo, mixtos o por distancia.
 
@@ -240,7 +241,41 @@ function leerFormulario(formulario, dia) {
   };
 }
 
-export function crearEntrenamientoDiarioView({ diario = {}, mensaje = null, onIniciar, onGuardarProgreso, onCompletar } = {}) {
+function crearSelectorDiaDiario(rutinaDelDia = {}, onSeleccionarDia) {
+  const dias = rutinaDelDia.diasDisponibles || [];
+  if (!dias.length || typeof onSeleccionarDia !== "function") return null;
+
+  const form = crearElemento("form", "entreno-diario-day-selector");
+  const label = crearElemento("label", "entreno-diario-mini");
+  const texto = crearElemento("span", "", "Día que toca hoy");
+  const select = document.createElement("select");
+  const boton = crearElemento("button", "entreno-diario-button", "Cambiar día");
+  const ayuda = crearElemento("small", "", rutinaDelDia.explicacion || "Puedes ajustar el día si tu semana no coincide con el automático.");
+
+  select.name = "diaRutinaId";
+  dias.forEach((dia) => {
+    const option = document.createElement("option");
+    option.value = dia.id;
+    option.textContent = `${dia.nombre} · ${dia.totalEjercicios} ejercicio(s)`;
+    option.selected = dia.id === rutinaDelDia.diaSeleccionadoId;
+    select.appendChild(option);
+  });
+
+  boton.type = "submit";
+  label.appendChild(texto);
+  label.appendChild(select);
+  form.appendChild(label);
+  form.appendChild(boton);
+  form.appendChild(ayuda);
+  form.addEventListener("submit", (evento) => {
+    evento.preventDefault();
+    onSeleccionarDia(new FormData(form).get("diaRutinaId"));
+  });
+
+  return form;
+}
+
+export function crearEntrenamientoDiarioView({ diario = {}, mensaje = null, onSeleccionarDia, onIniciar, onGuardarProgreso, onCompletar } = {}) {
   const pantalla = crearElemento("section", "entreno-diario-screen");
   const header = crearElemento("div", "entreno-diario-header");
   const panel = crearElemento("section", "entreno-diario-panel");
@@ -258,13 +293,21 @@ export function crearEntrenamientoDiarioView({ diario = {}, mensaje = null, onIn
   const datos = diario.metricas || {};
   const tieneRutina = Boolean(rutina && dia);
   const completada = sesion?.estado === "completada";
+  const selectorDia = tieneRutina ? crearSelectorDiaDiario(rutinaDelDia, onSeleccionarDia) : null;
 
   header.appendChild(crearElemento("p", "entreno-diario-kicker", rutinaDelDia.diaSemana || "Hoy"));
   header.appendChild(crearElemento("h2", "", "Diario"));
   header.appendChild(crearElemento("p", "", tieneRutina ? `${rutina.nombre} · ${dia.nombre}` : "Crea y activa una rutina para cargar el día automáticamente."));
+  if (tieneRutina) {
+    header.appendChild(crearElemento("small", "entreno-diario-safe", `Selección: ${rutinaDelDia.modoSeleccion === "manual" ? "manual" : "automática"} · Día ${Number(rutinaDelDia.diaIndice || 0) + 1} de ${rutinaDelDia.diaTotal || 1}`));
+  }
 
   if (mensajeNodo) {
     panel.appendChild(mensajeNodo);
+  }
+
+  if (selectorDia) {
+    panel.appendChild(selectorDia);
   }
 
   if (tieneRutina) {
