@@ -1,4 +1,5 @@
 const ZONAS_LINEA = {
+  cuello: { y: 76, x1: 108, x2: 172, label: "Cuello" },
   cintura: { y: 128, x1: 92, x2: 188, label: "Cintura" },
   abdomen: { y: 148, x1: 86, x2: 194, label: "Abdomen" },
   pecho: { y: 100, x1: 88, x2: 192, label: "Pecho" },
