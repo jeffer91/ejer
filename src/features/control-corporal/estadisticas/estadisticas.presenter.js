@@ -6,12 +6,15 @@
     - Preparar la informacion visual para la pantalla Progreso.
     - Separar la seleccion de tarjetas y textos de la vista HTML.
     - Reducir saturacion mostrando primero lo importante y luego el detalle.
+    - Integrar análisis corporal inteligente sin etiquetar cuerpos por peso.
 
   Se conecta con:
     - src/features/control-corporal/estadisticas/estadisticas.view.js
     - src/features/control-corporal/estadisticas/estadisticas.constants.js
+    - src/features/control-corporal/analisis-corporal/analisis-corporal.presenter.js
 */
 
+import { prepararAnalisisCorporalVista } from "../analisis-corporal/analisis-corporal.presenter.js";
 import { ESTADISTICAS_LABELS, ESTADISTICAS_TEXTOS, ESTADISTICAS_TENDENCIAS } from "./estadisticas.constants.js";
 
 function formatearKg(valor) {
@@ -125,11 +128,11 @@ function crearDetallePeso(resumen) {
 
 function crearMedidas(resumen) {
   const medidas = resumen.ultimasMedidas || {};
-  const campos = ["cinturaCm", "abdomenCm", "pechoCm", "brazoCm", "piernaCm", "caderaCm"];
+  const campos = ["cuelloCm", "cinturaCm", "abdomenCm", "pechoCm", "brazoCm", "piernaCm", "caderaCm"];
 
   return campos.map((campo) => ({
     id: campo,
-    titulo: ESTADISTICAS_LABELS[campo],
+    titulo: ESTADISTICAS_LABELS[campo] || campo,
     valor: formatearCm(medidas[campo]),
     estado: medidas[campo] ? "success" : "empty"
   }));
@@ -149,6 +152,7 @@ export function prepararVistaEstadisticas(resumen) {
       descripcion: resumen.mensajeInteligente || ESTADISTICAS_TEXTOS.SIN_DATOS,
       estado: tieneDatos ? "info" : "pending"
     },
+    analisisCorporal: prepararAnalisisCorporalVista(resumen.analisisCorporal),
     resumenPrincipal: crearResumenPrincipal(resumen),
     detallePeso: crearDetallePeso(resumen),
     progreso: {
