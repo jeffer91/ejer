@@ -32,6 +32,7 @@ FitJeff tiene una base modular funcional y visualmente clara. La app trabaja en 
 - Firebase con resumen liviano en el documento principal y registros pesados en subcolección.
 - Conflictos local/remoto guardados localmente para evitar sobrescrituras peligrosas.
 - Dispositivos con puente claro de importación CSV/JSON para actividad.
+- Revisión final de instalador Windows, Android/APK y GitHub Release.
 
 ### Preparado, pero pendiente de conexión real
 
@@ -74,23 +75,7 @@ Bloques funcionales y correctivos aplicados:
 - Bloque 37: Conflictos local/remoto.
 - Bloque 38: Dispositivos reales o puente claro de importación.
 - Bloque 39: Rutinas y selección correcta del día de entrenamiento.
-
-## Pantalla principal
-
-- Hoy
-
-## Módulos visibles
-
-- Control corporal
-- Actividad
-- Entrenamiento
-- Sistema
-
-## Menú de Actividad
-
-- Resumen
-- Registrar
-- Dispositivos
+- Bloque 40: Revisión final para instalador Windows y APK Android.
 
 ## Abrir FitJeff
 
@@ -118,18 +103,6 @@ src/core/config/firebase.project.config.js
 
 Ese archivo exporta `FIREBASE_PROJECT_CONFIG`. Cuando `apiKey`, `projectId` y `appId` tienen valores reales, FitJeff puede consultar Firebase en segundo plano.
 
-## Firebase resumen liviano
-
-Firestore queda organizado así:
-
-```text
-fitjeff / jeff
-fitjeff / jeff / registros
-fitjeff / jeff / sync / status
-```
-
-El documento principal `fitjeff/jeff` debe ser liviano. Guarda solo `perfil`, `objetivo`, `resumenLocal`, `controlCorporal.resumen` y `sync`.
-
 ## Local-first real
 
 FitJeff debe abrir rápido aunque Firebase esté lento o sin conexión.
@@ -141,72 +114,6 @@ Flujo actual:
 3. Si local está vacío, consulta Firebase en segundo plano.
 4. Si Firebase tiene perfil, objetivo o registros, guarda local y entra a Hoy.
 5. La sincronización de inicio solo procesa cola pendiente; ya no sube todo el estado local automáticamente.
-
-## Metadata de sincronización
-
-La metadata local se guarda en:
-
-```text
-fitjeff:sync:metadata
-```
-
-y se administra desde:
-
-```text
-src/core/sync/sync-metadata.service.js
-```
-
-Permite saber, sin consultar Firebase, si hay cambios pendientes en Control corporal, Actividad, Entrenamiento y Sistema.
-
-## Cola diferencial
-
-La cola local se guarda en:
-
-```text
-fitjeff:sync:queue
-```
-
-y se administra desde:
-
-```text
-src/core/sync/sync-queue.service.js
-```
-
-Cada operación tiene `operationKey`, `modulo`, `entidad`, `entidadId`, `accion`, `payloadHash` e `intentos`.
-
-## Sincronización diaria automática
-
-La programación local de sincronización se administra desde:
-
-```text
-src/core/sync/sync-scheduler.service.js
-```
-
-El estado del scheduler se guarda en:
-
-```text
-fitjeff:sync:scheduler
-```
-
-## Conflictos local/remoto
-
-Los conflictos se guardan localmente en:
-
-```text
-fitjeff:sync:conflicts
-```
-
-y se administran desde:
-
-```text
-src/core/sync/sync-conflict.service.js
-```
-
-Regla de seguridad:
-
-```text
-Si hay cambios locales pendientes y Firebase tiene datos remotos más recientes, FitJeff detiene la sincronización y registra un conflicto.
-```
 
 ## Dispositivos y puente de importación
 
@@ -225,14 +132,6 @@ fecha,pasos,bicicletaMin,bicicletaKm,fuente,nota
 2026-06-29,6000,25,8.5,google-fit,Actividad mixta
 ```
 
-El puente se administra desde:
-
-```text
-src/features/actividad/dispositivos/dispositivos-import-bridge.service.js
-```
-
-La importación conserva metadata en Actividad: `fuente`, `origen`, `importado` e `importadoEn`. También marca el módulo Actividad como pendiente de sincronización.
-
 ## Rutinas y selección correcta del día
 
 La selección del día de entrenamiento se administra desde:
@@ -249,6 +148,30 @@ Reglas actuales:
 4. En `Entrenamiento > Diario` también puedes cambiar el día directamente antes de iniciar o completar la sesión.
 5. La selección queda guardada dentro de la rutina activa como `selectorDia`.
 
+## Revisión final de instalador y APK
+
+La revisión final está en:
+
+```text
+scripts/revision-release-final.cjs
+```
+
+Comandos:
+
+```bash
+npm run release:check
+npm run release:check:built
+```
+
+Reglas actuales:
+
+1. `release:check` valida configuración antes de compilar.
+2. `release:check:built` valida los artefactos después de compilar Windows y preparar Android.
+3. `build-windows.cjs` elimina instaladores Windows viejos antes de compilar.
+4. `build-android.cjs` elimina APK/manifiesto Android viejo antes de preparar la nueva versión.
+5. `release-github.cjs` publica solo archivos de la versión actual.
+6. Android no bloquea Windows: si no existe proyecto Android nativo, se genera `latest-android.json` con estado `preparado-sin-apk`.
+
 ## Auditoría integral
 
 Comando directo:
@@ -257,11 +180,11 @@ Comando directo:
 npm run audit:app
 ```
 
-`npm run check:local` ejecuta herramientas, estructura, auditoría y build de Vite.
+`npm run check:local` ejecuta herramientas, estructura, auditoría, revisión release preflight y build de Vite.
 
 ## Actualizar versión con doble clic
 
-Para aumentar versión, compilar instalador Windows, preparar Android/APK y publicar release, usar:
+Para aumentar versión, compilar instalador Windows, preparar Android/APK, revisar artefactos y publicar release, usar:
 
 ```text
 ACTUALIZAR_VERSION_FITJEFF.bat
@@ -269,67 +192,34 @@ ACTUALIZAR_VERSION_FITJEFF.bat
 
 ## Bloques aplicados
 
-### Bloque 28 - Inicio seguro y actualización automática
-
-Resultado: `npm start` no depende obligatoriamente del puerto 5173.
-
-### Bloque 29 - Restauración Firebase antes de Inicio
-
-Resultado: FitJeff puede leer Firebase si está configurado y restaurar perfil, objetivo o registros remotos.
-
-### Bloque 30 - Firebase resuelto desde código
-
-Resultado: Firebase ya no depende de un BAT de configuración.
-
-### Bloque 31 - Auditoría integral
-
-Resultado: la app tiene una auditoría estática propia.
-
-### Bloque 32 - Local-first real
-
-Resultado: la app ya no espera Firebase para montar la interfaz.
-
-### Bloque 33 - Metadata de sincronización
-
-Resultado: FitJeff guarda metadata local de sincronización por módulo.
-
-### Bloque 34 - Cola diferencial
-
-Resultado: la cola de sincronización deduplica por `modulo + entidad + entidadId + accion`.
-
-### Bloque 35 - Sincronización diaria automática
-
-Resultado: FitJeff tiene un scheduler de sincronización y botón `Sincronizar ahora`.
-
-### Bloque 36 - Firebase resumen liviano
-
-Resultado: Firebase usa documento principal liviano, registros en subcolección y sync/status separado.
-
-### Bloque 37 - Conflictos local/remoto
-
-Resultado: si hay cambios locales pendientes y Firebase tiene datos remotos más recientes, FitJeff registra un conflicto y detiene la sincronización.
-
 ### Bloque 38 - Dispositivos y puente claro de importación
 
 Resultado: Dispositivos tiene un puente de importación funcional para CSV/JSON.
 
 ### Bloque 39 - Rutinas y selección correcta del día
 
+Resultado: Diario carga el día correcto de la rutina activa. Puedes elegir manualmente el día desde Rutinas o Diario. Si no hay selección manual, la app usa una selección automática con la semana iniciando en lunes.
+
+### Bloque 40 - Revisión final para instalador Windows y APK Android
+
 Corregido:
 
-- `src/features/entrenamiento/rutinas/rutinas-day-selector.service.js`
-- `src/features/entrenamiento/entrenamiento.service.js`
-- `src/features/entrenamiento/rutinas/rutinas.service.js`
-- `src/features/entrenamiento/rutinas/rutinas.controller.js`
-- `src/features/entrenamiento/rutinas/rutinas.view.js`
-- `src/features/entrenamiento/rutinas/rutinas-day-selector.css`
-- `src/features/entrenamiento/diario/diario.service.js`
-- `src/features/entrenamiento/diario/diario.controller.js`
-- `src/features/entrenamiento/diario/diario.view.js`
-- `src/features/entrenamiento/diario/diario-day-selector.css`
+- `scripts/revision-release-final.cjs`
+- `package.json`
+- `scripts/check-tools.cjs`
+- `scripts/check-local.cjs`
+- `scripts/build-windows.cjs`
+- `scripts/build-android.cjs`
+- `scripts/release-github.cjs`
+- `scripts/publicar-version.bat`
+- `scripts/publicar-version-automatica.bat`
+- `.gitignore`
+- `release/latest.json`
+- `release/latest-android.json`
+- `release/README.md`
 - `README.md`
 
-Resultado: Diario carga el día correcto de la rutina activa. Puedes elegir manualmente el día desde Rutinas o Diario. Si no hay selección manual, la app usa una selección automática con la semana iniciando en lunes.
+Resultado: el flujo de publicación queda blindado contra artefactos viejos. Antes de publicar, FitJeff valida que el instalador `.exe`, `latest.yml`, `latest-android.json` y APK si existe correspondan a la versión actual.
 
 ## Comandos
 
@@ -337,6 +227,14 @@ Resultado: Diario carga el día correcto de la rutina activa. Puedes elegir manu
 npm install
 npm run check:local
 npm start
+```
+
+Para preparar publicación:
+
+```bash
+npm run build:windows
+npm run build:android
+npm run release:check:built
 ```
 
 ## Reglas de crecimiento
@@ -351,7 +249,8 @@ npm start
 - Nunca se debe sobrescribir local o remoto si hay conflicto pendiente.
 - Dispositivos no debe decir que existe lectura real automática si solo existe importación por puente.
 - Diario debe permitir corregir el día de rutina antes de iniciar o completar la sesión.
+- Release no debe publicar instaladores o APK de versiones anteriores.
 
 ## Bloques pendientes
 
-1. Bloque 40: Revisión final para instalador Windows y APK Android.
+No quedan bloques pendientes de esta auditoría principal. El siguiente trabajo debe ser prueba real en tu PC: `git pull origin main`, `npm run check:local`, `npm start` y luego, solo si quieres publicar, `ACTUALIZAR_VERSION_FITJEFF.bat`.
