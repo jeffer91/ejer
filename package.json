@@ -7,11 +7,11 @@
   "description": "FitJeff: app personal local-first para registro corporal, estadisticas, PWA y escritorio Electron.",
   "author": "Jeff",
   "scripts": {
-    "start": "npm run electron:dev",
-    "dev": "vite --host localhost --port 5173 --strictPort",
+    "start": "node scripts/start-electron-dev.cjs",
+    "dev": "vite --host localhost --port 5173",
     "build": "vite build",
-    "preview": "vite preview --host localhost --port 4173 --strictPort",
-    "electron:dev": "concurrently -k -n VITE,ELECTRON -c green,blue \"npm run dev\" \"wait-on http://localhost:5173/ && cross-env FITJEFF_ELECTRON_DEV=1 electron .\"",
+    "preview": "vite preview --host localhost --port 4173",
+    "electron:dev": "node scripts/start-electron-dev.cjs",
     "electron:build": "npm run build && cross-env FITJEFF_ELECTRON_DEV=0 electron .",
     "electron:dev:check": "npm run tools:check && npm run check:structure && npm run electron:dev",
     "desktop:pack": "npm run build && electron-builder --dir",
@@ -25,6 +25,7 @@
     "release:github": "node scripts/release-github.cjs",
     "review:updates": "node scripts/revision-actualizaciones.cjs",
     "publicar:version": "scripts\\publicar-version.bat",
+    "publicar:automatico": "scripts\\publicar-version-automatica.bat",
     "actualizar:todo": "scripts\\actualizar-todo.bat",
     "revisar:todo": "scripts\\revisar-todo.bat"
   },
