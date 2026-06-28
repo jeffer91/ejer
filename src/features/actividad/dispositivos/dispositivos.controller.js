@@ -4,18 +4,25 @@ import { crearDispositivosView, leerDispositivosForm, pintarMensajeDispositivos 
 export function crearDispositivosController() {
   const service = crearDispositivosService();
 
-  function montar(contenedor) {
-    const estado = service.obtenerEstado();
+  function renderizar(contenedor, estado = service.obtenerEstado(), resultado = null) {
     const vista = crearDispositivosView(estado);
 
     contenedor.innerHTML = "";
     contenedor.appendChild(vista.pantalla);
 
+    if (resultado) {
+      pintarMensajeDispositivos(vista.mensaje, resultado);
+    }
+
     vista.form.addEventListener("submit", (evento) => {
       evento.preventDefault();
-      const resultado = service.guardarPreparacion(leerDispositivosForm(vista.form));
-      pintarMensajeDispositivos(vista.mensaje, resultado);
+      const guardado = service.guardarPreparacion(leerDispositivosForm(vista.form));
+      renderizar(contenedor, guardado.estado || service.obtenerEstado(), guardado);
     });
+  }
+
+  function montar(contenedor) {
+    renderizar(contenedor);
   }
 
   return { montar };
