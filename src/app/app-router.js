@@ -6,6 +6,7 @@
     - Controlar la navegacion principal de FitJeff.
     - Mostrar Inicio solo la primera vez.
     - Abrir Hoy como pantalla principal despues de completar Inicio o restaurar la ultima pantalla valida.
+    - Permitir que una restauracion Firebase en segundo plano marque el perfil como completado.
     - Conectar el shell global con modulos grandes y submenus internos.
     - Montar funcionalidades desde src/features/features.registry.js.
     - Conectar Sistema: Actualizaciones y Ajustes.
@@ -159,9 +160,16 @@ export function crearRouterFitJeff(configuracion) {
     renderizar(rutaActual);
   }
 
+  function marcarPerfilCompletadoDesdeSync(ruta = SHELL_DEFAULT_ROUTE_ID) {
+    perfilCompletado = true;
+    rutaActual = ruta || SHELL_DEFAULT_ROUTE_ID;
+    navegar(rutaActual);
+  }
+
   return {
     iniciar: () => renderizar(rutaActual),
     navegar,
+    marcarPerfilCompletadoDesdeSync,
     obtenerRutaActual: () => rutaActual
   };
 }
