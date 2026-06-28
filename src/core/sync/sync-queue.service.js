@@ -7,7 +7,7 @@
     - Guardar operaciones aunque no haya internet o Firebase no esté configurado.
     - Deduplicar operaciones por módulo, entidad, entidadId y acción.
     - Reemplazar una operación pendiente por la versión local más reciente.
-    - Mantener compatibilidad con operaciones antiguas de la cola.
+    - Migrar y compactar operaciones antiguas de la cola.
     - Permitir que sync.service.js procese la cola después.
 
   Se conecta con:
@@ -110,20 +110,49 @@ function normalizarItem(item = {}) {
   };
 }
 
+function elegirMasReciente(actual, candidato) {
+  if (!actual) return candidato;
+
+  const fechaActual = String(actual.actualizadoEn || actual.creadoEn || "");
+  const fechaCandidato = String(candidato.actualizadoEn || candidato.creadoEn || "");
+
+  if (fechaCandidato >= fechaActual) {
+    return {
+      ...actual,
+      ...candidato,
+      id: actual.id,
+      creadoEn: actual.creadoEn,
+      intentos: Math.max(Number(actual.intentos || 0), Number(candidato.intentos || 0))
+    };
+  }
+
+  return actual;
+}
+
+function deduplicarCola(cola = []) {
+  const mapa = new Map();
+
+  cola.map((item) => normalizarItem(item)).forEach((item) => {
+    mapa.set(item.operationKey, elegirMasReciente(mapa.get(item.operationKey), item));
+  });
+
+  return [...mapa.values()];
+}
+
 function ordenarCola(cola = []) {
   return [...cola].sort((a, b) => String(b.actualizadoEn || "").localeCompare(String(a.actualizadoEn || "")));
 }
 
 export function crearSyncQueueService(storage = crearSafeLocalStorageService()) {
   function guardarCola(cola) {
-    const normalizada = ordenarCola(cola.map((item) => normalizarItem(item)));
+    const normalizada = ordenarCola(deduplicarCola(cola));
     storage.guardarJson(SYNC_QUEUE_KEY, normalizada);
     return normalizada;
   }
 
   function listar() {
     const cola = storage.leerJson(SYNC_QUEUE_KEY, []);
-    const normalizada = ordenarCola(cola.map((item) => normalizarItem(item)));
+    const normalizada = ordenarCola(deduplicarCola(cola));
 
     if (JSON.stringify(cola) !== JSON.stringify(normalizada)) {
       guardarCola(normalizada);
