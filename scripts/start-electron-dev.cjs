@@ -6,6 +6,7 @@
     - Abrir FitJeff con npm start sin fallar cuando el puerto 5173 está ocupado.
     - Buscar automáticamente un puerto libre para Vite.
     - Pasar a Electron la URL real del servidor de desarrollo.
+    - Ejecutar concurrently mediante shell para evitar spawn EINVAL en Windows/PowerShell.
     - Mantener el flujo de desarrollo separado del instalador de producción.
 
   Se conecta con:
@@ -14,13 +15,25 @@
     - electron/main.js
 */
 
+const fs = require("node:fs");
 const net = require("node:net");
+const path = require("node:path");
 const { spawn } = require("node:child_process");
 
+const ROOT = path.resolve(__dirname, "..");
 const HOST = "localhost";
 const PUERTO_BASE = Number(process.env.FITJEFF_DEV_PORT || 5173);
 const PUERTO_MAXIMO = PUERTO_BASE + 30;
-const npxCommand = process.platform === "win32" ? "npx.cmd" : "npx";
+const ES_WINDOWS = process.platform === "win32";
+
+function obtenerBinLocal(nombre) {
+  const archivo = ES_WINDOWS ? `${nombre}.cmd` : nombre;
+  return path.join(ROOT, "node_modules", ".bin", archivo);
+}
+
+function envolver(rutaOComando) {
+  return `"${String(rutaOComando).replace(/"/g, "\\\"")}"`;
+}
 
 function puertoDisponible(puerto) {
   return new Promise((resolve) => {
@@ -45,6 +58,16 @@ async function encontrarPuertoDisponible() {
   throw new Error(`No se encontró puerto libre entre ${PUERTO_BASE} y ${PUERTO_MAXIMO}.`);
 }
 
+function validarDependenciasLocales() {
+  const concurrentlyBin = obtenerBinLocal("concurrently");
+
+  if (!fs.existsSync(concurrentlyBin)) {
+    throw new Error("No se encontró concurrently en node_modules. Ejecuta npm install y vuelve a probar npm start.");
+  }
+
+  return { concurrentlyBin };
+}
+
 function crearComandoVite(puerto) {
   return `vite --host ${HOST} --port ${puerto} --strictPort`;
 }
@@ -53,9 +76,31 @@ function crearComandoElectron(url) {
   return `wait-on ${url} && cross-env FITJEFF_ELECTRON_DEV=1 FITJEFF_DEV_SERVER_URL=${url} electron .`;
 }
 
+function crearComandoConcurrently({ concurrentlyBin, puerto, url }) {
+  return [
+    envolver(concurrentlyBin),
+    "-k",
+    "-n VITE,ELECTRON",
+    "-c green,blue",
+    envolver(crearComandoVite(puerto)),
+    envolver(crearComandoElectron(url))
+  ].join(" ");
+}
+
+function ejecutarConcurrently(comando) {
+  return spawn(comando, [], {
+    cwd: ROOT,
+    stdio: "inherit",
+    shell: true,
+    windowsHide: false
+  });
+}
+
 async function main() {
+  const { concurrentlyBin } = validarDependenciasLocales();
   const puerto = await encontrarPuertoDisponible();
   const url = `http://${HOST}:${puerto}/`;
+  const comando = crearComandoConcurrently({ concurrentlyBin, puerto, url });
 
   console.log("========================================");
   console.log("FitJeff - npm start seguro");
@@ -64,20 +109,7 @@ async function main() {
   console.log(`URL de desarrollo: ${url}`);
   console.log("----------------------------------------");
 
-  const proceso = spawn(npxCommand, [
-    "concurrently",
-    "-k",
-    "-n",
-    "VITE,ELECTRON",
-    "-c",
-    "green,blue",
-    crearComandoVite(puerto),
-    crearComandoElectron(url)
-  ], {
-    cwd: process.cwd(),
-    stdio: "inherit",
-    shell: false
-  });
+  const proceso = ejecutarConcurrently(comando);
 
   proceso.on("exit", (codigo) => {
     process.exitCode = codigo || 0;
