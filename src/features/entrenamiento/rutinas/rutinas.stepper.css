@@ -1,0 +1,124 @@
+.rutinas-stepper {
+  display: grid;
+  gap: 10px;
+}
+
+.rutinas-stepper__nav {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.rutinas-stepper__tab {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  min-height: 66px;
+  border: 1px solid var(--fj-border, #d9e4f1);
+  border-radius: var(--fj-radius-sm, 12px);
+  background: rgba(255, 255, 255, 0.94);
+  color: var(--fj-text, #172033);
+  cursor: pointer;
+  padding: 10px;
+  text-align: left;
+  box-shadow: var(--fj-shadow-soft, 0 8px 22px rgba(15, 23, 42, 0.06));
+}
+
+.rutinas-stepper__tab:hover,
+.rutinas-stepper__tab--active {
+  border-color: var(--fj-blue, #2563eb);
+  background: linear-gradient(135deg, var(--fj-blue-soft, rgba(37, 99, 235, 0.12)), #ffffff);
+}
+
+.rutinas-stepper__number {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--fj-blue-soft, rgba(37, 99, 235, 0.12));
+  color: var(--fj-blue, #2563eb);
+  font-weight: 1000;
+}
+
+.rutinas-stepper__tab--active .rutinas-stepper__number {
+  background: var(--fj-blue, #2563eb);
+  color: #ffffff;
+}
+
+.rutinas-stepper__text {
+  display: grid;
+  gap: 3px;
+}
+
+.rutinas-stepper__text strong {
+  color: var(--fj-text-strong, #07111f);
+  font-size: 0.9rem;
+}
+
+.rutinas-stepper__text small {
+  color: var(--fj-muted, #64748b);
+  font-size: 0.74rem;
+  line-height: 1.3;
+}
+
+.rutinas-stepper__panels {
+  display: grid;
+}
+
+.rutinas-stepper__panel[hidden] {
+  display: none;
+}
+
+.rutinas-stepper__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  border: 1px solid var(--fj-border, #d9e4f1);
+  border-radius: var(--fj-radius-sm, 12px);
+  background: rgba(255, 255, 255, 0.94);
+  padding: 8px;
+}
+
+.rutinas-stepper__button {
+  min-height: 36px;
+  border: 1px solid transparent;
+  border-radius: var(--fj-radius-sm, 12px);
+  background: var(--fj-action-bg, linear-gradient(135deg, #2563eb, #0ea5e9));
+  color: #ffffff;
+  cursor: pointer;
+  padding: 7px 11px;
+  font-size: 0.82rem;
+  font-weight: 950;
+}
+
+.rutinas-stepper__button--secondary {
+  border-color: rgba(37, 99, 235, 0.28);
+  background: var(--fj-blue-soft, rgba(37, 99, 235, 0.12));
+  color: var(--fj-blue, #2563eb);
+}
+
+.rutinas-stepper__button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.rutinas-stepper__indicator {
+  color: var(--fj-muted, #64748b);
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
+@media (max-width: 760px) {
+  .rutinas-stepper__nav {
+    grid-template-columns: 1fr;
+  }
+
+  .rutinas-stepper__footer {
+    display: grid;
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+}
