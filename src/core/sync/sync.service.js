@@ -5,7 +5,8 @@
   Función o funciones:
     - Coordinar la sincronización local con Firebase.
     - Enviar estado general y registros pendientes cuando Firebase esté listo.
-    - Mantener cambios en cola si no hay nube disponible.
+    - Mantener cambios en cola si no hay internet o Firebase no está configurado.
+    - Evitar que un estado local vacío reemplace un respaldo válido en Firebase.
     - No mostrar opciones técnicas al usuario.
 
   Se conecta con:
@@ -20,6 +21,28 @@ import { crearSyncQueueService } from "./sync-queue.service.js";
 import { crearSyncStatusService } from "./sync-status.service.js";
 import { crearRegistroService } from "../../features/control-corporal/registro.service.js";
 
+function perfilTieneDatos(perfil = {}) {
+  return Boolean(
+    perfil.configurado ||
+    Number(perfil.alturaCm || 0) > 0 ||
+    perfil.fechaNacimiento
+  );
+}
+
+function objetivoTieneDatos(objetivo = {}) {
+  return Boolean(Number(objetivo.pesoObjetivoKg || 0) > 0);
+}
+
+function estadoTieneDatos(estado = {}) {
+  return Boolean(
+    perfilTieneDatos(estado.perfil) ||
+    objetivoTieneDatos(estado.objetivo) ||
+    (Array.isArray(estado.registros) && estado.registros.length > 0) ||
+    (Array.isArray(estado.historialCambios) && estado.historialCambios.length > 0) ||
+    (Array.isArray(estado.papelera) && estado.papelera.length > 0)
+  );
+}
+
 export function crearSyncService({
   firebaseDatabase = crearFirebaseDatabaseService(),
   queue = crearSyncQueueService(),
@@ -29,11 +52,22 @@ export function crearSyncService({
   function encolarEstadoActual() {
     const estado = registroService.obtenerEstado();
 
+    if (!estadoTieneDatos(estado)) {
+      status.marcarDatosAlDia("Sin datos locales para sincronizar");
+      return {
+        ok: false,
+        mensaje: "No se sincronizó porque el estado local está vacío.",
+        encolados: 0
+      };
+    }
+
     queue.agregar({
       tipo: "estado-general",
       payload: {
         perfil: estado.perfil,
         objetivo: estado.objetivo,
+        historialCambios: estado.historialCambios || [],
+        papelera: estado.papelera || [],
         resumenLocal: {
           totalRegistros: estado.registros.length,
           totalCambios: estado.historialCambios.length,
@@ -50,6 +84,12 @@ export function crearSyncService({
     });
 
     status.marcarPendiente("Cambios pendientes");
+
+    return {
+      ok: true,
+      mensaje: "Estado local encolado para sincronizar.",
+      encolados: 1 + (estado.registros || []).length
+    };
   }
 
   async function procesarItem(item) {
@@ -109,7 +149,15 @@ export function crearSyncService({
 
   async function sincronizarAhora() {
     if (queue.listar().length === 0) {
-      encolarEstadoActual();
+      const encolado = encolarEstadoActual();
+
+      if (!encolado.ok) {
+        return {
+          ok: true,
+          mensaje: encolado.mensaje,
+          procesados: 0
+        };
+      }
     }
 
     return sincronizarPendientes();
