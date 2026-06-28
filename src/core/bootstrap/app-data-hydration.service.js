@@ -3,9 +3,9 @@
   Ruta o ubicación: src/core/bootstrap/app-data-hydration.service.js
 
   Función o funciones:
-    - Preparar los datos antes de montar el router principal.
+    - Preparar datos locales antes de montar el router principal sin bloquear por Firebase.
     - Evitar que la app instalada vuelva a Inicio si ya existen datos locales.
-    - Restaurar desde Firebase cuando el almacenamiento local esté vacío y Firebase esté configurado.
+    - Restaurar desde Firebase en segundo plano cuando el almacenamiento local esté vacío.
     - Aceptar respaldos remotos con estructura actual o estructuras anteriores.
     - No intentar conexión remota cuando la app está en modo local.
     - Marcar Inicio como completado solo cuando existan datos reales.
@@ -112,38 +112,70 @@ function normalizarEstadoRemoto(data = {}) {
   };
 }
 
-export async function prepararDatosAntesDeRouter({
+function crearControlInicio(storage) {
+  return {
+    marcarInicioCompletado() {
+      storage.guardarTexto(INICIO_STORAGE_KEYS.COMPLETADO, "true");
+    },
+    inicioFueCompletado() {
+      return storage.leerTexto(INICIO_STORAGE_KEYS.COMPLETADO, "") === "true";
+    }
+  };
+}
+
+export function prepararDatosAntesDeRouter({
   repository = crearRegistroRepository(),
-  firebaseDatabase = crearFirebaseDatabaseService(),
   storage = crearSafeLocalStorageService()
 } = {}) {
-  function marcarInicioCompletado() {
-    storage.guardarTexto(INICIO_STORAGE_KEYS.COMPLETADO, "true");
-  }
-
-  function inicioFueCompletado() {
-    return storage.leerTexto(INICIO_STORAGE_KEYS.COMPLETADO, "") === "true";
-  }
-
+  const inicio = crearControlInicio(storage);
   const estadoLocal = repository.obtenerEstado();
 
   if (estadoRegistroTieneDatos(estadoLocal)) {
-    marcarInicioCompletado();
+    inicio.marcarInicioCompletado();
     return {
       perfilInicialCompletado: true,
       origen: "local",
-      restaurado: false
+      restaurado: false,
+      firebasePendienteSegundoPlano: false
+    };
+  }
+
+  return {
+    perfilInicialCompletado: false,
+    origen: inicio.inicioFueCompletado() ? "local-vacio-con-marca" : "local-vacio",
+    restaurado: false,
+    firebasePendienteSegundoPlano: firebaseEstaConfigurado()
+  };
+}
+
+export async function restaurarFirebaseEnSegundoPlano({
+  repository = crearRegistroRepository(),
+  firebaseDatabase = crearFirebaseDatabaseService(),
+  storage = crearSafeLocalStorageService(),
+  soloSiLocalVacio = true
+} = {}) {
+  const inicio = crearControlInicio(storage);
+  const estadoLocal = repository.obtenerEstado();
+
+  if (soloSiLocalVacio && estadoRegistroTieneDatos(estadoLocal)) {
+    inicio.marcarInicioCompletado();
+    return {
+      ok: true,
+      restaurado: false,
+      origen: "local",
+      mensaje: "La app abrió con datos locales. No fue necesario consultar Firebase para restaurar."
     };
   }
 
   if (!firebaseEstaConfigurado()) {
     const conexion = obtenerEstadoFirebaseConexion();
-    console.info("[FitJeff] Firebase no se consulta al iniciar:", conexion.mensaje);
+    console.info("[FitJeff] Firebase no se consulta en segundo plano:", conexion.mensaje);
 
     return {
-      perfilInicialCompletado: inicioFueCompletado(),
+      ok: true,
+      restaurado: false,
       origen: "modo-local",
-      restaurado: false
+      mensaje: conexion.mensaje
     };
   }
 
@@ -155,22 +187,31 @@ export async function prepararDatosAntesDeRouter({
 
       if (estadoRegistroTieneDatos(estadoRemoto)) {
         repository.guardarEstado(estadoRemoto);
-        marcarInicioCompletado();
+        inicio.marcarInicioCompletado();
 
         return {
-          perfilInicialCompletado: true,
+          ok: true,
+          restaurado: true,
           origen: "firebase",
-          restaurado: true
+          mensaje: "Datos restaurados desde Firebase en segundo plano."
         };
       }
     }
-  } catch (error) {
-    console.warn("[FitJeff] No se pudo restaurar desde Firebase antes del inicio:", error);
-  }
 
-  return {
-    perfilInicialCompletado: inicioFueCompletado(),
-    origen: "sin-datos",
-    restaurado: false
-  };
+    return {
+      ok: true,
+      restaurado: false,
+      origen: "firebase-sin-datos",
+      mensaje: "Firebase no tiene datos suficientes para restaurar el perfil."
+    };
+  } catch (error) {
+    console.warn("[FitJeff] No se pudo restaurar desde Firebase en segundo plano:", error);
+
+    return {
+      ok: false,
+      restaurado: false,
+      origen: "firebase-error",
+      mensaje: "No se pudo restaurar Firebase en segundo plano."
+    };
+  }
 }
