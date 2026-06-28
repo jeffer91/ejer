@@ -36,6 +36,7 @@ const requiredFiles = [
   "src/core/utils/date.util.js",
   "src/core/storage/safe-local-storage.service.js",
   "src/core/bootstrap/app-data-hydration.service.js",
+  "src/core/firebase/firebase-database.service.js",
   "src/core/backup/backup-local.service.js",
   "src/core/backup/backup-restore.service.js",
   "src/core/sync/sync.service.js",
@@ -87,11 +88,12 @@ const blockedPatterns = [
 ];
 
 const semanticChecks = [
-  { file: "README.md", mustInclude: ["Bloque 35 - Sincronización diaria automática", "sync-scheduler.service.js", "Bloques pendientes"], message: "README debe documentar el bloque 35 y pendientes." },
+  { file: "README.md", mustInclude: ["Bloque 36 - Firebase resumen liviano", "registros por subcolección", "Bloques pendientes"], message: "README debe documentar el bloque 36 y pendientes." },
   { file: "package.json", mustInclude: ["\"start\": \"node scripts/start-electron-dev.cjs\"", "\"audit:app\": \"node scripts/auditar-app.cjs\"", "publicar:automatico"], message: "package.json debe usar inicio seguro y auditoria." },
   { file: "scripts/check-local.cjs", mustInclude: ["Auditoría estática", "scripts/auditar-app.cjs", "Build de Vite"], message: "check-local debe ejecutar auditoria antes del build." },
   { file: "scripts/check-tools.cjs", mustInclude: ["audit:app", "publicar:automatico", "No debe existir configurar:firebase"], message: "check-tools debe validar auditoria y no permitir configurar:firebase." },
   { file: "scripts/auditar-app.cjs", mustInclude: ["auditarImportsLocales", "archivosNoPermitidos", "sync-scheduler.service.js"], message: "Auditoria debe incluir scheduler de sincronizacion." },
+  { file: "src/core/firebase/firebase-database.service.js", mustInclude: ["FIREBASE_STRUCTURE_VERSION", "guardarResumenUsuario", "leerResumenUsuario", "leerCambiosDesde", "SYNC_SUBCOLLECTION", "crearCamposPesadosParaEliminar"], message: "Firebase database debe separar resumen liviano, registros y sync." },
   { file: "src/core/sync/sync-metadata.service.js", mustInclude: ["SYNC_METADATA_KEY", "SYNC_MODULES", "marcarModuloSucio", "ultimoPullFirebaseEn", "obtenerModulosSucios"], message: "Debe existir metadata de sincronización por módulo." },
   { file: "src/core/sync/sync-queue.service.js", mustInclude: ["operationKey", "deduplicarCola", "payloadHash", "listarPorModulo", "entidadId"], message: "La cola debe ser diferencial y deduplicada por entidad." },
   { file: "src/core/sync/sync-scheduler.service.js", mustInclude: ["ejecutarSyncAutomatico", "sincronizarManual", "ultimoAutoSyncDia", "decidirSyncAutomatico", "SYNC_SCHEDULER_KEY"], message: "Debe existir sincronización diaria automática y manual." },
@@ -103,7 +105,6 @@ const semanticChecks = [
   { file: "src/core/config/firebase.project.config.js", mustInclude: ["FIREBASE_PROJECT_CONFIG", "apiKey", "collection: \"fitjeff\"", "userDocument: \"jeff\""], message: "Debe existir configuracion Firebase desde codigo." },
   { file: "src/core/config/firebase.config.js", mustInclude: ["FIREBASE_PROJECT_CONFIG", "leerValor", "resolverFirebaseEnabled", "obtenerEstadoFirebaseConexion"], message: "Firebase config debe leer variables o configuracion desde codigo." },
   { file: "src/core/bootstrap/app-data-hydration.service.js", mustInclude: ["restaurarFirebaseEnSegundoPlano", "marcarPullFirebase", "firebasePendienteSegundoPlano", "repository.guardarEstado"], message: "Hidratacion debe ser local-first y registrar pull remoto." },
-  { file: "src/core/firebase/firebase-database.service.js", mustInclude: ["obtenerRegistrosDesdeDocumento", "registrosSubcoleccion.length > 0", "registrosFinales"], message: "Firebase database debe conservar registros remotos del documento." },
   { file: "src/core/sync/sync.service.js", mustInclude: ["syncMetadata", "entidadId", "listarPorModulo", "return sincronizarPendientes();"], message: "Sync debe usar metadata y cola diferencial." },
   { file: "src/features/control-corporal/registro.service.js", mustInclude: ["marcarCambioLocal", "entidadId: registro.id", "entidad: \"registro\""], message: "Control corporal debe encolar operaciones por entidad." },
   { file: "scripts/start-electron-dev.cjs", mustInclude: ["encontrarPuertoDisponible", "PUERTO_BASE", "FITJEFF_DEV_SERVER_URL", "concurrently"], message: "npm start debe buscar puerto libre y pasar URL a Electron." },
@@ -218,6 +219,7 @@ function run() {
     console.log("Bloque 33 aplicado: Metadata de sincronizacion por modulo.");
     console.log("Bloque 34 aplicado: Cola diferencial con deduplicacion por entidad.");
     console.log("Bloque 35 aplicado: Sincronizacion diaria automatica y manual.");
+    console.log("Bloque 36 aplicado: Firebase resumen liviano y registros por subcoleccion.");
     return;
   }
 
