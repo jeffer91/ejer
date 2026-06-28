@@ -1,0 +1,126 @@
+.entreno-jarvis-panel__log--history,
+.entreno-jarvis-panel__commands {
+  display: block;
+}
+
+.entreno-diario-jarvis,
+.entreno-hit-jarvis {
+  display: grid;
+  gap: 9px;
+  border-color: rgba(22, 163, 74, 0.28) !important;
+  background: linear-gradient(135deg, var(--fj-green-soft, rgba(22, 163, 74, 0.12)), rgba(255, 255, 255, 0.97)) !important;
+}
+
+.entreno-diario-jarvis::before,
+.entreno-hit-jarvis::before {
+  background: var(--fj-green, #16a34a) !important;
+}
+
+.entreno-diario-jarvis__top,
+.entreno-hit-jarvis__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.entreno-diario-jarvis h3,
+.entreno-hit-jarvis h3 {
+  color: var(--fj-text-strong, #07111f);
+}
+
+.entreno-diario-jarvis p,
+.entreno-hit-jarvis p {
+  color: var(--fj-muted, #64748b);
+}
+
+.entreno-diario-jarvis-status,
+.entreno-hit-jarvis-status {
+  border: 1px solid var(--fj-border, #d9e4f1);
+  border-radius: var(--fj-radius-sm, 12px);
+  padding: 9px;
+  margin: 0 !important;
+  color: var(--fj-muted, #64748b) !important;
+  background: #ffffff;
+  font-size: 0.84rem;
+  font-weight: 850;
+  line-height: 1.35;
+}
+
+.entreno-diario-jarvis-status--on,
+.entreno-hit-jarvis-status--on {
+  border-color: rgba(22, 163, 74, 0.28);
+  color: var(--fj-green, #16a34a) !important;
+  background: var(--fj-green-soft, rgba(22, 163, 74, 0.12));
+}
+
+.entreno-diario-jarvis-context,
+.entreno-hit-jarvis-context {
+  color: var(--fj-blue, #2563eb);
+  font-size: 0.78rem;
+  font-weight: 850;
+  line-height: 1.35;
+}
+
+.entreno-diario-jarvis-log,
+.entreno-hit-jarvis-log {
+  border: 1px dashed rgba(37, 99, 235, 0.26);
+  border-radius: var(--fj-radius-sm, 12px);
+  padding: 9px;
+  color: var(--fj-muted, #64748b);
+  background: var(--fj-blue-soft, rgba(37, 99, 235, 0.12));
+  font-size: 0.82rem;
+  line-height: 1.35;
+}
+
+.entreno-diario-jarvis-log-line,
+.entreno-hit-jarvis-log-line {
+  padding: 4px 0;
+  border-bottom: 1px solid rgba(38, 64, 94, 0.1);
+}
+
+.entreno-diario-jarvis-manual,
+.entreno-hit-jarvis-manual {
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) 170px;
+  gap: 8px;
+}
+
+.entreno-diario-jarvis-manual input,
+.entreno-hit-jarvis-manual input {
+  min-height: 40px;
+  border: 1px solid var(--fj-border, #d9e4f1);
+  border-radius: var(--fj-radius-sm, 12px);
+  background: #ffffff;
+  color: var(--fj-text, #172033);
+  padding: 8px 10px;
+  font-weight: 800;
+  outline: none;
+}
+
+.entreno-diario-jarvis-manual input:focus,
+.entreno-hit-jarvis-manual input:focus {
+  border-color: var(--fj-border-active, rgba(37, 99, 235, 0.7));
+  background: var(--fj-surface-2, #f7fbff);
+  box-shadow: 0 0 0 3px var(--fj-blue-soft, rgba(37, 99, 235, 0.12));
+}
+
+.entreno-diario-button--jarvis,
+.entreno-hit-button--jarvis {
+  border-color: rgba(22, 163, 74, 0.32) !important;
+  background: var(--fj-green-soft, rgba(22, 163, 74, 0.12)) !important;
+  color: var(--fj-green, #16a34a) !important;
+}
+
+@media (max-width: 640px) {
+  .entreno-diario-jarvis__top,
+  .entreno-hit-jarvis__top {
+    display: grid;
+  }
+
+  .entreno-diario-jarvis-manual,
+  .entreno-hit-jarvis-manual {
+    grid-template-columns: 1fr;
+  }
+}
