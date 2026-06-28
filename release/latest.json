@@ -13,7 +13,9 @@
   },
   "android": {
     "enabled": false,
-    "note": "La publicación de APK se agregará en el bloque Android."
+    "apkFileName": "",
+    "manifestFile": "latest-android.json",
+    "note": "Android preparado sin APK real todavía. El manifiesto se regenera en cada publicación."
   },
   "files": []
 }
