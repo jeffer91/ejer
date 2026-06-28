@@ -25,6 +25,7 @@ function renderContenido(modal, campo) {
 
   modal.titulo.textContent = info.titulo;
   modal.resumen.textContent = info.resumen;
+  modal.footerNota.textContent = info.nota || MEDIDAS_MODAL_TEXTOS.SUBTITULO;
   limpiarNodo(modal.figura);
   limpiarNodo(modal.detalle);
 
@@ -48,6 +49,7 @@ export function crearMedidasModal() {
   const figura = crearElemento("div", "medidas-modal__figure");
   const detalle = crearElemento("div", "medidas-modal__detail");
   const footer = crearElemento("footer", "medidas-modal__footer");
+  const footerNota = crearElemento("p", "", MEDIDAS_MODAL_TEXTOS.SUBTITULO);
   const cerrarFooter = crearElemento("button", "medidas-modal__button", MEDIDAS_MODAL_TEXTOS.CERRAR);
 
   overlay.hidden = true;
@@ -65,7 +67,7 @@ export function crearMedidasModal() {
   header.appendChild(cerrar);
   cuerpo.appendChild(figura);
   cuerpo.appendChild(detalle);
-  footer.appendChild(crearElemento("p", "", MEDIDAS_MODAL_TEXTOS.SUBTITULO));
+  footer.appendChild(footerNota);
   footer.appendChild(cerrarFooter);
   caja.appendChild(header);
   caja.appendChild(cuerpo);
@@ -79,6 +81,7 @@ export function crearMedidasModal() {
     resumen,
     figura,
     detalle,
+    footerNota,
     cerrar,
     cerrarFooter
   };
