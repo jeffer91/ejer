@@ -5,7 +5,7 @@
   Funcion o funciones:
     - Controlar la navegacion principal de FitJeff.
     - Mostrar Inicio solo la primera vez.
-    - Abrir Hoy como pantalla principal despues de completar Inicio.
+    - Abrir Hoy como pantalla principal despues de completar Inicio o restaurar la ultima pantalla valida.
     - Conectar el shell global con modulos grandes y submenus internos.
     - Montar funcionalidades desde src/features/features.registry.js.
     - Conectar Sistema: Actualizaciones y Ajustes.
@@ -25,7 +25,7 @@ import { esRutaFeature, montarPantallaFeature } from "../features/features.regis
 import { crearInicioController } from "../features/control-corporal/inicio/inicio.controller.js";
 import { crearShellController } from "../shell/shell.controller.js";
 import { SHELL_DEFAULT_ROUTE_ID, SHELL_ONBOARDING_ROUTE_ID } from "../shell/shell.menu.config.js";
-import { guardarUbicacionShell, limpiarUbicacionShell } from "../shell/shell.memory.js";
+import { guardarUbicacionShell, leerUbicacionShell, limpiarUbicacionShell } from "../shell/shell.memory.js";
 import { resolverUbicacionShell } from "../shell/shell.router.js";
 import { crearAjustesController } from "../modules/ajustes/ajustes.controller.js";
 import { crearActualizacionesController } from "../modules/actualizaciones/actualizaciones.controller.js";
@@ -36,9 +36,18 @@ function limpiar(contenedor) {
   }
 }
 
+function obtenerUbicacionInicial(perfilCompletado) {
+  if (!perfilCompletado) {
+    return resolverUbicacionShell({ rutaId: SHELL_DEFAULT_ROUTE_ID });
+  }
+
+  const ubicacionRecordada = leerUbicacionShell();
+  return resolverUbicacionShell(ubicacionRecordada || { rutaId: SHELL_DEFAULT_ROUTE_ID });
+}
+
 export function crearRouterFitJeff(configuracion) {
   let perfilCompletado = configuracion.perfilInicialCompletado;
-  const ubicacionInicial = resolverUbicacionShell({ rutaId: SHELL_DEFAULT_ROUTE_ID });
+  const ubicacionInicial = obtenerUbicacionInicial(perfilCompletado);
   let rutaActual = perfilCompletado ? ubicacionInicial.rutaId : SHELL_ONBOARDING_ROUTE_ID;
   let controllerActual = null;
 
