@@ -19,6 +19,7 @@ FitJeff tiene una base modular funcional y visualmente clara. La app ya puede tr
 - Actualizaciones preparadas para Electron instalado.
 - PWA base real con manifest claro y service worker de cache basico.
 - Storage seguro aplicado a repositories principales, Inicio, Ajustes, backup e hidratacion inicial.
+- Memoria de ultima pantalla valida dentro del shell.
 
 ### Preparado, pero pendiente de conexion real
 
@@ -45,6 +46,7 @@ Bloques funcionales y correctivos aplicados:
 - Bloque 21: Analisis y correccion de errores.
 - Bloque 22: Base PWA clara y estado real.
 - Bloque 23: Almacenamiento local seguro.
+- Bloque 24: Memoria de pantalla y shell.
 
 ## Pantalla principal
 
@@ -182,6 +184,18 @@ Corregido:
 
 Resultado: los repositories principales, Inicio, Ajustes, backup e hidratacion inicial usan storage seguro. Si un JSON local se dana o localStorage falla, FitJeff debe volver a valores seguros sin romper la pantalla completa.
 
+### Bloque 24 - Memoria de pantalla y shell
+
+Corregido:
+
+- `src/app/app-router.js`
+- `src/shell/shell.memory.js`
+- `src/shell/shell.view.js`
+- `scripts/check-structure.cjs`
+- `README.md`
+
+Resultado: al abrir FitJeff con perfil completado, la app restaura la ultima pantalla valida guardada. Si esa pantalla ya no existe, vuelve a Hoy. La memoria del shell usa storage seguro y el texto visible se corrigio a `Estás en`.
+
 ## Comandos
 
 Instalar dependencias:
@@ -240,17 +254,17 @@ npm run desktop:win
 - Control corporal debe cruzar IMC con medidas y contexto muscular antes de sacar conclusiones.
 - PWA debe registrarse solo en produccion web para evitar cache viejo durante desarrollo.
 - Los datos locales deben pasar por storage seguro cuando sean leidos o escritos desde servicios/repositories.
+- La ultima pantalla solo debe restaurarse si es una ruta valida del shell.
 
 ## Siguiente fase recomendada
 
 Correcciones pendientes por prioridad:
 
-1. Corregir memoria de ultima pantalla y textos del shell.
-2. Mejorar reglas de Control corporal: onboarding, medidas semanales y comparaciones.
-3. Corregir duplicados de Actividad.
-4. Aclarar o implementar conexiones reales de Dispositivos.
-5. Mejorar Rutinas y seleccion del dia de entrenamiento.
-6. Revisar seguridad y texto de Gemini API Key.
-7. Decidir Firebase activo o modo local-only.
-8. Publicar primer release Windows real.
-9. Crear proyecto Android/Capacitor solo cuando se vaya a generar APK real.
+1. Mejorar reglas de Control corporal: onboarding, medidas semanales y comparaciones.
+2. Corregir duplicados de Actividad.
+3. Aclarar o implementar conexiones reales de Dispositivos.
+4. Mejorar Rutinas y seleccion del dia de entrenamiento.
+5. Revisar seguridad y texto de Gemini API Key.
+6. Decidir Firebase activo o modo local-only.
+7. Publicar primer release Windows real.
+8. Crear proyecto Android/Capacitor solo cuando se vaya a generar APK real.
