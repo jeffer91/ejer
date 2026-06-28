@@ -4,6 +4,7 @@
 
   Función o funciones:
     - Crear un GitHub Release estable usando GitHub CLI.
+    - Publicar solo artefactos de la versión actual.
     - Publicar instalador Windows, latest.yml, blockmap, APK si existe y manifiestos JSON.
     - Generar un manifiesto local de versión para trazabilidad.
     - Evitar publicar dos veces la misma versión.
@@ -17,6 +18,7 @@
     - release/latest.yml
     - scripts/build-windows.cjs
     - scripts/build-android.cjs
+    - scripts/revision-release-final.cjs
     - scripts/publicar-version.bat
 */
 
@@ -31,13 +33,23 @@ const latestJsonPath = path.join(releaseDir, "latest.json");
 const latestAndroidPath = path.join(releaseDir, "latest-android.json");
 const repo = "jeffer91/ejer";
 
+function comandoLocal(comando) {
+  if (process.platform !== "win32") return comando;
+  if (["gh", "git", "npm", "npx"].includes(comando)) return `${comando}.cmd`;
+  return comando;
+}
+
 function ejecutar(comando, args, opciones = {}) {
-  const resultado = spawnSync(comando, args, {
+  const resultado = spawnSync(comandoLocal(comando), args, {
     cwd: rootDir,
     stdio: opciones.silencioso ? ["ignore", "pipe", "pipe"] : "inherit",
     encoding: "utf8",
-    shell: process.platform === "win32"
+    shell: false
   });
+
+  if (resultado.error && opciones.fallar !== false) {
+    throw new Error(`No se pudo ejecutar ${comando}: ${resultado.error.message}`);
+  }
 
   if (resultado.status !== 0 && opciones.fallar !== false) {
     const detalle = resultado.stderr || resultado.stdout || "";
@@ -81,7 +93,19 @@ function releaseExiste(tag) {
   return resultado.status === 0;
 }
 
-function listarArchivosPublicables() {
+function archivoPerteneceVersion(ruta, pkg) {
+  const base = path.basename(ruta).toLowerCase();
+  const ext = path.extname(ruta).toLowerCase();
+  const version = String(pkg.version || "").toLowerCase();
+
+  if ([".exe", ".apk", ".aab", ".blockmap"].includes(ext)) {
+    return base.includes(version);
+  }
+
+  return ["latest.yml", "latest.yaml", "latest.json", "latest-android.json"].includes(base);
+}
+
+function listarArchivosPublicables(pkg) {
   if (!fs.existsSync(releaseDir)) {
     return [];
   }
@@ -93,15 +117,19 @@ function listarArchivosPublicables() {
     .filter((ruta) => fs.statSync(ruta).isFile())
     .filter((ruta) => permitidos.has(path.extname(ruta).toLowerCase()))
     .filter((ruta) => path.basename(ruta).toLowerCase() !== "builder-debug.yml")
-    .filter((ruta) => path.basename(ruta).toLowerCase() !== "builder-effective-config.yaml");
+    .filter((ruta) => path.basename(ruta).toLowerCase() !== "builder-effective-config.yaml")
+    .filter((ruta) => archivoPerteneceVersion(ruta, pkg));
 }
 
-function validarArtefactos(archivos) {
-  const tieneInstalador = archivos.some((archivo) => archivo.toLowerCase().endsWith(".exe"));
+function validarArtefactos(archivos, pkg) {
+  const version = String(pkg.version || "");
+  const tieneInstalador = archivos.some((archivo) => {
+    return archivo.toLowerCase().endsWith(".exe") && path.basename(archivo).includes(version);
+  });
   const tieneLatestYml = archivos.some((archivo) => path.basename(archivo).toLowerCase() === "latest.yml");
 
   if (!tieneInstalador) {
-    throw new Error("No se encontró instalador .exe para publicar.");
+    throw new Error(`No se encontró instalador .exe de la versión ${version} para publicar.`);
   }
 
   if (!tieneLatestYml) {
@@ -109,9 +137,9 @@ function validarArtefactos(archivos) {
   }
 }
 
-function obtenerInfoAndroid() {
+function obtenerInfoAndroid(pkg) {
   const manifest = leerJsonOpcional(latestAndroidPath, null);
-  const apk = listarArchivosPublicables().find((archivo) => archivo.toLowerCase().endsWith(".apk"));
+  const apk = listarArchivosPublicables(pkg).find((archivo) => archivo.toLowerCase().endsWith(".apk"));
 
   return {
     enabled: Boolean(apk),
@@ -124,7 +152,7 @@ function obtenerInfoAndroid() {
 function generarLatestJson({ pkg, tag, archivos }) {
   fs.mkdirSync(releaseDir, { recursive: true });
 
-  const android = obtenerInfoAndroid();
+  const android = obtenerInfoAndroid(pkg);
 
   const payload = {
     app: "FitJeff",
@@ -166,7 +194,7 @@ function crearNotasRelease(pkg, tag, archivos) {
     "",
     `Versión: ${pkg.version}`,
     "Canal: estable",
-    `Windows: incluido`,
+    "Windows: incluido",
     `Android/APK: ${incluyeApk ? "incluido" : "preparado sin APK real"}`,
     "",
     "Archivos publicados:",
@@ -195,11 +223,13 @@ function main() {
     throw new Error(`Ya existe un release con el tag ${tag}. Sube la versión antes de publicar.`);
   }
 
-  let archivos = listarArchivosPublicables();
-  validarArtefactos(archivos);
+  let archivos = listarArchivosPublicables(pkg);
+  validarArtefactos(archivos, pkg);
 
   const latestJson = generarLatestJson({ pkg, tag, archivos });
-  archivos = [...archivos.filter((archivo) => archivo !== latestJson), latestJson];
+  archivos = listarArchivosPublicables(pkg);
+  if (!archivos.includes(latestJson)) archivos.push(latestJson);
+  archivos = [...new Set(archivos)];
 
   const notas = crearNotasRelease(pkg, tag, archivos);
 
