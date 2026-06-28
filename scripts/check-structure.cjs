@@ -123,6 +123,10 @@ function readFile(relativePath) {
   return fs.readFileSync(path.join(ROOT, relativePath), "utf8");
 }
 
+function esArchivoDeReglas(file) {
+  return file.endsWith("check-structure.cjs") || file.endsWith("auditar-app.cjs");
+}
+
 function walkFiles(directory) {
   const absoluteDirectory = path.join(ROOT, directory);
   if (!fs.existsSync(absoluteDirectory)) return [];
@@ -151,9 +155,11 @@ function checkRequiredFiles() {
 function checkBlockedImports() {
   const findings = [];
   for (const file of walkFiles(".")) {
+    if (esArchivoDeReglas(file)) continue;
+
     const content = readFile(file);
     for (const pattern of blockedPatterns) {
-      if (content.includes(pattern) && !file.endsWith("check-structure.cjs")) findings.push(`${file} -> ${pattern}`);
+      if (content.includes(pattern)) findings.push(`${file} -> ${pattern}`);
     }
   }
   return findings;
