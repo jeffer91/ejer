@@ -43,6 +43,10 @@ const requiredFiles = [
   "src/features/control-corporal/registro/ayudas-medidas.constants.js",
   "src/features/control-corporal/registro/mapa-corporal.view.js",
   "src/features/control-corporal/registro/mapa-corporal.css",
+  "src/features/control-corporal/registro/medidas-modal/medidas-modal.constants.js",
+  "src/features/control-corporal/registro/medidas-modal/medidas-figura.svg.js",
+  "src/features/control-corporal/registro/medidas-modal/medidas-modal.view.js",
+  "src/features/control-corporal/registro/medidas-modal/medidas-modal.css",
   "src/features/control-corporal/historial/historial.controller.js",
   "src/features/control-corporal/historial/historial.view.js",
   "src/features/control-corporal/historial/historial.css",
@@ -94,8 +98,8 @@ const blockedPatterns = [
 const semanticChecks = [
   {
     file: "README.md",
-    mustInclude: ["Bloque 15 - Gemini persistencia blindada", "almacenamiento separado", "API Key"],
-    message: "README debe documentar el bloque 15 de persistencia Gemini."
+    mustInclude: ["Bloque 16 - Medidas con popup visual", "popup visual", "medidas-modal"],
+    message: "README debe documentar el bloque 16 de medidas con popup visual."
   },
   {
     file: "docs/fase-visual-2026-cierre.md",
@@ -164,8 +168,28 @@ const semanticChecks = [
   },
   {
     file: "src/features/control-corporal/registro/ingreso.view.js",
-    mustInclude: ["obtenerAyudaMedida", "crearMapaCorporal", "ingreso-help-button"],
-    message: "Registro debe integrar ayuda ? y mapa corporal."
+    mustInclude: ["crearMedidasModal", "abrirAyuda", "medidas-modal/medidas-modal.view.js"],
+    message: "Registro debe abrir popup visual de medidas desde el boton ?."
+  },
+  {
+    file: "src/features/control-corporal/registro/medidas-modal/medidas-modal.constants.js",
+    mustInclude: ["MEDIDAS_MODAL_INFO", "Dónde medir", "obtenerMedidaModalInfo"],
+    message: "Modal de medidas debe tener textos claros por campo."
+  },
+  {
+    file: "src/features/control-corporal/registro/medidas-modal/medidas-figura.svg.js",
+    mustInclude: ["crearFiguraMedicion", "medidas-figura__cinta", "ZONAS_LINEA"],
+    message: "Modal de medidas debe incluir figura visual."
+  },
+  {
+    file: "src/features/control-corporal/registro/medidas-modal/medidas-modal.view.js",
+    mustInclude: ["role", "dialog", "crearFiguraMedicion", "Escape"],
+    message: "Modal de medidas debe tener dialogo accesible y cierre."
+  },
+  {
+    file: "src/features/control-corporal/registro/medidas-modal/medidas-modal.css",
+    mustInclude: [".medidas-modal", ".medidas-figura__cinta", "background: rgba(7, 17, 31, 0.42)"],
+    message: "Modal de medidas debe tener estilos claros y figura visual."
   },
   {
     file: "src/features/control-corporal/estadisticas/estadisticas.view.js",
@@ -336,11 +360,12 @@ function run() {
     console.log("Bloque 13 aplicado: fechas locales corregidas.");
     console.log("Bloque 14 aplicado: revision local completa.");
     console.log("Bloque 15 aplicado: Gemini con persistencia blindada.");
+    console.log("Bloque 16 aplicado: medidas con popup visual.");
     console.log("Control corporal vive en src/features/control-corporal.");
     console.log("Hoy es la pantalla principal de Control corporal.");
     console.log("El tema claro global esta registrado.");
     console.log("Inicio abre hacia Hoy y usa modo claro.");
-    console.log("Registro integra ayuda ? y mapa corporal.");
+    console.log("Registro integra ayuda ? con popup visual y mapa corporal.");
     console.log("Progreso usa presenter para una vista ordenada.");
     console.log("Actividad manual esta registrada como modulo independiente.");
     console.log("Gemini guarda API Key en almacenamiento separado.");
