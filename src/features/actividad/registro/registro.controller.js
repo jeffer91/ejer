@@ -1,3 +1,4 @@
+import { fechaHoyISO } from "../actividad.constants.js";
 import { ACTIVIDAD_ROUTES } from "../actividad.routes.js";
 import { crearActividadService } from "../actividad.service.js";
 import { crearActividadRegistroView, leerFormularioActividad, mostrarErroresActividad, mostrarMensajeActividad } from "./registro.view.js";
@@ -20,7 +21,7 @@ export function crearActividadRegistroController({ alNavegar } = {}) {
 
       if (resultado.ok) {
         vista.formulario.reset();
-        vista.fechaInput.value = new Date().toISOString().slice(0, 10);
+        vista.fechaInput.value = fechaHoyISO();
       }
     });
 
