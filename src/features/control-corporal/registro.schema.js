@@ -20,7 +20,6 @@ export function crearPerfilSchema() {
   return {
     alturaCm: null,
     fechaNacimiento: "",
-    sexoBiologico: "no-especificado",
     nivelMuscular: "medio",
     configurado: false,
     actualizadoEn: ""
