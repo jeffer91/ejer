@@ -7,24 +7,32 @@
     - Guardar cambios de perfil y objetivo.
     - Reabrir Inicio cuando el usuario lo confirme.
     - Exportar e importar copias de seguridad locales.
-    - Mantener Ajustes simple, sin mostrar datos técnicos.
+    - Ejecutar sincronización manual sin bloquear la app.
+    - Mantener Ajustes simple, sin mostrar datos técnicos pesados.
 
   Se conecta con:
     - src/modules/ajustes/ajustes.service.js
     - src/modules/ajustes/ajustes.view.js
     - src/modules/ajustes/ajustes.constants.js
     - src/core/backup/backup.service.js
+    - src/core/sync/sync-scheduler.service.js
     - src/app/app-router.js
 */
 
 import { crearBackupService } from "../../core/backup/backup.service.js";
+import { crearSyncSchedulerService } from "../../core/sync/sync-scheduler.service.js";
 import { AJUSTES_TEXTOS } from "./ajustes.constants.js";
 import { crearAjustesService } from "./ajustes.service.js";
-import { crearAjustesView, leerFormularioAjustes, mostrarErroresAjustes, mostrarMensajeAjustes } from "./ajustes.view.js";
+import { crearAjustesView, leerFormularioAjustes, mostrarErroresAjustes, mostrarMensajeAjustes, actualizarEstadoSync } from "./ajustes.view.js";
 
 export function crearAjustesController({ alReabrirInicio } = {}) {
   const service = crearAjustesService();
   const backupService = crearBackupService();
+  const syncScheduler = crearSyncSchedulerService();
+
+  function refrescarSync(vista) {
+    actualizarEstadoSync(vista, syncScheduler.obtenerEstado());
+  }
 
   function guardarPerfil(vista) {
     const datos = leerFormularioAjustes(vista.perfilForm);
@@ -32,6 +40,7 @@ export function crearAjustesController({ alReabrirInicio } = {}) {
 
     if (resultado.ok) {
       backupService.crearBackupAutomatico("guardar-perfil");
+      refrescarSync(vista);
     }
 
     mostrarErroresAjustes(vista.perfilForm, resultado.errores || {});
@@ -44,6 +53,7 @@ export function crearAjustesController({ alReabrirInicio } = {}) {
 
     if (resultado.ok) {
       backupService.crearBackupAutomatico("guardar-objetivo");
+      refrescarSync(vista);
     }
 
     mostrarErroresAjustes(vista.objetivoForm, resultado.errores || {});
@@ -86,12 +96,23 @@ export function crearAjustesController({ alReabrirInicio } = {}) {
     }
   }
 
+  async function sincronizarManual(vista) {
+    vista.syncBoton.disabled = true;
+    mostrarMensajeAjustes(vista.syncMensaje, "Sincronizando cambios pendientes...", true);
+
+    const resultado = await syncScheduler.sincronizarManual();
+    refrescarSync(vista);
+    mostrarMensajeAjustes(vista.syncMensaje, resultado.mensaje, resultado.ok);
+    vista.syncBoton.disabled = false;
+  }
+
   function montar(contenedor) {
     const datos = service.obtenerDatos();
     const vista = crearAjustesView(datos);
 
     contenedor.innerHTML = "";
     contenedor.appendChild(vista.pantalla);
+    refrescarSync(vista);
 
     vista.perfilForm.addEventListener("submit", (evento) => {
       evento.preventDefault();
@@ -104,6 +125,7 @@ export function crearAjustesController({ alReabrirInicio } = {}) {
     });
 
     vista.reabrirInicioBoton.addEventListener("click", reabrirInicio);
+    vista.syncBoton.addEventListener("click", () => sincronizarManual(vista));
     vista.backupExportarBoton.addEventListener("click", () => exportarBackup(vista));
     vista.backupImportarBoton.addEventListener("click", () => vista.backupInputArchivo.click());
     vista.backupInputArchivo.addEventListener("change", () => {
