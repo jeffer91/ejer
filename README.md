@@ -1,6 +1,6 @@
 # FitJeff
 
-App personal local-first para control corporal, registro de peso, medidas, progreso visual, historial, backups, PWA y escritorio Electron.
+App personal local-first para control corporal, actividad, registro de peso, medidas, progreso visual, historial, backups, PWA y escritorio Electron.
 
 La app se trabaja por bloques para evitar cambios mezclados y mantener cada modulo separado.
 
@@ -18,6 +18,13 @@ Menu principal de Control corporal:
 - Registrar
 - Progreso
 - Historial
+
+Modulos principales visibles:
+
+- Control corporal
+- Actividad
+- Entrenamiento
+- Sistema
 
 ## Redisenio 2026 - Bloques aplicados
 
@@ -192,6 +199,38 @@ Resultado:
 - El check valida Actualizaciones y Stats como parte del redisenio visual
 - La app mantiene una base visual coherente antes de crear Actividad
 
+### Bloque 11 - Actividad manual
+
+Creado:
+
+- `src/features/actividad/actividad.constants.js`
+- `src/features/actividad/actividad.routes.js`
+- `src/features/actividad/actividad.menu.js`
+- `src/features/actividad/actividad.module.js`
+- `src/features/actividad/actividad.repository.js`
+- `src/features/actividad/actividad.service.js`
+- `src/features/actividad/resumen/resumen.controller.js`
+- `src/features/actividad/resumen/resumen.view.js`
+- `src/features/actividad/resumen/resumen.css`
+- `src/features/actividad/registro/registro.controller.js`
+- `src/features/actividad/registro/registro.view.js`
+- `src/features/actividad/registro/registro.css`
+
+Corregido:
+
+- `src/features/features.registry.js`
+- `src/shell/shell.css`
+- `scripts/check-structure.cjs`
+- `README.md`
+
+Resultado:
+
+- Actividad queda como modulo independiente
+- Permite registro manual de pasos, minutos de bicicleta y kilometros de bicicleta
+- Tiene resumen de hoy, resumen semanal y registros recientes
+- Guarda localmente en `localStorage`
+- No toca Firebase, Sync, Backup, Electron ni Android
+
 ## Bloques originales de construccion
 
 ### Base inicial
@@ -213,6 +252,10 @@ Incluye peso diario, medidas semanales, validacion de rangos, deteccion de cambi
 ### Progreso
 
 Incluye peso actual, objetivo, cambios, tendencia, IMC, proxima medicion, barra de progreso, grafico simple y tarjetas compactas de medidas.
+
+### Actividad
+
+Incluye registro manual de pasos, minutos de bicicleta, kilometros de bicicleta, resumen diario, resumen semanal y registros recientes.
 
 ### Historial
 
@@ -274,7 +317,8 @@ npm run desktop:win
 
 - Mantener cada modulo separado.
 - No mezclar Control corporal con Actividad.
-- No tocar Firebase, Sync, Backup, Electron o Android cuando el bloque sea solo visual.
+- No tocar Firebase, Sync, Backup, Electron o Android cuando el bloque sea solo visual o manual.
 - Pantalla Hoy debe seguir siendo la entrada principal.
 - Registro debe mantener ayuda ? integrada.
 - Progreso debe ser detalle, no dashboard saturado.
+- Actividad manual debe crecer antes de conectar sensores o apps externas.
