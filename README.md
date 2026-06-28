@@ -14,6 +14,8 @@ Bloque 14 aplicado: revision local completa.
 
 Bloque 15 aplicado: Gemini persistencia blindada.
 
+Bloque 16 aplicado: Medidas con popup visual.
+
 La app queda con una base clara, simple y modular para continuar con mejoras funcionales sin mezclar responsabilidades.
 
 ## Pantalla principal
@@ -252,6 +254,25 @@ Corregido:
 
 Resultado: Gemini ahora tiene almacenamiento separado para la API Key, migracion desde ajustes antiguos, conservacion cuando el campo queda vacio, estado visible de persistencia y boton de borrado explicito.
 
+### Bloque 16 - Medidas con popup visual
+
+Creado:
+
+- `src/features/control-corporal/registro/medidas-modal/medidas-modal.constants.js`
+- `src/features/control-corporal/registro/medidas-modal/medidas-figura.svg.js`
+- `src/features/control-corporal/registro/medidas-modal/medidas-modal.view.js`
+- `src/features/control-corporal/registro/medidas-modal/medidas-modal.css`
+
+Corregido:
+
+- `src/features/control-corporal/registro/ayudas-medidas.constants.js`
+- `src/features/control-corporal/registro/ingreso.view.js`
+- `src/features/control-corporal/registro/ingreso.css`
+- `scripts/check-structure.cjs`
+- `README.md`
+
+Resultado: cada boton ? de Registro abre un popup visual con muñeco, zona de medicion resaltada, explicacion clara, errores comunes y consejo para repetir la medicion.
+
 ## Documento de cierre
 
 El cierre detallado de la fase visual esta en:
@@ -314,13 +335,13 @@ npm run desktop:win
 - Progreso debe ser detalle, no dashboard saturado.
 - Actividad manual debe crecer antes de conectar sensores o apps externas.
 - La API Key de Gemini debe conservarse en almacenamiento separado y solo borrarse desde la accion explicita.
+- Las medidas corporales deben explicarse con popup visual, no solo con texto corto.
 
 ## Siguiente fase recomendada
 
 Fase funcional de Actividad y Entrenamiento:
 
-1. Medidas con popup visual.
-2. Rutinas claro + pasos.
-3. Jarvis claro.
-4. Control corporal inteligente.
-5. Dispositivos / Cubitt CT4 / Google Fit preparado.
+1. Rutinas claro + pasos.
+2. Jarvis claro.
+3. Control corporal inteligente.
+4. Dispositivos / Cubitt CT4 / Google Fit preparado.
