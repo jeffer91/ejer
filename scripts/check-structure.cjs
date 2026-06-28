@@ -1,23 +1,3 @@
-/*
-  Nombre completo: check-structure.cjs
-  Ruta o ubicacion: scripts/check-structure.cjs
-
-  Funcion o funciones:
-    - Revisar que la estructura modular principal exista.
-    - Confirmar que el redisenio visual claro tenga sus archivos base.
-    - Confirmar que Hoy exista como pantalla principal de Control corporal.
-    - Confirmar que Inicio, Registro y Progreso esten alineados al modo claro.
-    - Detectar imports antiguos hacia src/modules/inicio o src/modules/registro.
-    - Confirmar que Control corporal, Shell y Features Registry estan conectados.
-
-  Se conecta con:
-    - package.json
-    - src/app/app.css
-    - src/features/features.registry.js
-    - src/shell/shell.menu.config.js
-    - src/app/app-router.js
-*/
-
 const fs = require("node:fs");
 const path = require("node:path");
 
@@ -61,6 +41,11 @@ const requiredFiles = [
   "src/features/control-corporal/registro/mapa-corporal.view.js",
   "src/features/control-corporal/registro/mapa-corporal.css",
   "src/features/control-corporal/historial/historial.controller.js",
+  "src/features/control-corporal/historial/historial.view.js",
+  "src/features/control-corporal/historial/historial.css",
+  "src/modules/ajustes/ajustes.controller.js",
+  "src/modules/ajustes/ajustes.view.js",
+  "src/modules/ajustes/ajustes.css",
   "src/features/_template/template.menu.js",
   "src/features/_template/template.routes.js",
   "src/features/_template/template.module.js"
@@ -120,6 +105,16 @@ const semanticChecks = [
     file: "src/features/control-corporal/estadisticas/estadisticas.view.js",
     mustInclude: ["prepararVistaEstadisticas"],
     message: "Progreso debe usar presenter para ordenar la vista."
+  },
+  {
+    file: "src/features/control-corporal/historial/historial.css",
+    mustInclude: ["background: rgba(255, 255, 255, 0.94)", "var(--fj-text-strong", "historial-button--borrar"],
+    message: "Historial debe estar alineado al modo claro."
+  },
+  {
+    file: "src/modules/ajustes/ajustes.css",
+    mustInclude: ["background: rgba(255, 255, 255, 0.94)", "var(--fj-action-bg", "background: #ffffff"],
+    message: "Ajustes debe estar alineado al modo claro."
   }
 ];
 
@@ -212,6 +207,7 @@ function run() {
     console.log("Inicio abre hacia Hoy y usa modo claro.");
     console.log("Registro integra ayuda ? y mapa corporal.");
     console.log("Progreso usa presenter para una vista ordenada.");
+    console.log("Historial y Ajustes usan modo claro.");
     return;
   }
 
