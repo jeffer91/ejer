@@ -24,6 +24,7 @@
     "build:android": "node scripts/build-android.cjs",
     "release:github": "node scripts/release-github.cjs",
     "review:updates": "node scripts/revision-actualizaciones.cjs",
+    "configurar:firebase": "scripts\\configurar-firebase-local.bat",
     "publicar:version": "scripts\\publicar-version.bat",
     "publicar:automatico": "scripts\\publicar-version-automatica.bat",
     "actualizar:todo": "scripts\\actualizar-todo.bat",
