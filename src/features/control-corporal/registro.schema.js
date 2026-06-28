@@ -5,6 +5,7 @@
   Función o funciones:
     - Describir la forma base de los datos de Control corporal.
     - Mantener consistente el perfil, objetivo, peso, medidas e historial.
+    - Agregar contexto corporal para no depender solo del IMC.
     - Servir como guía para validaciones, Firebase y migraciones futuras.
 
   Se conecta con:
@@ -13,12 +14,14 @@
     - src/features/control-corporal/registro.constants.js
 */
 
-export const REGISTRO_SCHEMA_VERSION = "0.1.0";
+export const REGISTRO_SCHEMA_VERSION = "0.2.0";
 
 export function crearPerfilSchema() {
   return {
     alturaCm: null,
     fechaNacimiento: "",
+    sexoBiologico: "no-especificado",
+    nivelMuscular: "medio",
     configurado: false,
     actualizadoEn: ""
   };
@@ -42,6 +45,7 @@ export function crearPesoSchema() {
 
 export function crearMedidasSchema() {
   return {
+    cuelloCm: null,
     cinturaCm: null,
     abdomenCm: null,
     pechoCm: null,
