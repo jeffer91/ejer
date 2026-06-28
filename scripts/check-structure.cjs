@@ -28,6 +28,7 @@ const requiredFiles = [
   "scripts/release-github.cjs",
   "src/core/config/app.config.js",
   "src/core/config/firebase.config.js",
+  "src/core/config/firebase.project.config.js",
   "src/core/utils/date.util.js",
   "src/core/storage/safe-local-storage.service.js",
   "src/core/bootstrap/app-data-hydration.service.js",
@@ -74,12 +75,18 @@ const blockedPatterns = [
   "src/modules/registro",
   "toISOString().slice(0, 10)",
   "Estas en",
-  "bajado 0 kg"
+  "bajado 0 kg",
+  "configurar-firebase-local.bat",
+  "CONFIGURAR_FIREBASE_FITJEFF.bat"
 ];
 
 const semanticChecks = [
-  { file: "README.md", mustInclude: ["Bloque 28 - Inicio seguro y actualización automática", "npm start seguro", "ACTUALIZAR_VERSION_FITJEFF.bat"], message: "README debe documentar el bloque 28." },
-  { file: "package.json", mustInclude: ["\"start\": \"node scripts/start-electron-dev.cjs\"", "\"electron:dev\": \"node scripts/start-electron-dev.cjs\"", "publicar:automatico"], message: "package.json debe usar inicio seguro y script de publicacion automatica." },
+  { file: "README.md", mustInclude: ["Bloque 30 - Firebase resuelto desde código", "firebase.project.config.js", "sin BAT de configuración"], message: "README debe documentar el bloque 30." },
+  { file: "package.json", mustInclude: ["\"start\": \"node scripts/start-electron-dev.cjs\"", "\"electron:dev\": \"node scripts/start-electron-dev.cjs\"", "publicar:automatico"], message: "package.json debe usar inicio seguro sin script BAT de Firebase." },
+  { file: "src/core/config/firebase.project.config.js", mustInclude: ["FIREBASE_PROJECT_CONFIG", "apiKey", "collection: \"fitjeff\"", "userDocument: \"jeff\""], message: "Debe existir configuracion Firebase desde codigo." },
+  { file: "src/core/config/firebase.config.js", mustInclude: ["FIREBASE_PROJECT_CONFIG", "leerValor", "resolverFirebaseEnabled", "obtenerEstadoFirebaseConexion"], message: "Firebase config debe leer variables o configuracion desde codigo." },
+  { file: "src/core/bootstrap/app-data-hydration.service.js", mustInclude: ["normalizarEstadoRemoto", "extraerRaizControlCorporal", "origen: \"firebase\"", "repository.guardarEstado"], message: "Hidratacion debe restaurar Firebase antes de Inicio." },
+  { file: "src/core/firebase/firebase-database.service.js", mustInclude: ["obtenerRegistrosDesdeDocumento", "registrosSubcoleccion.length > 0", "registrosFinales"], message: "Firebase database debe conservar registros remotos del documento." },
   { file: "scripts/start-electron-dev.cjs", mustInclude: ["encontrarPuertoDisponible", "PUERTO_BASE", "FITJEFF_DEV_SERVER_URL", "concurrently"], message: "npm start debe buscar puerto libre y pasar URL a Electron." },
   { file: "electron/electron-path.service.js", mustInclude: ["FITJEFF_DEV_SERVER_URL", "http://localhost:5173/"], message: "Electron debe leer la URL real de desarrollo." },
   { file: "electron/electron-window.service.js", mustInclude: ["backgroundColor: \"#f8fafc\"", "obtenerDevUrl"], message: "Ventana Electron debe mantener tema claro y URL dinamica." },
@@ -90,7 +97,6 @@ const semanticChecks = [
   { file: "index.html", mustInclude: ["theme-color\" content=\"#f8fafc", "color-scheme\" content=\"light", "manifest.webmanifest"], message: "index.html debe declarar modo claro y manifest." },
   { file: "manifest.webmanifest", mustInclude: ["\"background_color\": \"#f8fafc\"", "\"theme_color\": \"#2563eb\"", "./icons/icon.svg"], message: "Manifest debe estar alineado al tema claro." },
   { file: "service-worker.js", mustInclude: ["CACHE_VERSION", "PRECACHE_URLS", "self.addEventListener(\"fetch\"", "responderDinamico"], message: "Service worker debe tener base PWA real." },
-  { file: "src/core/config/firebase.config.js", mustInclude: ["leerVariableEnv", "VITE_FIREBASE_ENABLED", "obtenerEstadoFirebaseConexion", "obtenerVariablesFirebaseFaltantes"], message: "Firebase config debe leer variables y exponer estado de conexion." },
   { file: "src/core/sync/sync.service.js", mustInclude: ["obtenerEstadoConexion", "responderModoLocal", "firebaseEstaConfigurado", "status.marcarModoLocal"], message: "Sync debe revisar conexion antes de sincronizar." },
   { file: "src/app/app-router.js", mustInclude: ["leerUbicacionShell", "obtenerUbicacionInicial", "ubicacionRecordada", "limpiarUbicacionShell"], message: "Router debe restaurar ultima pantalla valida." },
   { file: "src/shell/shell.view.js", mustInclude: ["Estás en", "Mantener textos visibles corregidos"], message: "Shell debe tener texto visible corregido." },
@@ -182,6 +188,8 @@ function run() {
     console.log("Bloque 26 aplicado: Variables y conexion revisadas.");
     console.log("Bloque 27 aplicado: Actividad depurada.");
     console.log("Bloque 28 aplicado: Inicio seguro y actualizacion automatica.");
+    console.log("Bloque 29 aplicado: Restauracion Firebase antes de Inicio.");
+    console.log("Bloque 30 aplicado: Firebase resuelto desde codigo.");
     return;
   }
 
@@ -191,7 +199,7 @@ function run() {
   }
 
   if (blockedImports.length > 0) {
-    console.error("Se encontraron referencias antiguas, textos mal escritos o fechas UTC en campos diarios:");
+    console.error("Se encontraron referencias antiguas, textos mal escritos o configuradores Firebase no solicitados:");
     blockedImports.forEach((item) => console.error(`- ${item}`));
   }
 
