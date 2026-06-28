@@ -10,7 +10,7 @@ export const ACTIVIDAD_TIPOS = Object.freeze({
 
 export const ACTIVIDAD_TEXTOS = Object.freeze({
   RESUMEN_TITULO: "Actividad",
-  RESUMEN_SUBTITULO: "Registra pasos y bicicleta de forma manual mientras preparamos conexiones automáticas.",
+  RESUMEN_SUBTITULO: "Registra pasos y bicicleta de forma manual. También puedes dejar preparado Cubitt CT4 y Google Fit.",
   REGISTRO_TITULO: "Registrar actividad",
   REGISTRO_SUBTITULO: "Guarda tus pasos, bicicleta o ambos. No necesitas completar todo.",
   BOTON_GUARDAR: "Guardar actividad",
