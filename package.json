@@ -23,6 +23,8 @@
     "version:bump": "node scripts/version-bump.cjs",
     "build:windows": "node scripts/build-windows.cjs",
     "build:android": "node scripts/build-android.cjs",
+    "release:check": "node scripts/revision-release-final.cjs",
+    "release:check:built": "node scripts/revision-release-final.cjs --after-build",
     "release:github": "node scripts/release-github.cjs",
     "review:updates": "node scripts/revision-actualizaciones.cjs",
     "publicar:version": "scripts\\publicar-version.bat",
