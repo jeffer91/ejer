@@ -1,10 +1,11 @@
 /*
   Nombre completo: features.registry.js
-  Ruta o ubicación: src/features/features.registry.js
+  Ruta o ubicacion: src/features/features.registry.js
 
-  Función o funciones:
+  Funcion o funciones:
     - Registrar todas las funcionalidades principales de FitJeff.
-    - Centralizar el menú y el montaje de cada módulo.
+    - Centralizar el menu y el montaje de cada modulo.
+    - Definir Hoy como primera pantalla de Control corporal.
     - Permitir agregar futuras funcionalidades sin tocar app-router.js.
 
   Se conecta con:
@@ -28,7 +29,7 @@ export const FEATURE_MODULES = [
 ];
 
 export const FEATURE_DEFAULT_MODULE_ID = CONTROL_CORPORAL_MODULE_ID;
-export const FEATURE_DEFAULT_ROUTE_ID = CONTROL_CORPORAL_ROUTES.ESTADISTICAS;
+export const FEATURE_DEFAULT_ROUTE_ID = CONTROL_CORPORAL_ROUTES.HOY;
 
 const FEATURE_MOUNTERS = [
   {
