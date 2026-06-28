@@ -9,6 +9,7 @@
     - Abrir enlaces externos en el navegador del sistema.
     - Permitir micrófono/audio para Jarvis dentro de Electron.
     - Mostrar errores reales cuando Electron no logra cargar la app.
+    - Mantener el fondo inicial alineado con el tema claro.
 
   Se conecta con:
     - electron/main.js
@@ -99,7 +100,7 @@ export function crearVentanaPrincipal() {
     minWidth: 980,
     minHeight: 680,
     title: "FitJeff",
-    backgroundColor: "#0a0f1c",
+    backgroundColor: "#f8fafc",
     show: false,
     webPreferences: {
       preload: obtenerPreloadPath(),
