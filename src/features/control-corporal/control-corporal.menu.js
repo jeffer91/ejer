@@ -1,11 +1,12 @@
 /*
   Nombre completo: control-corporal.menu.js
-  Ruta o ubicación: src/features/control-corporal/control-corporal.menu.js
+  Ruta o ubicacion: src/features/control-corporal/control-corporal.menu.js
 
-  Función o funciones:
-    - Definir el módulo principal Control corporal.
-    - Centralizar su nombre, descripción y submenú interno.
-    - Facilitar que el shell global cargue este módulo sin mezclarlo con otros.
+  Funcion o funciones:
+    - Definir el modulo principal Control corporal.
+    - Centralizar su nombre, descripcion y submenu interno.
+    - Abrir Hoy como pantalla principal simple para el usuario.
+    - Facilitar que el shell global cargue este modulo sin mezclarlo con otros.
 
   Se conecta con:
     - src/shell/shell.menu.config.js
@@ -21,7 +22,7 @@ export const CONTROL_CORPORAL_MENU = {
   label: "Control corporal",
   shortLabel: "Corporal",
   description: "Peso, medidas y evolución personal.",
-  defaultRoute: CONTROL_CORPORAL_ROUTES.ESTADISTICAS,
-  status: "Listo para registrar",
+  defaultRoute: CONTROL_CORPORAL_ROUTES.HOY,
+  status: "Listo para hoy",
   routes: CONTROL_CORPORAL_ROUTE_ITEMS
 };
