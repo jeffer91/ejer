@@ -1,11 +1,11 @@
 /*
   Nombre completo: shell.view.js
-  Ruta o ubicación: src/shell/shell.view.js
+  Ruta o ubicacion: src/shell/shell.view.js
 
-  Función o funciones:
+  Funcion o funciones:
     - Construir visualmente el shell global de FitJeff.
-    - Mostrar menú superior de módulos grandes.
-    - Mostrar submenú interno del módulo activo.
+    - Mostrar secciones principales con lenguaje simple.
+    - Mostrar acciones internas de la seccion activa sin texto tecnico.
     - Entregar el contenedor main donde se monta cada pantalla.
 
   Se conecta con:
@@ -47,7 +47,7 @@ function crearModuloButton({ modulo, activo, onSeleccionarModulo }) {
     boton.setAttribute("aria-current", "page");
   }
 
-  const nombre = crearElemento("span", "fj-shell__module-name", modulo.label);
+  const nombre = crearElemento("span", "fj-shell__module-name", modulo.shortLabel || modulo.label);
 
   boton.appendChild(nombre);
   boton.addEventListener("click", () => onSeleccionarModulo(modulo.id));
@@ -77,17 +77,17 @@ export function montarShellView({ raiz, modulos, ubicacion, onSeleccionarModulo,
   const logo = crearElemento("span", "fj-shell__logo", "FJ");
   const brandText = crearElemento("div", "fj-shell__brand-text");
   const appName = crearElemento("strong", "fj-shell__app-name", "FitJeff");
-  const appMode = crearElemento("span", "fj-shell__app-mode", "App modular");
+  const appMode = crearElemento("span", "fj-shell__app-mode", "Tu control diario");
   const activeBox = crearElemento("div", "fj-shell__active");
-  const activeLabel = crearElemento("span", "fj-shell__active-label", "Módulo activo");
-  const activeModule = crearElemento("strong", "fj-shell__active-module", ubicacion.modulo.label);
-  const routeDescription = crearElemento("span", "fj-shell__route-description", ubicacion.ruta.description || ubicacion.ruta.label);
+  const activeLabel = crearElemento("span", "fj-shell__active-label", "Estas en");
+  const activeModule = crearElemento("strong", "fj-shell__active-module", ubicacion.ruta.label || ubicacion.modulo.label);
+  const routeDescription = crearElemento("span", "fj-shell__route-description", ubicacion.modulo.label);
   const modulesNav = crearElemento("nav", "fj-shell__modules");
   const routesNav = crearElemento("nav", "fj-shell__subnav");
   const main = crearElemento("main", "fj-main fj-shell__content");
 
-  modulesNav.setAttribute("aria-label", "Módulos principales");
-  routesNav.setAttribute("aria-label", `Opciones internas de ${ubicacion.modulo.label}`);
+  modulesNav.setAttribute("aria-label", "Secciones principales");
+  routesNav.setAttribute("aria-label", `Acciones de ${ubicacion.modulo.label}`);
 
   brandText.appendChild(appName);
   brandText.appendChild(appMode);
@@ -101,7 +101,7 @@ export function montarShellView({ raiz, modulos, ubicacion, onSeleccionarModulo,
   topbar.appendChild(brand);
   topbar.appendChild(activeBox);
 
-  modulesNav.appendChild(crearNavLabel("Módulos principales"));
+  modulesNav.appendChild(crearNavLabel("Secciones"));
 
   modulos.forEach((modulo) => {
     modulesNav.appendChild(
@@ -113,7 +113,7 @@ export function montarShellView({ raiz, modulos, ubicacion, onSeleccionarModulo,
     );
   });
 
-  routesNav.appendChild(crearNavLabel("Opciones internas", ubicacion.modulo.label));
+  routesNav.appendChild(crearNavLabel("Acciones", ubicacion.modulo.label));
 
   ubicacion.modulo.routes.forEach((ruta) => {
     routesNav.appendChild(
