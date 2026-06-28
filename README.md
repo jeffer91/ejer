@@ -22,14 +22,16 @@ FitJeff tiene una base modular funcional y visualmente clara. La app ya puede tr
 - Memoria de ultima pantalla valida dentro del shell.
 - Control corporal depurado con guardado inicial unico, medicion principal por semana y comparaciones confiables.
 - Variables Vite de Firebase centralizadas con modo local activo por defecto.
+- npm start seguro con puerto automatico si 5173 esta ocupado.
+- BAT raiz para abrir FitJeff y BAT raiz para actualizar version automaticamente.
 
 ### Preparado, pero pendiente de conexion real
 
 - Firebase esta preparado como respaldo, pero no se conecta si `VITE_FIREBASE_ENABLED` sigue en `false` o faltan variables.
 - Cubitt CT4 esta preparado como pantalla/configuracion, pero no lee datos reales del reloj todavia.
 - Google Fit esta preparado como pantalla/configuracion, pero no tiene autorizacion ni lectura real todavia.
-- Android/APK esta preparado a nivel de scripts, pero falta proyecto Android/Capacitor para generar APK real.
-- GitHub Releases esta preparado para actualizaciones, pero requiere publicar instalador y `latest.yml`.
+- Android/APK esta preparado a nivel de scripts: si existe proyecto Android nativo/Capacitor, compila APK; si no existe, genera manifiesto `latest-android.json` sin bloquear Windows.
+- GitHub Releases esta preparado para actualizaciones del instalador con `.exe` y `latest.yml`.
 
 ## Estado de bloques
 
@@ -52,6 +54,7 @@ Bloques funcionales y correctivos aplicados:
 - Bloque 25: Control corporal depurado.
 - Bloque 26: Variables y conexión.
 - Bloque 27: Actividad depurada.
+- Bloque 28: Inicio seguro y actualización automática.
 
 ## Pantalla principal
 
@@ -79,6 +82,22 @@ La guia visual de medidas existe como ruta interna y ayuda complementaria. No se
 - Registrar
 - Dispositivos
 
+## Abrir FitJeff
+
+Comando recomendado:
+
+```bash
+npm start
+```
+
+`npm start` ahora busca un puerto libre desde 5173. Si 5173 esta ocupado, abre Vite en el siguiente puerto disponible y pasa esa URL real a Electron.
+
+Tambien puedes abrir con doble clic en:
+
+```text
+ABRIR_FITJEFF.bat
+```
+
 ## Variables de conexión
 
 FitJeff trabaja en modo local por defecto. Para activar Firebase en una PC, copiar `.env.example` como `.env.local`, completar las variables y cambiar:
@@ -88,6 +107,25 @@ VITE_FIREBASE_ENABLED=true
 ```
 
 Mientras `VITE_FIREBASE_ENABLED=false`, la app no intenta conectarse a Firebase, no lo marca como error y no acumula cola de sincronizacion innecesaria.
+
+## Actualizar version con doble clic
+
+Para aumentar version, compilar instalador Windows, preparar Android/APK y publicar release, usar:
+
+```text
+ACTUALIZAR_VERSION_FITJEFF.bat
+```
+
+Ese BAT llama a `scripts/publicar-version-automatica.bat` y ejecuta:
+
+- revision de herramientas;
+- sincronizacion con GitHub;
+- `npm install`;
+- `npm run check:local`;
+- aumento automatico de version;
+- build Windows con instalador y `latest.yml`;
+- preparacion Android/APK;
+- commit, push y GitHub Release.
 
 ## Bloques aplicados
 
@@ -253,6 +291,24 @@ Corregido:
 
 Resultado: Actividad ahora mantiene un solo registro principal por fecha. Si el usuario selecciona una fecha con actividad previa, el formulario carga esos datos; si guarda de nuevo, actualiza el registro del día en lugar de duplicarlo. También se agregaron límites básicos y bloqueo de fechas futuras.
 
+### Bloque 28 - Inicio seguro y actualización automática
+
+Corregido:
+
+- `package.json`
+- `scripts/start-electron-dev.cjs`
+- `electron/electron-path.service.js`
+- `electron/electron-window.service.js`
+- `scripts/abrir-electron-dev.bat`
+- `scripts/actualizar-todo.bat`
+- `scripts/publicar-version-automatica.bat`
+- `ABRIR_FITJEFF.bat`
+- `ACTUALIZAR_VERSION_FITJEFF.bat`
+- `scripts/check-structure.cjs`
+- `README.md`
+
+Resultado: `npm start` ya no depende obligatoriamente del puerto 5173. Si el puerto está ocupado, busca otro puerto libre y Electron abre la URL correcta. Además, existen BAT de doble clic para abrir FitJeff y para actualizar versión, compilar instalador Windows, preparar Android/APK y publicar GitHub Release.
+
 ## Comandos
 
 Instalar dependencias:
@@ -273,16 +329,16 @@ Revisar estructura, herramientas y build local:
 npm run check:local
 ```
 
+Abrir en Electron desarrollo:
+
+```bash
+npm start
+```
+
 Abrir en navegador:
 
 ```bash
 npm run dev
-```
-
-Abrir en Electron:
-
-```bash
-npm run electron:dev
 ```
 
 Probar modo escritorio con dist:
@@ -295,6 +351,18 @@ Crear instalador Windows:
 
 ```bash
 npm run desktop:win
+```
+
+Preparar Android/APK:
+
+```bash
+npm run build:android
+```
+
+Publicar version automatica:
+
+```bash
+npm run publicar:automatico
 ```
 
 ## Reglas de crecimiento
@@ -315,6 +383,8 @@ npm run desktop:win
 - Las medidas corporales deben manejarse como medicion principal semanal, no como registros repetidos sin control.
 - Las conexiones externas deben iniciar en modo local y activarse solo por variables configuradas.
 - Actividad debe manejar un solo registro principal por fecha y actualizar el registro del día si ya existe.
+- `npm start` debe abrir siempre con puerto automatico y no depender de 5173 libre.
+- La version de Windows y Android debe salir desde el mismo `package.json`.
 
 ## Siguiente fase recomendada
 
@@ -323,5 +393,4 @@ Correcciones pendientes por prioridad:
 1. Aclarar o implementar conexiones reales de Dispositivos.
 2. Mejorar Rutinas y seleccion del dia de entrenamiento.
 3. Revisar seguridad y texto de Gemini API Key.
-4. Publicar primer release Windows real.
-5. Crear proyecto Android/Capacitor solo cuando se vaya a generar APK real.
+4. Crear proyecto Android/Capacitor cuando se vaya a generar APK real.
