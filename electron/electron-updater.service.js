@@ -5,6 +5,7 @@
   Función o funciones:
     - Controlar la búsqueda, descarga e instalación de actualizaciones en Electron.
     - Usar electron-updater solo cuando la app esté empaquetada/instalada.
+    - Buscar y descargar actualizaciones automáticamente en segundo plano.
     - Emitir eventos de estado y progreso hacia el renderer.
     - Mantener el modo desarrollo sin fallar aunque no exista una actualización publicada.
 
@@ -19,6 +20,8 @@
 import { app, BrowserWindow } from "electron";
 
 const EVENTO_RENDERER = "fitjeff:update:event";
+const BUSQUEDA_AUTOMATICA_INICIO_MS = 8000;
+const BUSQUEDA_AUTOMATICA_INTERVALO_MS = 1000 * 60 * 60 * 6;
 
 const ESTADOS = Object.freeze({
   INACTIVO: "inactivo",
@@ -34,7 +37,7 @@ const ESTADOS = Object.freeze({
 function crearEstadoInicial() {
   return {
     estado: ESTADOS.INACTIVO,
-    mensaje: "Actualizador listo.",
+    mensaje: "Actualizador automático listo.",
     versionActual: app.getVersion(),
     versionDisponible: "",
     porcentaje: 0,
@@ -46,6 +49,7 @@ function crearEstadoInicial() {
     puedeReiniciar: false,
     esElectron: true,
     esInstalada: app.isPackaged,
+    automaticoActivo: app.isPackaged,
     actualizadoEn: new Date().toISOString()
   };
 }
@@ -59,10 +63,21 @@ function normalizarProgreso(progreso = {}) {
   };
 }
 
+function usarTemporizadorSinBloquearSalida(temporizador) {
+  if (temporizador && typeof temporizador.unref === "function") {
+    temporizador.unref();
+  }
+
+  return temporizador;
+}
+
 export function crearElectronUpdaterService({ obtenerVentanaPrincipal = () => BrowserWindow.getFocusedWindow() } = {}) {
   let autoUpdater = null;
   let eventosRegistrados = false;
   let estadoActual = crearEstadoInicial();
+  let busquedaEnCurso = null;
+  let temporizadorBusquedaAutomatica = null;
+  let intervaloBusquedaAutomatica = null;
 
   function actualizarEstado(parcial = {}) {
     estadoActual = {
@@ -70,6 +85,7 @@ export function crearElectronUpdaterService({ obtenerVentanaPrincipal = () => Br
       ...parcial,
       versionActual: app.getVersion(),
       esInstalada: app.isPackaged,
+      automaticoActivo: app.isPackaged,
       actualizadoEn: new Date().toISOString()
     };
 
@@ -101,7 +117,7 @@ export function crearElectronUpdaterService({ obtenerVentanaPrincipal = () => Br
       throw new Error("No se pudo cargar electron-updater.");
     }
 
-    autoUpdater.autoDownload = false;
+    autoUpdater.autoDownload = true;
     autoUpdater.autoInstallOnAppQuit = true;
     autoUpdater.allowPrerelease = false;
 
@@ -119,7 +135,7 @@ export function crearElectronUpdaterService({ obtenerVentanaPrincipal = () => Br
     autoUpdater.on("checking-for-update", () => {
       actualizarEstado({
         estado: ESTADOS.BUSCANDO,
-        mensaje: "Buscando actualización...",
+        mensaje: "Buscando actualización automáticamente...",
         porcentaje: 0,
         puedeBuscar: false,
         puedeDescargar: false,
@@ -130,11 +146,11 @@ export function crearElectronUpdaterService({ obtenerVentanaPrincipal = () => Br
     autoUpdater.on("update-available", (info) => {
       actualizarEstado({
         estado: ESTADOS.DISPONIBLE,
-        mensaje: "Hay una actualización disponible.",
+        mensaje: "Hay una actualización disponible. La descarga iniciará automáticamente.",
         versionDisponible: info?.version || "",
         porcentaje: 0,
-        puedeBuscar: true,
-        puedeDescargar: true,
+        puedeBuscar: false,
+        puedeDescargar: false,
         puedeReiniciar: false
       });
     });
@@ -154,7 +170,7 @@ export function crearElectronUpdaterService({ obtenerVentanaPrincipal = () => Br
     autoUpdater.on("download-progress", (progreso) => {
       actualizarEstado({
         estado: ESTADOS.DESCARGANDO,
-        mensaje: "Descargando actualización...",
+        mensaje: "Descargando actualización automáticamente...",
         ...normalizarProgreso(progreso),
         puedeBuscar: false,
         puedeDescargar: false,
@@ -165,7 +181,7 @@ export function crearElectronUpdaterService({ obtenerVentanaPrincipal = () => Br
     autoUpdater.on("update-downloaded", (info) => {
       actualizarEstado({
         estado: ESTADOS.DESCARGADA,
-        mensaje: "Actualización descargada. Reinicia para instalar.",
+        mensaje: "Actualización descargada. Se instalará automáticamente al cerrar o reiniciar FitJeff.",
         versionDisponible: info?.version || estadoActual.versionDisponible,
         porcentaje: 100,
         puedeBuscar: false,
@@ -179,7 +195,7 @@ export function crearElectronUpdaterService({ obtenerVentanaPrincipal = () => Br
         estado: ESTADOS.ERROR,
         mensaje: error?.message || "No se pudo actualizar FitJeff.",
         puedeBuscar: true,
-        puedeDescargar: estadoActual.estado === ESTADOS.DISPONIBLE,
+        puedeDescargar: false,
         puedeReiniciar: false
       });
     });
@@ -189,20 +205,74 @@ export function crearElectronUpdaterService({ obtenerVentanaPrincipal = () => Br
     return estadoActual;
   }
 
-  async function buscarActualizacion() {
+  async function ejecutarBusquedaActualizacion({ automatica = false } = {}) {
     if (!app.isPackaged) {
       return actualizarEstado({
         estado: ESTADOS.NO_DISPONIBLE_DESARROLLO,
-        mensaje: "El actualizador automático funciona solo en la app instalada.",
+        mensaje: automatica
+          ? "Modo desarrollo: búsqueda automática desactivada."
+          : "El actualizador automático funciona solo en la app instalada.",
         puedeBuscar: false,
         puedeDescargar: false,
         puedeReiniciar: false
       });
     }
 
-    const updater = await cargarAutoUpdater();
-    await updater.checkForUpdates();
-    return obtenerEstado();
+    if (busquedaEnCurso) {
+      return busquedaEnCurso;
+    }
+
+    busquedaEnCurso = (async () => {
+      const updater = await cargarAutoUpdater();
+
+      actualizarEstado({
+        estado: ESTADOS.BUSCANDO,
+        mensaje: automatica ? "Buscando actualización automáticamente..." : "Buscando actualización...",
+        porcentaje: 0,
+        puedeBuscar: false,
+        puedeDescargar: false,
+        puedeReiniciar: false
+      });
+
+      await updater.checkForUpdates();
+      return obtenerEstado();
+    })().finally(() => {
+      busquedaEnCurso = null;
+    });
+
+    return busquedaEnCurso;
+  }
+
+  function programarBusquedaAutomatica() {
+    if (!app.isPackaged || temporizadorBusquedaAutomatica || intervaloBusquedaAutomatica) {
+      return;
+    }
+
+    const buscarEnSegundoPlano = () => {
+      ejecutarBusquedaActualizacion({ automatica: true }).catch((error) => {
+        actualizarEstado({
+          estado: ESTADOS.ERROR,
+          mensaje: error?.message || "No se pudo buscar actualizaciones automáticamente.",
+          puedeBuscar: true,
+          puedeDescargar: false,
+          puedeReiniciar: false
+        });
+      });
+    };
+
+    temporizadorBusquedaAutomatica = usarTemporizadorSinBloquearSalida(setTimeout(() => {
+      temporizadorBusquedaAutomatica = null;
+      buscarEnSegundoPlano();
+    }, BUSQUEDA_AUTOMATICA_INICIO_MS));
+
+    intervaloBusquedaAutomatica = usarTemporizadorSinBloquearSalida(setInterval(
+      buscarEnSegundoPlano,
+      BUSQUEDA_AUTOMATICA_INTERVALO_MS
+    ));
+  }
+
+  function buscarActualizacion() {
+    return ejecutarBusquedaActualizacion({ automatica: false });
   }
 
   async function descargarActualizacion() {
@@ -247,7 +317,15 @@ export function crearElectronUpdaterService({ obtenerVentanaPrincipal = () => Br
     }
 
     await cargarAutoUpdater();
-    return obtenerEstado();
+    programarBusquedaAutomatica();
+
+    return actualizarEstado({
+      estado: ESTADOS.INACTIVO,
+      mensaje: "Actualizador automático activo. FitJeff buscará y descargará actualizaciones en segundo plano.",
+      puedeBuscar: true,
+      puedeDescargar: false,
+      puedeReiniciar: false
+    });
   }
 
   return {
