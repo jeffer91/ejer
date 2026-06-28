@@ -66,7 +66,13 @@ const requiredFiles = [
   "src/features/actividad/registro/registro.controller.js",
   "src/features/actividad/registro/registro.view.js",
   "src/features/actividad/resumen/resumen.view.js",
+  "src/features/actividad/dispositivos/dispositivos.constants.js",
+  "src/features/actividad/dispositivos/dispositivos.controller.js",
+  "src/features/actividad/dispositivos/dispositivos.css",
+  "src/features/actividad/dispositivos/dispositivos.repository.js",
   "src/features/actividad/dispositivos/dispositivos.service.js",
+  "src/features/actividad/dispositivos/dispositivos.view.js",
+  "src/features/actividad/dispositivos/dispositivos-import-bridge.service.js",
   "src/features/entrenamiento/entrenamiento.repository.js",
   "src/features/entrenamiento/ajustes/gemini.service.js",
   "src/features/entrenamiento/ajustes/gemini-settings.repository.js",
@@ -89,7 +95,7 @@ const blockedPatterns = [
 ];
 
 const semanticChecks = [
-  { file: "README.md", mustInclude: ["Bloque 37 - Conflictos local/remoto", "sync-conflict.service.js", "Bloques pendientes"], message: "README debe documentar el bloque 37 y pendientes." },
+  { file: "README.md", mustInclude: ["Bloque 38 - Dispositivos", "puente claro de importación", "Bloques pendientes"], message: "README debe documentar el bloque 38 y pendientes." },
   { file: "package.json", mustInclude: ["\"start\": \"node scripts/start-electron-dev.cjs\"", "\"audit:app\": \"node scripts/auditar-app.cjs\"", "publicar:automatico"], message: "package.json debe usar inicio seguro y auditoria." },
   { file: "scripts/check-local.cjs", mustInclude: ["Auditoría estática", "scripts/auditar-app.cjs", "Build de Vite"], message: "check-local debe ejecutar auditoria antes del build." },
   { file: "scripts/check-tools.cjs", mustInclude: ["audit:app", "publicar:automatico", "No debe existir configurar:firebase"], message: "check-tools debe validar auditoria y no permitir configurar:firebase." },
@@ -100,6 +106,12 @@ const semanticChecks = [
   { file: "src/core/sync/sync-queue.service.js", mustInclude: ["operationKey", "deduplicarCola", "payloadHash", "listarPorModulo", "entidadId"], message: "La cola debe ser diferencial y deduplicada por entidad." },
   { file: "src/core/sync/sync-scheduler.service.js", mustInclude: ["ejecutarSyncAutomatico", "sincronizarManual", "conflictosPendientes", "crearSyncConflictService", "SYNC_SCHEDULER_KEY"], message: "Scheduler debe mostrar conflictos y sincronización diaria." },
   { file: "src/core/sync/sync.service.js", mustInclude: ["validarConflictosAntesDeSubir", "crearSyncConflictService", "registrarConflicto", "leerResumenUsuario"], message: "Sync debe detenerse ante conflictos local/remoto." },
+  { file: "src/features/actividad/dispositivos/dispositivos-import-bridge.service.js", mustInclude: ["crearDispositivosImportBridgeService", "importarTexto", "parsearJson", "parsearTabla", "SYNC_MODULES.ACTIVIDAD"], message: "Debe existir puente claro de importación de dispositivos." },
+  { file: "src/features/actividad/dispositivos/dispositivos.service.js", mustInclude: ["crearDispositivosImportBridgeService", "importarDatosPegados", "ejemploImportacion", "ultimoResultadoImportacion"], message: "Dispositivos debe conectar el puente de importación." },
+  { file: "src/features/actividad/dispositivos/dispositivos.view.js", mustInclude: ["crearPanelImportacion", "Importar actividad", "dispositivos-textarea", "Pegar ejemplo"], message: "Vista Dispositivos debe mostrar importación clara." },
+  { file: "src/features/actividad/dispositivos/dispositivos.controller.js", mustInclude: ["importarDatosPegados", "vista.importForm", "vista.ejemploBoton", "resultadoImportacion"], message: "Controller Dispositivos debe ejecutar importación." },
+  { file: "src/features/actividad/dispositivos/dispositivos.css", mustInclude: ["dispositivos-textarea", "dispositivos-import-form", "dispositivos-import-actions"], message: "Dispositivos debe tener estilos de importación." },
+  { file: "src/features/actividad/actividad.repository.js", mustInclude: ["importadoEn", "fuente", "origen", "Conservar metadata de importación"], message: "Actividad debe conservar metadata importada." },
   { file: "src/app/app.bootstrap.js", mustInclude: ["crearSyncSchedulerService", "sincronizarAutomaticoEnSegundoPlano", "ejecutarSyncAutomatico", "router.iniciar()"], message: "Bootstrap debe usar scheduler diario sin bloquear la app." },
   { file: "src/modules/ajustes/ajustes.controller.js", mustInclude: ["crearSyncSchedulerService", "sincronizarManual", "refrescarSync", "vista.syncBoton"], message: "Ajustes debe permitir sincronización manual." },
   { file: "src/modules/ajustes/ajustes.view.js", mustInclude: ["crearBloqueSync", "actualizarEstadoSync", "Conflictos pendientes", "ajustes-sync-status__row--alert"], message: "Vista Ajustes debe mostrar conflictos." },
@@ -223,6 +235,7 @@ function run() {
     console.log("Bloque 35 aplicado: Sincronizacion diaria automatica y manual.");
     console.log("Bloque 36 aplicado: Firebase resumen liviano y registros por subcoleccion.");
     console.log("Bloque 37 aplicado: Conflictos local/remoto y resolucion segura.");
+    console.log("Bloque 38 aplicado: Dispositivos reales o puente claro de importacion.");
     return;
   }
 
