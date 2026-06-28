@@ -4,6 +4,7 @@ release/*
 !release/
 !release/README.md
 !release/latest.json
+!release/latest-android.json
 out/
 package-lock.json
 .DS_Store
