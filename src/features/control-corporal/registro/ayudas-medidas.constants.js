@@ -18,6 +18,10 @@ export const AYUDAS_MEDIDAS = Object.freeze({
     titulo: "Peso",
     texto: "Usa condiciones parecidas cada vez. El botón ? abre una guía visual y consejos."
   },
+  cuelloCm: {
+    titulo: "Cuello",
+    texto: "Mide alrededor del cuello, sin apretar. Ayuda a mejorar el análisis corporal."
+  },
   cinturaCm: {
     titulo: "Cintura",
     texto: "Cerca del ombligo, cinta horizontal, sin apretar. Abre ? para ver el punto exacto."
