@@ -6,7 +6,8 @@
     - Iniciar FitJeff en modo web, PWA o Electron.
     - Instalar captura global de errores simples.
     - Validar que exista el contenedor #app antes de montar la app.
-    - Restaurar datos locales/Firebase antes de decidir si mostrar Inicio.
+    - Leer datos locales primero para montar la interfaz sin esperar Firebase.
+    - Restaurar Firebase en segundo plano si la app local está vacía.
     - Montar la estructura principal dentro de #app.
     - Lanzar sincronización en segundo plano sin bloquear la interfaz.
     - Registrar el service worker solo en producción web/PWA para evitar caché viejo en desarrollo y Electron.
@@ -23,7 +24,7 @@
 
 import "./app.css";
 import { crearAppErrorHandlerService } from "../core/errors/app-error-handler.service.js";
-import { prepararDatosAntesDeRouter } from "../core/bootstrap/app-data-hydration.service.js";
+import { prepararDatosAntesDeRouter, restaurarFirebaseEnSegundoPlano } from "../core/bootstrap/app-data-hydration.service.js";
 import { crearSyncService } from "../core/sync/sync.service.js";
 import { crearRouterFitJeff } from "./app-router.js";
 
@@ -68,6 +69,20 @@ function sincronizarEnSegundoPlano() {
   });
 }
 
+function restaurarFirebaseSinBloquear(router) {
+  restaurarFirebaseEnSegundoPlano().then((resultado) => {
+    if (resultado.restaurado && typeof router.marcarPerfilCompletadoDesdeSync === "function") {
+      router.marcarPerfilCompletadoDesdeSync();
+    }
+  }).catch((error) => {
+    errorHandler.registrarError(error, {
+      modulo: "firebase",
+      accion: "restaurar-segundo-plano",
+      mensajeUsuario: "FitJeff abrió en modo local. Firebase se revisará después."
+    });
+  });
+}
+
 function debeRegistrarServiceWorker() {
   return Boolean(
     "serviceWorker" in navigator
@@ -98,10 +113,10 @@ function validarRaiz() {
   throw new Error("No existe el contenedor #app en index.html.");
 }
 
-async function iniciarFitJeff() {
+function iniciarFitJeff() {
   validarRaiz();
 
-  const preparacionDatos = await prepararDatosAntesDeRouter();
+  const preparacionDatos = prepararDatosAntesDeRouter();
 
   const router = crearRouterFitJeff({
     raiz,
@@ -109,8 +124,13 @@ async function iniciarFitJeff() {
   });
 
   router.iniciar();
+  restaurarFirebaseSinBloquear(router);
   sincronizarEnSegundoPlano();
   registrarServiceWorkerPwa();
 }
 
-iniciarFitJeff().catch(renderizarErrorInicio);
+try {
+  iniciarFitJeff();
+} catch (error) {
+  renderizarErrorInicio(error);
+}
