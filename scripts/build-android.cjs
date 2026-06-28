@@ -44,12 +44,16 @@ function escribirJson(ruta, data) {
   fs.writeFileSync(ruta, `${JSON.stringify(data, null, 2)}\n`, "utf8");
 }
 
+function requiereShellWindows(comando) {
+  return process.platform === "win32" && /\.(bat|cmd)$/i.test(comando);
+}
+
 function ejecutar(comando, args, opciones = {}) {
   const resultado = spawnSync(comando, args, {
     cwd: opciones.cwd || rootDir,
     stdio: opciones.silencioso ? ["ignore", "pipe", "pipe"] : "inherit",
     encoding: "utf8",
-    shell: false
+    shell: requiereShellWindows(comando)
   });
 
   if (resultado.error && opciones.fallar !== false) {
