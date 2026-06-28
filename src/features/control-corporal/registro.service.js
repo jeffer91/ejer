@@ -9,6 +9,7 @@
     - Guardar la configuracion inicial en una sola operacion local.
     - Marcar Inicio como completado cuando ya existen datos reales.
     - Encolar cambios locales aunque Firebase todavia no este listo.
+    - Encolar operaciones diferenciales para no duplicar cambios pendientes.
     - Marcar Control corporal como modulo sucio en metadata de sincronizacion.
     - Registrar cambios para que el Historial pueda mostrar correcciones.
     - Usar fecha local para registros diarios y evitar desfases por UTC.
@@ -104,6 +105,10 @@ export function crearRegistroService(
 
     return queue.agregar({
       tipo: "estado-general",
+      modulo: SYNC_MODULES.CONTROL_CORPORAL,
+      entidad: "estado-general",
+      entidadId: "general",
+      accion: "upsert",
       payload: {
         perfil: estado.perfil,
         objetivo: estado.objetivo,
@@ -125,6 +130,10 @@ export function crearRegistroService(
 
     return queue.agregar({
       tipo: "registro",
+      modulo: SYNC_MODULES.CONTROL_CORPORAL,
+      entidad: "registro",
+      entidadId: registro.id,
+      accion: "upsert",
       payload: registro
     });
   }
