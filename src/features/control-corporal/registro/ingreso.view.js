@@ -5,7 +5,7 @@
   Funcion o funciones:
     - Construir la pantalla de Registro / Ingreso.
     - Mostrar peso diario y medidas corporales en una vista compacta.
-    - Integrar ayuda ? debajo de cada campo sin abrir otra pantalla.
+    - Abrir popup visual de ayuda con muñeco y texto claro desde cada botón ?.
     - Mantener la vista separada de guardado y validaciones.
 
   Se conecta con:
@@ -13,12 +13,14 @@
     - src/features/control-corporal/registro/ingreso.constants.js
     - src/features/control-corporal/registro/ayudas-medidas.constants.js
     - src/features/control-corporal/registro/mapa-corporal.view.js
+    - src/features/control-corporal/registro/medidas-modal/medidas-modal.view.js
     - src/features/control-corporal/registro/ingreso.css
 */
 
 import { INGRESO_CAMPOS_MEDIDAS, INGRESO_CAMPOS_PESO, INGRESO_LABELS, INGRESO_TEXTOS } from "./ingreso.constants.js";
 import { obtenerAyudaMedida } from "./ayudas-medidas.constants.js";
 import { crearMapaCorporal } from "./mapa-corporal.view.js";
+import { crearMedidasModal } from "./medidas-modal/medidas-modal.view.js";
 import { fechaHoy } from "./ingreso.parser.js";
 import "./ingreso.css";
 
@@ -40,9 +42,8 @@ function crearAyudaCampo(id) {
   const ayuda = obtenerAyudaMedida(id);
   const contenedor = crearElemento("div", "ingreso-field__help");
 
-  contenedor.hidden = true;
-
   if (!ayuda) {
+    contenedor.hidden = true;
     return contenedor;
   }
 
@@ -52,28 +53,26 @@ function crearAyudaCampo(id) {
   return contenedor;
 }
 
-function crearBotonAyuda(id, ayudaBox) {
+function crearBotonAyuda(id, abrirAyuda) {
   const boton = crearElemento("button", "ingreso-help-button", "?");
   boton.type = "button";
-  boton.setAttribute("aria-label", `Ver ayuda de ${INGRESO_LABELS[id] || id}`);
-  boton.setAttribute("aria-expanded", "false");
+  boton.setAttribute("aria-label", `Abrir guía visual de ${INGRESO_LABELS[id] || id}`);
 
   boton.addEventListener("click", () => {
-    const mostrar = ayudaBox.hidden;
-    ayudaBox.hidden = !mostrar;
-    boton.setAttribute("aria-expanded", String(mostrar));
-    boton.classList.toggle("ingreso-help-button--active", mostrar);
+    if (typeof abrirAyuda === "function") {
+      abrirAyuda(id);
+    }
   });
 
   return boton;
 }
 
-function crearCampo({ id, label, placeholder, tipo, valor, inputMode }) {
+function crearCampo({ id, label, placeholder, tipo, valor, inputMode, abrirAyuda }) {
   const grupo = crearElemento("div", "ingreso-field");
   const encabezado = crearElemento("div", "ingreso-field__head");
   const texto = crearElemento("label", "ingreso-field__label", label);
   const ayuda = crearAyudaCampo(id);
-  const botonAyuda = crearBotonAyuda(id, ayuda);
+  const botonAyuda = crearBotonAyuda(id, abrirAyuda);
   const input = crearElemento("input", "ingreso-field__input");
   const error = crearElemento("small", "ingreso-field__error");
 
@@ -102,7 +101,7 @@ function crearCampo({ id, label, placeholder, tipo, valor, inputMode }) {
   return grupo;
 }
 
-function crearFormularioPeso() {
+function crearFormularioPeso({ abrirAyuda }) {
   const form = crearElemento("form", "ingreso-card ingreso-form");
   const mensaje = crearElemento("p", "ingreso-message");
   const boton = crearElemento("button", "ingreso-button", INGRESO_TEXTOS.BOTON_PESO);
@@ -113,7 +112,8 @@ function crearFormularioPeso() {
     id: INGRESO_CAMPOS_PESO.PESO_KG,
     label: INGRESO_LABELS.pesoKg,
     placeholder: "Ejemplo: 86.3 kg",
-    inputMode: "decimal"
+    inputMode: "decimal",
+    abrirAyuda
   }));
 
   boton.type = "submit";
@@ -123,7 +123,7 @@ function crearFormularioPeso() {
   return { form, mensaje };
 }
 
-function crearFormularioMedidas() {
+function crearFormularioMedidas({ abrirAyuda }) {
   const form = crearElemento("form", "ingreso-card ingreso-form ingreso-card--wide");
   const grid = crearElemento("div", "ingreso-grid");
   const mensaje = crearElemento("p", "ingreso-message");
@@ -137,7 +137,8 @@ function crearFormularioMedidas() {
     id: INGRESO_CAMPOS_MEDIDAS.FECHA,
     label: INGRESO_LABELS.fecha,
     tipo: "date",
-    valor: fechaHoy()
+    valor: fechaHoy(),
+    abrirAyuda
   }));
 
   Object.values(INGRESO_CAMPOS_MEDIDAS)
@@ -147,7 +148,8 @@ function crearFormularioMedidas() {
         id: campo,
         label: INGRESO_LABELS[campo],
         placeholder: "cm",
-        inputMode: "decimal"
+        inputMode: "decimal",
+        abrirAyuda
       }));
     });
 
@@ -163,8 +165,10 @@ export function crearIngresoView() {
   const pantalla = crearElemento("section", "ingreso-screen");
   const header = crearElemento("div", "ingreso-header");
   const contenedor = crearElemento("div", "ingreso-layout");
-  const peso = crearFormularioPeso();
-  const medidas = crearFormularioMedidas();
+  const modal = crearMedidasModal();
+  const abrirAyuda = (campo) => modal.abrir(campo);
+  const peso = crearFormularioPeso({ abrirAyuda });
+  const medidas = crearFormularioMedidas({ abrirAyuda });
 
   header.appendChild(crearElemento("p", "ingreso-kicker", "Registro corporal"));
   header.appendChild(crearElemento("h2", "", INGRESO_TEXTOS.TITULO));
@@ -174,6 +178,7 @@ export function crearIngresoView() {
   contenedor.appendChild(medidas.form);
   pantalla.appendChild(header);
   pantalla.appendChild(contenedor);
+  pantalla.appendChild(modal.elemento);
 
   return {
     pantalla,
