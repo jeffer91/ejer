@@ -4,6 +4,7 @@
 
   Función o funciones:
     - Preparar la publicación Android/APK de FitJeff con la misma versión de Windows.
+    - Limpiar APK/manifiestos Android anteriores antes de preparar la versión actual.
     - Generar manifiesto Android para actualización fuera de Play Store.
     - Detectar si ya existe proyecto Android/Capacitor y compilar APK cuando esté disponible.
     - No bloquear la publicación Windows mientras el proyecto Android nativo aún no exista.
@@ -13,6 +14,7 @@
     - android/update-config.json
     - android/signing/README.md
     - release/latest-android.json
+    - scripts/revision-release-final.cjs
     - scripts/publicar-version.bat
     - scripts/release-github.cjs
 */
@@ -27,6 +29,7 @@ const androidDir = path.join(rootDir, "android");
 const releaseDir = path.join(rootDir, "release");
 const updateConfigPath = path.join(androidDir, "update-config.json");
 const latestAndroidPath = path.join(releaseDir, "latest-android.json");
+const npxCommand = process.platform === "win32" ? "npx.cmd" : "npx";
 
 function leerJson(ruta, fallback = null) {
   if (!fs.existsSync(ruta)) {
@@ -46,8 +49,12 @@ function ejecutar(comando, args, opciones = {}) {
     cwd: opciones.cwd || rootDir,
     stdio: opciones.silencioso ? ["ignore", "pipe", "pipe"] : "inherit",
     encoding: "utf8",
-    shell: process.platform === "win32"
+    shell: false
   });
+
+  if (resultado.error && opciones.fallar !== false) {
+    throw new Error(`No se pudo ejecutar ${comando}: ${resultado.error.message}`);
+  }
 
   if (resultado.status !== 0 && opciones.fallar !== false) {
     const detalle = resultado.stderr || resultado.stdout || "";
@@ -87,6 +94,27 @@ function resolverGradleWrapper() {
   return null;
 }
 
+function limpiarArtefactosAndroidPrevios() {
+  fs.mkdirSync(releaseDir, { recursive: true });
+
+  const eliminados = [];
+  fs.readdirSync(releaseDir).forEach((archivo) => {
+    const lower = archivo.toLowerCase();
+    const esAndroid = lower.startsWith("fitjeff-android-") && (lower.endsWith(".apk") || lower.endsWith(".aab"));
+    const esManifest = lower === "latest-android.json";
+
+    if (!esAndroid && !esManifest) return;
+
+    fs.rmSync(path.join(releaseDir, archivo), { force: true });
+    eliminados.push(archivo);
+  });
+
+  if (eliminados.length) {
+    console.log("Artefactos Android anteriores eliminados:");
+    eliminados.forEach((archivo) => console.log(`- ${archivo}`));
+  }
+}
+
 function buscarApks(dir, encontrados = []) {
   if (!fs.existsSync(dir)) {
     return encontrados;
@@ -120,6 +148,14 @@ function copiarApkPublicable(pkg) {
   return destino;
 }
 
+function calcularVersionCode(version) {
+  const partes = String(version || "0.0.1").split(".").map((parte) => Number(parte || 0));
+  const major = Math.max(partes[0] || 0, 0);
+  const minor = Math.max(partes[1] || 0, 0);
+  const patch = Math.max(partes[2] || 0, 0);
+  return major * 1000000 + minor * 1000 + patch || 1;
+}
+
 function crearManifestAndroid({ pkg, config, apkPath = null, estado = "preparado", mensaje = "APK pendiente de proyecto Android nativo." }) {
   const apkExiste = apkPath && fs.existsSync(apkPath);
   const payload = {
@@ -127,7 +163,7 @@ function crearManifestAndroid({ pkg, config, apkPath = null, estado = "preparado
     platform: "android",
     channel: "stable",
     versionName: pkg.version,
-    versionCode: Number(String(pkg.version).split(".").reduce((acc, parte) => `${acc}${String(parte).padStart(3, "0")}`, "")) || 1,
+    versionCode: calcularVersionCode(pkg.version),
     packageId: config.packageId || "com.jeff.fitjeff",
     repository: config.repository || "jeffer91/ejer",
     releaseProvider: config.releaseProvider || "github",
@@ -164,7 +200,7 @@ function prepararSinProyectoAndroid(pkg, config) {
 
 function compilarAndroid(pkg, config) {
   if (existeCapacitorConfig()) {
-    ejecutar("npx", ["cap", "sync", "android"]);
+    ejecutar(npxCommand, ["cap", "sync", "android"]);
   }
 
   const gradleWrapper = resolverGradleWrapper();
@@ -211,7 +247,7 @@ function main() {
   console.log(`Versión: ${pkg.version}`);
   console.log(`Paquete: ${config.packageId || "com.jeff.fitjeff"}`);
 
-  fs.mkdirSync(releaseDir, { recursive: true });
+  limpiarArtefactosAndroidPrevios();
 
   if (!existeProyectoAndroidNativo()) {
     prepararSinProyectoAndroid(pkg, config);
