@@ -6,6 +6,7 @@ const ROOT = process.cwd();
 const requiredFiles = [
   "README.md",
   "docs/fase-visual-2026-cierre.md",
+  "src/core/utils/date.util.js",
   "src/app/app-router.js",
   "src/app/app.css",
   "src/app/theme-light.css",
@@ -77,19 +78,45 @@ const blockedPatterns = [
   "../../modules/inicio",
   "../../modules/registro",
   "src/modules/inicio",
-  "src/modules/registro"
+  "src/modules/registro",
+  "toISOString().slice(0, 10)"
 ];
 
 const semanticChecks = [
   {
     file: "README.md",
-    mustInclude: ["Bloque 12 - Cierre", "Fase visual 2026 cerrada", "Bloques completados: 12 de 12"],
-    message: "README debe documentar el cierre de la fase visual."
+    mustInclude: ["Bloque 13 - Revision para solucionar errores", "Fechas locales", "Fase visual 2026 cerrada"],
+    message: "README debe documentar el bloque 13 de correccion."
   },
   {
     file: "docs/fase-visual-2026-cierre.md",
     mustInclude: ["Fase visual: cerrada", "Bloques completados: 12 de 12", "Siguiente fase recomendada"],
     message: "Debe existir documento de cierre de fase visual."
+  },
+  {
+    file: "src/core/utils/date.util.js",
+    mustInclude: ["formatearFechaLocalISO", "getFullYear", "getMonth", "getDate"],
+    message: "date.util debe usar fecha local para evitar desfases por UTC."
+  },
+  {
+    file: "src/features/control-corporal/registro/ingreso.parser.js",
+    mustInclude: ["obtenerFechaHoyISO"],
+    message: "Ingreso debe usar fecha local centralizada."
+  },
+  {
+    file: "src/features/control-corporal/hoy/hoy.rules.js",
+    mustInclude: ["obtenerFechaHoyISO"],
+    message: "Hoy debe detectar el dia actual con fecha local."
+  },
+  {
+    file: "src/features/control-corporal/registro.service.js",
+    mustInclude: ["obtenerFechaHoyISO"],
+    message: "Registro service debe usar fecha local para registros diarios."
+  },
+  {
+    file: "src/features/actividad/actividad.service.js",
+    mustInclude: ["sumarDiasISO", "fechaHoyISO"],
+    message: "Actividad debe calcular hoy y semana con fecha local."
   },
   {
     file: "src/app/app.css",
@@ -262,6 +289,7 @@ function run() {
   if (missingFiles.length === 0 && blockedImports.length === 0 && semanticFindings.length === 0) {
     console.log("Estructura modular OK.");
     console.log("Fase visual 2026 cerrada: 12/12 bloques completados.");
+    console.log("Bloque 13 aplicado: fechas locales corregidas.");
     console.log("Control corporal vive en src/features/control-corporal.");
     console.log("Hoy es la pantalla principal de Control corporal.");
     console.log("El tema claro global esta registrado.");
@@ -280,7 +308,7 @@ function run() {
   }
 
   if (blockedImports.length > 0) {
-    console.error("Se encontraron referencias antiguas:");
+    console.error("Se encontraron referencias antiguas o fechas UTC en campos diarios:");
     blockedImports.forEach((item) => console.error(`- ${item}`));
   }
 
