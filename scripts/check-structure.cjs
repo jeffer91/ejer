@@ -43,6 +43,18 @@ const requiredFiles = [
   "src/features/control-corporal/historial/historial.controller.js",
   "src/features/control-corporal/historial/historial.view.js",
   "src/features/control-corporal/historial/historial.css",
+  "src/features/actividad/actividad.constants.js",
+  "src/features/actividad/actividad.routes.js",
+  "src/features/actividad/actividad.menu.js",
+  "src/features/actividad/actividad.module.js",
+  "src/features/actividad/actividad.repository.js",
+  "src/features/actividad/actividad.service.js",
+  "src/features/actividad/resumen/resumen.controller.js",
+  "src/features/actividad/resumen/resumen.view.js",
+  "src/features/actividad/resumen/resumen.css",
+  "src/features/actividad/registro/registro.controller.js",
+  "src/features/actividad/registro/registro.view.js",
+  "src/features/actividad/registro/registro.css",
   "src/features/entrenamiento/stats/stats.controller.js",
   "src/features/entrenamiento/stats/stats.view.js",
   "src/features/entrenamiento/stats/stats.css",
@@ -84,8 +96,8 @@ const semanticChecks = [
   },
   {
     file: "src/features/features.registry.js",
-    mustInclude: ["FEATURE_DEFAULT_ROUTE_ID = CONTROL_CORPORAL_ROUTES.HOY"],
-    message: "Features Registry debe usar Hoy como ruta inicial."
+    mustInclude: ["ACTIVIDAD_MENU", "montarPantallaActividad", "FEATURE_DEFAULT_ROUTE_ID = CONTROL_CORPORAL_ROUTES.HOY"],
+    message: "Features Registry debe registrar Actividad y mantener Hoy como ruta inicial."
   },
   {
     file: "src/app/app-router.js",
@@ -116,6 +128,26 @@ const semanticChecks = [
     file: "src/features/control-corporal/historial/historial.css",
     mustInclude: ["background: rgba(255, 255, 255, 0.94)", "var(--fj-text-strong", "historial-button--borrar"],
     message: "Historial debe estar alineado al modo claro."
+  },
+  {
+    file: "src/features/actividad/actividad.menu.js",
+    mustInclude: ["ACTIVIDAD_MODULE_ID", "Registro manual", "ACTIVIDAD_ROUTES.RESUMEN"],
+    message: "Actividad debe tener menu independiente."
+  },
+  {
+    file: "src/features/actividad/actividad.service.js",
+    mustInclude: ["guardarActividad", "obtenerResumen", "bicicletaKm"],
+    message: "Actividad debe manejar pasos y bicicleta manual."
+  },
+  {
+    file: "src/features/actividad/resumen/resumen.css",
+    mustInclude: ["background: rgba(255, 255, 255, 0.94)", "actividad-card--success", "actividad-card--pending"],
+    message: "Resumen de Actividad debe estar alineado al modo claro."
+  },
+  {
+    file: "src/features/actividad/registro/registro.view.js",
+    mustInclude: ["pasos", "bicicletaMin", "bicicletaKm"],
+    message: "Registro de Actividad debe permitir pasos y bicicleta."
   },
   {
     file: "src/modules/ajustes/ajustes.css",
@@ -223,6 +255,7 @@ function run() {
     console.log("Inicio abre hacia Hoy y usa modo claro.");
     console.log("Registro integra ayuda ? y mapa corporal.");
     console.log("Progreso usa presenter para una vista ordenada.");
+    console.log("Actividad manual esta registrada como modulo independiente.");
     console.log("Historial, Ajustes, Actualizaciones y Stats usan modo claro.");
     return;
   }
