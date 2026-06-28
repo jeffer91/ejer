@@ -4,8 +4,9 @@
 
   Función o funciones:
     - Controlar el estado interno de sincronización.
-    - Mantener el texto visible simple: Datos al día o cambios pendientes.
+    - Mantener el texto visible simple: Datos al día, cambios pendientes o modo local.
     - Preparar la app para sincronizar con Firebase sin mostrar panel técnico.
+    - Evitar que Firebase deshabilitado se muestre como error.
 
   Se conecta con:
     - src/core/status/app-status.service.js
@@ -23,6 +24,7 @@ function estadoInicial() {
   return {
     ok: true,
     texto: "Datos al día",
+    modo: "local",
     pendiente: false,
     ultimoIntentoEn: "",
     ultimoExitoEn: "",
@@ -49,14 +51,33 @@ export function crearSyncStatusService() {
     return estado;
   }
 
-  function marcarDatosAlDia() {
+  function marcarDatosAlDia(mensaje = "Datos al día") {
     appStatus.marcarDatosAlDia();
 
     return guardar({
       ok: true,
-      texto: "Datos al día",
+      texto: mensaje,
+      modo: "firebase",
       pendiente: false,
       ultimoExitoEn: obtenerFechaHoraISO(),
+      ultimoErrorSimple: ""
+    });
+  }
+
+  function marcarModoLocal(mensaje = "Modo local activo") {
+    appStatus.guardarEstado({
+      texto: mensaje,
+      datosAlDia: true,
+      pendienteSubir: false,
+      errorSimple: ""
+    });
+
+    return guardar({
+      ok: true,
+      texto: mensaje,
+      modo: "local",
+      pendiente: false,
+      ultimoExitoEn: "",
       ultimoErrorSimple: ""
     });
   }
@@ -67,6 +88,7 @@ export function crearSyncStatusService() {
     return guardar({
       ok: false,
       texto: mensaje,
+      modo: "firebase",
       pendiente: true,
       ultimoErrorSimple: ""
     });
@@ -78,6 +100,7 @@ export function crearSyncStatusService() {
     return guardar({
       ok: false,
       texto: mensaje,
+      modo: "firebase",
       pendiente: true,
       ultimoErrorSimple: mensaje
     });
@@ -87,6 +110,7 @@ export function crearSyncStatusService() {
     obtener,
     guardar,
     marcarDatosAlDia,
+    marcarModoLocal,
     marcarPendiente,
     marcarError
   };
