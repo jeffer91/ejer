@@ -4,18 +4,22 @@
 
   Función o funciones:
     - Coordinar la sincronización local con Firebase.
+    - Detectar si Firebase está configurado antes de encolar o enviar datos.
+    - Mantener la app en modo local sin marcar error cuando Firebase está deshabilitado.
     - Enviar estado general y registros pendientes cuando Firebase esté listo.
-    - Mantener cambios en cola si no hay internet o Firebase no está configurado.
+    - Mantener cambios en cola si Firebase está habilitado pero falla la conexión.
     - Evitar que un estado local vacío reemplace un respaldo válido en Firebase.
     - No mostrar opciones técnicas al usuario.
 
   Se conecta con:
+    - src/core/config/firebase.config.js
     - src/core/firebase/firebase-database.service.js
     - src/core/sync/sync-queue.service.js
     - src/core/sync/sync-status.service.js
     - src/features/control-corporal/registro.service.js
 */
 
+import { firebaseEstaConfigurado, obtenerEstadoFirebaseConexion } from "../config/firebase.config.js";
 import { crearFirebaseDatabaseService } from "../firebase/firebase-database.service.js";
 import { crearSyncQueueService } from "./sync-queue.service.js";
 import { crearSyncStatusService } from "./sync-status.service.js";
@@ -49,7 +53,33 @@ export function crearSyncService({
   status = crearSyncStatusService(),
   registroService = crearRegistroService()
 } = {}) {
+  function obtenerEstadoConexion() {
+    return obtenerEstadoFirebaseConexion();
+  }
+
+  function puedeSincronizar() {
+    return firebaseEstaConfigurado();
+  }
+
+  function responderModoLocal() {
+    const conexion = obtenerEstadoConexion();
+    status.marcarModoLocal(conexion.mensaje);
+
+    return {
+      ok: true,
+      modo: conexion.modo,
+      mensaje: conexion.mensaje,
+      procesados: 0,
+      encolados: 0,
+      conexion
+    };
+  }
+
   function encolarEstadoActual() {
+    if (!puedeSincronizar()) {
+      return responderModoLocal();
+    }
+
     const estado = registroService.obtenerEstado();
 
     if (!estadoTieneDatos(estado)) {
@@ -108,6 +138,10 @@ export function crearSyncService({
   }
 
   async function sincronizarPendientes() {
+    if (!puedeSincronizar()) {
+      return responderModoLocal();
+    }
+
     const pendientes = queue.listar();
 
     if (pendientes.length === 0) {
@@ -148,6 +182,10 @@ export function crearSyncService({
   }
 
   async function sincronizarAhora() {
+    if (!puedeSincronizar()) {
+      return responderModoLocal();
+    }
+
     if (queue.listar().length === 0) {
       const encolado = encolarEstadoActual();
 
@@ -164,6 +202,7 @@ export function crearSyncService({
   }
 
   return {
+    obtenerEstadoConexion,
     encolarEstadoActual,
     sincronizarPendientes,
     sincronizarAhora
