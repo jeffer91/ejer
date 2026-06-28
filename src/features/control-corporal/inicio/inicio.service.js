@@ -1,24 +1,27 @@
 /*
   Nombre completo: inicio.service.js
-  Ruta o ubicación: src/features/control-corporal/inicio/inicio.service.js
+  Ruta o ubicacion: src/features/control-corporal/inicio/inicio.service.js
 
-  Función o funciones:
-    - Guardar la configuración inicial de FitJeff.
+  Funcion o funciones:
+    - Guardar la configuracion inicial de FitJeff.
     - Crear perfil, objetivo y primer registro de peso.
-    - Marcar el Inicio como completado para abrir Estadísticas por defecto.
+    - Marcar el Inicio como completado para abrir Hoy por defecto.
+    - Usar fecha local para el primer registro de peso.
 
   Se conecta con:
     - src/features/control-corporal/inicio/inicio.validator.js
     - src/features/control-corporal/inicio/inicio.constants.js
     - src/features/control-corporal/registro.service.js
+    - src/core/utils/date.util.js
 */
 
+import { obtenerFechaHoyISO } from "../../../core/utils/date.util.js";
 import { INICIO_STORAGE_KEYS } from "./inicio.constants.js";
 import { validarInicio } from "./inicio.validator.js";
 import { crearRegistroService } from "../registro.service.js";
 
 function fechaHoy() {
-  return new Date().toISOString().slice(0, 10);
+  return obtenerFechaHoyISO();
 }
 
 export function crearInicioService(registroService = crearRegistroService()) {
@@ -63,7 +66,7 @@ export function crearInicioService(registroService = crearRegistroService()) {
 
     return {
       ok: true,
-      mensaje: "Perfil inicial guardado.",
+      mensaje: "Perfil inicial guardado. Abriendo Hoy.",
       pesoGuardado
     };
   }
