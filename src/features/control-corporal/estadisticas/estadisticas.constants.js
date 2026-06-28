@@ -5,7 +5,7 @@
   Funcion o funciones:
     - Centralizar textos, etiquetas y estados visuales de Progreso.
     - Mantener la pantalla clara y sin saturar al usuario.
-    - Preparar indicadores para peso, objetivo, IMC, tendencia, avance, faltante y próxima medición.
+    - Preparar indicadores para peso, objetivo, IMC contextual, tendencia, avance, faltante y próxima medición.
 
   Se conecta con:
     - src/features/control-corporal/estadisticas/estadisticas.calculations.js
@@ -25,7 +25,8 @@ export const ESTADISTICAS_TEXTOS = Object.freeze({
   PROGRESO_PESO: "Avance hacia la meta",
   MENSAJE_INTELIGENTE: "Lectura rápida",
   DETALLE_PESO: "Detalle de peso",
-  RESUMEN_PRINCIPAL: "Resumen principal"
+  RESUMEN_PRINCIPAL: "Resumen principal",
+  ANALISIS_CORPORAL: "Análisis corporal inteligente"
 });
 
 export const ESTADISTICAS_TENDENCIAS = Object.freeze({
@@ -55,6 +56,7 @@ export const ESTADISTICAS_LABELS = Object.freeze({
   tendencia: "Tendencia",
   imc: "IMC",
   proximaMedicion: "Próxima medición",
+  cuelloCm: "Cuello",
   cinturaCm: "Cintura",
   abdomenCm: "Abdomen",
   pechoCm: "Pecho",
