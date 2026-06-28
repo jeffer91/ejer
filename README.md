@@ -12,6 +12,8 @@ Bloque 13 aplicado: revision para solucionar errores.
 
 Bloque 14 aplicado: revision local completa.
 
+Bloque 15 aplicado: Gemini persistencia blindada.
+
 La app queda con una base clara, simple y modular para continuar con mejoras funcionales sin mezclar responsabilidades.
 
 ## Pantalla principal
@@ -229,9 +231,30 @@ Corregido:
 
 Resultado: nuevo comando `npm run check:local` para revisar herramientas, estructura modular y build de Vite antes de abrir la app.
 
+## Nueva fase funcional
+
+### Bloque 15 - Gemini persistencia blindada
+
+Creado:
+
+- `src/features/entrenamiento/ajustes/gemini-settings.repository.js`
+- `src/features/entrenamiento/ajustes/gemini-settings.service.js`
+- `src/features/entrenamiento/ajustes/gemini-settings.migration.js`
+
+Corregido:
+
+- `src/features/entrenamiento/entrenamiento.constants.js`
+- `src/features/entrenamiento/ajustes/ajustes.service.js`
+- `src/features/entrenamiento/ajustes/ajustes.view.js`
+- `src/features/entrenamiento/ajustes/ajustes.css`
+- `scripts/check-structure.cjs`
+- `README.md`
+
+Resultado: Gemini ahora tiene almacenamiento separado para la API Key, migracion desde ajustes antiguos, conservacion cuando el campo queda vacio, estado visible de persistencia y boton de borrado explicito.
+
 ## Documento de cierre
 
-El cierre detallado de esta fase esta en:
+El cierre detallado de la fase visual esta en:
 
 ```txt
  docs/fase-visual-2026-cierre.md
@@ -245,16 +268,16 @@ Instalar dependencias:
 npm install
 ```
 
-Revision local completa:
-
-```bash
-npm run check:local
-```
-
 Revisar estructura:
 
 ```bash
 npm run check:structure
+```
+
+Revisar estructura, herramientas y build local:
+
+```bash
+npm run check:local
 ```
 
 Abrir en navegador:
@@ -290,15 +313,14 @@ npm run desktop:win
 - Registro debe mantener ayuda ? integrada.
 - Progreso debe ser detalle, no dashboard saturado.
 - Actividad manual debe crecer antes de conectar sensores o apps externas.
-- Las fechas diarias deben usar fecha local, no UTC.
-- Antes de seguir con nuevos bloques, ejecutar `npm run check:local`.
+- La API Key de Gemini debe conservarse en almacenamiento separado y solo borrarse desde la accion explicita.
 
 ## Siguiente fase recomendada
 
-Fase funcional de Actividad:
+Fase funcional de Actividad y Entrenamiento:
 
-1. Mejorar historial de Actividad.
-2. Agregar edicion y eliminacion segura.
-3. Integrar Actividad con Hoy.
-4. Preparar sync local-first.
-5. Luego evaluar sensores, Health Connect o Google Fit.
+1. Medidas con popup visual.
+2. Rutinas claro + pasos.
+3. Jarvis claro.
+4. Control corporal inteligente.
+5. Dispositivos / Cubitt CT4 / Google Fit preparado.
