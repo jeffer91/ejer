@@ -6,7 +6,7 @@
     - Auditar FitJeff de forma estática antes de abrir, compilar o publicar.
     - Verificar package.json, scripts principales, archivos críticos y rutas de imports locales.
     - Detectar configuradores Firebase no solicitados, archivos faltantes y referencias rotas.
-    - Verificar que exista metadata de sincronización local-first.
+    - Verificar metadata, cola diferencial y scheduler de sincronización local-first.
     - Reportar avisos sin bloquear cuando son configuración pendiente, no errores de código.
 
   Se conecta con:
@@ -16,6 +16,8 @@
     - src/app/app.bootstrap.js
     - src/core/config/firebase.project.config.js
     - src/core/sync/sync-metadata.service.js
+    - src/core/sync/sync-queue.service.js
+    - src/core/sync/sync-scheduler.service.js
 */
 
 const fs = require("node:fs");
@@ -48,6 +50,7 @@ const archivosCriticos = [
   "src/core/sync/sync.service.js",
   "src/core/sync/sync-queue.service.js",
   "src/core/sync/sync-metadata.service.js",
+  "src/core/sync/sync-scheduler.service.js",
   "src/features/features.registry.js"
 ];
 
