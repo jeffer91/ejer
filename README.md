@@ -30,13 +30,15 @@ FitJeff tiene una base modular funcional y visualmente clara. La app trabaja en 
 - Sincronización diaria automática y sincronización manual desde Ajustes.
 - Firebase con resumen liviano en el documento principal y registros pesados en subcolección.
 - Conflictos local/remoto guardados localmente para evitar sobrescrituras peligrosas.
+- Dispositivos con puente claro de importación CSV/JSON para actividad.
 
-### Preparado, pero pendiente de conexion real
+### Preparado, pero pendiente de conexión real
 
-- Cubitt CT4 esta preparado como pantalla/configuracion, pero no lee datos reales del reloj todavia.
-- Google Fit esta preparado como pantalla/configuracion, pero no tiene autorizacion ni lectura real todavia.
-- Android/APK esta preparado a nivel de scripts: si existe proyecto Android nativo/Capacitor, compila APK; si no existe, genera manifiesto `latest-android.json` sin bloquear Windows.
-- GitHub Releases esta preparado para actualizaciones del instalador con `.exe` y `latest.yml`.
+- Cubitt CT4 está preparado como pantalla/configuración, pero todavía no lee datos reales del reloj por API.
+- Google Fit está preparado como pantalla/configuración, pero todavía no tiene autorización OAuth ni lectura real.
+- Mientras no exista API real, Dispositivos permite importar datos exportados o copiados mediante CSV/JSON.
+- Android/APK está preparado a nivel de scripts: si existe proyecto Android nativo/Capacitor, compila APK; si no existe, genera manifiesto `latest-android.json` sin bloquear Windows.
+- GitHub Releases está preparado para actualizaciones del instalador con `.exe` y `latest.yml`.
 
 ## Estado de bloques
 
@@ -44,15 +46,15 @@ Fase visual 2026 cerrada: 12 de 12 bloques.
 
 Bloques funcionales y correctivos aplicados:
 
-- Bloque 13: revision para solucionar errores.
-- Bloque 14: revision local completa.
+- Bloque 13: revisión para solucionar errores.
+- Bloque 14: revisión local completa.
 - Bloque 15: Gemini persistencia separada.
 - Bloque 16: Medidas con popup visual.
 - Bloque 17: Rutinas claro + pasos.
 - Bloque 18: Jarvis claro.
 - Bloque 19: Control corporal inteligente.
 - Bloque 20: Dispositivos / Cubitt CT4 / Google Fit preparado.
-- Bloque 21: Analisis y correccion de errores.
+- Bloque 21: Análisis y corrección de errores.
 - Bloque 22: Base PWA clara y estado real.
 - Bloque 23: Almacenamiento local seguro.
 - Bloque 24: Memoria de pantalla y shell.
@@ -69,28 +71,20 @@ Bloques funcionales y correctivos aplicados:
 - Bloque 35: Sincronización diaria automática.
 - Bloque 36: Firebase resumen liviano + registros por subcolección.
 - Bloque 37: Conflictos local/remoto.
+- Bloque 38: Dispositivos reales o puente claro de importación.
 
 ## Pantalla principal
 
 - Hoy
 
-## Modulos visibles
+## Módulos visibles
 
 - Control corporal
 - Actividad
 - Entrenamiento
 - Sistema
 
-## Menu de Control corporal
-
-- Hoy
-- Registrar
-- Progreso
-- Historial
-
-La guia visual de medidas existe como ruta interna y ayuda complementaria. No se muestra en el menu principal para mantener Registro simple.
-
-## Menu de Actividad
+## Menú de Actividad
 
 - Resumen
 - Registrar
@@ -104,9 +98,9 @@ Comando recomendado:
 npm start
 ```
 
-`npm start` busca un puerto libre desde 5173. Si 5173 esta ocupado, abre Vite en el siguiente puerto disponible y pasa esa URL real a Electron.
+`npm start` busca un puerto libre desde 5173. Si 5173 está ocupado, abre Vite en el siguiente puerto disponible y pasa esa URL real a Electron.
 
-Tambien puedes abrir con doble clic en:
+También puedes abrir con doble clic en:
 
 ```text
 ABRIR_FITJEFF.bat
@@ -121,14 +115,6 @@ src/core/config/firebase.project.config.js
 ```
 
 Ese archivo exporta `FIREBASE_PROJECT_CONFIG`. Cuando `apiKey`, `projectId` y `appId` tienen valores reales, FitJeff puede consultar Firebase en segundo plano.
-
-La prioridad de lectura es:
-
-1. Variables Vite, si existen.
-2. `FIREBASE_PROJECT_CONFIG` escrito en código.
-3. Modo local si no hay credenciales completas.
-
-Ya no existe BAT de configuración de Firebase. Si Firebase tiene datos remotos y la configuración está completa, `app-data-hydration.service.js` restaura el respaldo en segundo plano, marca Inicio como completado y abre Hoy sin bloquear el arranque.
 
 ## Firebase resumen liviano
 
@@ -153,8 +139,6 @@ El estado técnico de sincronización se guarda en:
 ```text
 fitjeff / jeff / sync / status
 ```
-
-`firebase-database.service.js` ahora tiene `guardarResumenUsuario`, `leerResumenUsuario`, `leerCambiosDesde` y `guardarSyncStatus`. La restauración completa solo lee la subcolección de registros cuando el resumen indica que existen registros o cuando detecta una estructura antigua.
 
 ## Local-first real
 
@@ -184,8 +168,6 @@ src/core/sync/sync-metadata.service.js
 
 Permite saber, sin consultar Firebase, si hay cambios pendientes en Control corporal, Actividad, Entrenamiento y Sistema.
 
-Cada módulo guarda `dirty`, `versionLocal`, `versionRemota`, `ultimoCambioLocalEn`, `ultimoSyncEn`, `ultimoIntentoSyncEn` y `ultimoError`. Esto prepara la sincronización diaria y la cola diferencial.
-
 ## Cola diferencial
 
 La cola local se guarda en:
@@ -201,8 +183,6 @@ src/core/sync/sync-queue.service.js
 ```
 
 Cada operación tiene `operationKey`, `modulo`, `entidad`, `entidadId`, `accion`, `payloadHash` e `intentos`.
-
-Si se edita el mismo registro varias veces antes de sincronizar, FitJeff conserva una sola operación pendiente con la versión más reciente. Esto evita que Firebase reciba cambios repetidos e innecesarios.
 
 ## Sincronización diaria automática
 
@@ -247,7 +227,30 @@ Regla de seguridad:
 Si hay cambios locales pendientes y Firebase tiene datos remotos más recientes, FitJeff detiene la sincronización y registra un conflicto.
 ```
 
-Esto evita que la app sobrescriba información remota o local sin dejar evidencia. Ajustes muestra cuántos conflictos están pendientes.
+## Dispositivos y puente de importación
+
+El módulo Dispositivos mantiene preparada la configuración de Cubitt CT4 y Google Fit, pero sin prometer lectura automática real todavía.
+
+Mientras no exista API real, el flujo correcto es:
+
+1. Exportar o copiar datos desde la fuente externa.
+2. Ir a `Actividad > Dispositivos`.
+3. Pegar datos en el bloque `Importar actividad`.
+4. Usar formato CSV o JSON con columnas/campos:
+
+```text
+fecha,pasos,bicicletaMin,bicicletaKm,fuente,nota
+2026-06-28,8200,0,0,cubitt,Importado desde reloj
+2026-06-29,6000,25,8.5,google-fit,Actividad mixta
+```
+
+El puente se administra desde:
+
+```text
+src/features/actividad/dispositivos/dispositivos-import-bridge.service.js
+```
+
+La importación conserva metadata en Actividad: `fuente`, `origen`, `importado` e `importadoEn`. También marca el módulo Actividad como pendiente de sincronización.
 
 ## Auditoría integral
 
@@ -257,172 +260,95 @@ Comando directo:
 npm run audit:app
 ```
 
-La auditoría revisa:
+`npm run check:local` ejecuta herramientas, estructura, auditoría y build de Vite.
 
-- scripts obligatorios de `package.json`;
-- archivos críticos de app, Electron, Firebase, Windows y Android;
-- imports locales rotos;
-- configuradores Firebase no solicitados;
-- contenedor `#app` en `index.html`;
-- aviso si Firebase desde código sigue sin credenciales reales.
+## Actualizar versión con doble clic
 
-`npm run check:local` ahora ejecuta herramientas, estructura, auditoría y build de Vite.
-
-## Actualizar version con doble clic
-
-Para aumentar version, compilar instalador Windows, preparar Android/APK y publicar release, usar:
+Para aumentar versión, compilar instalador Windows, preparar Android/APK y publicar release, usar:
 
 ```text
 ACTUALIZAR_VERSION_FITJEFF.bat
 ```
 
-Ese BAT llama a `scripts/publicar-version-automatica.bat` y ejecuta revision de herramientas, sincronizacion con GitHub, `npm install`, `npm run check:local`, aumento automatico de version, build Windows, preparacion Android/APK, commit, push y GitHub Release.
-
 ## Bloques aplicados
 
 ### Bloque 28 - Inicio seguro y actualización automática
 
-Resultado: `npm start` no depende obligatoriamente del puerto 5173. Si el puerto está ocupado, busca otro puerto libre y Electron abre la URL correcta.
+Resultado: `npm start` no depende obligatoriamente del puerto 5173.
 
 ### Bloque 29 - Restauración Firebase antes de Inicio
 
-Resultado: FitJeff puede leer Firebase si está configurado. Si encuentra perfil, objetivo o registros remotos, guarda el estado local y marca Inicio como completado.
+Resultado: FitJeff puede leer Firebase si está configurado y restaurar perfil, objetivo o registros remotos.
 
 ### Bloque 30 - Firebase resuelto desde código
 
-Resultado: Firebase ya no depende de un BAT de configuración. La app puede usar configuración escrita en código desde `firebase.project.config.js`. También se retiraron los BAT no solicitados de configuración Firebase.
+Resultado: Firebase ya no depende de un BAT de configuración.
 
 ### Bloque 31 - Auditoría integral
 
-Resultado: la app tiene una auditoría estática propia. La revisión local valida herramientas, estructura, rutas/imports locales, archivos críticos, scripts obligatorios y build antes de continuar.
+Resultado: la app tiene una auditoría estática propia.
 
 ### Bloque 32 - Local-first real
 
-Resultado: la app ya no espera Firebase para montar la interfaz. Primero abre con datos locales. Si local está vacío, Firebase se revisa en segundo plano y, si hay respaldo, la app entra a Hoy. Además, el inicio ya no encola ni sube todo el estado local automáticamente; solo procesa cambios pendientes.
+Resultado: la app ya no espera Firebase para montar la interfaz.
 
 ### Bloque 33 - Metadata de sincronización
 
-Resultado: FitJeff guarda metadata local de sincronización por módulo. Control corporal se marca como pendiente cuando hay cambios locales. Sync registra intentos, errores y módulos sincronizados. La restauración desde Firebase registra el último pull remoto.
+Resultado: FitJeff guarda metadata local de sincronización por módulo.
 
 ### Bloque 34 - Cola diferencial
 
-Resultado: la cola de sincronización deduplica por `modulo + entidad + entidadId + accion`. Si el mismo registro se guarda o edita varias veces antes de sincronizar, solo queda una operación pendiente con el último payload. También migra y compacta operaciones antiguas de la cola.
+Resultado: la cola de sincronización deduplica por `modulo + entidad + entidadId + accion`.
 
 ### Bloque 35 - Sincronización diaria automática
 
-Resultado: FitJeff tiene un scheduler de sincronización. Al abrir, revisa en segundo plano si hay cambios pendientes y evita llamadas repetidas si ya se revisó el día. Además, Ajustes muestra un bloque de sincronización con estado local y botón `Sincronizar ahora`.
+Resultado: FitJeff tiene un scheduler de sincronización y botón `Sincronizar ahora`.
 
 ### Bloque 36 - Firebase resumen liviano
 
-Resultado: Firebase ya no depende de guardar todo en el documento principal. El documento `fitjeff/jeff` guarda resumen liviano, perfil y objetivo; los registros van en `fitjeff/jeff/registros`; y el estado técnico va en `fitjeff/jeff/sync/status`. También se mantiene compatibilidad con estructuras antiguas.
+Resultado: Firebase usa documento principal liviano, registros en subcolección y sync/status separado.
 
 ### Bloque 37 - Conflictos local/remoto
 
+Resultado: si hay cambios locales pendientes y Firebase tiene datos remotos más recientes, FitJeff registra un conflicto y detiene la sincronización.
+
+### Bloque 38 - Dispositivos y puente claro de importación
+
 Corregido:
 
-- `src/core/sync/sync-conflict.service.js`
-- `src/core/sync/sync.service.js`
-- `src/core/sync/sync-scheduler.service.js`
-- `src/modules/ajustes/ajustes.view.js`
-- `src/modules/ajustes/ajustes.css`
-- `scripts/auditar-app.cjs`
+- `src/features/actividad/dispositivos/dispositivos-import-bridge.service.js`
+- `src/features/actividad/dispositivos/dispositivos.service.js`
+- `src/features/actividad/dispositivos/dispositivos.view.js`
+- `src/features/actividad/dispositivos/dispositivos.controller.js`
+- `src/features/actividad/dispositivos/dispositivos.css`
+- `src/features/actividad/dispositivos/dispositivos.constants.js`
+- `src/features/actividad/actividad.repository.js`
 - `scripts/check-structure.cjs`
 - `README.md`
 
-Resultado: si hay cambios locales pendientes y Firebase tiene datos remotos más recientes, FitJeff registra un conflicto y detiene la sincronización para evitar sobrescrituras. Ajustes muestra si existen conflictos pendientes.
+Resultado: Dispositivos ya tiene un puente de importación funcional. Permite pegar CSV/JSON de Cubitt, Google Fit u otra fuente, convierte filas válidas en registros de Actividad, evita duplicados por fecha con la regla existente y conserva metadata de importación.
 
 ## Comandos
 
-Instalar dependencias:
-
 ```bash
 npm install
-```
-
-Revisar estructura:
-
-```bash
-npm run check:structure
-```
-
-Auditar app:
-
-```bash
-npm run audit:app
-```
-
-Revisar estructura, herramientas, auditoría y build local:
-
-```bash
 npm run check:local
-```
-
-Abrir en Electron desarrollo:
-
-```bash
 npm start
-```
-
-Abrir en navegador:
-
-```bash
-npm run dev
-```
-
-Probar modo escritorio con dist:
-
-```bash
-npm run electron:build
-```
-
-Crear instalador Windows:
-
-```bash
-npm run desktop:win
-```
-
-Preparar Android/APK:
-
-```bash
-npm run build:android
-```
-
-Publicar version automatica:
-
-```bash
-npm run publicar:automatico
 ```
 
 ## Reglas de crecimiento
 
-- Mantener cada modulo separado.
+- Mantener cada módulo separado.
 - No mezclar Control corporal con Actividad.
 - Pantalla Hoy debe seguir siendo la entrada principal.
-- Registro debe mantener ayuda ? integrada.
-- Progreso debe ser detalle, no dashboard saturado.
-- Actividad manual debe conservarse aunque existan conexiones automaticas.
-- La API Key de Gemini debe conservarse en almacenamiento separado y poder borrarse de forma explicita.
-- Rutinas debe mantenerse en modo claro y por pasos.
-- Jarvis debe mantenerse en modo claro compartido para Diario y HIT.
-- Control corporal debe cruzar IMC con medidas y contexto muscular antes de sacar conclusiones.
-- PWA debe registrarse solo en produccion web para evitar cache viejo durante desarrollo.
-- Los datos locales deben pasar por storage seguro cuando sean leidos o escritos desde servicios/repositories.
-- La ultima pantalla solo debe restaurarse si es una ruta valida del shell.
-- Las medidas corporales deben manejarse como medicion principal semanal, no como registros repetidos sin control.
-- Las conexiones externas deben iniciar en modo local y activarse solo por configuración valida.
-- Actividad debe manejar un solo registro principal por fecha y actualizar el registro del día si ya existe.
-- `npm start` debe abrir siempre con puerto automatico y no depender de 5173 libre.
-- La version de Windows y Android debe salir desde el mismo `package.json`.
-- Ningún bloque nuevo debe saltarse `npm run audit:app` y `npm run check:local`.
+- Actividad manual debe conservarse aunque existan conexiones automáticas.
 - Firebase nunca debe bloquear el arranque visual de la app.
-- Cada módulo debe marcar su metadata cuando tenga cambios locales.
 - La cola de sincronización debe guardar una sola operación pendiente por entidad modificada.
-- La sincronización automática no debe llamar Firebase si ya se revisó hoy y no hay cambios pendientes.
 - El documento principal de Firebase debe mantenerse liviano; los registros deben ir en subcolección.
 - Nunca se debe sobrescribir local o remoto si hay conflicto pendiente.
+- Dispositivos no debe decir que existe lectura real automática si solo existe importación por puente.
 
 ## Bloques pendientes
 
-1. Bloque 38: Dispositivos reales o puente claro de importación.
-2. Bloque 39: Rutinas y selección correcta del día de entrenamiento.
-3. Bloque 40: Revisión final para instalador Windows y APK Android.
+1. Bloque 39: Rutinas y selección correcta del día de entrenamiento.
+2. Bloque 40: Revisión final para instalador Windows y APK Android.
