@@ -6,90 +6,55 @@
     - Guardar la última ubicación abierta dentro de la app.
     - Recordar módulo principal y pantalla interna.
     - Evitar errores si localStorage no está disponible.
+    - Usar almacenamiento seguro centralizado.
 
   Se conecta con:
     - src/app/app-router.js
     - src/shell/shell.router.js
+    - src/core/storage/safe-local-storage.service.js
 */
+
+import { crearSafeLocalStorageService } from "../core/storage/safe-local-storage.service.js";
 
 const SHELL_MEMORY_KEY = "fitjeff:shell:last-location";
 
-function obtenerStorageSeguro() {
-  try {
-    if (typeof window === "undefined" || !window.localStorage) {
-      return null;
-    }
-
-    return window.localStorage;
-  } catch {
-    return null;
-  }
-}
-
-export function leerUbicacionShell() {
-  const storage = obtenerStorageSeguro();
-
-  if (!storage) {
+function normalizarUbicacionMemoria(ubicacion) {
+  if (!ubicacion || typeof ubicacion !== "object") {
     return null;
   }
 
-  try {
-    const valor = storage.getItem(SHELL_MEMORY_KEY);
+  const moduloId = typeof ubicacion.moduloId === "string" ? ubicacion.moduloId.trim() : "";
+  const rutaId = typeof ubicacion.rutaId === "string" ? ubicacion.rutaId.trim() : "";
 
-    if (!valor) {
-      return null;
-    }
-
-    const ubicacion = JSON.parse(valor);
-
-    if (!ubicacion || typeof ubicacion !== "object") {
-      return null;
-    }
-
-    return {
-      moduloId: ubicacion.moduloId || "",
-      rutaId: ubicacion.rutaId || "",
-      actualizadoEn: ubicacion.actualizadoEn || ""
-    };
-  } catch {
+  if (!moduloId || !rutaId) {
     return null;
   }
+
+  return {
+    moduloId,
+    rutaId,
+    actualizadoEn: typeof ubicacion.actualizadoEn === "string" ? ubicacion.actualizadoEn : ""
+  };
 }
 
-export function guardarUbicacionShell(ubicacion = {}) {
-  const storage = obtenerStorageSeguro();
-
-  if (!storage || !ubicacion.moduloId || !ubicacion.rutaId) {
-    return false;
-  }
-
-  try {
-    storage.setItem(
-      SHELL_MEMORY_KEY,
-      JSON.stringify({
-        moduloId: ubicacion.moduloId,
-        rutaId: ubicacion.rutaId,
-        actualizadoEn: new Date().toISOString()
-      })
-    );
-
-    return true;
-  } catch {
-    return false;
-  }
+export function leerUbicacionShell(storage = crearSafeLocalStorageService()) {
+  return normalizarUbicacionMemoria(storage.leerJson(SHELL_MEMORY_KEY, null));
 }
 
-export function limpiarUbicacionShell() {
-  const storage = obtenerStorageSeguro();
+export function guardarUbicacionShell(ubicacion = {}, storage = crearSafeLocalStorageService()) {
+  const ubicacionNormalizada = normalizarUbicacionMemoria(ubicacion);
 
-  if (!storage) {
+  if (!ubicacionNormalizada) {
     return false;
   }
 
-  try {
-    storage.removeItem(SHELL_MEMORY_KEY);
-    return true;
-  } catch {
-    return false;
-  }
+  return storage.guardarJson(SHELL_MEMORY_KEY, {
+    moduloId: ubicacionNormalizada.moduloId,
+    rutaId: ubicacionNormalizada.rutaId,
+    actualizadoEn: new Date().toISOString()
+  });
+}
+
+export function limpiarUbicacionShell(storage = crearSafeLocalStorageService()) {
+  return storage.eliminar(SHELL_MEMORY_KEY);
 }
