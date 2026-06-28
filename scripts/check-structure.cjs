@@ -140,15 +140,19 @@ const blockedPatterns = [
   "../../modules/registro",
   "src/modules/inicio",
   "src/modules/registro",
-  "toISOString().slice(0, 10)"
+  "toISOString().slice(0, 10)",
+  "Estas en"
 ];
 
 const semanticChecks = [
-  { file: "README.md", mustInclude: ["Bloque 23 - Almacenamiento local seguro", "storage seguro", "repositories principales"], message: "README debe documentar el bloque 23." },
+  { file: "README.md", mustInclude: ["Bloque 24 - Memoria de pantalla y shell", "ultima pantalla valida", "Estás en"], message: "README debe documentar el bloque 24." },
   { file: "index.html", mustInclude: ["theme-color\" content=\"#f8fafc", "color-scheme\" content=\"light", "manifest.webmanifest"], message: "index.html debe declarar modo claro y manifest." },
   { file: "manifest.webmanifest", mustInclude: ["\"background_color\": \"#f8fafc\"", "\"theme_color\": \"#2563eb\"", "./icons/icon.svg"], message: "Manifest debe estar alineado al tema claro." },
   { file: "service-worker.js", mustInclude: ["CACHE_VERSION", "PRECACHE_URLS", "self.addEventListener(\"fetch\"", "responderDinamico"], message: "Service worker debe tener base PWA real." },
   { file: "src/app/app.bootstrap.js", mustInclude: ["debeRegistrarServiceWorker", "!window.fitJeffDesktop", "!import.meta.env.DEV", "registrarServiceWorkerPwa"], message: "Bootstrap debe registrar PWA solo en producción web." },
+  { file: "src/app/app-router.js", mustInclude: ["leerUbicacionShell", "obtenerUbicacionInicial", "ubicacionRecordada", "limpiarUbicacionShell"], message: "Router debe restaurar ultima pantalla valida." },
+  { file: "src/shell/shell.memory.js", mustInclude: ["crearSafeLocalStorageService", "normalizarUbicacionMemoria", "storage.leerJson", "storage.guardarJson", "storage.eliminar"], message: "Memoria del shell debe usar storage seguro." },
+  { file: "src/shell/shell.view.js", mustInclude: ["Estás en", "Mantener textos visibles corregidos"], message: "Shell debe tener texto visible corregido." },
   { file: "src/core/storage/safe-local-storage.service.js", mustInclude: ["leerMapaTextoPorPrefijo", "eliminarPorPrefijo", "listarClaves", "guardarJson"], message: "Storage seguro debe incluir utilidades para backup y repositorios." },
   { file: "src/core/bootstrap/app-data-hydration.service.js", mustInclude: ["crearSafeLocalStorageService", "storage.guardarTexto", "storage.leerTexto"], message: "Hidratacion inicial debe usar storage seguro." },
   { file: "src/core/backup/backup-local.service.js", mustInclude: ["leerMapaTextoPorPrefijo", "crearSafeLocalStorageService", "storage.guardarJson"], message: "Backup local debe usar storage seguro." },
@@ -254,6 +258,7 @@ function run() {
     console.log("Bloque 21 aplicado: Analisis y correccion de errores.");
     console.log("Bloque 22 aplicado: Base PWA clara y estado real.");
     console.log("Bloque 23 aplicado: Almacenamiento local seguro.");
+    console.log("Bloque 24 aplicado: Memoria de pantalla y shell.");
     return;
   }
 
@@ -263,7 +268,7 @@ function run() {
   }
 
   if (blockedImports.length > 0) {
-    console.error("Se encontraron referencias antiguas o fechas UTC en campos diarios:");
+    console.error("Se encontraron referencias antiguas, textos mal escritos o fechas UTC en campos diarios:");
     blockedImports.forEach((item) => console.error(`- ${item}`));
   }
 
