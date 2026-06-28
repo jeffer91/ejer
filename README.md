@@ -28,6 +28,7 @@ FitJeff tiene una base modular funcional y visualmente clara. La app trabaja en 
 - Metadata de sincronización por módulo para saber qué cambió sin consultar Firebase.
 - Cola diferencial con deduplicación por entidad para no repetir operaciones pendientes.
 - Sincronización diaria automática y sincronización manual desde Ajustes.
+- Firebase con resumen liviano en el documento principal y registros pesados en subcolección.
 
 ### Preparado, pero pendiente de conexion real
 
@@ -65,6 +66,7 @@ Bloques funcionales y correctivos aplicados:
 - Bloque 33: Metadata de sincronización.
 - Bloque 34: Cola diferencial con deduplicación por entidad.
 - Bloque 35: Sincronización diaria automática.
+- Bloque 36: Firebase resumen liviano + registros por subcolección.
 
 ## Pantalla principal
 
@@ -126,6 +128,38 @@ La prioridad de lectura es:
 
 Ya no existe BAT de configuración de Firebase. Si Firebase tiene datos remotos y la configuración está completa, `app-data-hydration.service.js` restaura el respaldo en segundo plano, marca Inicio como completado y abre Hoy sin bloquear el arranque.
 
+## Firebase resumen liviano
+
+Firestore queda organizado así:
+
+```text
+fitjeff / jeff
+fitjeff / jeff / registros
+fitjeff / jeff / sync / status
+```
+
+El documento principal `fitjeff/jeff` debe ser liviano. Guarda solo:
+
+- `perfil`;
+- `objetivo`;
+- `resumenLocal`;
+- `controlCorporal.resumen`;
+- `sync`.
+
+Los registros pesados se guardan en:
+
+```text
+fitjeff / jeff / registros
+```
+
+El estado técnico de sincronización se guarda en:
+
+```text
+fitjeff / jeff / sync / status
+```
+
+`firebase-database.service.js` ahora tiene `guardarResumenUsuario`, `leerResumenUsuario`, `leerCambiosDesde` y `guardarSyncStatus`. La restauración completa solo lee la subcolección de registros cuando el resumen indica que existen registros o cuando detecta una estructura antigua.
+
 ## Local-first real
 
 FitJeff debe abrir rápido aunque Firebase esté lento o sin conexión.
@@ -152,12 +186,7 @@ y se administra desde:
 src/core/sync/sync-metadata.service.js
 ```
 
-Permite saber, sin consultar Firebase, si hay cambios pendientes en:
-
-- Control corporal;
-- Actividad;
-- Entrenamiento;
-- Sistema.
+Permite saber, sin consultar Firebase, si hay cambios pendientes en Control corporal, Actividad, Entrenamiento y Sistema.
 
 Cada módulo guarda `dirty`, `versionLocal`, `versionRemota`, `ultimoCambioLocalEn`, `ultimoSyncEn`, `ultimoIntentoSyncEn` y `ultimoError`. Esto prepara la sincronización diaria y la cola diferencial.
 
@@ -175,15 +204,7 @@ y se administra desde:
 src/core/sync/sync-queue.service.js
 ```
 
-Cada operación tiene:
-
-- `operationKey`;
-- `modulo`;
-- `entidad`;
-- `entidadId`;
-- `accion`;
-- `payloadHash`;
-- `intentos`.
+Cada operación tiene `operationKey`, `modulo`, `entidad`, `entidadId`, `accion`, `payloadHash` e `intentos`.
 
 Si se edita el mismo registro varias veces antes de sincronizar, FitJeff conserva una sola operación pendiente con la versión más reciente. Esto evita que Firebase reciba cambios repetidos e innecesarios.
 
@@ -271,18 +292,17 @@ Resultado: la cola de sincronización deduplica por `modulo + entidad + entidadI
 
 ### Bloque 35 - Sincronización diaria automática
 
+Resultado: FitJeff tiene un scheduler de sincronización. Al abrir, revisa en segundo plano si hay cambios pendientes y evita llamadas repetidas si ya se revisó el día. Además, Ajustes muestra un bloque de sincronización con estado local y botón `Sincronizar ahora`.
+
+### Bloque 36 - Firebase resumen liviano
+
 Corregido:
 
-- `src/core/sync/sync-scheduler.service.js`
-- `src/app/app.bootstrap.js`
-- `src/modules/ajustes/ajustes.controller.js`
-- `src/modules/ajustes/ajustes.view.js`
-- `src/modules/ajustes/ajustes.css`
-- `scripts/auditar-app.cjs`
+- `src/core/firebase/firebase-database.service.js`
 - `scripts/check-structure.cjs`
 - `README.md`
 
-Resultado: FitJeff ya tiene un scheduler de sincronización. Al abrir, revisa en segundo plano si hay cambios pendientes y evita llamadas repetidas si ya se revisó el día. Además, Ajustes muestra un bloque de sincronización con estado local y botón `Sincronizar ahora`.
+Resultado: Firebase ya no depende de guardar todo en el documento principal. El documento `fitjeff/jeff` guarda resumen liviano, perfil y objetivo; los registros van en `fitjeff/jeff/registros`; y el estado técnico va en `fitjeff/jeff/sync/status`. También se mantiene compatibilidad con estructuras antiguas.
 
 ## Comandos
 
@@ -371,11 +391,11 @@ npm run publicar:automatico
 - Cada módulo debe marcar su metadata cuando tenga cambios locales.
 - La cola de sincronización debe guardar una sola operación pendiente por entidad modificada.
 - La sincronización automática no debe llamar Firebase si ya se revisó hoy y no hay cambios pendientes.
+- El documento principal de Firebase debe mantenerse liviano; los registros deben ir en subcolección.
 
 ## Bloques pendientes
 
-1. Bloque 36: Firebase resumen liviano + registros por subcolección.
-2. Bloque 37: Conflictos local/remoto y resolución segura.
-3. Bloque 38: Dispositivos reales o puente claro de importación.
-4. Bloque 39: Rutinas y selección correcta del día de entrenamiento.
-5. Bloque 40: Revisión final para instalador Windows y APK Android.
+1. Bloque 37: Conflictos local/remoto y resolución segura.
+2. Bloque 38: Dispositivos reales o puente claro de importación.
+3. Bloque 39: Rutinas y selección correcta del día de entrenamiento.
+4. Bloque 40: Revisión final para instalador Windows y APK Android.
