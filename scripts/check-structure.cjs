@@ -58,6 +58,15 @@ const requiredFiles = [
   "src/features/actividad/registro/registro.controller.js",
   "src/features/actividad/registro/registro.view.js",
   "src/features/actividad/registro/registro.css",
+  "src/features/entrenamiento/entrenamiento.constants.js",
+  "src/features/entrenamiento/ajustes/ajustes.controller.js",
+  "src/features/entrenamiento/ajustes/ajustes.service.js",
+  "src/features/entrenamiento/ajustes/ajustes.view.js",
+  "src/features/entrenamiento/ajustes/ajustes.css",
+  "src/features/entrenamiento/ajustes/gemini.service.js",
+  "src/features/entrenamiento/ajustes/gemini-settings.repository.js",
+  "src/features/entrenamiento/ajustes/gemini-settings.service.js",
+  "src/features/entrenamiento/ajustes/gemini-settings.migration.js",
   "src/features/entrenamiento/stats/stats.controller.js",
   "src/features/entrenamiento/stats/stats.view.js",
   "src/features/entrenamiento/stats/stats.css",
@@ -85,8 +94,8 @@ const blockedPatterns = [
 const semanticChecks = [
   {
     file: "README.md",
-    mustInclude: ["Bloque 13 - Revision para solucionar errores", "Fechas locales", "Fase visual 2026 cerrada"],
-    message: "README debe documentar el bloque 13 de correccion."
+    mustInclude: ["Bloque 15 - Gemini persistencia blindada", "almacenamiento separado", "API Key"],
+    message: "README debe documentar el bloque 15 de persistencia Gemini."
   },
   {
     file: "docs/fase-visual-2026-cierre.md",
@@ -187,6 +196,41 @@ const semanticChecks = [
     file: "src/features/actividad/registro/registro.view.js",
     mustInclude: ["pasos", "bicicletaMin", "bicicletaKm"],
     message: "Registro de Actividad debe permitir pasos y bicicleta."
+  },
+  {
+    file: "src/features/entrenamiento/entrenamiento.constants.js",
+    mustInclude: ["GEMINI_SETTINGS_STORAGE_KEY", "fitjeff.entrenamiento.gemini.settings.v1"],
+    message: "Entrenamiento debe tener clave separada para Gemini."
+  },
+  {
+    file: "src/features/entrenamiento/ajustes/gemini-settings.repository.js",
+    mustInclude: ["GEMINI_SETTINGS_STORAGE_KEY", "localStorage", "borrarApiKey"],
+    message: "Gemini settings repository debe guardar en almacenamiento separado."
+  },
+  {
+    file: "src/features/entrenamiento/ajustes/gemini-settings.migration.js",
+    mustInclude: ["migrarGeminiSettingsDesdeAjustes", "geminiApiKey", "migradoDesdeAjustes"],
+    message: "Gemini settings debe migrar claves antiguas desde ajustes."
+  },
+  {
+    file: "src/features/entrenamiento/ajustes/gemini-settings.service.js",
+    mustInclude: ["sincronizarDesdeAjustes", "guardarDesdeFormulario", "actualizarPruebaGemini"],
+    message: "Gemini settings service debe blindar guardado y pruebas."
+  },
+  {
+    file: "src/features/entrenamiento/ajustes/ajustes.service.js",
+    mustInclude: ["crearGeminiSettingsService", "guardarAjustesSinPerderGemini", "obtenerVistaSegura"],
+    message: "Ajustes de entrenamiento deben usar Gemini persistente."
+  },
+  {
+    file: "src/features/entrenamiento/ajustes/ajustes.view.js",
+    mustInclude: ["Persistencia Gemini", "Si dejas este campo vacío", "Borrar Key"],
+    message: "Vista de ajustes debe mostrar estado de persistencia Gemini."
+  },
+  {
+    file: "src/features/entrenamiento/ajustes/ajustes.css",
+    mustInclude: ["background: rgba(255, 255, 255, 0.94)", "var(--fj-action-bg", "entreno-ajustes-pill--on"],
+    message: "Ajustes de entrenamiento debe estar alineado al modo claro."
   },
   {
     file: "src/modules/ajustes/ajustes.css",
@@ -290,6 +334,8 @@ function run() {
     console.log("Estructura modular OK.");
     console.log("Fase visual 2026 cerrada: 12/12 bloques completados.");
     console.log("Bloque 13 aplicado: fechas locales corregidas.");
+    console.log("Bloque 14 aplicado: revision local completa.");
+    console.log("Bloque 15 aplicado: Gemini con persistencia blindada.");
     console.log("Control corporal vive en src/features/control-corporal.");
     console.log("Hoy es la pantalla principal de Control corporal.");
     console.log("El tema claro global esta registrado.");
@@ -297,6 +343,7 @@ function run() {
     console.log("Registro integra ayuda ? y mapa corporal.");
     console.log("Progreso usa presenter para una vista ordenada.");
     console.log("Actividad manual esta registrada como modulo independiente.");
+    console.log("Gemini guarda API Key en almacenamiento separado.");
     console.log("Historial, Ajustes, Actualizaciones y Stats usan modo claro.");
     console.log("Documento de cierre disponible en docs/fase-visual-2026-cierre.md.");
     return;
