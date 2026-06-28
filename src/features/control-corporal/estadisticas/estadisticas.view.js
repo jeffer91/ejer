@@ -1,70 +1,95 @@
 /*
   Nombre completo: estadisticas.view.js
-  Ruta o ubicación: src/features/control-corporal/estadisticas/estadisticas.view.js
+  Ruta o ubicacion: src/features/control-corporal/estadisticas/estadisticas.view.js
 
-  Función o funciones:
-    - Construir la pantalla visual de Estadísticas.
-    - Mostrar tarjetas compactas de peso inicial, peso actual, objetivo, cambio total, faltante y tendencia.
-    - Dibujar gráfico simple de peso sin depender de librerías externas.
-    - Mostrar barra visual de progreso hacia la meta.
-    - Mostrar mensaje inteligente de avance corporal.
-    - Mostrar medidas corporales en tarjetas pequeñas.
+  Funcion o funciones:
+    - Construir la pantalla Progreso como vista de detalle.
+    - Mostrar primero resumen, accion visual y grafico importante.
+    - Dejar los datos ampliados organizados por secciones.
+    - Dibujar grafico simple de peso sin depender de librerias externas.
 
   Se conecta con:
     - src/features/control-corporal/estadisticas/estadisticas.controller.js
+    - src/features/control-corporal/estadisticas/estadisticas.presenter.js
     - src/features/control-corporal/estadisticas/estadisticas.constants.js
     - src/features/control-corporal/estadisticas/estadisticas.css
 */
 
-import { ESTADISTICAS_LABELS, ESTADISTICAS_TEXTOS, ESTADISTICAS_TENDENCIAS } from "./estadisticas.constants.js";
+import { ESTADISTICAS_TEXTOS } from "./estadisticas.constants.js";
+import { prepararVistaEstadisticas } from "./estadisticas.presenter.js";
 import "./estadisticas.css";
 
-function crearElemento(etiqueta, clase, texto) {
+function crearElemento(etiqueta, clase = "", texto = "") {
   const elemento = document.createElement(etiqueta);
 
   if (clase) {
     elemento.className = clase;
   }
 
-  if (texto !== undefined && texto !== null) {
+  if (texto !== undefined && texto !== null && texto !== "") {
     elemento.textContent = texto;
   }
 
   return elemento;
 }
 
-function formatearKg(valor) {
-  return valor === null || valor === undefined ? "Falta dato" : `${valor} kg`;
+function crearChipEstado(estado, texto) {
+  const chip = crearElemento("span", `fj-status-chip fj-status--${estado}`);
+  const punto = crearElemento("span", `fj-status-dot fj-status-dot--${estado}`);
+  const label = crearElemento("span", "", texto);
+
+  chip.appendChild(punto);
+  chip.appendChild(label);
+
+  return chip;
 }
 
-function formatearCm(valor) {
-  return valor === null || valor === undefined ? "-" : `${valor} cm`;
+function crearHeader(datos) {
+  const header = crearElemento("section", "estadisticas-header");
+
+  header.appendChild(crearElemento("p", "estadisticas-kicker", datos.kicker));
+  header.appendChild(crearElemento("h2", "", datos.titulo));
+  header.appendChild(crearElemento("p", "", datos.subtitulo));
+
+  return header;
 }
 
-function formatearCambio(valor) {
-  if (valor === null || valor === undefined) {
-    return "Falta dato";
+function crearHero(datos) {
+  const hero = crearElemento("section", `estadisticas-hero estadisticas-hero--${datos.estado}`);
+  const texto = crearElemento("div", "estadisticas-hero__text");
+
+  texto.appendChild(crearElemento("p", "estadisticas-kicker", ESTADISTICAS_TEXTOS.MENSAJE_INTELIGENTE));
+  texto.appendChild(crearElemento("h3", "", datos.titulo));
+  texto.appendChild(crearElemento("p", "", datos.descripcion));
+
+  hero.appendChild(texto);
+
+  return hero;
+}
+
+function crearTituloSeccion(titulo, descripcion = "") {
+  const header = crearElemento("div", "estadisticas-section-header");
+  const texto = crearElemento("div", "estadisticas-section-header__text");
+
+  texto.appendChild(crearElemento("h3", "", titulo));
+
+  if (descripcion) {
+    texto.appendChild(crearElemento("p", "", descripcion));
   }
 
-  if (valor > 0) return `+${valor} kg`;
-  return `${valor} kg`;
+  header.appendChild(texto);
+
+  return header;
 }
 
-function formatearFaltante(valor) {
-  if (valor === null || valor === undefined) return "Falta dato";
-  return `${valor} kg`;
-}
+function crearTarjeta({ titulo, valor, detalle, estado }) {
+  const tarjeta = crearElemento("article", `estadisticas-card estadisticas-card--${estado}`);
+  const top = crearElemento("div", "estadisticas-card__top");
 
-function claseTendencia(tendencia) {
-  if (tendencia === ESTADISTICAS_TENDENCIAS.BAJANDO) return "estadisticas-card--progreso";
-  if (tendencia === ESTADISTICAS_TENDENCIAS.SUBIENDO) return "estadisticas-card--alerta";
-  if (tendencia === ESTADISTICAS_TENDENCIAS.ESTABLE) return "estadisticas-card--info";
-  return "estadisticas-card--pendiente";
-}
+  top.appendChild(crearElemento("p", "estadisticas-card__label", titulo));
+  top.appendChild(crearChipEstado(estado, estado === "success" ? "Al día" : estado === "pending" ? "Pendiente" : estado === "empty" ? "Sin dato" : "Info"));
 
-function crearTarjeta({ label, valor, detalle, clase }) {
-  const tarjeta = crearElemento("article", `estadisticas-card ${clase || ""}`.trim());
-  tarjeta.appendChild(crearElemento("p", "estadisticas-card__label", label));
+  tarjeta.appendChild(top);
   tarjeta.appendChild(crearElemento("strong", "estadisticas-card__value", valor));
 
   if (detalle) {
@@ -74,40 +99,48 @@ function crearTarjeta({ label, valor, detalle, clase }) {
   return tarjeta;
 }
 
-function crearBarraProgreso({ porcentaje = 0, pesoInicialKg, pesoActualKg, pesoObjetivoKg, faltanteObjetivoKg }) {
+function crearGridTarjetas(tarjetas, claseExtra = "") {
+  const grid = crearElemento("div", `estadisticas-cards ${claseExtra}`.trim());
+
+  tarjetas.forEach((tarjeta) => {
+    grid.appendChild(crearTarjeta(tarjeta));
+  });
+
+  return grid;
+}
+
+function crearResumenPrincipal(vista) {
+  const seccion = crearElemento("section", "estadisticas-panel");
+  seccion.appendChild(crearTituloSeccion(ESTADISTICAS_TEXTOS.RESUMEN_PRINCIPAL, "Lo más importante de tu seguimiento."));
+  seccion.appendChild(crearGridTarjetas(vista.resumenPrincipal, "estadisticas-cards--principal"));
+  return seccion;
+}
+
+function crearBarraProgreso(progreso) {
   const seccion = crearElemento("section", "estadisticas-progress-card");
   const top = crearElemento("div", "estadisticas-progress-card__top");
   const contenedor = crearElemento("div", "estadisticas-progress");
   const barra = crearElemento("div", "estadisticas-progress__bar");
-  const texto = crearElemento("span", "estadisticas-progress__text", `${porcentaje}% del objetivo`);
+  const texto = crearElemento("span", "estadisticas-progress__text", `${progreso.porcentaje}%`);
   const detalle = crearElemento("div", "estadisticas-progress-card__detail");
 
-  top.appendChild(crearElemento("h3", "", ESTADISTICAS_TEXTOS.PROGRESO_PESO));
-  top.appendChild(crearElemento("strong", "", `${porcentaje}%`));
+  top.appendChild(crearTituloSeccion(ESTADISTICAS_TEXTOS.PROGRESO_PESO, "Comparación entre inicio, estado actual y meta."));
+  top.appendChild(crearElemento("strong", "", `${progreso.porcentaje}%`));
 
-  barra.style.width = `${Math.max(0, Math.min(100, porcentaje))}%`;
+  barra.style.width = `${Math.max(0, Math.min(100, progreso.porcentaje))}%`;
   contenedor.appendChild(barra);
   contenedor.appendChild(texto);
 
-  detalle.appendChild(crearElemento("span", "", `Inicial: ${formatearKg(pesoInicialKg)}`));
-  detalle.appendChild(crearElemento("span", "", `Actual: ${formatearKg(pesoActualKg)}`));
-  detalle.appendChild(crearElemento("span", "", `Meta: ${formatearKg(pesoObjetivoKg)}`));
-  detalle.appendChild(crearElemento("span", "", `Falta: ${formatearFaltante(faltanteObjetivoKg)}`));
+  detalle.appendChild(crearElemento("span", "", `Inicial: ${progreso.pesoInicialKg}`));
+  detalle.appendChild(crearElemento("span", "", `Actual: ${progreso.pesoActualKg}`));
+  detalle.appendChild(crearElemento("span", "", `Meta: ${progreso.pesoObjetivoKg}`));
+  detalle.appendChild(crearElemento("span", "", `Falta: ${progreso.faltanteObjetivoKg}`));
 
   seccion.appendChild(top);
   seccion.appendChild(contenedor);
   seccion.appendChild(detalle);
 
   return seccion;
-}
-
-function crearMensajeInteligente(resumen) {
-  const caja = crearElemento("section", "estadisticas-insight");
-  caja.appendChild(crearElemento("p", "estadisticas-kicker", ESTADISTICAS_TEXTOS.MENSAJE_INTELIGENTE));
-  caja.appendChild(crearElemento("h3", "", resumen.tendencia || ESTADISTICAS_TENDENCIAS.INSUFICIENTE));
-  caja.appendChild(crearElemento("p", "", resumen.mensajeInteligente || "Registra datos para activar una lectura automática."));
-  caja.appendChild(crearElemento("small", "", "La lectura sirve como guía visual. Mantén registros constantes y compara también medidas, energía y rendimiento."));
-  return caja;
 }
 
 function crearPuntoSvg(cx, cy) {
@@ -121,7 +154,7 @@ function crearPuntoSvg(cx, cy) {
 
 function crearGraficoPeso(puntos) {
   const contenedor = crearElemento("section", "estadisticas-chart-card");
-  contenedor.appendChild(crearElemento("h3", "", ESTADISTICAS_TEXTOS.GRAFICO_PESO));
+  contenedor.appendChild(crearTituloSeccion(ESTADISTICAS_TEXTOS.GRAFICO_PESO, "Vista simple de tus últimos registros."));
 
   if (!puntos || puntos.length < 2) {
     contenedor.appendChild(crearElemento("p", "estadisticas-empty", "Registra al menos dos pesos para ver el gráfico."));
@@ -129,16 +162,16 @@ function crearGraficoPeso(puntos) {
   }
 
   const ancho = 640;
-  const alto = 220;
-  const margen = 26;
-  const valores = puntos.map((punto) => punto.valor);
+  const alto = 190;
+  const margen = 24;
+  const valores = puntos.map((punto) => Number(punto.valor));
   const minimo = Math.min(...valores);
   const maximo = Math.max(...valores);
   const rango = maximo - minimo || 1;
 
   const coordenadas = puntos.map((punto, indice) => {
     const x = margen + (indice * (ancho - margen * 2)) / (puntos.length - 1);
-    const y = alto - margen - ((punto.valor - minimo) * (alto - margen * 2)) / rango;
+    const y = alto - margen - ((Number(punto.valor) - minimo) * (alto - margen * 2)) / rango;
     return { x, y, texto: `${x},${y}` };
   });
 
@@ -166,18 +199,25 @@ function crearGraficoPeso(puntos) {
   return contenedor;
 }
 
-function crearTarjetasMedidas(medidas) {
+function crearDetallePeso(vista) {
+  const seccion = crearElemento("section", "estadisticas-panel");
+  seccion.appendChild(crearTituloSeccion(ESTADISTICAS_TEXTOS.DETALLE_PESO, "Datos ampliados para revisar cuando lo necesites."));
+  seccion.appendChild(crearGridTarjetas(vista.detallePeso));
+  return seccion;
+}
+
+function crearMedidas(vista) {
   const seccion = crearElemento("section", "estadisticas-measures");
   const grid = crearElemento("div", "estadisticas-measures__grid");
-  const campos = ["cinturaCm", "abdomenCm", "pechoCm", "brazoCm", "piernaCm", "caderaCm"];
 
-  seccion.appendChild(crearElemento("h3", "", ESTADISTICAS_TEXTOS.MEDIDAS));
+  seccion.appendChild(crearTituloSeccion(ESTADISTICAS_TEXTOS.MEDIDAS, "Últimas medidas guardadas."));
 
-  campos.forEach((campo) => {
+  vista.medidas.forEach((medida) => {
     grid.appendChild(crearTarjeta({
-      label: ESTADISTICAS_LABELS[campo],
-      valor: formatearCm(medidas[campo]),
-      clase: "estadisticas-card--small"
+      titulo: medida.titulo,
+      valor: medida.valor,
+      detalle: medida.estado === "success" ? "Último dato guardado" : "Sin registro",
+      estado: medida.estado
     }));
   });
 
@@ -185,58 +225,19 @@ function crearTarjetasMedidas(medidas) {
   return seccion;
 }
 
-function crearHeroProgreso(resumen) {
-  const hero = crearElemento("section", "estadisticas-hero");
-  const texto = crearElemento("div", "estadisticas-hero__text");
-  const resumenRapido = crearElemento("div", "estadisticas-hero__quick");
-
-  texto.appendChild(crearElemento("p", "estadisticas-kicker", "Control corporal"));
-  texto.appendChild(crearElemento("h2", "", "Progreso visual de peso"));
-  texto.appendChild(crearElemento("p", "", resumen.mensajeInteligente || ESTADISTICAS_TEXTOS.SUBTITULO));
-
-  resumenRapido.appendChild(crearTarjeta({ label: ESTADISTICAS_LABELS.pesoActualKg, valor: formatearKg(resumen.pesoActualKg), detalle: `Inicial: ${formatearKg(resumen.pesoInicialKg)}`, clase: "estadisticas-card--progreso" }));
-  resumenRapido.appendChild(crearTarjeta({ label: ESTADISTICAS_LABELS.cambioTotalKg, valor: formatearCambio(resumen.cambioTotalKg), detalle: `${resumen.diasRegistro ?? 0} día(s) registrados`, clase: "estadisticas-card--info" }));
-  resumenRapido.appendChild(crearTarjeta({ label: ESTADISTICAS_LABELS.faltanteObjetivoKg, valor: formatearFaltante(resumen.faltanteObjetivoKg), detalle: `Meta: ${formatearKg(resumen.pesoObjetivoKg)}`, clase: "estadisticas-card--pendiente" }));
-
-  hero.appendChild(texto);
-  hero.appendChild(resumenRapido);
-  return hero;
-}
-
 export function crearEstadisticasView(resumen) {
+  const vista = prepararVistaEstadisticas(resumen);
   const pantalla = crearElemento("section", "estadisticas-screen");
-  const header = crearElemento("div", "estadisticas-header");
-  const cards = crearElemento("div", "estadisticas-cards");
 
-  header.appendChild(crearElemento("p", "estadisticas-kicker", "Panel principal"));
-  header.appendChild(crearElemento("h2", "", ESTADISTICAS_TEXTOS.TITULO));
-  header.appendChild(crearElemento("p", "", ESTADISTICAS_TEXTOS.SUBTITULO));
+  pantalla.appendChild(crearHeader(vista.header));
+  pantalla.appendChild(crearHero(vista.hero));
+  pantalla.appendChild(crearResumenPrincipal(vista));
+  pantalla.appendChild(crearBarraProgreso(vista.progreso));
+  pantalla.appendChild(crearGraficoPeso(vista.graficoPeso));
+  pantalla.appendChild(crearDetallePeso(vista));
+  pantalla.appendChild(crearMedidas(vista));
 
-  cards.appendChild(crearTarjeta({ label: ESTADISTICAS_LABELS.pesoInicialKg, valor: formatearKg(resumen.pesoInicialKg), clase: "estadisticas-card--info" }));
-  cards.appendChild(crearTarjeta({ label: ESTADISTICAS_LABELS.pesoActualKg, valor: formatearKg(resumen.pesoActualKg), clase: "estadisticas-card--progreso" }));
-  cards.appendChild(crearTarjeta({ label: ESTADISTICAS_LABELS.pesoObjetivoKg, valor: formatearKg(resumen.pesoObjetivoKg), detalle: `${resumen.progresoObjetivo}%`, clase: "estadisticas-card--info" }));
-  cards.appendChild(crearTarjeta({ label: ESTADISTICAS_LABELS.cambioKg, valor: formatearCambio(resumen.cambioKg), detalle: "último registro", clase: "estadisticas-card--pendiente" }));
-  cards.appendChild(crearTarjeta({ label: ESTADISTICAS_LABELS.cambioSemanaKg, valor: formatearCambio(resumen.cambioSemanaKg), detalle: "comparación reciente", clase: "estadisticas-card--small" }));
-  cards.appendChild(crearTarjeta({ label: ESTADISTICAS_LABELS.cambioMesKg, valor: formatearCambio(resumen.cambioMesKg), detalle: "comparación mensual", clase: "estadisticas-card--small" }));
-  cards.appendChild(crearTarjeta({ label: ESTADISTICAS_LABELS.tendencia, valor: resumen.tendencia, clase: claseTendencia(resumen.tendencia) }));
-  cards.appendChild(crearTarjeta({ label: ESTADISTICAS_LABELS.imc, valor: resumen.imc.valor ? String(resumen.imc.valor) : "Falta dato", detalle: resumen.imc.categoria, clase: "estadisticas-card--info" }));
-  cards.appendChild(crearTarjeta({ label: ESTADISTICAS_LABELS.proximaMedicion, valor: resumen.proximaMedicion.texto, clase: resumen.proximaMedicion.pendiente ? "estadisticas-card--pendiente" : "estadisticas-card--progreso" }));
-
-  pantalla.appendChild(header);
-  pantalla.appendChild(crearHeroProgreso(resumen));
-  pantalla.appendChild(cards);
-  pantalla.appendChild(crearBarraProgreso({
-    porcentaje: resumen.progresoObjetivo,
-    pesoInicialKg: resumen.pesoInicialKg,
-    pesoActualKg: resumen.pesoActualKg,
-    pesoObjetivoKg: resumen.pesoObjetivoKg,
-    faltanteObjetivoKg: resumen.faltanteObjetivoKg
-  }));
-  pantalla.appendChild(crearMensajeInteligente(resumen));
-  pantalla.appendChild(crearGraficoPeso(resumen.graficoPeso));
-  pantalla.appendChild(crearTarjetasMedidas(resumen.ultimasMedidas));
-
-  if (resumen.cantidadPesos < 3) {
+  if (vista.sinDatos) {
     pantalla.appendChild(crearElemento("p", "estadisticas-empty", ESTADISTICAS_TEXTOS.SIN_DATOS));
   }
 
