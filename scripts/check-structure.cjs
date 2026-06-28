@@ -2,6 +2,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 
 const ROOT = process.cwd();
+const DIRECTORIOS_IGNORADOS = new Set([".git", "node_modules", "dist", "release", ".vite", ".idea", ".vscode"]);
 
 const requiredFiles = [
   "README.md",
@@ -130,6 +131,10 @@ function walkFiles(directory) {
   const entries = fs.readdirSync(absoluteDirectory, { withFileTypes: true });
 
   for (const entry of entries) {
+    if (entry.isDirectory() && DIRECTORIOS_IGNORADOS.has(entry.name)) {
+      continue;
+    }
+
     const absolutePath = path.join(absoluteDirectory, entry.name);
     const relativePath = path.relative(ROOT, absolutePath).replaceAll(path.sep, "/");
     if (entry.isDirectory()) files.push(...walkFiles(relativePath));
