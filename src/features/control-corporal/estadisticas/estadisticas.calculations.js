@@ -7,6 +7,7 @@
     - Preparar datos visuales para tarjetas, grafico, barra de progreso y mensaje inteligente.
     - Integrar análisis corporal inteligente con cintura/altura y contexto muscular.
     - Evitar conclusiones falsas cuando hay pocos registros.
+    - Evitar comparaciones semanales o mensuales si no existe un registro suficientemente antiguo.
     - Interpretar progreso de peso sin promover cambios extremos.
     - Usar fecha local en proxima medicion para evitar desfases por UTC.
 
@@ -58,12 +59,27 @@ function buscarPesoDesde(pesos, diasAtras) {
     return !Number.isNaN(fecha.getTime()) && fecha <= fechaLimite;
   });
 
-  return candidatos[candidatos.length - 1] || pesos[0] || null;
+  return candidatos[candidatos.length - 1] || null;
 }
 
 function calcularCambioContra(pesoActual, registroReferencia) {
   if (!pesoActual || !registroReferencia?.datos?.pesoKg) return null;
   return redondear(Number(pesoActual) - Number(registroReferencia.datos.pesoKg), 1);
+}
+
+function describirCambioTotal(cambioTotalKg) {
+  if (cambioTotalKg === null || cambioTotalKg === undefined) {
+    return "";
+  }
+
+  if (Math.abs(cambioTotalKg) < 0.05) {
+    return "Desde el inicio tu peso está sin cambio relevante.";
+  }
+
+  const cantidad = Math.abs(cambioTotalKg);
+  return cambioTotalKg > 0
+    ? `Desde el inicio has subido ${cantidad} kg.`
+    : `Desde el inicio has bajado ${cantidad} kg.`;
 }
 
 export function obtenerRegistrosPeso(registros) {
@@ -158,10 +174,10 @@ function construirMensajeInteligente({ pesos, pesoInicial, pesoActual, pesoObjet
 
   const direccion = obtenerDireccionObjetivo(pesoInicial, pesoObjetivo);
   const partes = [];
+  const textoCambio = describirCambioTotal(cambioTotalKg);
 
-  if (cambioTotalKg !== null) {
-    const cambioTexto = cambioTotalKg > 0 ? `subido ${Math.abs(cambioTotalKg)} kg` : `bajado ${Math.abs(cambioTotalKg)} kg`;
-    partes.push(`Desde el inicio has ${cambioTexto}.`);
+  if (textoCambio) {
+    partes.push(textoCambio);
   }
 
   if (progresoObjetivo >= 100) {
@@ -246,6 +262,8 @@ export function construirResumenEstadisticas(estado) {
     cambioTotalKg,
     cambioSemanaKg,
     cambioMesKg,
+    comparacionSemanaDisponible: Boolean(registroSemana),
+    comparacionMesDisponible: Boolean(registroMes),
     faltanteObjetivoKg,
     direccionObjetivo: obtenerDireccionObjetivo(primerPeso, pesoObjetivo),
     diasRegistro,
