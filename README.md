@@ -21,10 +21,11 @@ FitJeff tiene una base modular funcional y visualmente clara. La app ya puede tr
 - Storage seguro aplicado a repositories principales, Inicio, Ajustes, backup e hidratacion inicial.
 - Memoria de ultima pantalla valida dentro del shell.
 - Control corporal depurado con guardado inicial unico, medicion principal por semana y comparaciones confiables.
+- Variables Vite de Firebase centralizadas con modo local activo por defecto.
 
 ### Preparado, pero pendiente de conexion real
 
-- Firebase esta preparado como respaldo, pero no esta activo mientras `enabled` siga en `false` y la configuracion este vacia.
+- Firebase esta preparado como respaldo, pero no se conecta si `VITE_FIREBASE_ENABLED` sigue en `false` o faltan variables.
 - Cubitt CT4 esta preparado como pantalla/configuracion, pero no lee datos reales del reloj todavia.
 - Google Fit esta preparado como pantalla/configuracion, pero no tiene autorizacion ni lectura real todavia.
 - Android/APK esta preparado a nivel de scripts, pero falta proyecto Android/Capacitor para generar APK real.
@@ -49,6 +50,7 @@ Bloques funcionales y correctivos aplicados:
 - Bloque 23: Almacenamiento local seguro.
 - Bloque 24: Memoria de pantalla y shell.
 - Bloque 25: Control corporal depurado.
+- Bloque 26: Variables y conexión.
 
 ## Pantalla principal
 
@@ -75,6 +77,16 @@ La guia visual de medidas existe como ruta interna y ayuda complementaria. No se
 - Resumen
 - Registrar
 - Dispositivos
+
+## Variables de conexión
+
+FitJeff trabaja en modo local por defecto. Para activar Firebase en una PC, copiar `.env.example` como `.env.local`, completar las variables y cambiar:
+
+```bash
+VITE_FIREBASE_ENABLED=true
+```
+
+Mientras `VITE_FIREBASE_ENABLED=false`, la app no intenta conectarse a Firebase, no lo marca como error y no acumula cola de sincronizacion innecesaria.
 
 ## Bloques aplicados
 
@@ -211,6 +223,21 @@ Corregido:
 
 Resultado: Inicio guarda perfil, objetivo y peso inicial en una sola operacion local; las medidas quedan limitadas a una medicion principal por semana; Progreso ya no compara semana o mes si no existe un registro suficientemente antiguo; y el mensaje inteligente ya no muestra frases como cambios de 0 kg.
 
+### Bloque 26 - Variables y conexión
+
+Corregido:
+
+- `.env.example`
+- `src/core/config/firebase.config.js`
+- `src/core/sync/sync.service.js`
+- `src/core/sync/sync-status.service.js`
+- `src/core/bootstrap/app-data-hydration.service.js`
+- `src/features/control-corporal/registro.service.js`
+- `scripts/check-structure.cjs`
+- `README.md`
+
+Resultado: Firebase ahora se configura por variables Vite; si no está habilitado, FitJeff queda en modo local activo sin marcar error de nube. La hidratacion inicial no intenta conexión remota en modo local y Control corporal no llena la cola de sincronizacion si Firebase no está listo.
+
 ## Comandos
 
 Instalar dependencias:
@@ -271,6 +298,7 @@ npm run desktop:win
 - Los datos locales deben pasar por storage seguro cuando sean leidos o escritos desde servicios/repositories.
 - La ultima pantalla solo debe restaurarse si es una ruta valida del shell.
 - Las medidas corporales deben manejarse como medicion principal semanal, no como registros repetidos sin control.
+- Las conexiones externas deben iniciar en modo local y activarse solo por variables configuradas.
 
 ## Siguiente fase recomendada
 
@@ -280,6 +308,5 @@ Correcciones pendientes por prioridad:
 2. Aclarar o implementar conexiones reales de Dispositivos.
 3. Mejorar Rutinas y seleccion del dia de entrenamiento.
 4. Revisar seguridad y texto de Gemini API Key.
-5. Decidir Firebase activo o modo local-only.
-6. Publicar primer release Windows real.
-7. Crear proyecto Android/Capacitor solo cuando se vaya a generar APK real.
+5. Publicar primer release Windows real.
+6. Crear proyecto Android/Capacitor solo cuando se vaya a generar APK real.
