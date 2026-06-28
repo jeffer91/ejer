@@ -7,6 +7,7 @@
     - Detectar si Firebase está configurado antes de enviar datos.
     - Mantener la app en modo local sin marcar error cuando Firebase está deshabilitado.
     - Procesar solo cambios pendientes ya guardados en la cola local.
+    - Usar metadata local para saber qué módulo tiene cambios pendientes.
     - Evitar que el arranque de la app encole y suba todo el estado local.
     - Mantener cambios en cola si Firebase está habilitado pero falla la conexión.
     - Evitar que un estado local vacío reemplace un respaldo válido en Firebase.
@@ -17,11 +18,13 @@
     - src/core/firebase/firebase-database.service.js
     - src/core/sync/sync-queue.service.js
     - src/core/sync/sync-status.service.js
+    - src/core/sync/sync-metadata.service.js
     - src/features/control-corporal/registro.service.js
 */
 
 import { firebaseEstaConfigurado, obtenerEstadoFirebaseConexion } from "../config/firebase.config.js";
 import { crearFirebaseDatabaseService } from "../firebase/firebase-database.service.js";
+import { crearSyncMetadataService, SYNC_MODULES } from "./sync-metadata.service.js";
 import { crearSyncQueueService } from "./sync-queue.service.js";
 import { crearSyncStatusService } from "./sync-status.service.js";
 import { crearRegistroService } from "../../features/control-corporal/registro.service.js";
@@ -48,10 +51,17 @@ function estadoTieneDatos(estado = {}) {
   );
 }
 
+function obtenerModuloDeItem(item = {}) {
+  if (item.modulo) return item.modulo;
+  if (["estado-general", "registro"].includes(item.tipo)) return SYNC_MODULES.CONTROL_CORPORAL;
+  return SYNC_MODULES.SISTEMA;
+}
+
 export function crearSyncService({
   firebaseDatabase = crearFirebaseDatabaseService(),
   queue = crearSyncQueueService(),
   status = crearSyncStatusService(),
+  syncMetadata = crearSyncMetadataService(),
   registroService = crearRegistroService()
 } = {}) {
   function obtenerEstadoConexion() {
@@ -87,6 +97,8 @@ export function crearSyncService({
         encolados: 0
       };
     }
+
+    syncMetadata.marcarModuloSucio(SYNC_MODULES.CONTROL_CORPORAL, "Estado general encolado manualmente");
 
     queue.agregar({
       tipo: "estado-general",
@@ -151,12 +163,16 @@ export function crearSyncService({
     }
 
     let procesados = 0;
+    const modulosProcesados = new Set();
 
     for (const item of pendientes) {
+      const modulo = obtenerModuloDeItem(item);
+      syncMetadata.marcarIntentoSync(modulo);
       queue.marcarIntento(item.id);
       const resultado = await procesarItem(item);
 
       if (!resultado.ok) {
+        syncMetadata.marcarError(modulo, resultado.mensaje);
         status.marcarError(resultado.mensaje);
         return {
           ok: false,
@@ -166,8 +182,13 @@ export function crearSyncService({
       }
 
       queue.eliminar(item.id);
+      modulosProcesados.add(modulo);
       procesados += 1;
     }
+
+    modulosProcesados.forEach((modulo) => {
+      syncMetadata.marcarModuloSincronizado(modulo);
+    });
 
     status.marcarDatosAlDia();
 
