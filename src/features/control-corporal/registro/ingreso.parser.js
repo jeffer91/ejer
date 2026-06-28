@@ -1,16 +1,20 @@
 /*
   Nombre completo: ingreso.parser.js
-  Ruta o ubicación: src/features/control-corporal/registro/ingreso.parser.js
+  Ruta o ubicacion: src/features/control-corporal/registro/ingreso.parser.js
 
-  Función o funciones:
+  Funcion o funciones:
     - Interpretar datos escritos de forma flexible por el usuario.
     - Entender coma decimal, kg, cm y espacios.
-    - Convertir entradas a números limpios para guardar en Registro.
+    - Convertir entradas a numeros limpios para guardar en Registro.
+    - Usar fecha local para evitar desfases por UTC.
 
   Se conecta con:
     - src/features/control-corporal/registro/ingreso.validator.js
     - src/features/control-corporal/registro/registro.controller.js
+    - src/core/utils/date.util.js
 */
+
+import { obtenerFechaHoyISO } from "../../../core/utils/date.util.js";
 
 function limpiarTexto(valor) {
   return String(valor || "")
@@ -62,7 +66,7 @@ export function convertirACm(valor) {
 }
 
 export function fechaHoy() {
-  return new Date().toISOString().slice(0, 10);
+  return obtenerFechaHoyISO();
 }
 
 export function normalizarFecha(valor) {
