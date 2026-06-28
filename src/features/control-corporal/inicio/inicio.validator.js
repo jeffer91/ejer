@@ -3,7 +3,7 @@
   Ruta o ubicación: src/features/control-corporal/inicio/inicio.validator.js
 
   Función o funciones:
-    - Validar altura, fecha de nacimiento, peso inicial y peso objetivo.
+    - Validar altura, fecha de nacimiento, contexto muscular, peso inicial y peso objetivo.
     - Entender valores escritos con coma decimal o unidades simples.
     - Devolver mensajes simples, sin mostrar código técnico en la app.
 
@@ -12,6 +12,8 @@
     - src/features/control-corporal/inicio/inicio.controller.js
     - src/features/control-corporal/inicio/inicio.constants.js
 */
+
+const NIVELES_MUSCULARES = ["bajo", "medio", "alto"];
 
 function limpiarNumero(valor) {
   return String(valor || "")
@@ -56,11 +58,17 @@ function fechaEsValida(fecha) {
   return !Number.isNaN(valor.getTime()) && valor < new Date();
 }
 
+function normalizarNivelMuscular(valor) {
+  const nivel = String(valor || "medio").trim().toLowerCase();
+  return NIVELES_MUSCULARES.includes(nivel) ? nivel : "medio";
+}
+
 export function validarInicio(datos) {
   const errores = {};
   const alturaCm = convertirAlturaACm(datos.alturaCm);
   const pesoInicialKg = convertirPesoAKg(datos.pesoInicialKg);
   const pesoObjetivoKg = convertirPesoAKg(datos.pesoObjetivoKg);
+  const nivelMuscular = normalizarNivelMuscular(datos.nivelMuscular);
 
   if (!alturaCm || alturaCm < 100 || alturaCm > 230) {
     errores.alturaCm = "Escribe una altura válida.";
@@ -84,6 +92,7 @@ export function validarInicio(datos) {
     datosLimpios: {
       alturaCm,
       fechaNacimiento: datos.fechaNacimiento,
+      nivelMuscular,
       pesoInicialKg,
       pesoObjetivoKg
     }
