@@ -5,6 +5,7 @@ REM
 REM  Funcion o funciones:
 REM    - Actualizar FitJeff con doble clic.
 REM    - Sincronizar con GitHub, instalar dependencias, revisar, subir version, compilar Windows y preparar Android/APK.
+REM    - Ejecutar revision final de artefactos antes de publicar.
 REM    - Subir cambios y publicar GitHub Release para que el instalador pueda detectar actualizaciones.
 REM    - Mantener Windows y Android usando la misma version de package.json.
 REM
@@ -13,6 +14,7 @@ REM    - package.json
 REM    - scripts/version-bump.cjs
 REM    - scripts/build-windows.cjs
 REM    - scripts/build-android.cjs
+REM    - scripts/revision-release-final.cjs
 REM    - scripts/release-github.cjs
 REM    - ACTUALIZAR_VERSION_FITJEFF.bat
 
@@ -31,27 +33,27 @@ if not exist "package.json" (
   exit /b 1
 )
 
-echo [1/9] Revisando herramientas...
+echo [1/10] Revisando herramientas...
 call npm run tools:check
 if errorlevel 1 goto ERROR_FINAL
 
 echo.
-echo [2/9] Sincronizando con GitHub...
+echo [2/10] Sincronizando con GitHub...
 git pull --rebase --autostash origin main
 if errorlevel 1 goto ERROR_FINAL
 
 echo.
-echo [3/9] Instalando/verificando dependencias...
+echo [3/10] Instalando/verificando dependencias...
 call npm install
 if errorlevel 1 goto ERROR_FINAL
 
 echo.
-echo [4/9] Revision local antes de publicar...
+echo [4/10] Revision local antes de publicar...
 call npm run check:local
 if errorlevel 1 goto ERROR_FINAL
 
 echo.
-echo [5/9] Aumentando version automaticamente...
+echo [5/10] Aumentando version automaticamente...
 call npm run version:bump
 if errorlevel 1 goto ERROR_FINAL
 
@@ -63,17 +65,22 @@ echo Nueva version: %APP_VERSION%
 echo Tag: %APP_TAG%
 
 echo.
-echo [6/9] Compilando instalador Windows...
+echo [6/10] Compilando instalador Windows...
 call npm run build:windows
 if errorlevel 1 goto ERROR_FINAL
 
 echo.
-echo [7/9] Preparando Android/APK...
+echo [7/10] Preparando Android/APK...
 call npm run build:android
 if errorlevel 1 goto ERROR_FINAL
 
 echo.
-echo [8/9] Guardando y subiendo cambios a GitHub...
+echo [8/10] Revision final de instalador y Android...
+call npm run release:check:built
+if errorlevel 1 goto ERROR_FINAL
+
+echo.
+echo [9/10] Guardando y subiendo cambios a GitHub...
 git add -A
 git commit -m "%APP_TAG% - Actualizacion automatica FitJeff"
 if errorlevel 1 (
@@ -83,7 +90,7 @@ git push origin main
 if errorlevel 1 goto ERROR_FINAL
 
 echo.
-echo [9/9] Publicando GitHub Release...
+echo [10/10] Publicando GitHub Release...
 call npm run release:github
 if errorlevel 1 goto ERROR_FINAL
 
