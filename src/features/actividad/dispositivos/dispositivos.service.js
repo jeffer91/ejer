@@ -11,6 +11,11 @@ function leerBooleano(valor) {
   return valor === true || valor === "true" || valor === "on";
 }
 
+function preservarTexto(nuevoValor, valorAnterior, max = 120) {
+  const nuevo = limpiarTexto(nuevoValor, max);
+  return nuevo || limpiarTexto(valorAnterior, max);
+}
+
 function crearEvento(tipo, mensaje) {
   return {
     id: `disp-${Date.now()}-${Math.random().toString(16).slice(2)}`,
@@ -60,16 +65,16 @@ export function crearDispositivosService(repository = crearDispositivosRepositor
     const cubitt = {
       ...anterior.cubitt,
       activo: leerBooleano(datos.cubittActivo),
-      marca: limpiarTexto(datos.cubittMarca || anterior.cubitt.marca, 60),
-      modelo: limpiarTexto(datos.cubittModelo || anterior.cubitt.modelo, 60),
-      variante: limpiarTexto(datos.cubittVariante || anterior.cubitt.variante, 60),
-      alias: limpiarTexto(datos.cubittAlias || anterior.cubitt.alias, 80),
-      identificadorLocal: limpiarTexto(datos.cubittIdentificadorLocal, 80)
+      marca: preservarTexto(datos.cubittMarca, anterior.cubitt.marca, 60),
+      modelo: preservarTexto(datos.cubittModelo, anterior.cubitt.modelo, 60),
+      variante: preservarTexto(datos.cubittVariante, anterior.cubitt.variante, 60),
+      alias: preservarTexto(datos.cubittAlias, anterior.cubitt.alias, 80),
+      identificadorLocal: preservarTexto(datos.cubittIdentificadorLocal, anterior.cubitt.identificadorLocal, 80)
     };
     const googleFit = {
       ...anterior.googleFit,
       activo: leerBooleano(datos.googleFitActivo),
-      cuenta: limpiarTexto(datos.googleFitCuenta, 120),
+      cuenta: preservarTexto(datos.googleFitCuenta, anterior.googleFit.cuenta, 120),
       lecturaPasos: leerBooleano(datos.googleFitLecturaPasos),
       lecturaBicicleta: leerBooleano(datos.googleFitLecturaBicicleta),
       sincronizacionAutomatica: leerBooleano(datos.googleFitSincronizacionAutomatica)
