@@ -5,12 +5,14 @@ const ROOT = process.cwd();
 
 const requiredFiles = [
   "README.md",
+  ".env.example",
   "index.html",
   "manifest.webmanifest",
   "service-worker.js",
   "public/icons/icon.svg",
   "docs/fase-visual-2026-cierre.md",
   "src/core/utils/date.util.js",
+  "src/core/config/firebase.config.js",
   "src/core/storage/safe-local-storage.service.js",
   "src/core/bootstrap/app-data-hydration.service.js",
   "src/core/backup/backup-local.service.js",
@@ -146,16 +148,21 @@ const blockedPatterns = [
 ];
 
 const semanticChecks = [
-  { file: "README.md", mustInclude: ["Bloque 25 - Control corporal depurado", "medicion principal por semana", "comparaciones confiables"], message: "README debe documentar el bloque 25." },
+  { file: "README.md", mustInclude: ["Bloque 26 - Variables y conexión", "variables Vite", "modo local activo"], message: "README debe documentar el bloque 26." },
+  { file: ".env.example", mustInclude: ["VITE_FIREBASE_ENABLED=false", "VITE_FIREBASE_API_KEY=", "VITE_FIREBASE_COLLECTION=fitjeff"], message: "Debe existir ejemplo de variables sin secretos." },
   { file: "index.html", mustInclude: ["theme-color\" content=\"#f8fafc", "color-scheme\" content=\"light", "manifest.webmanifest"], message: "index.html debe declarar modo claro y manifest." },
   { file: "manifest.webmanifest", mustInclude: ["\"background_color\": \"#f8fafc\"", "\"theme_color\": \"#2563eb\"", "./icons/icon.svg"], message: "Manifest debe estar alineado al tema claro." },
   { file: "service-worker.js", mustInclude: ["CACHE_VERSION", "PRECACHE_URLS", "self.addEventListener(\"fetch\"", "responderDinamico"], message: "Service worker debe tener base PWA real." },
   { file: "src/app/app.bootstrap.js", mustInclude: ["debeRegistrarServiceWorker", "!window.fitJeffDesktop", "!import.meta.env.DEV", "registrarServiceWorkerPwa"], message: "Bootstrap debe registrar PWA solo en producción web." },
+  { file: "src/core/config/firebase.config.js", mustInclude: ["leerVariableEnv", "VITE_FIREBASE_ENABLED", "obtenerEstadoFirebaseConexion", "obtenerVariablesFirebaseFaltantes"], message: "Firebase config debe leer variables y exponer estado de conexion." },
+  { file: "src/core/sync/sync.service.js", mustInclude: ["obtenerEstadoConexion", "responderModoLocal", "firebaseEstaConfigurado", "status.marcarModoLocal"], message: "Sync debe revisar conexion antes de sincronizar." },
+  { file: "src/core/sync/sync-status.service.js", mustInclude: ["marcarModoLocal", "modo: \"local\"", "Modo local activo"], message: "Sync status debe separar modo local de error de nube." },
+  { file: "src/core/bootstrap/app-data-hydration.service.js", mustInclude: ["firebaseEstaConfigurado", "origen: \"modo-local\"", "No intentar conexión remota"], message: "Hidratacion debe evitar conexion remota en modo local." },
+  { file: "src/features/control-corporal/registro.service.js", mustInclude: ["firebaseEstaConfigurado", "puedeEncolarSync", "return null"], message: "Control corporal no debe encolar sync si Firebase no esta listo." },
   { file: "src/app/app-router.js", mustInclude: ["leerUbicacionShell", "obtenerUbicacionInicial", "ubicacionRecordada", "limpiarUbicacionShell"], message: "Router debe restaurar ultima pantalla valida." },
   { file: "src/shell/shell.memory.js", mustInclude: ["crearSafeLocalStorageService", "normalizarUbicacionMemoria", "storage.leerJson", "storage.guardarJson", "storage.eliminar"], message: "Memoria del shell debe usar storage seguro." },
   { file: "src/shell/shell.view.js", mustInclude: ["Estás en", "Mantener textos visibles corregidos"], message: "Shell debe tener texto visible corregido." },
   { file: "src/core/storage/safe-local-storage.service.js", mustInclude: ["leerMapaTextoPorPrefijo", "eliminarPorPrefijo", "listarClaves", "guardarJson"], message: "Storage seguro debe incluir utilidades para backup y repositorios." },
-  { file: "src/core/bootstrap/app-data-hydration.service.js", mustInclude: ["crearSafeLocalStorageService", "storage.guardarTexto", "storage.leerTexto"], message: "Hidratacion inicial debe usar storage seguro." },
   { file: "src/core/backup/backup-local.service.js", mustInclude: ["leerMapaTextoPorPrefijo", "crearSafeLocalStorageService", "storage.guardarJson"], message: "Backup local debe usar storage seguro." },
   { file: "src/core/backup/backup-restore.service.js", mustInclude: ["eliminarPorPrefijo", "storage.guardarTexto", "crearSafeLocalStorageService"], message: "Restauracion debe usar storage seguro." },
   { file: "src/features/control-corporal/registro.repository.js", mustInclude: ["crearSafeLocalStorageService", "storage.leerJson", "storage.guardarJson"], message: "Repository de Control corporal debe usar storage seguro." },
@@ -264,6 +271,7 @@ function run() {
     console.log("Bloque 23 aplicado: Almacenamiento local seguro.");
     console.log("Bloque 24 aplicado: Memoria de pantalla y shell.");
     console.log("Bloque 25 aplicado: Control corporal depurado.");
+    console.log("Bloque 26 aplicado: Variables y conexion revisadas.");
     return;
   }
 
