@@ -8,6 +8,7 @@
     - Mantener la app en modo local sin marcar error cuando Firebase está deshabilitado.
     - Procesar solo cambios pendientes ya guardados en la cola local.
     - Usar metadata local para saber qué módulo tiene cambios pendientes.
+    - Encolar operaciones diferenciales identificadas por módulo, entidad y entidadId.
     - Evitar que el arranque de la app encole y suba todo el estado local.
     - Mantener cambios en cola si Firebase está habilitado pero falla la conexión.
     - Evitar que un estado local vacío reemplace un respaldo válido en Firebase.
@@ -102,6 +103,10 @@ export function crearSyncService({
 
     queue.agregar({
       tipo: "estado-general",
+      modulo: SYNC_MODULES.CONTROL_CORPORAL,
+      entidad: "estado-general",
+      entidadId: "general",
+      accion: "upsert",
       payload: {
         perfil: estado.perfil,
         objetivo: estado.objetivo,
@@ -118,6 +123,10 @@ export function crearSyncService({
     (estado.registros || []).forEach((registro) => {
       queue.agregar({
         tipo: "registro",
+        modulo: SYNC_MODULES.CONTROL_CORPORAL,
+        entidad: "registro",
+        entidadId: registro.id,
+        accion: "upsert",
         payload: registro
       });
     });
@@ -126,8 +135,8 @@ export function crearSyncService({
 
     return {
       ok: true,
-      mensaje: "Estado local encolado para sincronizar.",
-      encolados: 1 + (estado.registros || []).length
+      mensaje: "Estado local encolado para sincronizar de forma diferencial.",
+      encolados: queue.contar()
     };
   }
 
@@ -187,7 +196,9 @@ export function crearSyncService({
     }
 
     modulosProcesados.forEach((modulo) => {
-      syncMetadata.marcarModuloSincronizado(modulo);
+      if (queue.listarPorModulo(modulo).length === 0) {
+        syncMetadata.marcarModuloSincronizado(modulo);
+      }
     });
 
     status.marcarDatosAlDia();
