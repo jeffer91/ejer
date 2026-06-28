@@ -5,16 +5,16 @@
   Funcion o funciones:
     - Coordinar las operaciones principales de Control corporal.
     - Guardar perfil, objetivo, peso y medidas usando el repository.
+    - Guardar local primero para que la interfaz responda rapido.
     - Guardar la configuracion inicial en una sola operacion local.
     - Marcar Inicio como completado cuando ya existen datos reales.
-    - Encolar cambios locales solo cuando Firebase está configurado.
+    - Encolar cambios locales aunque Firebase todavia no este listo.
     - Registrar cambios para que el Historial pueda mostrar correcciones.
     - Usar fecha local para registros diarios y evitar desfases por UTC.
     - Limitar medidas a una medicion principal por semana para evitar duplicados.
     - No mezclar logica visual con guardado de datos.
 
   Se conecta con:
-    - src/core/config/firebase.config.js
     - src/features/control-corporal/registro.repository.js
     - src/features/control-corporal/registro.state.js
     - src/features/control-corporal/registro.constants.js
@@ -24,7 +24,6 @@
     - src/core/storage/safe-local-storage.service.js
 */
 
-import { firebaseEstaConfigurado } from "../../core/config/firebase.config.js";
 import { crearSafeLocalStorageService } from "../../core/storage/safe-local-storage.service.js";
 import { crearSyncQueueService } from "../../core/sync/sync-queue.service.js";
 import { convertirAFechaSegura, formatearFechaLocalISO, obtenerFechaHoraISO, obtenerFechaHoyISO } from "../../core/utils/date.util.js";
@@ -87,7 +86,7 @@ export function crearRegistroService(
   }
 
   function puedeEncolarSync() {
-    return firebaseEstaConfigurado();
+    return true;
   }
 
   function encolarEstadoGeneral(estado = obtenerEstado()) {
