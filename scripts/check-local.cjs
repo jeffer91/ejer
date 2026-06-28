@@ -4,7 +4,7 @@
 
   Funcion o funciones:
     - Ejecutar una revision local completa antes de abrir la app.
-    - Revisar herramientas, estructura modular y build de Vite.
+    - Revisar herramientas, estructura modular, auditoria estatica y build de Vite.
     - Detenerse en el primer error para que sea facil copiar la consola.
     - Servir como punto de prueba despues de cada bloque grande.
 
@@ -12,6 +12,7 @@
     - package.json
     - scripts/check-tools.cjs
     - scripts/check-structure.cjs
+    - scripts/auditar-app.cjs
     - vite build
 */
 
@@ -33,6 +34,12 @@ const pasos = [
     nombre: "Estructura modular",
     comando: "node",
     args: ["scripts/check-structure.cjs"],
+    requerido: true
+  },
+  {
+    nombre: "Auditoría estática",
+    comando: "node",
+    args: ["scripts/auditar-app.cjs"],
     requerido: true
   },
   {
@@ -98,7 +105,7 @@ function run() {
   }
 
   console.log("\nRevision local OK.");
-  console.log("Puedes ejecutar npm run dev o npm run electron:dev.");
+  console.log("Puedes ejecutar npm start, npm run dev o npm run electron:dev.");
 }
 
 run();
