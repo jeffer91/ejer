@@ -6,23 +6,20 @@ App personal local-first para control corporal, actividad, entrenamiento, progre
 
 Fase visual 2026 cerrada.
 
-Bloques completados: 12 de 12.
+Bloques completados de la fase visual: 12 de 12.
 
-Bloque 13 aplicado: revision para solucionar errores.
+Bloques funcionales/correctivos aplicados:
 
-Bloque 14 aplicado: revision local completa.
+- Bloque 13: revision para solucionar errores.
+- Bloque 14: revision local completa.
+- Bloque 15: Gemini persistencia blindada.
+- Bloque 16: Medidas con popup visual.
+- Bloque 17: Rutinas claro + pasos.
+- Bloque 18: Jarvis claro.
+- Bloque 19: Control corporal inteligente.
+- Bloque 20: Dispositivos / Cubitt CT4 / Google Fit preparado.
 
-Bloque 15 aplicado: Gemini persistencia blindada.
-
-Bloque 16 aplicado: Medidas con popup visual.
-
-Bloque 17 aplicado: Rutinas claro + pasos.
-
-Bloque 18 aplicado: Jarvis claro.
-
-Bloque 19 aplicado: Control corporal inteligente.
-
-La app queda con una base clara, simple y modular para continuar con mejoras funcionales sin mezclar responsabilidades.
+La app queda con una base clara, simple y modular para continuar con conectores reales sin mezclar responsabilidades.
 
 ## Pantalla principal
 
@@ -42,7 +39,13 @@ La app queda con una base clara, simple y modular para continuar con mejoras fun
 - Progreso
 - Historial
 
-## Redisenio 2026 - Bloques aplicados
+## Menu de Actividad
+
+- Resumen
+- Registrar
+- Dispositivos
+
+## Bloques visuales 2026 aplicados
 
 ### Bloque 1 - Tema claro global
 
@@ -183,13 +186,6 @@ Creado:
 - `src/features/actividad/registro/registro.view.js`
 - `src/features/actividad/registro/registro.css`
 
-Corregido:
-
-- `src/features/features.registry.js`
-- `src/shell/shell.css`
-- `scripts/check-structure.cjs`
-- `README.md`
-
 Resultado: Actividad queda como modulo independiente con registro manual de pasos, minutos de bicicleta y kilometros de bicicleta.
 
 ### Bloque 12 - Cierre
@@ -205,7 +201,7 @@ Corregido:
 
 Resultado: fase visual cerrada, documentacion final creada y check de estructura actualizado para validar el cierre 12/12.
 
-## Correccion de errores
+## Correcciones y nueva fase funcional
 
 ### Bloque 13 - Revision para solucionar errores
 
@@ -224,7 +220,7 @@ Corregido:
 - `scripts/check-structure.cjs`
 - `README.md`
 
-Resultado: Fechas locales corregidas para evitar desfases por UTC en Hoy, Registro, Inicio, Progreso y Actividad.
+Resultado: Fechas locales corregidas para evitar desfases por UTC.
 
 ### Bloque 14 - Revision local completa
 
@@ -237,9 +233,7 @@ Corregido:
 - `package.json`
 - `README.md`
 
-Resultado: nuevo comando `npm run check:local` para revisar herramientas, estructura modular y build de Vite antes de abrir la app.
-
-## Nueva fase funcional
+Resultado: comando `npm run check:local` para revisar herramientas, estructura modular y build de Vite.
 
 ### Bloque 15 - Gemini persistencia blindada
 
@@ -258,7 +252,7 @@ Corregido:
 - `scripts/check-structure.cjs`
 - `README.md`
 
-Resultado: Gemini ahora tiene almacenamiento separado para la API Key, migracion desde ajustes antiguos, conservacion cuando el campo queda vacio, estado visible de persistencia y boton de borrado explicito.
+Resultado: Gemini guarda API Key en almacenamiento separado y solo se borra desde accion explicita.
 
 ### Bloque 16 - Medidas con popup visual
 
@@ -277,7 +271,7 @@ Corregido:
 - `scripts/check-structure.cjs`
 - `README.md`
 
-Resultado: cada boton ? de Registro abre un popup visual con muñeco, zona de medicion resaltada, explicacion clara, errores comunes y consejo para repetir la medicion.
+Resultado: cada boton ? abre un popup visual con muñeco, zona de medicion resaltada y explicacion clara.
 
 ### Bloque 17 - Rutinas claro + pasos
 
@@ -294,7 +288,7 @@ Corregido:
 - `scripts/check-structure.cjs`
 - `README.md`
 
-Resultado: Rutinas queda en modo claro y ahora se organiza por pasos con `rutinas.stepper`: IA, Manual y Guardadas. El usuario puede avanzar con anterior/siguiente sin ver toda la pantalla saturada.
+Resultado: Rutinas queda en modo claro y se organiza por pasos: IA, Manual y Guardadas.
 
 ### Bloque 18 - Jarvis claro
 
@@ -310,7 +304,7 @@ Corregido:
 - `scripts/check-structure.cjs`
 - `README.md`
 
-Resultado: Jarvis de Diario y Jarvis HIT quedan en modo claro con panel compartido `jarvis-panel`, tarjetas blancas, texto oscuro, estados verdes, historial legible y comando escrito con input claro. Diario y HIT también quedan alineados visualmente al modo claro.
+Resultado: Jarvis de Diario y Jarvis HIT quedan en modo claro con panel compartido `jarvis-panel`.
 
 ### Bloque 19 - Control corporal inteligente
 
@@ -342,7 +336,33 @@ Corregido:
 - `scripts/check-structure.cjs`
 - `README.md`
 
-Resultado: Progreso ahora cruza IMC, cintura/altura, cuello y contexto muscular. También muestra un avatar corporal orientativo y evita juzgar el estado corporal solo por el peso.
+Resultado: Progreso cruza IMC, cintura/altura, cuello y contexto muscular. También muestra un avatar corporal orientativo y evita juzgar el estado corporal solo por el peso.
+
+### Bloque 20 - Dispositivos / Cubitt CT4 / Google Fit preparado
+
+Creado:
+
+- `src/features/actividad/dispositivos/dispositivos.constants.js`
+- `src/features/actividad/dispositivos/dispositivos.repository.js`
+- `src/features/actividad/dispositivos/dispositivos.service.js`
+- `src/features/actividad/dispositivos/dispositivos.controller.js`
+- `src/features/actividad/dispositivos/dispositivos.view.js`
+- `src/features/actividad/dispositivos/dispositivos.css`
+- `src/features/actividad/dispositivos/adapters/cubitt.adapter.js`
+- `src/features/actividad/dispositivos/adapters/google-fit.adapter.js`
+
+Corregido:
+
+- `src/features/actividad/actividad.routes.js`
+- `src/features/actividad/actividad.module.js`
+- `src/features/actividad/actividad.constants.js`
+- `src/features/actividad/actividad.service.js`
+- `src/features/actividad/resumen/resumen.view.js`
+- `src/features/actividad/resumen/resumen.css`
+- `scripts/check-structure.cjs`
+- `README.md`
+
+Resultado: Actividad ahora tiene una pantalla Dispositivos para preparar Cubitt CT4, Google Fit y el puente de importacion. El identificador local del reloj se guarda desde la app en la PC y no queda fijo en el codigo.
 
 ## Documento de cierre
 
@@ -404,15 +424,19 @@ npm run desktop:win
 - Pantalla Hoy debe seguir siendo la entrada principal.
 - Registro debe mantener ayuda ? integrada.
 - Progreso debe ser detalle, no dashboard saturado.
-- Actividad manual debe crecer antes de conectar sensores o apps externas.
+- Actividad manual debe conservarse aunque existan conexiones automaticas.
 - La API Key de Gemini debe conservarse en almacenamiento separado y solo borrarse desde la accion explicita.
 - Las medidas corporales deben explicarse con popup visual, no solo con texto corto.
 - Rutinas debe mantenerse en modo claro y por pasos, no como una pantalla larga saturada.
 - Jarvis debe mantenerse en modo claro compartido para Diario y HIT.
 - Control corporal debe cruzar IMC con medidas y contexto muscular antes de sacar conclusiones.
+- Dispositivos debe guardar identificadores locales desde la app, no fijos en el codigo.
 
 ## Siguiente fase recomendada
 
-Fase funcional de Actividad y Entrenamiento:
+Conectores reales y sincronizacion:
 
-1. Dispositivos / Cubitt CT4 / Google Fit preparado.
+1. Confirmar fuente real de datos del reloj.
+2. Implementar lectura real cuando exista fuente disponible.
+3. Conectar Google Fit con autorizacion real.
+4. Unificar datos importados con Actividad evitando duplicados.
