@@ -41,6 +41,27 @@ function crearRegistroReciente(registro) {
   return item;
 }
 
+function crearPanelDispositivos(dispositivos = {}) {
+  const panel = crearElemento("section", "actividad-panel actividad-panel--devices");
+  const top = crearElemento("div", "actividad-panel__top");
+  const boton = crearElemento("button", "actividad-button", "Preparar dispositivos");
+  const grid = crearElemento("div", "actividad-device-grid");
+
+  boton.type = "button";
+  boton.dataset.rutaDestino = ACTIVIDAD_ROUTES.DISPOSITIVOS;
+
+  top.appendChild(crearElemento("h3", "", "Dispositivos preparados"));
+  top.appendChild(boton);
+  panel.appendChild(top);
+
+  [dispositivos.cubitt, dispositivos.googleFit, dispositivos.puente].filter(Boolean).forEach((item) => {
+    grid.appendChild(crearTarjeta(item.titulo, item.estado === "success" ? "Listo" : item.estado === "pending" ? "Pendiente" : "Preparado", item.detalle, item.estado));
+  });
+
+  panel.appendChild(grid);
+  return panel;
+}
+
 export function crearActividadResumenView(resumen) {
   const pantalla = crearElemento("section", "actividad-screen");
   const header = crearElemento("section", "actividad-header");
@@ -73,6 +94,7 @@ export function crearActividadResumenView(resumen) {
   recientes.appendChild(recientesLista);
   pantalla.appendChild(header);
   pantalla.appendChild(tarjetas);
+  pantalla.appendChild(crearPanelDispositivos(resumen.dispositivos));
   pantalla.appendChild(recientes);
 
   return pantalla;
