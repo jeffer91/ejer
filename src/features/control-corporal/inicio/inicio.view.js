@@ -1,11 +1,12 @@
 /*
   Nombre completo: inicio.view.js
-  Ruta o ubicación: src/features/control-corporal/inicio/inicio.view.js
+  Ruta o ubicacion: src/features/control-corporal/inicio/inicio.view.js
 
-  Función o funciones:
+  Funcion o funciones:
     - Construir la pantalla visual de Inicio de primera vez.
     - Mostrar campos de altura, fecha de nacimiento, peso inicial y peso objetivo.
-    - Mantener la vista sin lógica de guardado.
+    - Mantener una experiencia clara y coherente con la pantalla Hoy.
+    - Mantener la vista sin logica de guardado.
 
   Se conecta con:
     - src/features/control-corporal/inicio/inicio.controller.js
@@ -23,14 +24,14 @@ function crearElemento(etiqueta, clase, texto) {
     elemento.className = clase;
   }
 
-  if (texto) {
+  if (texto !== undefined && texto !== null && texto !== "") {
     elemento.textContent = texto;
   }
 
   return elemento;
 }
 
-function crearCampo({ id, label, tipo, placeholder }) {
+function crearCampo({ id, label, tipo, placeholder, inputMode }) {
   const grupo = crearElemento("label", "inicio-field");
   const texto = crearElemento("span", "inicio-field__label", label);
   const input = crearElemento("input", "inicio-field__input");
@@ -41,6 +42,10 @@ function crearCampo({ id, label, tipo, placeholder }) {
   input.type = tipo || "text";
   input.placeholder = placeholder || "";
   input.autocomplete = "off";
+
+  if (inputMode) {
+    input.inputMode = inputMode;
+  }
 
   grupo.appendChild(texto);
   grupo.appendChild(input);
@@ -64,7 +69,8 @@ export function crearInicioView() {
   formulario.appendChild(crearCampo({
     id: INICIO_CAMPOS.ALTURA_CM,
     label: "Altura",
-    placeholder: "Ejemplo: 1.75 o 175 cm"
+    placeholder: "Ejemplo: 1.75 o 175 cm",
+    inputMode: "decimal"
   }));
 
   formulario.appendChild(crearCampo({
@@ -76,13 +82,15 @@ export function crearInicioView() {
   formulario.appendChild(crearCampo({
     id: INICIO_CAMPOS.PESO_INICIAL_KG,
     label: "Peso inicial",
-    placeholder: "Ejemplo: 86.3 kg"
+    placeholder: "Ejemplo: 86.3 kg",
+    inputMode: "decimal"
   }));
 
   formulario.appendChild(crearCampo({
     id: INICIO_CAMPOS.PESO_OBJETIVO_KG,
     label: "Peso objetivo",
-    placeholder: "Ejemplo: 80 kg"
+    placeholder: "Ejemplo: 80 kg",
+    inputMode: "decimal"
   }));
 
   boton.type = "submit";
