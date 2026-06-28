@@ -9,6 +9,7 @@
     - Conectar el shell global con modulos grandes y submenus internos.
     - Montar funcionalidades desde src/features/features.registry.js.
     - Conectar Sistema: Actualizaciones y Ajustes.
+    - Validar el contenedor raiz antes de renderizar para evitar errores silenciosos.
 
   Se conecta con:
     - src/app/app.bootstrap.js
@@ -30,7 +31,15 @@ import { resolverUbicacionShell } from "../shell/shell.router.js";
 import { crearAjustesController } from "../modules/ajustes/ajustes.controller.js";
 import { crearActualizacionesController } from "../modules/actualizaciones/actualizaciones.controller.js";
 
+function validarContenedor(contenedor) {
+  if (!contenedor || typeof contenedor.appendChild !== "function") {
+    throw new Error("FitJeff no puede renderizar porque falta el contenedor principal.");
+  }
+}
+
 function limpiar(contenedor) {
+  validarContenedor(contenedor);
+
   while (contenedor.firstChild) {
     contenedor.removeChild(contenedor.firstChild);
   }
@@ -46,7 +55,9 @@ function obtenerUbicacionInicial(perfilCompletado) {
 }
 
 export function crearRouterFitJeff(configuracion) {
-  let perfilCompletado = configuracion.perfilInicialCompletado;
+  validarContenedor(configuracion.raiz);
+
+  let perfilCompletado = Boolean(configuracion.perfilInicialCompletado);
   const ubicacionInicial = obtenerUbicacionInicial(perfilCompletado);
   let rutaActual = perfilCompletado ? ubicacionInicial.rutaId : SHELL_ONBOARDING_ROUTE_ID;
   let controllerActual = null;
@@ -136,7 +147,11 @@ export function crearRouterFitJeff(configuracion) {
 
     if (rutaActual === "ajustes") {
       montarAjustes(main);
+      return;
     }
+
+    rutaActual = SHELL_DEFAULT_ROUTE_ID;
+    renderizar(rutaActual);
   }
 
   function navegar(ruta) {
