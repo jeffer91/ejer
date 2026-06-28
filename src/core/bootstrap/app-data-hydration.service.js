@@ -8,15 +8,18 @@
     - Restaurar desde Firebase cuando el almacenamiento local esté vacío.
     - Marcar Inicio como completado solo cuando existan datos reales.
     - Proteger Firebase para no reemplazar respaldos con un estado local vacío.
+    - Usar almacenamiento seguro para leer y marcar el estado de Inicio.
 
   Se conecta con:
     - src/app/app.bootstrap.js
     - src/features/control-corporal/registro.repository.js
     - src/features/control-corporal/inicio/inicio.constants.js
     - src/core/firebase/firebase-database.service.js
+    - src/core/storage/safe-local-storage.service.js
 */
 
 import { crearFirebaseDatabaseService } from "../firebase/firebase-database.service.js";
+import { crearSafeLocalStorageService } from "../storage/safe-local-storage.service.js";
 import { crearRegistroRepository } from "../../features/control-corporal/registro.repository.js";
 import { INICIO_STORAGE_KEYS } from "../../features/control-corporal/inicio/inicio.constants.js";
 
@@ -42,14 +45,6 @@ export function estadoRegistroTieneDatos(estado = {}) {
   );
 }
 
-function marcarInicioCompletado() {
-  localStorage.setItem(INICIO_STORAGE_KEYS.COMPLETADO, "true");
-}
-
-function inicioFueCompletado() {
-  return localStorage.getItem(INICIO_STORAGE_KEYS.COMPLETADO) === "true";
-}
-
 function normalizarEstadoRemoto(data = {}) {
   return {
     perfil: data.perfil || {},
@@ -62,8 +57,17 @@ function normalizarEstadoRemoto(data = {}) {
 
 export async function prepararDatosAntesDeRouter({
   repository = crearRegistroRepository(),
-  firebaseDatabase = crearFirebaseDatabaseService()
+  firebaseDatabase = crearFirebaseDatabaseService(),
+  storage = crearSafeLocalStorageService()
 } = {}) {
+  function marcarInicioCompletado() {
+    storage.guardarTexto(INICIO_STORAGE_KEYS.COMPLETADO, "true");
+  }
+
+  function inicioFueCompletado() {
+    return storage.leerTexto(INICIO_STORAGE_KEYS.COMPLETADO, "") === "true";
+  }
+
   const estadoLocal = repository.obtenerEstado();
 
   if (estadoRegistroTieneDatos(estadoLocal)) {
