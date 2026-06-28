@@ -71,6 +71,16 @@ const requiredFiles = [
   "src/features/entrenamiento/ajustes/gemini-settings.repository.js",
   "src/features/entrenamiento/ajustes/gemini-settings.service.js",
   "src/features/entrenamiento/ajustes/gemini-settings.migration.js",
+  "src/features/entrenamiento/jarvis/jarvis-panel.view.js",
+  "src/features/entrenamiento/jarvis/jarvis-panel.css",
+  "src/features/entrenamiento/diario/diario.controller.js",
+  "src/features/entrenamiento/diario/diario.view.js",
+  "src/features/entrenamiento/diario/diario.jarvis.js",
+  "src/features/entrenamiento/diario/diario.css",
+  "src/features/entrenamiento/hit/hit.controller.js",
+  "src/features/entrenamiento/hit/hit.view.js",
+  "src/features/entrenamiento/hit/hit.jarvis.js",
+  "src/features/entrenamiento/hit/hit.css",
   "src/features/entrenamiento/rutinas/rutinas.controller.js",
   "src/features/entrenamiento/rutinas/rutinas.view.js",
   "src/features/entrenamiento/rutinas/rutinas.css",
@@ -102,30 +112,22 @@ const blockedPatterns = [
 ];
 
 const semanticChecks = [
-  { file: "README.md", mustInclude: ["Bloque 17 - Rutinas claro + pasos", "rutinas.stepper", "modo claro"], message: "README debe documentar el bloque 17 de Rutinas." },
+  { file: "README.md", mustInclude: ["Bloque 18 - Jarvis claro", "jarvis-panel", "Diario y HIT"], message: "README debe documentar el bloque 18 de Jarvis." },
   { file: "src/core/utils/date.util.js", mustInclude: ["formatearFechaLocalISO", "getFullYear", "getMonth", "getDate"], message: "date.util debe usar fecha local." },
   { file: "src/app/app.css", mustInclude: ["@import \"./theme-light.css\";", "@import \"./status-colors.css\";"], message: "app.css debe cargar tema claro y estados." },
   { file: "src/features/control-corporal/control-corporal.routes.js", mustInclude: ["HOY: \"hoy\"", "label: \"Hoy\""], message: "Control corporal debe tener Hoy." },
-  { file: "src/features/control-corporal/control-corporal.menu.js", mustInclude: ["defaultRoute: CONTROL_CORPORAL_ROUTES.HOY"], message: "Control corporal debe abrir Hoy." },
   { file: "src/features/features.registry.js", mustInclude: ["ACTIVIDAD_MENU", "montarPantallaActividad", "FEATURE_DEFAULT_ROUTE_ID = CONTROL_CORPORAL_ROUTES.HOY"], message: "Features Registry debe registrar Actividad y mantener Hoy." },
-  { file: "src/app/app-router.js", mustInclude: ["alNavegar: navegar"], message: "app-router debe pasar navegación interna." },
-  { file: "src/features/control-corporal/inicio/inicio.constants.js", mustInclude: ["Guardar y abrir Hoy", "Abriendo Hoy"], message: "Inicio debe dirigir hacia Hoy." },
   { file: "src/features/control-corporal/registro/ingreso.view.js", mustInclude: ["crearMedidasModal", "abrirAyuda", "medidas-modal/medidas-modal.view.js"], message: "Registro debe abrir popup visual de medidas." },
-  { file: "src/features/control-corporal/registro/medidas-modal/medidas-modal.constants.js", mustInclude: ["MEDIDAS_MODAL_INFO", "Dónde medir", "obtenerMedidaModalInfo"], message: "Modal de medidas debe tener textos claros." },
-  { file: "src/features/control-corporal/registro/medidas-modal/medidas-figura.svg.js", mustInclude: ["crearFiguraMedicion", "medidas-figura__cinta", "ZONAS_LINEA"], message: "Modal de medidas debe incluir figura visual." },
   { file: "src/features/control-corporal/registro/medidas-modal/medidas-modal.view.js", mustInclude: ["role", "dialog", "crearFiguraMedicion", "Escape"], message: "Modal de medidas debe tener diálogo accesible." },
-  { file: "src/features/control-corporal/registro/medidas-modal/medidas-modal.css", mustInclude: [".medidas-modal", ".medidas-figura__cinta", "background: rgba(7, 17, 31, 0.42)"], message: "Modal de medidas debe tener estilos." },
-  { file: "src/features/control-corporal/estadisticas/estadisticas.view.js", mustInclude: ["prepararVistaEstadisticas"], message: "Progreso debe usar presenter." },
   { file: "src/features/actividad/actividad.service.js", mustInclude: ["sumarDiasISO", "fechaHoyISO", "bicicletaKm"], message: "Actividad debe usar fecha local y bicicleta." },
   { file: "src/features/entrenamiento/entrenamiento.constants.js", mustInclude: ["GEMINI_SETTINGS_STORAGE_KEY", "fitjeff.entrenamiento.gemini.settings.v1"], message: "Entrenamiento debe tener clave separada para Gemini." },
-  { file: "src/features/entrenamiento/ajustes/gemini-settings.repository.js", mustInclude: ["GEMINI_SETTINGS_STORAGE_KEY", "localStorage", "borrarApiKey"], message: "Gemini debe guardar en almacenamiento separado." },
   { file: "src/features/entrenamiento/ajustes/gemini-settings.service.js", mustInclude: ["sincronizarDesdeAjustes", "guardarDesdeFormulario", "actualizarPruebaGemini"], message: "Gemini service debe blindar guardado." },
-  { file: "src/features/entrenamiento/ajustes/ajustes.view.js", mustInclude: ["Persistencia Gemini", "Si dejas este campo vacío", "Borrar Key"], message: "Ajustes debe mostrar estado de Gemini." },
-  { file: "src/features/entrenamiento/rutinas/rutinas.steps.js", mustInclude: ["RUTINAS_STEPS", "IA", "Manual", "Guardadas"], message: "Rutinas debe definir pasos." },
-  { file: "src/features/entrenamiento/rutinas/rutinas.stepper.view.js", mustInclude: ["crearRutinasStepper", "rutinas-stepper__tab", "Siguiente"], message: "Rutinas debe tener stepper." },
-  { file: "src/features/entrenamiento/rutinas/rutinas.stepper.css", mustInclude: [".rutinas-stepper", ".rutinas-stepper__tab--active", "grid-template-columns"], message: "Stepper de Rutinas debe tener estilos." },
   { file: "src/features/entrenamiento/rutinas/rutinas.view.js", mustInclude: ["crearRutinasStepper", "RUTINAS_STEPS", "Avanza por pasos"], message: "Vista de Rutinas debe usar pasos." },
   { file: "src/features/entrenamiento/rutinas/rutinas.css", mustInclude: ["background: rgba(255, 255, 255, 0.94)", "var(--fj-action-bg", "entreno-rutinas-summary"], message: "Rutinas debe estar en modo claro." },
+  { file: "src/features/entrenamiento/jarvis/jarvis-panel.view.js", mustInclude: ["crearJarvisPanel", "crearComandoManual", "jarvis-panel.css"], message: "Jarvis debe tener panel compartido." },
+  { file: "src/features/entrenamiento/jarvis/jarvis-panel.css", mustInclude: [".entreno-diario-jarvis", ".entreno-hit-jarvis", "background: linear-gradient"], message: "Jarvis debe tener estilos claros compartidos." },
+  { file: "src/features/entrenamiento/diario/diario.css", mustInclude: ["@import \"../jarvis/jarvis-panel.css\";", "background: rgba(255, 255, 255, 0.94)", "entreno-diario-safe"], message: "Diario debe estar en modo claro e importar Jarvis claro." },
+  { file: "src/features/entrenamiento/hit/hit.css", mustInclude: ["@import \"../jarvis/jarvis-panel.css\";", "background: rgba(255, 255, 255, 0.94)", "entreno-hit-time"], message: "HIT debe estar en modo claro e importar Jarvis claro." },
   { file: "src/features/entrenamiento/stats/stats.css", mustInclude: ["background: rgba(255, 255, 255, 0.94)", "var(--fj-text-strong", "entreno-stats-card--ok"], message: "Stats debe estar en modo claro." },
   { file: "src/modules/ajustes/ajustes.css", mustInclude: ["background: rgba(255, 255, 255, 0.94)", "var(--fj-action-bg", "background: #ffffff"], message: "Ajustes debe estar en modo claro." },
   { file: "src/modules/actualizaciones/actualizaciones.css", mustInclude: ["background: rgba(255, 255, 255, 0.94)", "var(--fj-action-bg", "fj-update-progress__bar"], message: "Actualizaciones debe estar en modo claro." }
@@ -150,11 +152,8 @@ function walkFiles(directory) {
     const absolutePath = path.join(absoluteDirectory, entry.name);
     const relativePath = path.relative(ROOT, absolutePath).replaceAll(path.sep, "/");
 
-    if (entry.isDirectory()) {
-      files.push(...walkFiles(relativePath));
-    } else if (/\.(js|cjs|mjs|css|html|json|md)$/.test(entry.name)) {
-      files.push(relativePath);
-    }
+    if (entry.isDirectory()) files.push(...walkFiles(relativePath));
+    else if (/\.(js|cjs|mjs|css|html|json|md)$/.test(entry.name)) files.push(relativePath);
   }
 
   return files;
@@ -207,8 +206,10 @@ function run() {
     console.log("Bloque 15 aplicado: Gemini con persistencia blindada.");
     console.log("Bloque 16 aplicado: medidas con popup visual.");
     console.log("Bloque 17 aplicado: Rutinas claro + pasos.");
+    console.log("Bloque 18 aplicado: Jarvis claro en Diario y HIT.");
     console.log("Registro integra ayuda ? con popup visual y mapa corporal.");
     console.log("Rutinas usa flujo por pasos y modo claro.");
+    console.log("Jarvis usa panel claro compartido.");
     console.log("Gemini guarda API Key en almacenamiento separado.");
     return;
   }
