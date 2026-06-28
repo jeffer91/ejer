@@ -8,6 +8,7 @@
     - Guardar rutinas interpretadas desde IA conservando días, bloques, tipos, medición, cardio, fútbol, duración y notas.
     - Editar ejercicios avanzados de rutinas IA sin perder estructura.
     - Editar, duplicar, activar, archivar, restaurar y borrar rutinas.
+    - Seleccionar manualmente qué día de rutina debe cargarse hoy en Diario.
 
   Se conecta con:
     - src/features/entrenamiento/entrenamiento.service.js
@@ -294,6 +295,10 @@ export function crearRutinasService(entrenamientoService = crearEntrenamientoSer
     return entrenamientoService.activarRutina(rutinaId);
   }
 
+  function seleccionarDia(rutinaId, datos = {}) {
+    return entrenamientoService.seleccionarDiaRutina(rutinaId, texto(datos.diaRutinaId));
+  }
+
   function editarNombre(rutinaId, datos = {}) {
     const nombre = texto(datos.nombre);
 
@@ -360,6 +365,7 @@ export function crearRutinasService(entrenamientoService = crearEntrenamientoSer
     crearDesdeRutinaIA,
     actualizarEjercicioAvanzado,
     activar,
+    seleccionarDia,
     editarNombre,
     actualizarDesdeFormulario,
     duplicar,
