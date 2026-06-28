@@ -5,19 +5,22 @@
   Función o funciones:
     - Preparar los datos antes de montar el router principal.
     - Evitar que la app instalada vuelva a Inicio si ya existen datos locales.
-    - Restaurar desde Firebase cuando el almacenamiento local esté vacío.
+    - Restaurar desde Firebase cuando el almacenamiento local esté vacío y Firebase esté configurado.
+    - No intentar conexión remota cuando la app está en modo local.
     - Marcar Inicio como completado solo cuando existan datos reales.
     - Proteger Firebase para no reemplazar respaldos con un estado local vacío.
     - Usar almacenamiento seguro para leer y marcar el estado de Inicio.
 
   Se conecta con:
     - src/app/app.bootstrap.js
+    - src/core/config/firebase.config.js
     - src/features/control-corporal/registro.repository.js
     - src/features/control-corporal/inicio/inicio.constants.js
     - src/core/firebase/firebase-database.service.js
     - src/core/storage/safe-local-storage.service.js
 */
 
+import { firebaseEstaConfigurado } from "../config/firebase.config.js";
 import { crearFirebaseDatabaseService } from "../firebase/firebase-database.service.js";
 import { crearSafeLocalStorageService } from "../storage/safe-local-storage.service.js";
 import { crearRegistroRepository } from "../../features/control-corporal/registro.repository.js";
@@ -75,6 +78,14 @@ export async function prepararDatosAntesDeRouter({
     return {
       perfilInicialCompletado: true,
       origen: "local",
+      restaurado: false
+    };
+  }
+
+  if (!firebaseEstaConfigurado()) {
+    return {
+      perfilInicialCompletado: inicioFueCompletado(),
+      origen: "modo-local",
       restaurado: false
     };
   }
