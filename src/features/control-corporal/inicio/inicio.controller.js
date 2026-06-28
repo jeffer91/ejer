@@ -1,12 +1,12 @@
 /*
   Nombre completo: inicio.controller.js
-  Ruta o ubicación: src/features/control-corporal/inicio/inicio.controller.js
+  Ruta o ubicacion: src/features/control-corporal/inicio/inicio.controller.js
 
-  Función o funciones:
+  Funcion o funciones:
     - Montar la pantalla de Inicio de primera vez dentro de Control corporal.
-    - Escuchar el envío del formulario inicial.
-    - Guardar configuración inicial mediante inicio.service.js.
-    - Avisar al router para abrir Estadísticas cuando el Inicio termina.
+    - Escuchar el envio del formulario inicial.
+    - Guardar configuracion inicial mediante inicio.service.js.
+    - Avisar al router para abrir Hoy cuando el Inicio termina.
 
   Se conecta con:
     - src/features/control-corporal/inicio/inicio.view.js
