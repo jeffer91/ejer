@@ -235,8 +235,20 @@
   line-height: 1.3;
 }
 
+.ajustes-sync-status__row--alert {
+  border-radius: 10px;
+  background: var(--fj-red-soft, rgba(220, 38, 38, 0.12));
+  padding: 7px 8px;
+  color: var(--fj-red, #dc2626);
+}
+
 .ajustes-sync-status__row strong {
   color: var(--fj-text-strong, #07111f);
+}
+
+.ajustes-sync-status__row--alert strong,
+.ajustes-sync-status__row--alert span {
+  color: var(--fj-red, #dc2626);
 }
 
 .ajustes-sync-status__row span {
