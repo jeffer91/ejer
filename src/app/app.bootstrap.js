@@ -9,7 +9,7 @@
     - Leer datos locales primero para montar la interfaz sin esperar Firebase.
     - Restaurar Firebase en segundo plano si la app local está vacía.
     - Montar la estructura principal dentro de #app.
-    - Lanzar sincronización en segundo plano sin bloquear la interfaz.
+    - Lanzar sincronización automática diaria en segundo plano sin bloquear la interfaz.
     - Registrar el service worker solo en producción web/PWA para evitar caché viejo en desarrollo y Electron.
 
   Se conecta con:
@@ -17,7 +17,7 @@
     - src/app/app-router.js
     - src/app/app.css
     - src/core/bootstrap/app-data-hydration.service.js
-    - src/core/sync/sync.service.js
+    - src/core/sync/sync-scheduler.service.js
     - src/core/errors/app-error-handler.service.js
     - service-worker.js
 */
@@ -25,7 +25,7 @@
 import "./app.css";
 import { crearAppErrorHandlerService } from "../core/errors/app-error-handler.service.js";
 import { prepararDatosAntesDeRouter, restaurarFirebaseEnSegundoPlano } from "../core/bootstrap/app-data-hydration.service.js";
-import { crearSyncService } from "../core/sync/sync.service.js";
+import { crearSyncSchedulerService } from "../core/sync/sync-scheduler.service.js";
 import { crearRouterFitJeff } from "./app-router.js";
 
 const errorHandler = crearAppErrorHandlerService();
@@ -57,13 +57,13 @@ function renderizarErrorInicio(error) {
   mostrarMensajeSinRaiz(resultado.mensaje);
 }
 
-function sincronizarEnSegundoPlano() {
-  const syncService = crearSyncService();
+function sincronizarAutomaticoEnSegundoPlano() {
+  const syncScheduler = crearSyncSchedulerService();
 
-  syncService.sincronizarAhora().catch((error) => {
+  syncScheduler.ejecutarSyncAutomatico().catch((error) => {
     errorHandler.registrarError(error, {
       modulo: "sync",
-      accion: "sincronizar-inicio",
+      accion: "sincronizar-automatico-diario",
       mensajeUsuario: "Tus datos locales están guardados. La nube se sincronizará después."
     });
   });
@@ -125,7 +125,7 @@ function iniciarFitJeff() {
 
   router.iniciar();
   restaurarFirebaseSinBloquear(router);
-  sincronizarEnSegundoPlano();
+  sincronizarAutomaticoEnSegundoPlano();
   registrarServiceWorkerPwa();
 }
 
