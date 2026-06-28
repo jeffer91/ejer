@@ -7,13 +7,14 @@
     - Guardar perfil, objetivo, peso y medidas usando el repository.
     - Guardar la configuracion inicial en una sola operacion local.
     - Marcar Inicio como completado cuando ya existen datos reales.
-    - Encolar cambios locales para que Firebase funcione como respaldo permanente.
+    - Encolar cambios locales solo cuando Firebase está configurado.
     - Registrar cambios para que el Historial pueda mostrar correcciones.
     - Usar fecha local para registros diarios y evitar desfases por UTC.
     - Limitar medidas a una medicion principal por semana para evitar duplicados.
     - No mezclar logica visual con guardado de datos.
 
   Se conecta con:
+    - src/core/config/firebase.config.js
     - src/features/control-corporal/registro.repository.js
     - src/features/control-corporal/registro.state.js
     - src/features/control-corporal/registro.constants.js
@@ -23,6 +24,7 @@
     - src/core/storage/safe-local-storage.service.js
 */
 
+import { firebaseEstaConfigurado } from "../../core/config/firebase.config.js";
 import { crearSafeLocalStorageService } from "../../core/storage/safe-local-storage.service.js";
 import { crearSyncQueueService } from "../../core/sync/sync-queue.service.js";
 import { convertirAFechaSegura, formatearFechaLocalISO, obtenerFechaHoraISO, obtenerFechaHoyISO } from "../../core/utils/date.util.js";
@@ -84,8 +86,16 @@ export function crearRegistroService(
     storage.guardarTexto(INICIO_STORAGE_KEYS.COMPLETADO, "true");
   }
 
+  function puedeEncolarSync() {
+    return firebaseEstaConfigurado();
+  }
+
   function encolarEstadoGeneral(estado = obtenerEstado()) {
-    queue.agregar({
+    if (!puedeEncolarSync()) {
+      return null;
+    }
+
+    return queue.agregar({
       tipo: "estado-general",
       payload: {
         perfil: estado.perfil,
@@ -102,11 +112,11 @@ export function crearRegistroService(
   }
 
   function encolarRegistro(registro) {
-    if (!registro?.id) {
-      return;
+    if (!puedeEncolarSync() || !registro?.id) {
+      return null;
     }
 
-    queue.agregar({
+    return queue.agregar({
       tipo: "registro",
       payload: registro
     });
