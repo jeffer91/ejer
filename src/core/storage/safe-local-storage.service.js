@@ -3,14 +3,17 @@
   Ruta o ubicación: src/core/storage/safe-local-storage.service.js
 
   Función o funciones:
-    - Leer y guardar datos locales con protección básica ante errores.
+    - Leer, guardar y eliminar datos locales con protección básica ante errores.
     - Evitar que un JSON dañado rompa la app completa.
     - Devolver valores seguros cuando localStorage no esté disponible.
+    - Centralizar lectura por prefijo para backups y restauraciones.
 
   Se conecta con:
     - src/core/status/app-status.service.js
     - src/core/diagnostics/app-diagnostics.service.js
-    - futuros repositorios y sincronización con Firebase.
+    - src/core/backup/backup-local.service.js
+    - src/core/backup/backup-restore.service.js
+    - repositorios locales de FitJeff.
 */
 
 function localStorageDisponible() {
@@ -84,12 +87,51 @@ export function crearSafeLocalStorageService() {
     }
   }
 
+  function listarClaves(prefijo = "") {
+    if (!disponible) {
+      return [];
+    }
+
+    try {
+      return Object.keys(localStorage).filter((clave) => String(clave).startsWith(prefijo));
+    } catch {
+      return [];
+    }
+  }
+
+  function leerMapaTextoPorPrefijo(prefijo = "", excluir = []) {
+    const excluidas = new Set(excluir);
+
+    return listarClaves(prefijo).reduce((datos, clave) => {
+      if (!excluidas.has(clave)) {
+        datos[clave] = leerTexto(clave, "");
+      }
+      return datos;
+    }, {});
+  }
+
+  function eliminarPorPrefijo(prefijo = "", excluir = []) {
+    const excluidas = new Set(excluir);
+    let total = 0;
+
+    listarClaves(prefijo).forEach((clave) => {
+      if (!excluidas.has(clave) && eliminar(clave)) {
+        total += 1;
+      }
+    });
+
+    return total;
+  }
+
   return {
     disponible,
     leerTexto,
     guardarTexto,
     leerJson,
     guardarJson,
-    eliminar
+    eliminar,
+    listarClaves,
+    leerMapaTextoPorPrefijo,
+    eliminarPorPrefijo
   };
 }
