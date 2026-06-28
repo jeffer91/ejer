@@ -4,7 +4,7 @@
 
   Funcion o funciones:
     - Construir la pantalla Progreso como vista de detalle.
-    - Mostrar primero resumen, accion visual y grafico importante.
+    - Mostrar primero resumen, análisis corporal inteligente, accion visual y grafico importante.
     - Dejar los datos ampliados organizados por secciones.
     - Dibujar grafico simple de peso sin depender de librerias externas.
 
@@ -12,9 +12,11 @@
     - src/features/control-corporal/estadisticas/estadisticas.controller.js
     - src/features/control-corporal/estadisticas/estadisticas.presenter.js
     - src/features/control-corporal/estadisticas/estadisticas.constants.js
+    - src/features/control-corporal/analisis-corporal/avatar-corporal.view.js
     - src/features/control-corporal/estadisticas/estadisticas.css
 */
 
+import { crearAvatarCorporal } from "../analisis-corporal/avatar-corporal.view.js";
 import { ESTADISTICAS_TEXTOS } from "./estadisticas.constants.js";
 import { prepararVistaEstadisticas } from "./estadisticas.presenter.js";
 import "./estadisticas.css";
@@ -87,7 +89,7 @@ function crearTarjeta({ titulo, valor, detalle, estado }) {
   const top = crearElemento("div", "estadisticas-card__top");
 
   top.appendChild(crearElemento("p", "estadisticas-card__label", titulo));
-  top.appendChild(crearChipEstado(estado, estado === "success" ? "Al día" : estado === "pending" ? "Pendiente" : estado === "empty" ? "Sin dato" : "Info"));
+  top.appendChild(crearChipEstado(estado, estado === "success" ? "Al día" : estado === "pending" ? "Pendiente" : estado === "alert" ? "Revisar" : estado === "empty" ? "Sin dato" : "Info"));
 
   tarjeta.appendChild(top);
   tarjeta.appendChild(crearElemento("strong", "estadisticas-card__value", valor));
@@ -113,6 +115,29 @@ function crearResumenPrincipal(vista) {
   const seccion = crearElemento("section", "estadisticas-panel");
   seccion.appendChild(crearTituloSeccion(ESTADISTICAS_TEXTOS.RESUMEN_PRINCIPAL, "Lo más importante de tu seguimiento."));
   seccion.appendChild(crearGridTarjetas(vista.resumenPrincipal, "estadisticas-cards--principal"));
+  return seccion;
+}
+
+function crearAnalisisCorporal(vista) {
+  const analisis = vista.analisisCorporal;
+  const seccion = crearElemento("section", `analisis-corporal-panel analisis-corporal-panel--${analisis.estado}`);
+  const contenido = crearElemento("div", "analisis-corporal-content");
+  const metricas = crearElemento("div", "analisis-corporal-metrics");
+
+  contenido.appendChild(crearTituloSeccion(ESTADISTICAS_TEXTOS.ANALISIS_CORPORAL, "Cruza peso, altura, cintura, cuello y contexto muscular."));
+  contenido.appendChild(crearElemento("h3", "", analisis.titulo));
+  contenido.appendChild(crearElemento("p", "", analisis.resumen));
+
+  analisis.metricas.forEach((metrica) => metricas.appendChild(crearTarjeta(metrica)));
+  contenido.appendChild(metricas);
+
+  if (analisis.faltantes.length > 0) {
+    contenido.appendChild(crearElemento("p", "analisis-corporal-missing", `Para mejorar la lectura falta: ${analisis.faltantes.join(", ")}.`));
+  }
+
+  contenido.appendChild(crearElemento("p", "analisis-corporal-note", analisis.aviso));
+  seccion.appendChild(crearAvatarCorporal(analisis.avatar));
+  seccion.appendChild(contenido);
   return seccion;
 }
 
@@ -231,6 +256,7 @@ export function crearEstadisticasView(resumen) {
 
   pantalla.appendChild(crearHeader(vista.header));
   pantalla.appendChild(crearHero(vista.hero));
+  pantalla.appendChild(crearAnalisisCorporal(vista));
   pantalla.appendChild(crearResumenPrincipal(vista));
   pantalla.appendChild(crearBarraProgreso(vista.progreso));
   pantalla.appendChild(crearGraficoPeso(vista.graficoPeso));
