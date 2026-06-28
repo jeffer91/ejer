@@ -5,6 +5,7 @@
   Función o funciones:
     - Centralizar claves locales, estados y tipos del módulo Entrenamiento.
     - Evitar textos y valores repetidos en repository, state y service.
+    - Separar la persistencia blindada de Gemini de los ajustes generales.
     - Preparar el módulo para sincronización futura sin cambiar pantallas.
 */
 
@@ -15,6 +16,8 @@ export const ENTRENAMIENTO_STORAGE_KEYS = {
   AJUSTES: "fitjeff.entrenamiento.ajustes",
   HISTORIAL: "fitjeff.entrenamiento.historial"
 };
+
+export const GEMINI_SETTINGS_STORAGE_KEY = "fitjeff.entrenamiento.gemini.settings.v1";
 
 export const ENTRENAMIENTO_ESTADOS_RUTINA = {
   ACTIVA: "activa",
