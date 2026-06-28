@@ -1,11 +1,12 @@
 /*
   Nombre completo: inicio.constants.js
-  Ruta o ubicación: src/features/control-corporal/inicio/inicio.constants.js
+  Ruta o ubicacion: src/features/control-corporal/inicio/inicio.constants.js
 
-  Función o funciones:
+  Funcion o funciones:
     - Centralizar textos y claves del Inicio de primera vez.
     - Definir los campos que se piden solo al configurar la app.
-    - Evitar repetir nombres de campos en vista, servicio y validación.
+    - Preparar la salida natural hacia la pantalla Hoy.
+    - Evitar repetir nombres de campos en vista, servicio y validacion.
 
   Se conecta con:
     - src/features/control-corporal/inicio/inicio.service.js
@@ -27,8 +28,8 @@ export const INICIO_CAMPOS = Object.freeze({
 
 export const INICIO_TEXTOS = Object.freeze({
   TITULO: "Configura FitJeff",
-  SUBTITULO: "Solo necesitamos estos datos la primera vez.",
-  BOTON_GUARDAR: "Guardar y ver estadísticas",
+  SUBTITULO: "Solo necesitamos estos datos la primera vez. Luego entrarás directo a Hoy.",
+  BOTON_GUARDAR: "Guardar y abrir Hoy",
   ERROR_GENERAL: "Revisa los datos antes de continuar.",
-  EXITO: "Perfil inicial guardado."
+  EXITO: "Perfil inicial guardado. Abriendo Hoy."
 });
