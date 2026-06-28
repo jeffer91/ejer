@@ -5,6 +5,7 @@
   Funcion o funciones:
     - Construir una guia visual simple del cuerpo para medidas.
     - Reforzar donde se mide sin abrir otra pantalla.
+    - Incluir cuello como dato importante para análisis corporal inteligente.
     - Mantener la pantalla Registro compacta y entendible.
 
   Se conecta con:
@@ -100,9 +101,11 @@ function crearSvgCuerpo() {
   svg.appendChild(brazoDer);
   svg.appendChild(piernaIzq);
   svg.appendChild(piernaDer);
+  svg.appendChild(crearLinea(66));
   svg.appendChild(crearLinea(92));
   svg.appendChild(crearLinea(122));
   svg.appendChild(crearLinea(154));
+  svg.appendChild(crearPunto(120, 66));
   svg.appendChild(crearPunto(120, 92));
   svg.appendChild(crearPunto(120, 122));
   svg.appendChild(crearPunto(120, 154));
@@ -116,14 +119,14 @@ export function crearMapaCorporal() {
   const seccion = crearElemento("aside", "mapa-corporal");
   const info = crearElemento("div", "mapa-corporal__info");
   const chips = crearElemento("div", "mapa-corporal__chips");
-  const etiquetas = ["Cintura", "Abdomen", "Pecho", "Brazo", "Pierna", "Cadera"];
+  const etiquetas = ["Cuello", "Cintura", "Abdomen", "Pecho", "Brazo", "Pierna", "Cadera"];
 
   etiquetas.forEach((etiqueta) => {
     chips.appendChild(crearElemento("span", "mapa-corporal__chip", etiqueta));
   });
 
   info.appendChild(crearElemento("h4", "", "Guía rápida de medidas"));
-  info.appendChild(crearElemento("p", "", "Usa los botones ? de cada campo para ver una aclaración corta sin salir de esta pantalla."));
+  info.appendChild(crearElemento("p", "", "Usa los botones ? de cada campo para ver una explicación visual con el punto exacto."));
   info.appendChild(chips);
 
   seccion.appendChild(crearSvgCuerpo());
