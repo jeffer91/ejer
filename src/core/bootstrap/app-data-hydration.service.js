@@ -6,6 +6,7 @@
     - Preparar los datos antes de montar el router principal.
     - Evitar que la app instalada vuelva a Inicio si ya existen datos locales.
     - Restaurar desde Firebase cuando el almacenamiento local esté vacío y Firebase esté configurado.
+    - Aceptar respaldos remotos con estructura actual o estructuras anteriores.
     - No intentar conexión remota cuando la app está en modo local.
     - Marcar Inicio como completado solo cuando existan datos reales.
     - Proteger Firebase para no reemplazar respaldos con un estado local vacío.
@@ -20,7 +21,7 @@
     - src/core/storage/safe-local-storage.service.js
 */
 
-import { firebaseEstaConfigurado } from "../config/firebase.config.js";
+import { firebaseEstaConfigurado, obtenerEstadoFirebaseConexion } from "../config/firebase.config.js";
 import { crearFirebaseDatabaseService } from "../firebase/firebase-database.service.js";
 import { crearSafeLocalStorageService } from "../storage/safe-local-storage.service.js";
 import { crearRegistroRepository } from "../../features/control-corporal/registro.repository.js";
@@ -30,12 +31,13 @@ function perfilTieneDatos(perfil = {}) {
   return Boolean(
     perfil.configurado ||
     Number(perfil.alturaCm || 0) > 0 ||
-    perfil.fechaNacimiento
+    perfil.fechaNacimiento ||
+    perfil.nivelMuscular
   );
 }
 
 function objetivoTieneDatos(objetivo = {}) {
-  return Boolean(Number(objetivo.pesoObjetivoKg || 0) > 0);
+  return Boolean(Number(objetivo.pesoObjetivoKg || objetivo.pesoObjetivo || 0) > 0);
 }
 
 export function estadoRegistroTieneDatos(estado = {}) {
@@ -48,13 +50,65 @@ export function estadoRegistroTieneDatos(estado = {}) {
   );
 }
 
-function normalizarEstadoRemoto(data = {}) {
+function elegirObjeto(...opciones) {
+  return opciones.find((opcion) => opcion && typeof opcion === "object" && !Array.isArray(opcion)) || {};
+}
+
+function elegirArray(...opciones) {
+  return opciones.find((opcion) => Array.isArray(opcion)) || [];
+}
+
+function extraerRaizControlCorporal(data = {}) {
+  return elegirObjeto(
+    data.controlCorporal,
+    data.registroCorporal,
+    data.registro,
+    data.control,
+    data
+  );
+}
+
+function normalizarPerfilRemoto(data = {}, raiz = {}) {
+  const perfil = elegirObjeto(raiz.perfil, data.perfil);
+
   return {
-    perfil: data.perfil || {},
-    objetivo: data.objetivo || {},
-    registros: Array.isArray(data.registros) ? data.registros : [],
-    historialCambios: Array.isArray(data.historialCambios) ? data.historialCambios : [],
-    papelera: Array.isArray(data.papelera) ? data.papelera : []
+    ...perfil,
+    alturaCm: perfil.alturaCm || raiz.alturaCm || data.alturaCm || "",
+    fechaNacimiento: perfil.fechaNacimiento || raiz.fechaNacimiento || data.fechaNacimiento || "",
+    nivelMuscular: perfil.nivelMuscular || raiz.nivelMuscular || data.nivelMuscular || "",
+    configurado: Boolean(perfil.configurado || perfil.alturaCm || raiz.alturaCm || data.alturaCm)
+  };
+}
+
+function normalizarObjetivoRemoto(data = {}, raiz = {}) {
+  const objetivo = elegirObjeto(raiz.objetivo, data.objetivo);
+  const pesoObjetivoKg = objetivo.pesoObjetivoKg || objetivo.pesoObjetivo || raiz.pesoObjetivoKg || data.pesoObjetivoKg || "";
+
+  return {
+    ...objetivo,
+    pesoObjetivoKg,
+    ritmoInteligente: objetivo.ritmoInteligente ?? true
+  };
+}
+
+function normalizarRegistrosRemotos(data = {}, raiz = {}) {
+  return elegirArray(
+    raiz.registros,
+    data.registros,
+    raiz.historialRegistros,
+    data.historialRegistros
+  );
+}
+
+function normalizarEstadoRemoto(data = {}) {
+  const raiz = extraerRaizControlCorporal(data);
+
+  return {
+    perfil: normalizarPerfilRemoto(data, raiz),
+    objetivo: normalizarObjetivoRemoto(data, raiz),
+    registros: normalizarRegistrosRemotos(data, raiz),
+    historialCambios: elegirArray(raiz.historialCambios, data.historialCambios),
+    papelera: elegirArray(raiz.papelera, data.papelera)
   };
 }
 
@@ -83,6 +137,9 @@ export async function prepararDatosAntesDeRouter({
   }
 
   if (!firebaseEstaConfigurado()) {
+    const conexion = obtenerEstadoFirebaseConexion();
+    console.info("[FitJeff] Firebase no se consulta al iniciar:", conexion.mensaje);
+
     return {
       perfilInicialCompletado: inicioFueCompletado(),
       origen: "modo-local",
