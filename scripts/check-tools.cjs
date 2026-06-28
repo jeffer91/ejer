@@ -12,9 +12,9 @@
     - package.json
     - scripts/start-electron-dev.cjs
     - scripts/auditar-app.cjs
-    - scripts/abrir-electron-dev.bat
     - scripts/build-windows.cjs
     - scripts/build-android.cjs
+    - scripts/revision-release-final.cjs
     - scripts/revision-actualizaciones.cjs
     - scripts/revisar-todo.bat
     - scripts/release-github.cjs
@@ -80,6 +80,8 @@ function revisarPackage() {
     "audit:app",
     "build:windows",
     "build:android",
+    "release:check",
+    "release:check:built",
     "release:github",
     "review:updates",
     "publicar:version",
@@ -96,6 +98,14 @@ function revisarPackage() {
 
   if (scripts.start !== "node scripts/start-electron-dev.cjs") {
     errores.push("El script start debe usar node scripts/start-electron-dev.cjs.");
+  }
+
+  if (scripts["release:check"] !== "node scripts/revision-release-final.cjs") {
+    errores.push("El script release:check debe usar node scripts/revision-release-final.cjs.");
+  }
+
+  if (scripts["release:check:built"] !== "node scripts/revision-release-final.cjs --after-build") {
+    errores.push("El script release:check:built debe usar node scripts/revision-release-final.cjs --after-build.");
   }
 
   return {
