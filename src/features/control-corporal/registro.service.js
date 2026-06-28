@@ -1,14 +1,15 @@
 /*
   Nombre completo: registro.service.js
-  Ruta o ubicación: src/features/control-corporal/registro.service.js
+  Ruta o ubicacion: src/features/control-corporal/registro.service.js
 
-  Función o funciones:
+  Funcion o funciones:
     - Coordinar las operaciones principales de Control corporal.
     - Guardar perfil, objetivo, peso y medidas usando el repository.
     - Marcar Inicio como completado cuando ya existen datos reales.
     - Encolar cambios locales para que Firebase funcione como respaldo permanente.
     - Registrar cambios para que el Historial pueda mostrar correcciones.
-    - No mezclar lógica visual con guardado de datos.
+    - Usar fecha local para registros diarios y evitar desfases por UTC.
+    - No mezclar logica visual con guardado de datos.
 
   Se conecta con:
     - src/features/control-corporal/registro.repository.js
@@ -16,15 +17,17 @@
     - src/features/control-corporal/registro.constants.js
     - src/features/control-corporal/inicio/inicio.constants.js
     - src/core/sync/sync-queue.service.js
+    - src/core/utils/date.util.js
 */
 
 import { crearSyncQueueService } from "../../core/sync/sync-queue.service.js";
+import { obtenerFechaHoyISO } from "../../core/utils/date.util.js";
 import { INICIO_STORAGE_KEYS } from "./inicio/inicio.constants.js";
 import { crearRegistroRepository } from "./registro.repository.js";
 import { crearCambioRegistro, crearRegistroBase } from "./registro.state.js";
 
 function fechaHoy() {
-  return new Date().toISOString().slice(0, 10);
+  return obtenerFechaHoyISO();
 }
 
 function existePesoEnFecha(registros, fecha) {
