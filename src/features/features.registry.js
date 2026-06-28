@@ -6,6 +6,7 @@
     - Registrar todas las funcionalidades principales de FitJeff.
     - Centralizar el menu y el montaje de cada modulo.
     - Definir Hoy como primera pantalla de Control corporal.
+    - Integrar Actividad como modulo independiente de pasos y bicicleta manual.
     - Permitir agregar futuras funcionalidades sin tocar app-router.js.
 
   Se conecta con:
@@ -13,6 +14,8 @@
     - src/app/app-router.js
     - src/features/control-corporal/control-corporal.menu.js
     - src/features/control-corporal/control-corporal.module.js
+    - src/features/actividad/actividad.menu.js
+    - src/features/actividad/actividad.module.js
     - src/features/entrenamiento/entrenamiento.menu.js
     - src/features/entrenamiento/entrenamiento.module.js
 */
@@ -20,11 +23,14 @@
 import { CONTROL_CORPORAL_MENU, CONTROL_CORPORAL_MODULE_ID } from "./control-corporal/control-corporal.menu.js";
 import { CONTROL_CORPORAL_ROUTES } from "./control-corporal/control-corporal.routes.js";
 import { esRutaControlCorporal, montarPantallaControlCorporal } from "./control-corporal/control-corporal.module.js";
+import { ACTIVIDAD_MENU, ACTIVIDAD_MODULE_ID } from "./actividad/actividad.menu.js";
+import { esRutaActividad, montarPantallaActividad } from "./actividad/actividad.module.js";
 import { ENTRENAMIENTO_MENU, ENTRENAMIENTO_MODULE_ID } from "./entrenamiento/entrenamiento.menu.js";
 import { esRutaEntrenamiento, montarPantallaEntrenamiento } from "./entrenamiento/entrenamiento.module.js";
 
 export const FEATURE_MODULES = [
   CONTROL_CORPORAL_MENU,
+  ACTIVIDAD_MENU,
   ENTRENAMIENTO_MENU
 ];
 
@@ -36,6 +42,11 @@ const FEATURE_MOUNTERS = [
     id: CONTROL_CORPORAL_MODULE_ID,
     aceptaRuta: esRutaControlCorporal,
     montar: montarPantallaControlCorporal
+  },
+  {
+    id: ACTIVIDAD_MODULE_ID,
+    aceptaRuta: esRutaActividad,
+    montar: montarPantallaActividad
   },
   {
     id: ENTRENAMIENTO_MODULE_ID,
