@@ -1,0 +1,42 @@
+/*
+  Nombre completo: rutinas-day-selector.css
+  Ruta o ubicación: src/features/entrenamiento/rutinas/rutinas-day-selector.css
+
+  Función o funciones:
+    - Estilizar el selector manual del día actual en Rutinas.
+    - Mantener el diseño claro sin mezclar estilos globales.
+
+  Se conecta con:
+    - src/features/entrenamiento/rutinas/rutinas.controller.js
+    - src/features/entrenamiento/rutinas/rutinas.view.js
+*/
+
+.entreno-rutinas-day-selector {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: end;
+  border: 1px solid rgba(22, 163, 74, 0.24);
+  border-radius: var(--fj-radius-sm, 12px);
+  background: var(--fj-green-soft, rgba(22, 163, 74, 0.12));
+  padding: 9px;
+}
+
+.entreno-rutinas-day-selector small {
+  grid-column: 1 / -1;
+  color: var(--fj-muted, #64748b);
+  font-size: 0.76rem;
+  font-weight: 800;
+}
+
+.entreno-rutinas-chip--selected-day {
+  border-color: rgba(22, 163, 74, 0.36);
+  background: var(--fj-green-soft, rgba(22, 163, 74, 0.12));
+  color: var(--fj-green, #16a34a);
+}
+
+@media (max-width: 760px) {
+  .entreno-rutinas-day-selector {
+    grid-template-columns: 1fr;
+  }
+}
