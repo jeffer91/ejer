@@ -5,6 +5,7 @@
   Funcion o funciones:
     - Guardar la configuracion inicial de FitJeff.
     - Crear perfil, objetivo y primer registro de peso.
+    - Guardar contexto muscular para análisis corporal inteligente.
     - Marcar el Inicio como completado para abrir Hoy por defecto.
     - Usar fecha local para el primer registro de peso.
 
@@ -48,7 +49,8 @@ export function crearInicioService(registroService = crearRegistroService()) {
 
     registroService.guardarPerfil({
       alturaCm: datosLimpios.alturaCm,
-      fechaNacimiento: datosLimpios.fechaNacimiento
+      fechaNacimiento: datosLimpios.fechaNacimiento,
+      nivelMuscular: datosLimpios.nivelMuscular
     });
 
     registroService.guardarObjetivo({
