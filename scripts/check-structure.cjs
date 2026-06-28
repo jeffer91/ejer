@@ -141,11 +141,12 @@ const blockedPatterns = [
   "src/modules/inicio",
   "src/modules/registro",
   "toISOString().slice(0, 10)",
-  "Estas en"
+  "Estas en",
+  "bajado 0 kg"
 ];
 
 const semanticChecks = [
-  { file: "README.md", mustInclude: ["Bloque 24 - Memoria de pantalla y shell", "ultima pantalla valida", "Estás en"], message: "README debe documentar el bloque 24." },
+  { file: "README.md", mustInclude: ["Bloque 25 - Control corporal depurado", "medicion principal por semana", "comparaciones confiables"], message: "README debe documentar el bloque 25." },
   { file: "index.html", mustInclude: ["theme-color\" content=\"#f8fafc", "color-scheme\" content=\"light", "manifest.webmanifest"], message: "index.html debe declarar modo claro y manifest." },
   { file: "manifest.webmanifest", mustInclude: ["\"background_color\": \"#f8fafc\"", "\"theme_color\": \"#2563eb\"", "./icons/icon.svg"], message: "Manifest debe estar alineado al tema claro." },
   { file: "service-worker.js", mustInclude: ["CACHE_VERSION", "PRECACHE_URLS", "self.addEventListener(\"fetch\"", "responderDinamico"], message: "Service worker debe tener base PWA real." },
@@ -158,7 +159,10 @@ const semanticChecks = [
   { file: "src/core/backup/backup-local.service.js", mustInclude: ["leerMapaTextoPorPrefijo", "crearSafeLocalStorageService", "storage.guardarJson"], message: "Backup local debe usar storage seguro." },
   { file: "src/core/backup/backup-restore.service.js", mustInclude: ["eliminarPorPrefijo", "storage.guardarTexto", "crearSafeLocalStorageService"], message: "Restauracion debe usar storage seguro." },
   { file: "src/features/control-corporal/registro.repository.js", mustInclude: ["crearSafeLocalStorageService", "storage.leerJson", "storage.guardarJson"], message: "Repository de Control corporal debe usar storage seguro." },
-  { file: "src/features/control-corporal/inicio/inicio.service.js", mustInclude: ["crearSafeLocalStorageService", "storage.leerTexto", "storage.guardarTexto"], message: "Inicio debe usar storage seguro." },
+  { file: "src/features/control-corporal/registro.service.js", mustInclude: ["guardarConfiguracionInicial", "existeMedidasEnSemana", "obtenerInicioSemanaISO", "storage.guardarTexto"], message: "Control corporal debe guardar inicio en bloque y bloquear medidas duplicadas por semana." },
+  { file: "src/features/control-corporal/inicio/inicio.service.js", mustInclude: ["registroService.guardarConfiguracionInicial", "pesoInicialKg", "marcarCompletado"], message: "Inicio debe delegar guardado inicial a Control corporal." },
+  { file: "src/features/control-corporal/estadisticas/estadisticas.calculations.js", mustInclude: ["comparacionSemanaDisponible", "comparacionMesDisponible", "describirCambioTotal", "candidatos[candidatos.length - 1] || null"], message: "Estadisticas debe evitar comparaciones sin antiguedad suficiente." },
+  { file: "src/features/control-corporal/estadisticas/estadisticas.presenter.js", mustInclude: ["detalleComparacion", "comparacionSemanaDisponible", "Faltan 7 días de datos", "Faltan 30 días de datos"], message: "Presenter debe explicar comparaciones insuficientes." },
   { file: "src/modules/ajustes/ajustes.service.js", mustInclude: ["crearSafeLocalStorageService", "storage.eliminar", "AJUSTES_STORAGE_KEYS.INICIO_COMPLETADO"], message: "Ajustes generales debe usar storage seguro." },
   { file: "src/features/actividad/actividad.repository.js", mustInclude: ["crearSafeLocalStorageService", "storage.leerJson", "storage.guardarJson"], message: "Repository de Actividad debe usar storage seguro." },
   { file: "src/features/actividad/dispositivos/dispositivos.repository.js", mustInclude: ["crearSafeLocalStorageService", "storage.leerJson", "storage.guardarJson", "mezclarEstado"], message: "Repository de Dispositivos debe usar storage seguro." },
@@ -259,6 +263,7 @@ function run() {
     console.log("Bloque 22 aplicado: Base PWA clara y estado real.");
     console.log("Bloque 23 aplicado: Almacenamiento local seguro.");
     console.log("Bloque 24 aplicado: Memoria de pantalla y shell.");
+    console.log("Bloque 25 aplicado: Control corporal depurado.");
     return;
   }
 
