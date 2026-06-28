@@ -6,6 +6,7 @@
     - Revisar que la estructura modular principal exista.
     - Confirmar que el redisenio visual claro tenga sus archivos base.
     - Confirmar que Hoy exista como pantalla principal de Control corporal.
+    - Confirmar que Inicio, Registro y Progreso esten alineados al modo claro.
     - Detectar imports antiguos hacia src/modules/inicio o src/modules/registro.
     - Confirmar que Control corporal, Shell y Features Registry estan conectados.
 
@@ -40,6 +41,9 @@ const requiredFiles = [
   "src/features/control-corporal/registro.service.js",
   "src/features/control-corporal/registro.repository.js",
   "src/features/control-corporal/inicio/inicio.controller.js",
+  "src/features/control-corporal/inicio/inicio.view.js",
+  "src/features/control-corporal/inicio/inicio.css",
+  "src/features/control-corporal/inicio/inicio.constants.js",
   "src/features/control-corporal/hoy/hoy.controller.js",
   "src/features/control-corporal/hoy/hoy.service.js",
   "src/features/control-corporal/hoy/hoy.rules.js",
@@ -96,6 +100,16 @@ const semanticChecks = [
     file: "src/app/app-router.js",
     mustInclude: ["alNavegar: navegar"],
     message: "app-router debe pasar navegacion interna a los modulos."
+  },
+  {
+    file: "src/features/control-corporal/inicio/inicio.constants.js",
+    mustInclude: ["Guardar y abrir Hoy", "Abriendo Hoy"],
+    message: "Inicio debe dirigir al usuario hacia Hoy."
+  },
+  {
+    file: "src/features/control-corporal/inicio/inicio.css",
+    mustInclude: ["var(--fj-action-bg", "background: #ffffff", "var(--fj-text-strong"],
+    message: "Inicio debe estar alineado al modo claro."
   },
   {
     file: "src/features/control-corporal/registro/ingreso.view.js",
@@ -195,6 +209,7 @@ function run() {
     console.log("Control corporal vive en src/features/control-corporal.");
     console.log("Hoy es la pantalla principal de Control corporal.");
     console.log("El tema claro global esta registrado.");
+    console.log("Inicio abre hacia Hoy y usa modo claro.");
     console.log("Registro integra ayuda ? y mapa corporal.");
     console.log("Progreso usa presenter para una vista ordenada.");
     return;
