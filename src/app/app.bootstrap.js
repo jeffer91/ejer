@@ -8,7 +8,7 @@
     - Restaurar datos locales/Firebase antes de decidir si mostrar Inicio.
     - Montar la estructura principal dentro de #app.
     - Lanzar sincronización en segundo plano sin bloquear la interfaz.
-    - Registrar el service worker si el navegador lo permite.
+    - Registrar el service worker solo en producción web/PWA para evitar caché viejo en desarrollo y Electron.
 
   Se conecta con:
     - index.html
@@ -55,6 +55,28 @@ function sincronizarEnSegundoPlano() {
   });
 }
 
+function debeRegistrarServiceWorker() {
+  return Boolean(
+    "serviceWorker" in navigator
+    && !window.fitJeffDesktop
+    && !import.meta.env.DEV
+  );
+}
+
+function registrarServiceWorkerPwa() {
+  if (!debeRegistrarServiceWorker()) {
+    return;
+  }
+
+  navigator.serviceWorker.register("./service-worker.js").catch((error) => {
+    errorHandler.registrarError(error, {
+      modulo: "pwa",
+      accion: "registrar-service-worker",
+      mensajeUsuario: "La app funciona, pero el modo sin conexión aún no se activó."
+    });
+  });
+}
+
 async function iniciarFitJeff() {
   const preparacionDatos = await prepararDatosAntesDeRouter();
 
@@ -65,16 +87,7 @@ async function iniciarFitJeff() {
 
   router.iniciar();
   sincronizarEnSegundoPlano();
+  registrarServiceWorkerPwa();
 }
 
 iniciarFitJeff().catch(renderizarErrorInicio);
-
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("./service-worker.js").catch((error) => {
-    errorHandler.registrarError(error, {
-      modulo: "pwa",
-      accion: "registrar-service-worker",
-      mensajeUsuario: "La app funciona, pero el modo sin conexión aún no se activó."
-    });
-  });
-}
