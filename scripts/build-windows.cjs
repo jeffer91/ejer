@@ -4,15 +4,17 @@
 
   Función o funciones:
     - Compilar FitJeff para Windows con Vite y electron-builder.
-    - Generar instalador NSIS y archivos de actualización en la carpeta release.
-    - Validar que existan artefactos mínimos antes de publicar en GitHub Releases.
+    - Limpiar artefactos Windows antiguos antes de compilar.
+    - Generar instalador NSIS y latest.yml en la carpeta release.
+    - Validar que el instalador generado corresponda a la versión actual.
     - Mantener la compilación separada del script que crea releases.
 
   Se conecta con:
     - package.json
     - electron/main.js
     - electron/electron-updater.service.js
-    - release/latest.json
+    - release/latest.yml
+    - scripts/revision-release-final.cjs
     - scripts/release-github.cjs
     - scripts/publicar-version.bat
 */
@@ -24,13 +26,19 @@ const { spawnSync } = require("node:child_process");
 const rootDir = path.resolve(__dirname, "..");
 const releaseDir = path.join(rootDir, "release");
 const packagePath = path.join(rootDir, "package.json");
+const npmCommand = process.platform === "win32" ? "npm.cmd" : "npm";
+const npxCommand = process.platform === "win32" ? "npx.cmd" : "npx";
 
 function ejecutar(comando, args) {
   const resultado = spawnSync(comando, args, {
     cwd: rootDir,
     stdio: "inherit",
-    shell: process.platform === "win32"
+    shell: false
   });
+
+  if (resultado.error) {
+    throw new Error(`No se pudo ejecutar ${comando}: ${resultado.error.message}`);
+  }
 
   if (resultado.status !== 0) {
     throw new Error(`Falló el comando: ${comando} ${args.join(" ")}`);
@@ -52,17 +60,47 @@ function listarArchivosRelease() {
   });
 }
 
-function validarArtefactos() {
-  const archivos = listarArchivosRelease();
-  const tieneInstalador = archivos.some((archivo) => archivo.toLowerCase().endsWith(".exe"));
-  const tieneMetadata = archivos.some((archivo) => archivo.toLowerCase() === "latest.yml");
+function limpiarArtefactosWindowsPrevios() {
+  fs.mkdirSync(releaseDir, { recursive: true });
 
-  if (!tieneInstalador) {
-    throw new Error("No se encontró instalador .exe en la carpeta release.");
+  const extensionesWindows = new Set([".exe", ".blockmap", ".yml", ".yaml"]);
+  const eliminados = [];
+
+  listarArchivosRelease().forEach((archivo) => {
+    const extension = path.extname(archivo).toLowerCase();
+    const nombre = archivo.toLowerCase();
+    const esArtefactoWindows = extensionesWindows.has(extension) || nombre === "builder-debug.yml" || nombre === "builder-effective-config.yaml";
+
+    if (!esArtefactoWindows) return;
+
+    fs.rmSync(path.join(releaseDir, archivo), { force: true });
+    eliminados.push(archivo);
+  });
+
+  if (eliminados.length) {
+    console.log("Artefactos Windows anteriores eliminados:");
+    eliminados.forEach((archivo) => console.log(`- ${archivo}`));
+  }
+}
+
+function validarArtefactos(pkg) {
+  const archivos = listarArchivosRelease();
+  const version = String(pkg.version || "");
+  const instaladores = archivos.filter((archivo) => archivo.toLowerCase().endsWith(".exe"));
+  const instaladorActual = instaladores.find((archivo) => archivo.includes(version));
+  const tieneMetadata = archivos.some((archivo) => archivo.toLowerCase() === "latest.yml");
+  const instaladoresViejos = instaladores.filter((archivo) => !archivo.includes(version));
+
+  if (!instaladorActual) {
+    throw new Error(`No se encontró instalador .exe de la versión actual ${version} en la carpeta release.`);
   }
 
   if (!tieneMetadata) {
     throw new Error("No se encontró latest.yml en la carpeta release. El autoupdater lo necesita.");
+  }
+
+  if (instaladoresViejos.length) {
+    throw new Error(`Hay instaladores viejos mezclados en release: ${instaladoresViejos.join(", ")}`);
   }
 
   return archivos;
@@ -78,12 +116,12 @@ function main() {
   console.log(`Salida:  ${releaseDir}`);
   console.log("----------------------------------------");
 
-  fs.mkdirSync(releaseDir, { recursive: true });
+  limpiarArtefactosWindowsPrevios();
 
-  ejecutar("npm", ["run", "build"]);
-  ejecutar("npx", ["electron-builder", "--win", "nsis", "--publish", "never"]);
+  ejecutar(npmCommand, ["run", "build"]);
+  ejecutar(npxCommand, ["electron-builder", "--win", "nsis", "--publish", "never"]);
 
-  const archivos = validarArtefactos();
+  const archivos = validarArtefactos(pkg);
 
   console.log("----------------------------------------");
   console.log("Artefactos Windows detectados:");
