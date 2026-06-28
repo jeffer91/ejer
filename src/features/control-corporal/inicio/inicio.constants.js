@@ -6,6 +6,7 @@
     - Centralizar textos y claves del Inicio de primera vez.
     - Definir los campos que se piden solo al configurar la app.
     - Preparar la salida natural hacia la pantalla Hoy.
+    - Agregar contexto muscular para no depender solo del IMC.
     - Evitar repetir nombres de campos en vista, servicio y validacion.
 
   Se conecta con:
@@ -22,13 +23,22 @@ export const INICIO_STORAGE_KEYS = Object.freeze({
 export const INICIO_CAMPOS = Object.freeze({
   ALTURA_CM: "alturaCm",
   FECHA_NACIMIENTO: "fechaNacimiento",
+  NIVEL_MUSCULAR: "nivelMuscular",
   PESO_INICIAL_KG: "pesoInicialKg",
   PESO_OBJETIVO_KG: "pesoObjetivoKg"
 });
 
+export const INICIO_OPCIONES = Object.freeze({
+  nivelMuscular: [
+    { value: "bajo", label: "Bajo / poco entrenamiento" },
+    { value: "medio", label: "Medio / entreno regular" },
+    { value: "alto", label: "Alto / mucha masa muscular" }
+  ]
+});
+
 export const INICIO_TEXTOS = Object.freeze({
   TITULO: "Configura FitJeff",
-  SUBTITULO: "Solo necesitamos estos datos la primera vez. Luego entrarás directo a Hoy.",
+  SUBTITULO: "Estos datos ayudan a que el análisis no dependa solo del peso o del IMC.",
   BOTON_GUARDAR: "Guardar y abrir Hoy",
   ERROR_GENERAL: "Revisa los datos antes de continuar.",
   EXITO: "Perfil inicial guardado. Abriendo Hoy."
