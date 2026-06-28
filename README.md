@@ -20,6 +20,7 @@ FitJeff tiene una base modular funcional y visualmente clara. La app ya puede tr
 - PWA base real con manifest claro y service worker de cache basico.
 - Storage seguro aplicado a repositories principales, Inicio, Ajustes, backup e hidratacion inicial.
 - Memoria de ultima pantalla valida dentro del shell.
+- Control corporal depurado con guardado inicial unico, medicion principal por semana y comparaciones confiables.
 
 ### Preparado, pero pendiente de conexion real
 
@@ -47,6 +48,7 @@ Bloques funcionales y correctivos aplicados:
 - Bloque 22: Base PWA clara y estado real.
 - Bloque 23: Almacenamiento local seguro.
 - Bloque 24: Memoria de pantalla y shell.
+- Bloque 25: Control corporal depurado.
 
 ## Pantalla principal
 
@@ -196,6 +198,19 @@ Corregido:
 
 Resultado: al abrir FitJeff con perfil completado, la app restaura la ultima pantalla valida guardada. Si esa pantalla ya no existe, vuelve a Hoy. La memoria del shell usa storage seguro y el texto visible se corrigio a `Estás en`.
 
+### Bloque 25 - Control corporal depurado
+
+Corregido:
+
+- `src/features/control-corporal/registro.service.js`
+- `src/features/control-corporal/inicio/inicio.service.js`
+- `src/features/control-corporal/estadisticas/estadisticas.calculations.js`
+- `src/features/control-corporal/estadisticas/estadisticas.presenter.js`
+- `scripts/check-structure.cjs`
+- `README.md`
+
+Resultado: Inicio guarda perfil, objetivo y peso inicial en una sola operacion local; las medidas quedan limitadas a una medicion principal por semana; Progreso ya no compara semana o mes si no existe un registro suficientemente antiguo; y el mensaje inteligente ya no muestra frases como cambios de 0 kg.
+
 ## Comandos
 
 Instalar dependencias:
@@ -255,16 +270,16 @@ npm run desktop:win
 - PWA debe registrarse solo en produccion web para evitar cache viejo durante desarrollo.
 - Los datos locales deben pasar por storage seguro cuando sean leidos o escritos desde servicios/repositories.
 - La ultima pantalla solo debe restaurarse si es una ruta valida del shell.
+- Las medidas corporales deben manejarse como medicion principal semanal, no como registros repetidos sin control.
 
 ## Siguiente fase recomendada
 
 Correcciones pendientes por prioridad:
 
-1. Mejorar reglas de Control corporal: onboarding, medidas semanales y comparaciones.
-2. Corregir duplicados de Actividad.
-3. Aclarar o implementar conexiones reales de Dispositivos.
-4. Mejorar Rutinas y seleccion del dia de entrenamiento.
-5. Revisar seguridad y texto de Gemini API Key.
-6. Decidir Firebase activo o modo local-only.
-7. Publicar primer release Windows real.
-8. Crear proyecto Android/Capacitor solo cuando se vaya a generar APK real.
+1. Corregir duplicados de Actividad.
+2. Aclarar o implementar conexiones reales de Dispositivos.
+3. Mejorar Rutinas y seleccion del dia de entrenamiento.
+4. Revisar seguridad y texto de Gemini API Key.
+5. Decidir Firebase activo o modo local-only.
+6. Publicar primer release Windows real.
+7. Crear proyecto Android/Capacitor solo cuando se vaya a generar APK real.
