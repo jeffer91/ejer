@@ -1,6 +1,7 @@
 import { sumarDiasISO } from "../../core/utils/date.util.js";
 import { ACTIVIDAD_TEXTOS, ACTIVIDAD_TIPOS, fechaHoyISO } from "./actividad.constants.js";
 import { crearActividadRepository } from "./actividad.repository.js";
+import { obtenerResumenDispositivos } from "./dispositivos/dispositivos.service.js";
 
 function numero(valor) {
   const normalizado = String(valor ?? "").replace(",", ".").trim();
@@ -71,6 +72,7 @@ export function crearActividadService(repository = crearActividadRepository()) {
         bicicletaKm: sumar(registrosSemana, "bicicletaKm"),
         diasActivos: new Set(registrosSemana.map((registro) => registro.fecha)).size
       },
+      dispositivos: obtenerResumenDispositivos(),
       recientes: registros.slice(0, 6)
     };
   }
