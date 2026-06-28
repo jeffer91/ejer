@@ -1,28 +1,31 @@
 /*
   Nombre completo: estadisticas.constants.js
-  Ruta o ubicación: src/features/control-corporal/estadisticas/estadisticas.constants.js
+  Ruta o ubicacion: src/features/control-corporal/estadisticas/estadisticas.constants.js
 
-  Función o funciones:
-    - Centralizar textos, etiquetas y estados visuales de Estadísticas.
-    - Mantener la pantalla principal clara y sin términos técnicos.
+  Funcion o funciones:
+    - Centralizar textos, etiquetas y estados visuales de Progreso.
+    - Mantener la pantalla clara y sin saturar al usuario.
     - Preparar indicadores para peso, objetivo, IMC, tendencia, avance, faltante y próxima medición.
 
   Se conecta con:
     - src/features/control-corporal/estadisticas/estadisticas.calculations.js
+    - src/features/control-corporal/estadisticas/estadisticas.presenter.js
     - src/features/control-corporal/estadisticas/estadisticas.service.js
     - src/features/control-corporal/estadisticas/estadisticas.view.js
 */
 
 export const ESTADISTICAS_TEXTOS = Object.freeze({
-  TITULO: "Estadísticas",
-  SUBTITULO: "Resumen visual de tu peso, objetivo, tendencia, avance y medidas corporales.",
-  SIN_DATOS: "Aún faltan registros para mostrar estadísticas completas.",
+  TITULO: "Progreso",
+  SUBTITULO: "Revisa los detalles importantes de tu peso, meta, tendencia y medidas.",
+  SIN_DATOS: "Aún faltan registros para mostrar un progreso completo.",
   DATOS_AL_DIA: "Datos al día",
   PROXIMA_MEDICION: "Próxima medición",
   MEDIDAS: "Medidas corporales",
-  GRAFICO_PESO: "Peso en el tiempo",
-  PROGRESO_PESO: "Progreso de peso",
-  MENSAJE_INTELIGENTE: "Lectura rápida"
+  GRAFICO_PESO: "Peso reciente",
+  PROGRESO_PESO: "Avance hacia la meta",
+  MENSAJE_INTELIGENTE: "Lectura rápida",
+  DETALLE_PESO: "Detalle de peso",
+  RESUMEN_PRINCIPAL: "Resumen principal"
 });
 
 export const ESTADISTICAS_TENDENCIAS = Object.freeze({
