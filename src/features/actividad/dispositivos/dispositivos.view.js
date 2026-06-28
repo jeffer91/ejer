@@ -115,7 +115,7 @@ export function crearDispositivosView(estado) {
   cubittPanel.appendChild(crearInput({ name: "cubittModelo", label: "Modelo", value: estado.cubitt.modelo }));
   cubittPanel.appendChild(crearInput({ name: "cubittVariante", label: "Variante", value: estado.cubitt.variante }));
   cubittPanel.appendChild(crearInput({ name: "cubittAlias", label: "Alias visible", value: estado.cubitt.alias }));
-  cubittPanel.appendChild(crearInput({ name: "cubittIdentificadorLocal", label: "Identificador local del reloj", value: estado.cubitt.identificadorLocal, placeholder: "Escríbelo solo en tu PC" }));
+  cubittPanel.appendChild(crearInput({ name: "cubittIdentificadorLocal", label: "identificador local del reloj", value: estado.cubitt.identificadorLocal, placeholder: "Escríbelo solo en tu PC" }));
   cubittPanel.appendChild(crearElemento("small", "dispositivos-note", estado.cubitt.nota));
 
   googlePanel.appendChild(crearElemento("h3", "", DISPOSITIVOS_TEXTOS.GOOGLE_FIT_TITULO));
