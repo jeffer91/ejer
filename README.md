@@ -14,7 +14,7 @@ FitJeff tiene una base modular funcional y visualmente clara. La app ya puede tr
 - Registro corporal con ayuda visual.
 - Progreso con analisis corporal inteligente.
 - Historial de control corporal.
-- Actividad manual.
+- Actividad manual depurada con un solo registro principal por fecha.
 - Rutinas, Diario, HIIT, Stats y Ajustes de entrenamiento.
 - Actualizaciones preparadas para Electron instalado.
 - PWA base real con manifest claro y service worker de cache basico.
@@ -51,6 +51,7 @@ Bloques funcionales y correctivos aplicados:
 - Bloque 24: Memoria de pantalla y shell.
 - Bloque 25: Control corporal depurado.
 - Bloque 26: Variables y conexión.
+- Bloque 27: Actividad depurada.
 
 ## Pantalla principal
 
@@ -238,6 +239,20 @@ Corregido:
 
 Resultado: Firebase ahora se configura por variables Vite; si no está habilitado, FitJeff queda en modo local activo sin marcar error de nube. La hidratacion inicial no intenta conexión remota en modo local y Control corporal no llena la cola de sincronizacion si Firebase no está listo.
 
+### Bloque 27 - Actividad depurada
+
+Corregido:
+
+- `src/features/actividad/actividad.constants.js`
+- `src/features/actividad/actividad.repository.js`
+- `src/features/actividad/actividad.service.js`
+- `src/features/actividad/registro/registro.controller.js`
+- `src/features/actividad/registro/registro.view.js`
+- `scripts/check-structure.cjs`
+- `README.md`
+
+Resultado: Actividad ahora mantiene un solo registro principal por fecha. Si el usuario selecciona una fecha con actividad previa, el formulario carga esos datos; si guarda de nuevo, actualiza el registro del día en lugar de duplicarlo. También se agregaron límites básicos y bloqueo de fechas futuras.
+
 ## Comandos
 
 Instalar dependencias:
@@ -299,14 +314,14 @@ npm run desktop:win
 - La ultima pantalla solo debe restaurarse si es una ruta valida del shell.
 - Las medidas corporales deben manejarse como medicion principal semanal, no como registros repetidos sin control.
 - Las conexiones externas deben iniciar en modo local y activarse solo por variables configuradas.
+- Actividad debe manejar un solo registro principal por fecha y actualizar el registro del día si ya existe.
 
 ## Siguiente fase recomendada
 
 Correcciones pendientes por prioridad:
 
-1. Corregir duplicados de Actividad.
-2. Aclarar o implementar conexiones reales de Dispositivos.
-3. Mejorar Rutinas y seleccion del dia de entrenamiento.
-4. Revisar seguridad y texto de Gemini API Key.
-5. Publicar primer release Windows real.
-6. Crear proyecto Android/Capacitor solo cuando se vaya a generar APK real.
+1. Aclarar o implementar conexiones reales de Dispositivos.
+2. Mejorar Rutinas y seleccion del dia de entrenamiento.
+3. Revisar seguridad y texto de Gemini API Key.
+4. Publicar primer release Windows real.
+5. Crear proyecto Android/Capacitor solo cuando se vaya a generar APK real.
