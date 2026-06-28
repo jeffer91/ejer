@@ -11,6 +11,10 @@ const requiredFiles = [
   "public/icons/icon.svg",
   "docs/fase-visual-2026-cierre.md",
   "src/core/utils/date.util.js",
+  "src/core/storage/safe-local-storage.service.js",
+  "src/core/bootstrap/app-data-hydration.service.js",
+  "src/core/backup/backup-local.service.js",
+  "src/core/backup/backup-restore.service.js",
   "src/app/app-router.js",
   "src/app/app.bootstrap.js",
   "src/app/app.css",
@@ -89,6 +93,7 @@ const requiredFiles = [
   "src/features/actividad/registro/registro.view.js",
   "src/features/actividad/registro/registro.css",
   "src/features/entrenamiento/entrenamiento.constants.js",
+  "src/features/entrenamiento/entrenamiento.repository.js",
   "src/features/entrenamiento/ajustes/ajustes.controller.js",
   "src/features/entrenamiento/ajustes/ajustes.service.js",
   "src/features/entrenamiento/ajustes/ajustes.view.js",
@@ -117,6 +122,7 @@ const requiredFiles = [
   "src/features/entrenamiento/stats/stats.view.js",
   "src/features/entrenamiento/stats/stats.css",
   "src/modules/ajustes/ajustes.controller.js",
+  "src/modules/ajustes/ajustes.service.js",
   "src/modules/ajustes/ajustes.view.js",
   "src/modules/ajustes/ajustes.css",
   "src/modules/actualizaciones/actualizaciones.controller.js",
@@ -138,11 +144,22 @@ const blockedPatterns = [
 ];
 
 const semanticChecks = [
-  { file: "README.md", mustInclude: ["Bloque 22 - Base PWA clara y estado real", "PWA base real", "service worker"], message: "README debe documentar el bloque 22." },
+  { file: "README.md", mustInclude: ["Bloque 23 - Almacenamiento local seguro", "storage seguro", "repositories principales"], message: "README debe documentar el bloque 23." },
   { file: "index.html", mustInclude: ["theme-color\" content=\"#f8fafc", "color-scheme\" content=\"light", "manifest.webmanifest"], message: "index.html debe declarar modo claro y manifest." },
   { file: "manifest.webmanifest", mustInclude: ["\"background_color\": \"#f8fafc\"", "\"theme_color\": \"#2563eb\"", "./icons/icon.svg"], message: "Manifest debe estar alineado al tema claro." },
   { file: "service-worker.js", mustInclude: ["CACHE_VERSION", "PRECACHE_URLS", "self.addEventListener(\"fetch\"", "responderDinamico"], message: "Service worker debe tener base PWA real." },
   { file: "src/app/app.bootstrap.js", mustInclude: ["debeRegistrarServiceWorker", "!window.fitJeffDesktop", "!import.meta.env.DEV", "registrarServiceWorkerPwa"], message: "Bootstrap debe registrar PWA solo en producción web." },
+  { file: "src/core/storage/safe-local-storage.service.js", mustInclude: ["leerMapaTextoPorPrefijo", "eliminarPorPrefijo", "listarClaves", "guardarJson"], message: "Storage seguro debe incluir utilidades para backup y repositorios." },
+  { file: "src/core/bootstrap/app-data-hydration.service.js", mustInclude: ["crearSafeLocalStorageService", "storage.guardarTexto", "storage.leerTexto"], message: "Hidratacion inicial debe usar storage seguro." },
+  { file: "src/core/backup/backup-local.service.js", mustInclude: ["leerMapaTextoPorPrefijo", "crearSafeLocalStorageService", "storage.guardarJson"], message: "Backup local debe usar storage seguro." },
+  { file: "src/core/backup/backup-restore.service.js", mustInclude: ["eliminarPorPrefijo", "storage.guardarTexto", "crearSafeLocalStorageService"], message: "Restauracion debe usar storage seguro." },
+  { file: "src/features/control-corporal/registro.repository.js", mustInclude: ["crearSafeLocalStorageService", "storage.leerJson", "storage.guardarJson"], message: "Repository de Control corporal debe usar storage seguro." },
+  { file: "src/features/control-corporal/inicio/inicio.service.js", mustInclude: ["crearSafeLocalStorageService", "storage.leerTexto", "storage.guardarTexto"], message: "Inicio debe usar storage seguro." },
+  { file: "src/modules/ajustes/ajustes.service.js", mustInclude: ["crearSafeLocalStorageService", "storage.eliminar", "AJUSTES_STORAGE_KEYS.INICIO_COMPLETADO"], message: "Ajustes generales debe usar storage seguro." },
+  { file: "src/features/actividad/actividad.repository.js", mustInclude: ["crearSafeLocalStorageService", "storage.leerJson", "storage.guardarJson"], message: "Repository de Actividad debe usar storage seguro." },
+  { file: "src/features/actividad/dispositivos/dispositivos.repository.js", mustInclude: ["crearSafeLocalStorageService", "storage.leerJson", "storage.guardarJson", "mezclarEstado"], message: "Repository de Dispositivos debe usar storage seguro." },
+  { file: "src/features/entrenamiento/entrenamiento.repository.js", mustInclude: ["crearSafeLocalStorageService", "storage.leerJson", "storage.guardarJson", "storage.eliminar"], message: "Repository de Entrenamiento debe usar storage seguro." },
+  { file: "src/features/entrenamiento/ajustes/gemini-settings.repository.js", mustInclude: ["crearSafeLocalStorageService", "storage.leerJson", "storage.guardarJson"], message: "Repository de Gemini debe usar storage seguro." },
   { file: "src/app/app.css", mustInclude: ["@import \"./theme-light.css\";", "@import \"./status-colors.css\";"], message: "app.css debe cargar tema claro y estados." },
   { file: "src/features/actividad/actividad.menu.js", mustInclude: ["conexiones preparadas", "Manual y conexiones"], message: "Menu de Actividad debe reflejar conexiones." },
   { file: "src/features/actividad/actividad.routes.js", mustInclude: ["DISPOSITIVOS", "actividad-dispositivos", "Cubitt CT4 y Google Fit"], message: "Actividad debe tener ruta de dispositivos." },
@@ -150,7 +167,6 @@ const semanticChecks = [
   { file: "src/features/actividad/actividad.service.js", mustInclude: ["obtenerResumenDispositivos", "dispositivos"], message: "Resumen de Actividad debe incluir dispositivos." },
   { file: "src/features/actividad/resumen/resumen.view.js", mustInclude: ["crearPanelDispositivos", "Preparar dispositivos", "ACTIVIDAD_ROUTES.DISPOSITIVOS"], message: "Resumen debe enlazar Dispositivos." },
   { file: "src/features/actividad/dispositivos/dispositivos.constants.js", mustInclude: ["DISPOSITIVOS_STORAGE_KEY", "Cubitt", "Google Fit", "AVISO_PRIVADO"], message: "Dispositivos debe tener constantes base." },
-  { file: "src/features/actividad/dispositivos/dispositivos.repository.js", mustInclude: ["crearDispositivosRepository", "localStorage", "mezclarEstado"], message: "Dispositivos debe persistir localmente." },
   { file: "src/features/actividad/dispositivos/dispositivos.service.js", mustInclude: ["crearDispositivosService", "preservarTexto", "identificadorLocal: preservarTexto", "cuenta: preservarTexto", "obtenerResumenDispositivos"], message: "Dispositivos debe preservar configuracion guardada." },
   { file: "src/features/actividad/dispositivos/dispositivos.controller.js", mustInclude: ["renderizar", "guardado.estado", "pintarMensajeDispositivos"], message: "Dispositivos debe refrescar estado despues de guardar." },
   { file: "src/features/actividad/dispositivos/adapters/cubitt.adapter.js", mustInclude: ["crearCubittAdapter", "normalizarActividadLectura"], message: "Debe existir adapter Cubitt." },
@@ -229,7 +245,7 @@ function run() {
     console.log("Fase visual 2026 cerrada: 12/12 bloques completados.");
     console.log("Bloque 13 aplicado: fechas locales corregidas.");
     console.log("Bloque 14 aplicado: revision local completa.");
-    console.log("Bloque 15 aplicado: Gemini con persistencia blindada.");
+    console.log("Bloque 15 aplicado: Gemini con persistencia separada.");
     console.log("Bloque 16 aplicado: medidas con popup visual.");
     console.log("Bloque 17 aplicado: Rutinas claro + pasos.");
     console.log("Bloque 18 aplicado: Jarvis claro en Diario y HIT.");
@@ -237,6 +253,7 @@ function run() {
     console.log("Bloque 20 aplicado: Dispositivos, Cubitt CT4 y Google Fit preparados.");
     console.log("Bloque 21 aplicado: Analisis y correccion de errores.");
     console.log("Bloque 22 aplicado: Base PWA clara y estado real.");
+    console.log("Bloque 23 aplicado: Almacenamiento local seguro.");
     return;
   }
 
