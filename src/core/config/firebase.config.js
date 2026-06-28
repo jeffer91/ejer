@@ -4,18 +4,22 @@
 
   Función o funciones:
     - Centralizar la configuración pública de Firebase.
-    - Leer variables Vite desde .env cuando existan.
+    - Leer primero variables Vite cuando existan.
+    - Usar configuración de proyecto escrita en código como respaldo.
     - Activar Firebase automáticamente si existen credenciales completas y no se deshabilitó explícitamente.
     - Mantener FitJeff en modo local cuando Firebase no esté habilitado o falten variables.
     - Exponer un estado simple de conexión para sincronización y diagnóstico.
     - Evitar que los servicios escriban datos si Firebase aún no está configurado.
 
   Se conecta con:
+    - src/core/config/firebase.project.config.js
     - .env.example
     - src/core/firebase/firebase-app.service.js
     - src/core/firebase/firebase-database.service.js
     - src/core/sync/sync.service.js
 */
+
+import { FIREBASE_PROJECT_CONFIG } from "./firebase.project.config.js";
 
 function leerVariableEnv(nombre, valorDefecto = "") {
   try {
@@ -23,6 +27,10 @@ function leerVariableEnv(nombre, valorDefecto = "") {
   } catch {
     return String(valorDefecto).trim();
   }
+}
+
+function leerValor(nombreEnv, valorCodigo = "") {
+  return leerVariableEnv(nombreEnv, valorCodigo || "");
 }
 
 function interpretarBoolean(valor, valorDefecto = false) {
@@ -40,37 +48,41 @@ function credencialesBasicasPresentes(config) {
 }
 
 function resolverFirebaseEnabled(config) {
-  const valor = leerVariableEnv("VITE_FIREBASE_ENABLED", "");
+  const valorEnv = leerVariableEnv("VITE_FIREBASE_ENABLED", "");
 
-  if (valor) {
-    return interpretarBoolean(valor, false);
+  if (valorEnv) {
+    return interpretarBoolean(valorEnv, false);
+  }
+
+  if (typeof FIREBASE_PROJECT_CONFIG.enabled === "boolean") {
+    return FIREBASE_PROJECT_CONFIG.enabled && credencialesBasicasPresentes(config);
   }
 
   return credencialesBasicasPresentes(config);
 }
 
 export const FIREBASE_CONFIG = Object.freeze({
-  apiKey: leerVariableEnv("VITE_FIREBASE_API_KEY"),
-  authDomain: leerVariableEnv("VITE_FIREBASE_AUTH_DOMAIN"),
-  projectId: leerVariableEnv("VITE_FIREBASE_PROJECT_ID"),
-  storageBucket: leerVariableEnv("VITE_FIREBASE_STORAGE_BUCKET"),
-  messagingSenderId: leerVariableEnv("VITE_FIREBASE_MESSAGING_SENDER_ID"),
-  appId: leerVariableEnv("VITE_FIREBASE_APP_ID")
+  apiKey: leerValor("VITE_FIREBASE_API_KEY", FIREBASE_PROJECT_CONFIG.apiKey),
+  authDomain: leerValor("VITE_FIREBASE_AUTH_DOMAIN", FIREBASE_PROJECT_CONFIG.authDomain),
+  projectId: leerValor("VITE_FIREBASE_PROJECT_ID", FIREBASE_PROJECT_CONFIG.projectId),
+  storageBucket: leerValor("VITE_FIREBASE_STORAGE_BUCKET", FIREBASE_PROJECT_CONFIG.storageBucket),
+  messagingSenderId: leerValor("VITE_FIREBASE_MESSAGING_SENDER_ID", FIREBASE_PROJECT_CONFIG.messagingSenderId),
+  appId: leerValor("VITE_FIREBASE_APP_ID", FIREBASE_PROJECT_CONFIG.appId)
 });
 
 export const FIREBASE_APP_OPTIONS = Object.freeze({
   enabled: resolverFirebaseEnabled(FIREBASE_CONFIG),
-  collection: leerVariableEnv("VITE_FIREBASE_COLLECTION", "fitjeff") || "fitjeff",
-  userDocument: leerVariableEnv("VITE_FIREBASE_USER_DOCUMENT", "jeff") || "jeff",
-  registrosSubcollection: leerVariableEnv("VITE_FIREBASE_REGISTROS_SUBCOLLECTION", "registros") || "registros",
-  statusDocument: leerVariableEnv("VITE_FIREBASE_STATUS_DOCUMENT", "status") || "status"
+  collection: leerValor("VITE_FIREBASE_COLLECTION", FIREBASE_PROJECT_CONFIG.collection) || "fitjeff",
+  userDocument: leerValor("VITE_FIREBASE_USER_DOCUMENT", FIREBASE_PROJECT_CONFIG.userDocument) || "jeff",
+  registrosSubcollection: leerValor("VITE_FIREBASE_REGISTROS_SUBCOLLECTION", FIREBASE_PROJECT_CONFIG.registrosSubcollection) || "registros",
+  statusDocument: leerValor("VITE_FIREBASE_STATUS_DOCUMENT", FIREBASE_PROJECT_CONFIG.statusDocument) || "status"
 });
 
 export function obtenerVariablesFirebaseFaltantes() {
   const requeridas = [
-    ["VITE_FIREBASE_API_KEY", FIREBASE_CONFIG.apiKey],
-    ["VITE_FIREBASE_PROJECT_ID", FIREBASE_CONFIG.projectId],
-    ["VITE_FIREBASE_APP_ID", FIREBASE_CONFIG.appId]
+    ["VITE_FIREBASE_API_KEY o FIREBASE_PROJECT_CONFIG.apiKey", FIREBASE_CONFIG.apiKey],
+    ["VITE_FIREBASE_PROJECT_ID o FIREBASE_PROJECT_CONFIG.projectId", FIREBASE_CONFIG.projectId],
+    ["VITE_FIREBASE_APP_ID o FIREBASE_PROJECT_CONFIG.appId", FIREBASE_CONFIG.appId]
   ];
 
   return requeridas
@@ -96,7 +108,7 @@ export function obtenerEstadoFirebaseConexion() {
       habilitado: false,
       configurado: false,
       faltantes,
-      mensaje: "Modo local activo. Firebase está deshabilitado."
+      mensaje: "Modo local activo. Firebase está deshabilitado o no tiene credenciales en código."
     };
   }
 
@@ -106,7 +118,7 @@ export function obtenerEstadoFirebaseConexion() {
       habilitado: true,
       configurado: false,
       faltantes,
-      mensaje: `Firebase está habilitado, pero faltan variables: ${faltantes.join(", ") || "sin detalle"}.`
+      mensaje: `Firebase está habilitado, pero faltan datos: ${faltantes.join(", ") || "sin detalle"}.`
     };
   }
 
