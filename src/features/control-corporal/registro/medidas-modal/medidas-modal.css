@@ -221,12 +221,13 @@
   font-weight: 900;
 }
 
-.medidas-figura--abdomen {
-  color: var(--fj-yellow, #f59e0b);
-}
-
+.medidas-figura--cuello,
 .medidas-figura--pecho {
   color: var(--fj-cyan, #0ea5e9);
+}
+
+.medidas-figura--abdomen {
+  color: var(--fj-yellow, #f59e0b);
 }
 
 .medidas-figura--brazo {
