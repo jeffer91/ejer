@@ -16,6 +16,7 @@ FitJeff tiene una base modular funcional y visualmente clara. La app trabaja en 
 - Historial de control corporal.
 - Actividad manual depurada con un solo registro principal por fecha.
 - Rutinas, Diario, HIIT, Stats y Ajustes de entrenamiento.
+- Rutinas con selección correcta del día que debe cargarse hoy en Diario.
 - PWA base real con manifest claro y service worker de cache basico.
 - Storage seguro aplicado a repositories principales, Inicio, Ajustes, backup e hidratacion inicial.
 - Memoria de ultima pantalla valida dentro del shell.
@@ -72,6 +73,7 @@ Bloques funcionales y correctivos aplicados:
 - Bloque 36: Firebase resumen liviano + registros por subcolección.
 - Bloque 37: Conflictos local/remoto.
 - Bloque 38: Dispositivos reales o puente claro de importación.
+- Bloque 39: Rutinas y selección correcta del día de entrenamiento.
 
 ## Pantalla principal
 
@@ -127,18 +129,6 @@ fitjeff / jeff / sync / status
 ```
 
 El documento principal `fitjeff/jeff` debe ser liviano. Guarda solo `perfil`, `objetivo`, `resumenLocal`, `controlCorporal.resumen` y `sync`.
-
-Los registros pesados se guardan en:
-
-```text
-fitjeff / jeff / registros
-```
-
-El estado técnico de sincronización se guarda en:
-
-```text
-fitjeff / jeff / sync / status
-```
 
 ## Local-first real
 
@@ -198,15 +188,6 @@ El estado del scheduler se guarda en:
 fitjeff:sync:scheduler
 ```
 
-Reglas actuales:
-
-1. Al abrir la app, la interfaz se monta primero.
-2. La sincronización automática corre en segundo plano.
-3. Si ya se revisó hoy y no hay cambios, no llama innecesariamente a Firebase.
-4. Si hay cola pendiente, procesa solo la cola diferencial.
-5. Si hay módulos marcados como pendientes y no hay cola, encola un respaldo diferencial de recuperación.
-6. Desde Ajustes existe el botón `Sincronizar ahora` para sincronización manual.
-
 ## Conflictos local/remoto
 
 Los conflictos se guardan localmente en:
@@ -251,6 +232,22 @@ src/features/actividad/dispositivos/dispositivos-import-bridge.service.js
 ```
 
 La importación conserva metadata en Actividad: `fuente`, `origen`, `importado` e `importadoEn`. También marca el módulo Actividad como pendiente de sincronización.
+
+## Rutinas y selección correcta del día
+
+La selección del día de entrenamiento se administra desde:
+
+```text
+src/features/entrenamiento/rutinas/rutinas-day-selector.service.js
+```
+
+Reglas actuales:
+
+1. Diario ya no depende de `new Date().getDay() % totalDias`, que podía cargar un día incorrecto.
+2. Si no se eligió un día manual, la selección automática inicia la semana en lunes.
+3. En `Entrenamiento > Rutinas` puedes elegir qué día debe cargarse hoy.
+4. En `Entrenamiento > Diario` también puedes cambiar el día directamente antes de iniciar o completar la sesión.
+5. La selección queda guardada dentro de la rutina activa como `selectorDia`.
 
 ## Auditoría integral
 
@@ -314,19 +311,25 @@ Resultado: si hay cambios locales pendientes y Firebase tiene datos remotos más
 
 ### Bloque 38 - Dispositivos y puente claro de importación
 
+Resultado: Dispositivos tiene un puente de importación funcional para CSV/JSON.
+
+### Bloque 39 - Rutinas y selección correcta del día
+
 Corregido:
 
-- `src/features/actividad/dispositivos/dispositivos-import-bridge.service.js`
-- `src/features/actividad/dispositivos/dispositivos.service.js`
-- `src/features/actividad/dispositivos/dispositivos.view.js`
-- `src/features/actividad/dispositivos/dispositivos.controller.js`
-- `src/features/actividad/dispositivos/dispositivos.css`
-- `src/features/actividad/dispositivos/dispositivos.constants.js`
-- `src/features/actividad/actividad.repository.js`
-- `scripts/check-structure.cjs`
+- `src/features/entrenamiento/rutinas/rutinas-day-selector.service.js`
+- `src/features/entrenamiento/entrenamiento.service.js`
+- `src/features/entrenamiento/rutinas/rutinas.service.js`
+- `src/features/entrenamiento/rutinas/rutinas.controller.js`
+- `src/features/entrenamiento/rutinas/rutinas.view.js`
+- `src/features/entrenamiento/rutinas/rutinas-day-selector.css`
+- `src/features/entrenamiento/diario/diario.service.js`
+- `src/features/entrenamiento/diario/diario.controller.js`
+- `src/features/entrenamiento/diario/diario.view.js`
+- `src/features/entrenamiento/diario/diario-day-selector.css`
 - `README.md`
 
-Resultado: Dispositivos ya tiene un puente de importación funcional. Permite pegar CSV/JSON de Cubitt, Google Fit u otra fuente, convierte filas válidas en registros de Actividad, evita duplicados por fecha con la regla existente y conserva metadata de importación.
+Resultado: Diario carga el día correcto de la rutina activa. Puedes elegir manualmente el día desde Rutinas o Diario. Si no hay selección manual, la app usa una selección automática con la semana iniciando en lunes.
 
 ## Comandos
 
@@ -347,8 +350,8 @@ npm start
 - El documento principal de Firebase debe mantenerse liviano; los registros deben ir en subcolección.
 - Nunca se debe sobrescribir local o remoto si hay conflicto pendiente.
 - Dispositivos no debe decir que existe lectura real automática si solo existe importación por puente.
+- Diario debe permitir corregir el día de rutina antes de iniciar o completar la sesión.
 
 ## Bloques pendientes
 
-1. Bloque 39: Rutinas y selección correcta del día de entrenamiento.
-2. Bloque 40: Revisión final para instalador Windows y APK Android.
+1. Bloque 40: Revisión final para instalador Windows y APK Android.
