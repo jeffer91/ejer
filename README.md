@@ -8,6 +8,8 @@ Fase visual 2026 cerrada.
 
 Bloques completados: 12 de 12.
 
+Bloque 13 aplicado: revision para solucionar errores.
+
 La app queda con una base clara, simple y modular para continuar con mejoras funcionales sin mezclar responsabilidades.
 
 ## Pantalla principal
@@ -191,6 +193,27 @@ Corregido:
 
 Resultado: fase visual cerrada, documentacion final creada y check de estructura actualizado para validar el cierre 12/12.
 
+## Correccion de errores
+
+### Bloque 13 - Revision para solucionar errores
+
+Corregido:
+
+- `src/core/utils/date.util.js`
+- `src/features/control-corporal/registro/ingreso.parser.js`
+- `src/features/control-corporal/registro/registro.controller.js`
+- `src/features/control-corporal/registro.service.js`
+- `src/features/control-corporal/inicio/inicio.service.js`
+- `src/features/control-corporal/hoy/hoy.rules.js`
+- `src/features/control-corporal/estadisticas/estadisticas.calculations.js`
+- `src/features/actividad/actividad.constants.js`
+- `src/features/actividad/actividad.service.js`
+- `src/features/actividad/registro/registro.controller.js`
+- `scripts/check-structure.cjs`
+- `README.md`
+
+Resultado: Fechas locales corregidas para evitar desfases por UTC en Hoy, Registro, Inicio, Progreso y Actividad.
+
 ## Documento de cierre
 
 El cierre detallado de esta fase esta en:
@@ -246,6 +269,7 @@ npm run desktop:win
 - Registro debe mantener ayuda ? integrada.
 - Progreso debe ser detalle, no dashboard saturado.
 - Actividad manual debe crecer antes de conectar sensores o apps externas.
+- Las fechas diarias deben usar fecha local, no UTC.
 
 ## Siguiente fase recomendada
 
