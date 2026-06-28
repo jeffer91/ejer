@@ -26,6 +26,7 @@ FitJeff tiene una base modular funcional y visualmente clara. La app trabaja en 
 - Auditoría integral agregada para validar scripts, archivos críticos, imports locales, Firebase y build antes de seguir programando.
 - Local-first real: la app abre con datos locales primero y Firebase se restaura en segundo plano.
 - Metadata de sincronización por módulo para saber qué cambió sin consultar Firebase.
+- Cola diferencial con deduplicación por entidad para no repetir operaciones pendientes.
 
 ### Preparado, pero pendiente de conexion real
 
@@ -61,6 +62,7 @@ Bloques funcionales y correctivos aplicados:
 - Bloque 31: Auditoría integral.
 - Bloque 32: Local-first real.
 - Bloque 33: Metadata de sincronización.
+- Bloque 34: Cola diferencial con deduplicación por entidad.
 
 ## Pantalla principal
 
@@ -157,6 +159,32 @@ Permite saber, sin consultar Firebase, si hay cambios pendientes en:
 
 Cada módulo guarda `dirty`, `versionLocal`, `versionRemota`, `ultimoCambioLocalEn`, `ultimoSyncEn`, `ultimoIntentoSyncEn` y `ultimoError`. Esto prepara la sincronización diaria y la cola diferencial.
 
+## Cola diferencial
+
+La cola local se guarda en:
+
+```text
+fitjeff:sync:queue
+```
+
+y se administra desde:
+
+```text
+src/core/sync/sync-queue.service.js
+```
+
+Cada operación tiene:
+
+- `operationKey`;
+- `modulo`;
+- `entidad`;
+- `entidadId`;
+- `accion`;
+- `payloadHash`;
+- `intentos`.
+
+Si se edita el mismo registro varias veces antes de sincronizar, FitJeff conserva una sola operación pendiente con la versión más reciente. Esto evita que Firebase reciba cambios repetidos e innecesarios.
+
 ## Auditoría integral
 
 Comando directo:
@@ -210,17 +238,19 @@ Resultado: la app ya no espera Firebase para montar la interfaz. Primero abre co
 
 ### Bloque 33 - Metadata de sincronización
 
+Resultado: FitJeff guarda metadata local de sincronización por módulo. Control corporal se marca como pendiente cuando hay cambios locales. Sync registra intentos, errores y módulos sincronizados. La restauración desde Firebase registra el último pull remoto.
+
+### Bloque 34 - Cola diferencial
+
 Corregido:
 
-- `src/core/sync/sync-metadata.service.js`
+- `src/core/sync/sync-queue.service.js`
 - `src/core/sync/sync.service.js`
-- `src/core/bootstrap/app-data-hydration.service.js`
 - `src/features/control-corporal/registro.service.js`
-- `scripts/auditar-app.cjs`
 - `scripts/check-structure.cjs`
 - `README.md`
 
-Resultado: FitJeff ahora guarda metadata local de sincronización por módulo. Control corporal se marca como pendiente cuando hay cambios locales. Sync registra intentos, errores y módulos sincronizados. La restauración desde Firebase registra el último pull remoto.
+Resultado: la cola de sincronización ahora deduplica por `modulo + entidad + entidadId + accion`. Si el mismo registro se guarda o edita varias veces antes de sincronizar, solo queda una operación pendiente con el último payload. También migra y compacta operaciones antiguas de la cola.
 
 ## Comandos
 
@@ -307,13 +337,13 @@ npm run publicar:automatico
 - Ningún bloque nuevo debe saltarse `npm run audit:app` y `npm run check:local`.
 - Firebase nunca debe bloquear el arranque visual de la app.
 - Cada módulo debe marcar su metadata cuando tenga cambios locales.
+- La cola de sincronización debe guardar una sola operación pendiente por entidad modificada.
 
 ## Bloques pendientes
 
-1. Bloque 34: Cola diferencial con deduplicación por entidad.
-2. Bloque 35: Sincronización diaria automática y sincronización manual.
-3. Bloque 36: Firebase resumen liviano + registros por subcolección.
-4. Bloque 37: Conflictos local/remoto y resolución segura.
-5. Bloque 38: Dispositivos reales o puente claro de importación.
-6. Bloque 39: Rutinas y selección correcta del día de entrenamiento.
-7. Bloque 40: Revisión final para instalador Windows y APK Android.
+1. Bloque 35: Sincronización diaria automática y sincronización manual.
+2. Bloque 36: Firebase resumen liviano + registros por subcolección.
+3. Bloque 37: Conflictos local/remoto y resolución segura.
+4. Bloque 38: Dispositivos reales o puente claro de importación.
+5. Bloque 39: Rutinas y selección correcta del día de entrenamiento.
+6. Bloque 40: Revisión final para instalador Windows y APK Android.
