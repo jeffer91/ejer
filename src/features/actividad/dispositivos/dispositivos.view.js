@@ -1,3 +1,20 @@
+/*
+  Nombre completo: dispositivos.view.js
+  Ruta o ubicación: src/features/actividad/dispositivos/dispositivos.view.js
+
+  Función o funciones:
+    - Construir la pantalla de Dispositivos y Google Fit.
+    - Mostrar preparación local de Cubitt CT4 y Google Fit.
+    - Mostrar puente claro de importación CSV/JSON.
+    - Leer formularios de configuración e importación.
+    - Mantener la vista sin lógica de guardado.
+
+  Se conecta con:
+    - src/features/actividad/dispositivos/dispositivos.controller.js
+    - src/features/actividad/dispositivos/dispositivos.service.js
+    - src/features/actividad/dispositivos/dispositivos.constants.js
+*/
+
 import { DISPOSITIVOS_FUENTES, DISPOSITIVOS_TEXTOS } from "./dispositivos.constants.js";
 import "./dispositivos.css";
 
@@ -88,6 +105,41 @@ function crearHistorial(historial = []) {
   return panel;
 }
 
+function crearPanelImportacion(estado) {
+  const form = crearElemento("form", "dispositivos-import-form");
+  const panel = crearElemento("section", "dispositivos-panel dispositivos-panel--import");
+  const acciones = crearElemento("div", "dispositivos-import-actions");
+  const mensaje = crearElemento("p", "dispositivos-message");
+  const textarea = crearElemento("textarea", "dispositivos-textarea");
+  const importarBoton = crearElemento("button", "dispositivos-button dispositivos-button--primary", DISPOSITIVOS_TEXTOS.BOTON_IMPORTAR);
+  const ejemploBoton = crearElemento("button", "dispositivos-button dispositivos-button--secondary", "Pegar ejemplo");
+
+  textarea.name = "datosImportacion";
+  textarea.rows = 7;
+  textarea.placeholder = estado.ejemploImportacion || "fecha,pasos,bicicletaMin,bicicletaKm,fuente,nota";
+  textarea.autocomplete = "off";
+
+  importarBoton.type = "submit";
+  ejemploBoton.type = "button";
+  ejemploBoton.dataset.action = "pegar-ejemplo";
+
+  acciones.appendChild(importarBoton);
+  acciones.appendChild(ejemploBoton);
+  panel.appendChild(crearElemento("h3", "", DISPOSITIVOS_TEXTOS.IMPORTAR_TITULO));
+  panel.appendChild(crearElemento("p", "", DISPOSITIVOS_TEXTOS.IMPORTAR_AYUDA));
+  panel.appendChild(textarea);
+  panel.appendChild(acciones);
+  panel.appendChild(mensaje);
+  form.appendChild(panel);
+
+  return {
+    form,
+    textarea,
+    mensaje,
+    ejemploBoton
+  };
+}
+
 export function crearDispositivosView(estado) {
   const pantalla = crearElemento("section", "dispositivos-screen");
   const header = crearElemento("section", "dispositivos-header");
@@ -96,6 +148,7 @@ export function crearDispositivosView(estado) {
   const cubittPanel = crearElemento("section", "dispositivos-panel");
   const googlePanel = crearElemento("section", "dispositivos-panel");
   const puentePanel = crearElemento("section", "dispositivos-panel dispositivos-panel--bridge");
+  const importacion = crearPanelImportacion(estado);
   const mensaje = crearElemento("p", "dispositivos-message");
   const boton = crearElemento("button", "dispositivos-button dispositivos-button--primary", DISPOSITIVOS_TEXTOS.BOTON_GUARDAR);
 
@@ -144,12 +197,18 @@ export function crearDispositivosView(estado) {
   pantalla.appendChild(header);
   pantalla.appendChild(statusGrid);
   pantalla.appendChild(form);
+  pantalla.appendChild(importacion.form);
   pantalla.appendChild(crearHistorial(estado.historial));
 
   return {
     pantalla,
     form,
-    mensaje
+    mensaje,
+    importForm: importacion.form,
+    importTextarea: importacion.textarea,
+    importMensaje: importacion.mensaje,
+    ejemploBoton: importacion.ejemploBoton,
+    ejemploImportacion: estado.ejemploImportacion || ""
   };
 }
 
