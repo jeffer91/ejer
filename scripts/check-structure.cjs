@@ -85,17 +85,19 @@ const blockedPatterns = [
 ];
 
 const semanticChecks = [
-  { file: "README.md", mustInclude: ["Bloque 31 - Auditoría integral", "auditar-app.cjs", "npm run audit:app"], message: "README debe documentar el bloque 31." },
+  { file: "README.md", mustInclude: ["Bloque 32 - Local-first real", "Firebase en segundo plano", "Bloques pendientes"], message: "README debe documentar el bloque 32 y pendientes." },
   { file: "package.json", mustInclude: ["\"start\": \"node scripts/start-electron-dev.cjs\"", "\"audit:app\": \"node scripts/auditar-app.cjs\"", "publicar:automatico"], message: "package.json debe usar inicio seguro y auditoria." },
   { file: "scripts/check-local.cjs", mustInclude: ["Auditoría estática", "scripts/auditar-app.cjs", "Build de Vite"], message: "check-local debe ejecutar auditoria antes del build." },
   { file: "scripts/check-tools.cjs", mustInclude: ["audit:app", "publicar:automatico", "No debe existir configurar:firebase"], message: "check-tools debe validar auditoria y no permitir configurar:firebase." },
   { file: "scripts/auditar-app.cjs", mustInclude: ["auditarImportsLocales", "archivosNoPermitidos", "Resultado: auditoría sin errores críticos"], message: "Debe existir auditoria estatica integral." },
-  { file: "src/app/app.bootstrap.js", mustInclude: ["validarRaiz", "No existe el contenedor #app", "mostrarMensajeSinRaiz"], message: "Bootstrap debe proteger inicio si falta #app." },
-  { file: "src/app/app-router.js", mustInclude: ["validarContenedor", "FitJeff no puede renderizar", "rutaActual = SHELL_DEFAULT_ROUTE_ID"], message: "Router debe validar contenedor y tener fallback." },
+  { file: "src/app/app.bootstrap.js", mustInclude: ["prepararDatosAntesDeRouter", "restaurarFirebaseSinBloquear", "restaurarFirebaseEnSegundoPlano", "router.iniciar()"], message: "Bootstrap debe montar local primero y restaurar Firebase despues." },
+  { file: "src/app/app-router.js", mustInclude: ["marcarPerfilCompletadoDesdeSync", "FitJeff no puede renderizar", "rutaActual = SHELL_DEFAULT_ROUTE_ID"], message: "Router debe permitir entrada a Hoy tras restauracion." },
   { file: "src/core/config/firebase.project.config.js", mustInclude: ["FIREBASE_PROJECT_CONFIG", "apiKey", "collection: \"fitjeff\"", "userDocument: \"jeff\""], message: "Debe existir configuracion Firebase desde codigo." },
   { file: "src/core/config/firebase.config.js", mustInclude: ["FIREBASE_PROJECT_CONFIG", "leerValor", "resolverFirebaseEnabled", "obtenerEstadoFirebaseConexion"], message: "Firebase config debe leer variables o configuracion desde codigo." },
-  { file: "src/core/bootstrap/app-data-hydration.service.js", mustInclude: ["normalizarEstadoRemoto", "extraerRaizControlCorporal", "origen: \"firebase\"", "repository.guardarEstado"], message: "Hidratacion debe restaurar Firebase antes de Inicio." },
+  { file: "src/core/bootstrap/app-data-hydration.service.js", mustInclude: ["restaurarFirebaseEnSegundoPlano", "local-vacio", "firebasePendienteSegundoPlano", "repository.guardarEstado"], message: "Hidratacion debe ser local-first y restaurar Firebase en segundo plano." },
   { file: "src/core/firebase/firebase-database.service.js", mustInclude: ["obtenerRegistrosDesdeDocumento", "registrosSubcoleccion.length > 0", "registrosFinales"], message: "Firebase database debe conservar registros remotos del documento." },
+  { file: "src/core/sync/sync.service.js", mustInclude: ["Sin cambios pendientes", "return sincronizarPendientes();", "Evitar que el arranque de la app encole"], message: "Sync no debe subir estado completo al iniciar." },
+  { file: "src/features/control-corporal/registro.service.js", mustInclude: ["Guardar local primero", "Encolar cambios locales aunque Firebase todavia no este listo", "puedeEncolarSync()"], message: "Control corporal debe guardar local y encolar aunque Firebase no este listo." },
   { file: "scripts/start-electron-dev.cjs", mustInclude: ["encontrarPuertoDisponible", "PUERTO_BASE", "FITJEFF_DEV_SERVER_URL", "concurrently"], message: "npm start debe buscar puerto libre y pasar URL a Electron." },
   { file: "electron/electron-path.service.js", mustInclude: ["FITJEFF_DEV_SERVER_URL", "http://localhost:5173/"], message: "Electron debe leer la URL real de desarrollo." },
   { file: "electron/electron-window.service.js", mustInclude: ["backgroundColor: \"#f8fafc\"", "obtenerDevUrl"], message: "Ventana Electron debe mantener tema claro y URL dinamica." },
@@ -106,8 +108,6 @@ const semanticChecks = [
   { file: "index.html", mustInclude: ["theme-color\" content=\"#f8fafc", "color-scheme\" content=\"light", "manifest.webmanifest"], message: "index.html debe declarar modo claro y manifest." },
   { file: "manifest.webmanifest", mustInclude: ["\"background_color\": \"#f8fafc\"", "\"theme_color\": \"#2563eb\"", "./icons/icon.svg"], message: "Manifest debe estar alineado al tema claro." },
   { file: "service-worker.js", mustInclude: ["CACHE_VERSION", "PRECACHE_URLS", "self.addEventListener(\"fetch\"", "responderDinamico"], message: "Service worker debe tener base PWA real." },
-  { file: "src/core/sync/sync.service.js", mustInclude: ["obtenerEstadoConexion", "responderModoLocal", "firebaseEstaConfigurado", "status.marcarModoLocal"], message: "Sync debe revisar conexion antes de sincronizar." },
-  { file: "src/features/control-corporal/registro.service.js", mustInclude: ["guardarConfiguracionInicial", "existeMedidasEnSemana", "obtenerInicioSemanaISO", "puedeEncolarSync"], message: "Control corporal debe guardar inicio en bloque, bloquear medidas duplicadas y revisar sync." },
   { file: "src/features/control-corporal/estadisticas/estadisticas.calculations.js", mustInclude: ["comparacionSemanaDisponible", "comparacionMesDisponible", "describirCambioTotal", "candidatos[candidatos.length - 1] || null"], message: "Estadisticas debe evitar comparaciones sin antiguedad suficiente." },
   { file: "src/features/actividad/actividad.repository.js", mustInclude: ["deduplicarPorFecha", "buscarPorFecha", "guardarOActualizarPorFecha", "Mantener un solo registro principal por fecha"], message: "Repository de Actividad debe evitar duplicados por fecha." },
   { file: "src/features/actividad/actividad.service.js", mustInclude: ["obtenerActividadPorFecha", "validarActividad", "guardarOActualizarPorFecha", "fechaEsFutura"], message: "Service de Actividad debe validar reglas y actualizar por fecha." },
@@ -206,6 +206,7 @@ function run() {
     console.log("Bloque 29 aplicado: Restauracion Firebase antes de Inicio.");
     console.log("Bloque 30 aplicado: Firebase resuelto desde codigo.");
     console.log("Bloque 31 aplicado: Auditoria integral.");
+    console.log("Bloque 32 aplicado: Local-first real.");
     return;
   }
 
