@@ -141,147 +141,74 @@ Resultado:
 - El check de estructura reconoce tema claro, Hoy, Registro visual y Progreso con presenter
 - La documentacion refleja la arquitectura actual del redisenio
 
+### Bloque 8 - Inicio claro y salida hacia Hoy
+
+Corregido:
+
+- `src/features/control-corporal/inicio/inicio.constants.js`
+- `src/features/control-corporal/inicio/inicio.controller.js`
+- `src/features/control-corporal/inicio/inicio.view.js`
+- `src/features/control-corporal/inicio/inicio.css`
+- `scripts/check-structure.cjs`
+
+Resultado:
+
+- Inicio usa modo claro
+- El boton dice Guardar y abrir Hoy
+- El mensaje de exito indica que abre Hoy
+- El check valida que Inicio este alineado al nuevo flujo
+
+### Bloque 9 - Historial y Ajustes claros
+
+Corregido:
+
+- `src/features/control-corporal/historial/historial.css`
+- `src/modules/ajustes/ajustes.view.js`
+- `src/modules/ajustes/ajustes.css`
+- `scripts/check-structure.cjs`
+- `README.md`
+
+Resultado:
+
+- Historial ya no usa estilo oscuro
+- Ajustes ya no usa estilo oscuro
+- Botones de editar, cambios y borrar tienen indicadores claros
+- Formularios de Ajustes usan inputs claros y teclado decimal cuando corresponde
+- El check valida Historial y Ajustes dentro del redisenio visual
+
 ## Bloques originales de construccion
 
 ### Base inicial
 
-Incluye:
-
-- Vite
-- HTML principal
-- Manifest PWA
-- Icono base
-- App bootstrap
-- Router base
-- Estilos base
-- Service worker reservado
+Incluye Vite, HTML principal, Manifest PWA, icono base, bootstrap, router, estilos base y service worker reservado.
 
 ### Base central de Registro
 
-Incluye:
-
-- Modulo central
-- Constantes
-- Estado
-- Esquema de datos
-- Repository local
-- Service principal
-- Estilos propios del modulo
+Incluye modulo central, constantes, estado, esquema de datos, repository local, service principal y estilos propios del modulo.
 
 ### Inicio de primera vez
 
-Incluye:
-
-- Altura
-- Fecha de nacimiento
-- Peso inicial
-- Peso objetivo
-- Validacion inteligente basica
-- Guardado en Registro
-- Salto automatico a Hoy
+Incluye altura, fecha de nacimiento, peso inicial, peso objetivo, validacion inteligente basica, guardado en Registro y salto automatico a Hoy.
 
 ### Registro e ingreso
 
-Incluye:
-
-- Peso diario maximo una vez por dia
-- Medidas semanales
-- Campos rapidos e inteligentes
-- Validacion de rangos corporales
-- Deteccion de cambios poco comunes
-- Confirmacion antes de guardar datos raros
-- Ayuda integrada con botones ?
-- Mapa corporal visual
+Incluye peso diario, medidas semanales, validacion de rangos, deteccion de cambios poco comunes, ayuda integrada con botones ? y mapa corporal visual.
 
 ### Progreso
 
-Incluye:
-
-- Peso actual
-- Peso objetivo
-- Cambio desde el ultimo registro
-- Tendencia desde 3 registros
-- IMC con categoria
-- Proxima medicion semanal
-- Barra de progreso del objetivo
-- Grafico simple de peso
-- Tarjetas compactas de medidas corporales
-- Vista de detalle conectada desde el menu Progreso
+Incluye peso actual, objetivo, cambios, tendencia, IMC, proxima medicion, barra de progreso, grafico simple y tarjetas compactas de medidas.
 
 ### Historial
 
-Incluye:
-
-- Lista compacta por fecha
-- Visualizacion de peso y medidas guardadas
-- Edicion de registros
-- Confirmacion antes de borrar
-- Envio a papelera interna
-- Consulta simple de cambios
-- Conexion real desde el menu Historial
+Incluye lista compacta por fecha, visualizacion de peso y medidas, edicion, confirmacion antes de borrar, papelera interna y consulta simple de cambios.
 
 ### Ajustes
 
-Incluye:
+Incluye perfil, objetivo, editar altura, editar fecha de nacimiento, editar peso objetivo, reabrir Inicio, backups locales, exportacion e importacion JSON.
 
-- Perfil simple
-- Objetivo simple
-- Editar altura
-- Editar fecha de nacimiento
-- Editar peso objetivo
-- Reabrir Inicio desde Ajustes
-- Conexion real desde el menu Ajustes
+### Core local, Firebase, backups y Electron
 
-### Core local y control de datos
-
-Incluye:
-
-- Configuracion central de app
-- Utilidades de fecha
-- Utilidades de numeros
-- Storage local seguro
-- Estado visible Datos al dia
-- Diagnostico interno oculto
-- Manejo general de errores simples
-- Conexion del manejador de errores al arranque
-
-### Firebase y sync base
-
-Incluye:
-
-- Dependencia Firebase agregada
-- Configuracion Firebase preparada
-- Inicializacion segura de Firebase
-- Servicio base Firestore
-- Manejo simple de errores Firebase
-- Cola local de sincronizacion
-- Estado interno de sincronizacion
-- Servicio coordinador de sincronizacion
-
-### Backups y exportacion local
-
-Incluye:
-
-- Copia local automatica
-- Lista corta de backups locales
-- Exportar JSON desde Ajustes
-- Importar JSON desde Ajustes
-- Restaurar datos locales
-- Copia previa antes de restaurar
-- Proteccion contra perdida de informacion
-
-### Electron base
-
-Incluye:
-
-- Main process de Electron
-- Preload seguro
-- Ventana principal de escritorio
-- Menu simple de aplicacion
-- IPC seguro basico
-- Carga de Vite en desarrollo
-- Carga de dist en produccion
-- Scripts para escritorio e instalador Windows
+Incluye configuracion central, storage local seguro, diagnostico, Firebase base, cola de sincronizacion, backups, exportacion local y escritorio Electron.
 
 ## Comandos
 
