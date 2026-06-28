@@ -1,3 +1,4 @@
+import { sumarDiasISO } from "../../core/utils/date.util.js";
 import { ACTIVIDAD_TEXTOS, ACTIVIDAD_TIPOS, fechaHoyISO } from "./actividad.constants.js";
 import { crearActividadRepository } from "./actividad.repository.js";
 
@@ -5,12 +6,6 @@ function numero(valor) {
   const normalizado = String(valor ?? "").replace(",", ".").trim();
   const n = Number(normalizado);
   return Number.isFinite(n) && n > 0 ? Number(n.toFixed(2)) : 0;
-}
-
-function haceDias(dias) {
-  const fecha = new Date();
-  fecha.setDate(fecha.getDate() - dias);
-  return fecha.toISOString().slice(0, 10);
 }
 
 function sumar(registros, campo) {
@@ -58,7 +53,7 @@ export function crearActividadService(repository = crearActividadRepository()) {
   function obtenerResumen() {
     const registros = listarRegistros();
     const hoy = fechaHoyISO();
-    const desdeSemana = haceDias(6);
+    const desdeSemana = sumarDiasISO(hoy, -6);
     const registrosHoy = registros.filter((registro) => registro.fecha === hoy);
     const registrosSemana = registros.filter((registro) => registro.fecha >= desdeSemana && registro.fecha <= hoy);
 
