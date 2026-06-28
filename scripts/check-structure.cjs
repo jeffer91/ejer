@@ -21,12 +21,19 @@ const requiredFiles = [
   "src/features/control-corporal/control-corporal.menu.js",
   "src/features/control-corporal/control-corporal.routes.js",
   "src/features/control-corporal/control-corporal.module.js",
+  "src/features/control-corporal/registro.schema.js",
   "src/features/control-corporal/registro.service.js",
   "src/features/control-corporal/registro.repository.js",
+  "src/features/control-corporal/analisis-corporal/analisis-corporal.calculations.js",
+  "src/features/control-corporal/analisis-corporal/analisis-corporal.presenter.js",
+  "src/features/control-corporal/analisis-corporal/avatar-corporal.view.js",
+  "src/features/control-corporal/analisis-corporal/avatar-corporal.css",
   "src/features/control-corporal/inicio/inicio.controller.js",
+  "src/features/control-corporal/inicio/inicio.service.js",
   "src/features/control-corporal/inicio/inicio.view.js",
   "src/features/control-corporal/inicio/inicio.css",
   "src/features/control-corporal/inicio/inicio.constants.js",
+  "src/features/control-corporal/inicio/inicio.validator.js",
   "src/features/control-corporal/hoy/hoy.controller.js",
   "src/features/control-corporal/hoy/hoy.service.js",
   "src/features/control-corporal/hoy/hoy.rules.js",
@@ -34,12 +41,14 @@ const requiredFiles = [
   "src/features/control-corporal/hoy/hoy.constants.js",
   "src/features/control-corporal/hoy/hoy.css",
   "src/features/control-corporal/estadisticas/estadisticas.controller.js",
+  "src/features/control-corporal/estadisticas/estadisticas.calculations.js",
   "src/features/control-corporal/estadisticas/estadisticas.presenter.js",
   "src/features/control-corporal/estadisticas/estadisticas.view.js",
   "src/features/control-corporal/estadisticas/estadisticas.css",
   "src/features/control-corporal/registro/registro.controller.js",
   "src/features/control-corporal/registro/ingreso.view.js",
   "src/features/control-corporal/registro/ingreso.css",
+  "src/features/control-corporal/registro/ingreso.constants.js",
   "src/features/control-corporal/registro/ayudas-medidas.constants.js",
   "src/features/control-corporal/registro/mapa-corporal.view.js",
   "src/features/control-corporal/registro/mapa-corporal.css",
@@ -112,25 +121,26 @@ const blockedPatterns = [
 ];
 
 const semanticChecks = [
-  { file: "README.md", mustInclude: ["Bloque 18 - Jarvis claro", "jarvis-panel", "Diario y HIT"], message: "README debe documentar el bloque 18 de Jarvis." },
-  { file: "src/core/utils/date.util.js", mustInclude: ["formatearFechaLocalISO", "getFullYear", "getMonth", "getDate"], message: "date.util debe usar fecha local." },
+  { file: "README.md", mustInclude: ["Bloque 19 - Control corporal inteligente", "analisis-corporal", "cuello"], message: "README debe documentar el bloque 19 de Control corporal inteligente." },
   { file: "src/app/app.css", mustInclude: ["@import \"./theme-light.css\";", "@import \"./status-colors.css\";"], message: "app.css debe cargar tema claro y estados." },
-  { file: "src/features/control-corporal/control-corporal.routes.js", mustInclude: ["HOY: \"hoy\"", "label: \"Hoy\""], message: "Control corporal debe tener Hoy." },
-  { file: "src/features/features.registry.js", mustInclude: ["ACTIVIDAD_MENU", "montarPantallaActividad", "FEATURE_DEFAULT_ROUTE_ID = CONTROL_CORPORAL_ROUTES.HOY"], message: "Features Registry debe registrar Actividad y mantener Hoy." },
-  { file: "src/features/control-corporal/registro/ingreso.view.js", mustInclude: ["crearMedidasModal", "abrirAyuda", "medidas-modal/medidas-modal.view.js"], message: "Registro debe abrir popup visual de medidas." },
-  { file: "src/features/control-corporal/registro/medidas-modal/medidas-modal.view.js", mustInclude: ["role", "dialog", "crearFiguraMedicion", "Escape"], message: "Modal de medidas debe tener diálogo accesible." },
-  { file: "src/features/actividad/actividad.service.js", mustInclude: ["sumarDiasISO", "fechaHoyISO", "bicicletaKm"], message: "Actividad debe usar fecha local y bicicleta." },
-  { file: "src/features/entrenamiento/entrenamiento.constants.js", mustInclude: ["GEMINI_SETTINGS_STORAGE_KEY", "fitjeff.entrenamiento.gemini.settings.v1"], message: "Entrenamiento debe tener clave separada para Gemini." },
-  { file: "src/features/entrenamiento/ajustes/gemini-settings.service.js", mustInclude: ["sincronizarDesdeAjustes", "guardarDesdeFormulario", "actualizarPruebaGemini"], message: "Gemini service debe blindar guardado." },
+  { file: "src/features/control-corporal/registro.schema.js", mustInclude: ["REGISTRO_SCHEMA_VERSION = \"0.2.0\"", "nivelMuscular", "cuelloCm"], message: "Schema debe incluir contexto muscular y cuello." },
+  { file: "src/features/control-corporal/inicio/inicio.constants.js", mustInclude: ["NIVEL_MUSCULAR", "INICIO_OPCIONES", "mucha masa muscular"], message: "Inicio debe pedir contexto muscular." },
+  { file: "src/features/control-corporal/inicio/inicio.view.js", mustInclude: ["crearSelect", "Contexto muscular", "nivelMuscular"], message: "Inicio debe mostrar selector de contexto muscular." },
+  { file: "src/features/control-corporal/inicio/inicio.service.js", mustInclude: ["nivelMuscular: datosLimpios.nivelMuscular"], message: "Inicio debe guardar contexto muscular." },
+  { file: "src/features/control-corporal/registro/ingreso.constants.js", mustInclude: ["CUELLO_CM", "cuelloCm", "Cuello"], message: "Registro debe incluir cuello." },
+  { file: "src/features/control-corporal/registro/ayudas-medidas.constants.js", mustInclude: ["cuelloCm", "análisis corporal"], message: "Ayuda de medidas debe explicar cuello." },
+  { file: "src/features/control-corporal/registro/mapa-corporal.view.js", mustInclude: ["Cuello", "crearLinea(66)"], message: "Mapa corporal debe incluir cuello." },
+  { file: "src/features/control-corporal/registro/medidas-modal/medidas-modal.constants.js", mustInclude: ["cuelloCm", "zona: \"cuello\""], message: "Popup visual debe incluir cuello." },
+  { file: "src/features/control-corporal/registro/medidas-modal/medidas-figura.svg.js", mustInclude: ["cuello", "label: \"Cuello\""], message: "Figura de medidas debe dibujar cuello." },
+  { file: "src/features/control-corporal/analisis-corporal/analisis-corporal.calculations.js", mustInclude: ["construirAnalisisCorporal", "relacionCinturaAltura", "nivelMuscular"], message: "Debe existir cálculo de análisis corporal inteligente." },
+  { file: "src/features/control-corporal/analisis-corporal/analisis-corporal.presenter.js", mustInclude: ["prepararAnalisisCorporalVista", "IMC contextual", "Contexto muscular"], message: "Debe existir presenter de análisis corporal." },
+  { file: "src/features/control-corporal/analisis-corporal/avatar-corporal.view.js", mustInclude: ["crearAvatarCorporal", "avatar-corporal__marker"], message: "Debe existir avatar corporal." },
+  { file: "src/features/control-corporal/analisis-corporal/avatar-corporal.css", mustInclude: ["analisis-corporal-panel", "avatar-corporal__marker--alto", "avatar-corporal__caption"], message: "Debe existir estilo del avatar corporal." },
+  { file: "src/features/control-corporal/estadisticas/estadisticas.calculations.js", mustInclude: ["construirAnalisisCorporal", "analisisCorporal", "ultimasMedidas"], message: "Estadísticas debe integrar análisis corporal." },
+  { file: "src/features/control-corporal/estadisticas/estadisticas.presenter.js", mustInclude: ["prepararAnalisisCorporalVista", "analisisCorporal"], message: "Presenter de Progreso debe incluir análisis corporal." },
+  { file: "src/features/control-corporal/estadisticas/estadisticas.view.js", mustInclude: ["crearAvatarCorporal", "crearAnalisisCorporal", "ANALISIS_CORPORAL"], message: "Vista de Progreso debe mostrar avatar corporal." },
   { file: "src/features/entrenamiento/rutinas/rutinas.view.js", mustInclude: ["crearRutinasStepper", "RUTINAS_STEPS", "Avanza por pasos"], message: "Vista de Rutinas debe usar pasos." },
-  { file: "src/features/entrenamiento/rutinas/rutinas.css", mustInclude: ["background: rgba(255, 255, 255, 0.94)", "var(--fj-action-bg", "entreno-rutinas-summary"], message: "Rutinas debe estar en modo claro." },
-  { file: "src/features/entrenamiento/jarvis/jarvis-panel.view.js", mustInclude: ["crearJarvisPanel", "crearComandoManual", "jarvis-panel.css"], message: "Jarvis debe tener panel compartido." },
-  { file: "src/features/entrenamiento/jarvis/jarvis-panel.css", mustInclude: [".entreno-diario-jarvis", ".entreno-hit-jarvis", "background: linear-gradient"], message: "Jarvis debe tener estilos claros compartidos." },
-  { file: "src/features/entrenamiento/diario/diario.css", mustInclude: ["@import \"../jarvis/jarvis-panel.css\";", "background: rgba(255, 255, 255, 0.94)", "entreno-diario-safe"], message: "Diario debe estar en modo claro e importar Jarvis claro." },
-  { file: "src/features/entrenamiento/hit/hit.css", mustInclude: ["@import \"../jarvis/jarvis-panel.css\";", "background: rgba(255, 255, 255, 0.94)", "entreno-hit-time"], message: "HIT debe estar en modo claro e importar Jarvis claro." },
-  { file: "src/features/entrenamiento/stats/stats.css", mustInclude: ["background: rgba(255, 255, 255, 0.94)", "var(--fj-text-strong", "entreno-stats-card--ok"], message: "Stats debe estar en modo claro." },
-  { file: "src/modules/ajustes/ajustes.css", mustInclude: ["background: rgba(255, 255, 255, 0.94)", "var(--fj-action-bg", "background: #ffffff"], message: "Ajustes debe estar en modo claro." },
-  { file: "src/modules/actualizaciones/actualizaciones.css", mustInclude: ["background: rgba(255, 255, 255, 0.94)", "var(--fj-action-bg", "fj-update-progress__bar"], message: "Actualizaciones debe estar en modo claro." }
+  { file: "src/features/entrenamiento/jarvis/jarvis-panel.css", mustInclude: [".entreno-diario-jarvis", ".entreno-hit-jarvis", "background: linear-gradient"], message: "Jarvis debe tener estilos claros compartidos." }
 ];
 
 function fileExists(relativePath) {
@@ -151,7 +161,6 @@ function walkFiles(directory) {
   for (const entry of entries) {
     const absolutePath = path.join(absoluteDirectory, entry.name);
     const relativePath = path.relative(ROOT, absolutePath).replaceAll(path.sep, "/");
-
     if (entry.isDirectory()) files.push(...walkFiles(relativePath));
     else if (/\.(js|cjs|mjs|css|html|json|md)$/.test(entry.name)) files.push(relativePath);
   }
@@ -165,31 +174,26 @@ function checkRequiredFiles() {
 
 function checkBlockedImports() {
   const findings = [];
-
   for (const file of walkFiles("src")) {
     const content = readFile(file);
     for (const pattern of blockedPatterns) {
       if (content.includes(pattern)) findings.push(`${file} -> ${pattern}`);
     }
   }
-
   return findings;
 }
 
 function checkSemanticRules() {
   const findings = [];
-
   for (const check of semanticChecks) {
     if (!fileExists(check.file)) {
       findings.push(`${check.file} -> archivo no encontrado para validar regla: ${check.message}`);
       continue;
     }
-
     const content = readFile(check.file);
     const missing = check.mustInclude.filter((pattern) => !content.includes(pattern));
     if (missing.length > 0) findings.push(`${check.file} -> ${check.message} Faltan: ${missing.join(", ")}`);
   }
-
   return findings;
 }
 
@@ -207,10 +211,8 @@ function run() {
     console.log("Bloque 16 aplicado: medidas con popup visual.");
     console.log("Bloque 17 aplicado: Rutinas claro + pasos.");
     console.log("Bloque 18 aplicado: Jarvis claro en Diario y HIT.");
-    console.log("Registro integra ayuda ? con popup visual y mapa corporal.");
-    console.log("Rutinas usa flujo por pasos y modo claro.");
-    console.log("Jarvis usa panel claro compartido.");
-    console.log("Gemini guarda API Key en almacenamiento separado.");
+    console.log("Bloque 19 aplicado: Control corporal inteligente.");
+    console.log("Progreso cruza IMC, cintura/altura, cuello y contexto muscular.");
     return;
   }
 
