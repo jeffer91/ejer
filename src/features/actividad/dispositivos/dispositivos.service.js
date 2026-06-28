@@ -1,6 +1,25 @@
+/*
+  Nombre completo: dispositivos.service.js
+  Ruta o ubicación: src/features/actividad/dispositivos/dispositivos.service.js
+
+  Función o funciones:
+    - Coordinar configuración local de Cubitt CT4, Google Fit y Puente FitJeff.
+    - Mantener claro que Cubitt/Google Fit aún no tienen lectura automática real.
+    - Importar datos pegados mediante puente CSV/JSON hacia Actividad.
+    - Guardar historial local de preparación e importación.
+    - Construir resumen visual de dispositivos para Actividad.
+
+  Se conecta con:
+    - src/features/actividad/dispositivos/dispositivos.repository.js
+    - src/features/actividad/dispositivos/dispositivos-import-bridge.service.js
+    - src/features/actividad/dispositivos/adapters/cubitt.adapter.js
+    - src/features/actividad/dispositivos/adapters/google-fit.adapter.js
+*/
+
 import { crearCubittAdapter } from "./adapters/cubitt.adapter.js";
 import { crearGoogleFitAdapter } from "./adapters/google-fit.adapter.js";
 import { DISPOSITIVOS_ESTADOS, DISPOSITIVOS_FUENTES, DISPOSITIVOS_TEXTOS } from "./dispositivos.constants.js";
+import { crearDispositivosImportBridgeService } from "./dispositivos-import-bridge.service.js";
 import { crearDispositivosRepository } from "./dispositivos.repository.js";
 
 function limpiarTexto(valor, max = 120) {
@@ -28,6 +47,7 @@ function crearEvento(tipo, mensaje) {
 function construirResumen(estado) {
   const cubittPreparado = estado.cubitt.estado === DISPOSITIVOS_ESTADOS.PREPARADO && Boolean(estado.cubitt.identificadorLocal);
   const googlePreparado = estado.googleFit.estado === DISPOSITIVOS_ESTADOS.PREPARADO && Boolean(estado.googleFit.cuenta);
+  const ultimoImporte = estado.puente.ultimoImportadoEn ? "Última importación guardada" : "Sin importaciones todavía";
 
   return {
     cubitt: {
@@ -42,13 +62,16 @@ function construirResumen(estado) {
     },
     puente: {
       titulo: "Puente FitJeff",
-      detalle: estado.puente.fuentePreferida === DISPOSITIVOS_FUENTES.MANUAL ? "Manual por ahora" : `Fuente: ${estado.puente.fuentePreferida}`,
-      estado: "info"
+      detalle: estado.puente.fuentePreferida === DISPOSITIVOS_FUENTES.MANUAL ? ultimoImporte : `Fuente: ${estado.puente.fuentePreferida}`,
+      estado: estado.puente.ultimoImportadoEn ? "success" : "info"
     }
   };
 }
 
-export function crearDispositivosService(repository = crearDispositivosRepository()) {
+export function crearDispositivosService(
+  repository = crearDispositivosRepository(),
+  importBridge = crearDispositivosImportBridgeService()
+) {
   const cubittAdapter = crearCubittAdapter();
   const googleFitAdapter = crearGoogleFitAdapter();
 
@@ -56,6 +79,7 @@ export function crearDispositivosService(repository = crearDispositivosRepositor
     const estado = repository.obtenerEstado();
     return {
       ...estado,
+      ejemploImportacion: importBridge.ejemploCsv(),
       resumen: construirResumen(estado)
     };
   }
@@ -116,6 +140,37 @@ export function crearDispositivosService(repository = crearDispositivosRepositor
       mensaje: DISPOSITIVOS_TEXTOS.EXITO,
       estado: {
         ...estado,
+        ejemploImportacion: importBridge.ejemploCsv(),
+        resumen: construirResumen(estado)
+      }
+    };
+  }
+
+  function importarDatosPegados(texto) {
+    const anterior = repository.obtenerEstado();
+    const resultado = importBridge.importarTexto(texto, {
+      fuentePreferida: anterior.puente.fuentePreferida || DISPOSITIVOS_FUENTES.MANUAL
+    });
+
+    const estado = repository.guardarEstado({
+      ...anterior,
+      puente: {
+        ...anterior.puente,
+        estado: resultado.ok ? DISPOSITIVOS_ESTADOS.CONECTADO : DISPOSITIVOS_ESTADOS.ERROR,
+        ultimoImportadoEn: resultado.ok ? new Date().toISOString() : anterior.puente.ultimoImportadoEn,
+        ultimoResultadoImportacion: resultado.mensaje
+      },
+      historial: [
+        crearEvento(resultado.ok ? "importacion" : "importacion-error", resultado.mensaje),
+        ...(anterior.historial || [])
+      ].slice(0, 20)
+    });
+
+    return {
+      ...resultado,
+      estado: {
+        ...estado,
+        ejemploImportacion: importBridge.ejemploCsv(),
         resumen: construirResumen(estado)
       }
     };
@@ -123,7 +178,8 @@ export function crearDispositivosService(repository = crearDispositivosRepositor
 
   return {
     obtenerEstado,
-    guardarPreparacion
+    guardarPreparacion,
+    importarDatosPegados
   };
 }
 
