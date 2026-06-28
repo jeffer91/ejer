@@ -5,6 +5,7 @@
   Funcion o funciones:
     - Centralizar campos, textos y limites de la pantalla Registro / Ingreso.
     - Separar peso diario de medidas semanales.
+    - Incluir cuello para análisis corporal con más contexto que el IMC.
     - Mantener el modulo preparado para crecer sin mezclar estadisticas ni historial.
     - Usar textos simples para una experiencia compacta y visual.
 
@@ -26,6 +27,7 @@ export const INGRESO_CAMPOS_PESO = Object.freeze({
 
 export const INGRESO_CAMPOS_MEDIDAS = Object.freeze({
   FECHA: "fecha",
+  CUELLO_CM: "cuelloCm",
   CINTURA_CM: "cinturaCm",
   ABDOMEN_CM: "abdomenCm",
   PECHO_CM: "pechoCm",
@@ -36,6 +38,7 @@ export const INGRESO_CAMPOS_MEDIDAS = Object.freeze({
 
 export const INGRESO_LIMITES = Object.freeze({
   pesoKg: { minimo: 30, maximo: 250, cambioRaro: 4 },
+  cuelloCm: { minimo: 20, maximo: 70, cambioRaro: 4 },
   cinturaCm: { minimo: 40, maximo: 180, cambioRaro: 6 },
   abdomenCm: { minimo: 40, maximo: 190, cambioRaro: 6 },
   pechoCm: { minimo: 50, maximo: 180, cambioRaro: 6 },
@@ -46,6 +49,7 @@ export const INGRESO_LIMITES = Object.freeze({
 
 export const INGRESO_LABELS = Object.freeze({
   pesoKg: "Peso",
+  cuelloCm: "Cuello",
   cinturaCm: "Cintura",
   abdomenCm: "Abdomen",
   pechoCm: "Pecho",
