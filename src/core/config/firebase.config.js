@@ -5,6 +5,7 @@
   Función o funciones:
     - Centralizar la configuración pública de Firebase.
     - Leer variables Vite desde .env cuando existan.
+    - Activar Firebase automáticamente si existen credenciales completas y no se deshabilitó explícitamente.
     - Mantener FitJeff en modo local cuando Firebase no esté habilitado o falten variables.
     - Exponer un estado simple de conexión para sincronización y diagnóstico.
     - Evitar que los servicios escriban datos si Firebase aún no está configurado.
@@ -24,9 +25,28 @@ function leerVariableEnv(nombre, valorDefecto = "") {
   }
 }
 
-function leerBooleanEnv(nombre, valorDefecto = false) {
-  const valor = leerVariableEnv(nombre, valorDefecto ? "true" : "false").toLowerCase();
-  return valor === "true" || valor === "1" || valor === "yes" || valor === "si" || valor === "sí";
+function interpretarBoolean(valor, valorDefecto = false) {
+  const normalizado = String(valor ?? "").trim().toLowerCase();
+
+  if (!normalizado) return valorDefecto;
+  if (["true", "1", "yes", "si", "sí", "on"].includes(normalizado)) return true;
+  if (["false", "0", "no", "off"].includes(normalizado)) return false;
+
+  return valorDefecto;
+}
+
+function credencialesBasicasPresentes(config) {
+  return Boolean(config.apiKey && config.projectId && config.appId);
+}
+
+function resolverFirebaseEnabled(config) {
+  const valor = leerVariableEnv("VITE_FIREBASE_ENABLED", "");
+
+  if (valor) {
+    return interpretarBoolean(valor, false);
+  }
+
+  return credencialesBasicasPresentes(config);
 }
 
 export const FIREBASE_CONFIG = Object.freeze({
@@ -39,7 +59,7 @@ export const FIREBASE_CONFIG = Object.freeze({
 });
 
 export const FIREBASE_APP_OPTIONS = Object.freeze({
-  enabled: leerBooleanEnv("VITE_FIREBASE_ENABLED", false),
+  enabled: resolverFirebaseEnabled(FIREBASE_CONFIG),
   collection: leerVariableEnv("VITE_FIREBASE_COLLECTION", "fitjeff") || "fitjeff",
   userDocument: leerVariableEnv("VITE_FIREBASE_USER_DOCUMENT", "jeff") || "jeff",
   registrosSubcollection: leerVariableEnv("VITE_FIREBASE_REGISTROS_SUBCOLLECTION", "registros") || "registros",
