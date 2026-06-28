@@ -35,11 +35,11 @@ export function prepararAnalisisCorporalVista(analisis = {}) {
         estado: datos.relacionCinturaAltura ? estadoMetrica(analisis.estado) : "empty"
       },
       {
-        id: "grasa-estimada",
-        titulo: "Grasa estimada",
-        valor: datos.grasaEstimada ? valor(datos.grasaEstimada, "%") : "Sin dato",
-        detalle: datos.grasaEstimada ? "Estimación técnica orientativa" : "Requiere sexo, cuello y medidas",
-        estado: datos.grasaEstimada ? "info" : "empty"
+        id: "cuello-contexto",
+        titulo: "Cuello registrado",
+        valor: datos.cuelloCm ? valor(datos.cuelloCm, " cm") : "Sin dato",
+        detalle: datos.cuelloCm ? "Mejora la comparación corporal" : "Regístralo en medidas",
+        estado: datos.cuelloCm ? "success" : "empty"
       },
       {
         id: "nivel-muscular",
