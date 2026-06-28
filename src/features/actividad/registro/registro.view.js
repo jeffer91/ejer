@@ -1,3 +1,20 @@
+/*
+  Nombre completo: registro.view.js
+  Ruta o ubicación: src/features/actividad/registro/registro.view.js
+
+  Función o funciones:
+    - Construir la pantalla de registro manual de Actividad.
+    - Leer pasos, bicicleta y nota desde el formulario.
+    - Mostrar errores por campo.
+    - Cargar un registro existente cuando el usuario selecciona una fecha ya guardada.
+    - Mantener claro que guardar sobre una fecha existente actualiza el registro del día.
+
+  Se conecta con:
+    - src/features/actividad/registro/registro.controller.js
+    - src/features/actividad/actividad.constants.js
+    - src/features/actividad/registro/registro.css
+*/
+
 import { ACTIVIDAD_TEXTOS, fechaHoyISO } from "../actividad.constants.js";
 import "./registro.css";
 
@@ -69,6 +86,10 @@ export function crearActividadRegistroView() {
     formulario,
     mensaje,
     fechaInput: fecha.input,
+    pasosInput: pasos.input,
+    bicicletaMinInput: bicicletaMin.input,
+    bicicletaKmInput: bicicletaKm.input,
+    notaInput: nota.input,
     volverBoton
   };
 }
@@ -82,6 +103,21 @@ export function leerFormularioActividad(formulario) {
   });
 
   return datos;
+}
+
+export function rellenarFormularioActividad(vista, registro) {
+  if (!registro) {
+    vista.pasosInput.value = "";
+    vista.bicicletaMinInput.value = "";
+    vista.bicicletaKmInput.value = "";
+    vista.notaInput.value = "";
+    return;
+  }
+
+  vista.pasosInput.value = registro.pasos || "";
+  vista.bicicletaMinInput.value = registro.bicicletaMin || "";
+  vista.bicicletaKmInput.value = registro.bicicletaKm || "";
+  vista.notaInput.value = registro.nota || "";
 }
 
 export function mostrarErroresActividad(formulario, errores) {
