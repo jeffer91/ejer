@@ -6,6 +6,7 @@
     - Crear copias locales automáticas de los datos de FitJeff.
     - Guardar solo un número limitado de copias para no llenar almacenamiento.
     - Leer la copia local más reciente cuando sea necesario restaurar.
+    - Usar almacenamiento seguro para no romper la app si localStorage falla.
 
   Se conecta con:
     - src/core/backup/backup.constants.js
@@ -17,20 +18,10 @@ import { BACKUP_CONFIG } from "./backup.constants.js";
 import { obtenerFechaHoraISO } from "../utils/date.util.js";
 import { crearSafeLocalStorageService } from "../storage/safe-local-storage.service.js";
 
-function leerDatosFitJeff() {
-  const datos = {};
-
-  Object.keys(localStorage).forEach((clave) => {
-    if (clave.startsWith(BACKUP_CONFIG.storagePrefix) && clave !== BACKUP_CONFIG.backupKey) {
-      datos[clave] = localStorage.getItem(clave);
-    }
-  });
-
-  return datos;
-}
-
-export function crearBackupLocalService() {
-  const storage = crearSafeLocalStorageService();
+export function crearBackupLocalService(storage = crearSafeLocalStorageService()) {
+  function leerDatosFitJeff() {
+    return storage.leerMapaTextoPorPrefijo(BACKUP_CONFIG.storagePrefix, [BACKUP_CONFIG.backupKey]);
+  }
 
   function listarBackupsLocales() {
     return storage.leerJson(BACKUP_CONFIG.backupKey, []);
