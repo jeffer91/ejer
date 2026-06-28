@@ -1,18 +1,21 @@
 /*
   Nombre completo: estadisticas.calculations.js
-  Ruta o ubicación: src/features/control-corporal/estadisticas/estadisticas.calculations.js
+  Ruta o ubicacion: src/features/control-corporal/estadisticas/estadisticas.calculations.js
 
-  Función o funciones:
-    - Calcular peso actual, peso inicial, cambio total, tendencia, IMC y próxima medición.
-    - Preparar datos visuales para tarjetas, gráfico, barra de progreso y mensaje inteligente.
+  Funcion o funciones:
+    - Calcular peso actual, peso inicial, cambio total, tendencia, IMC y proxima medicion.
+    - Preparar datos visuales para tarjetas, grafico, barra de progreso y mensaje inteligente.
     - Evitar conclusiones falsas cuando hay pocos registros.
     - Interpretar progreso de peso sin promover cambios extremos.
+    - Usar fecha local en proxima medicion para evitar desfases por UTC.
 
   Se conecta con:
     - src/features/control-corporal/estadisticas/estadisticas.service.js
     - src/features/control-corporal/estadisticas/estadisticas.constants.js
+    - src/core/utils/date.util.js
 */
 
+import { formatearFechaLocalISO } from "../../../core/utils/date.util.js";
 import { ESTADISTICAS_TENDENCIAS } from "./estadisticas.constants.js";
 
 function ordenarPorFechaAsc(registros) {
@@ -188,7 +191,7 @@ export function calcularProximaMedicion(medidas) {
   const pendiente = fecha < hoy;
 
   return {
-    texto: pendiente ? "Pendiente" : fecha.toISOString().slice(0, 10),
+    texto: pendiente ? "Pendiente" : formatearFechaLocalISO(fecha),
     pendiente
   };
 }
