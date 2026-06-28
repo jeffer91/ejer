@@ -5,6 +5,7 @@
   Función o funciones:
     - Leer y escribir datos de FitJeff en Firestore.
     - Guardar perfil, objetivo, registros y estado de sincronización.
+    - Leer un respaldo completo para restaurar la app instalada.
     - Mantener Firebase como respaldo oculto, no como pantalla visible.
 
   Se conecta con:
@@ -12,6 +13,7 @@
     - src/core/config/firebase.config.js
     - src/core/firebase/firebase-error.service.js
     - src/core/sync/sync.service.js
+    - src/core/bootstrap/app-data-hydration.service.js
 */
 
 import { FIREBASE_APP_OPTIONS } from "../config/firebase.config.js";
@@ -63,6 +65,10 @@ export function crearFirebaseDatabaseService(firebaseAppService = crearFirebaseA
       const refs = await obtenerRefs();
       if (!refs.ok) return refs;
 
+      if (!registro?.id) {
+        return { ok: false, mensaje: "Registro sin ID. No se puede sincronizar." };
+      }
+
       const registroRef = refs.firestore.doc(refs.registrosRef, registro.id);
       await refs.firestore.setDoc(registroRef, {
         ...registro,
@@ -108,10 +114,63 @@ export function crearFirebaseDatabaseService(firebaseAppService = crearFirebaseA
     }
   }
 
+  async function leerRegistros() {
+    try {
+      const refs = await obtenerRefs();
+      if (!refs.ok) return refs;
+
+      const snapshot = await refs.firestore.getDocs(refs.registrosRef);
+      const registros = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+
+      return {
+        ok: true,
+        registros
+      };
+    } catch (error) {
+      return errorService.registrar(error, "leer-registros");
+    }
+  }
+
+  async function leerEstadoCompleto() {
+    const estadoGeneral = await leerEstadoGeneral();
+
+    if (!estadoGeneral.ok) {
+      return estadoGeneral;
+    }
+
+    if (!estadoGeneral.existe) {
+      return {
+        ok: true,
+        existe: false,
+        data: null
+      };
+    }
+
+    const registros = await leerRegistros();
+
+    if (!registros.ok) {
+      return registros;
+    }
+
+    return {
+      ok: true,
+      existe: true,
+      data: {
+        ...(estadoGeneral.data || {}),
+        registros: registros.registros || []
+      }
+    };
+  }
+
   return {
     guardarEstadoGeneral,
     guardarRegistro,
     guardarRegistros,
-    leerEstadoGeneral
+    leerEstadoGeneral,
+    leerRegistros,
+    leerEstadoCompleto
   };
 }
