@@ -43,9 +43,15 @@ const requiredFiles = [
   "src/features/control-corporal/historial/historial.controller.js",
   "src/features/control-corporal/historial/historial.view.js",
   "src/features/control-corporal/historial/historial.css",
+  "src/features/entrenamiento/stats/stats.controller.js",
+  "src/features/entrenamiento/stats/stats.view.js",
+  "src/features/entrenamiento/stats/stats.css",
   "src/modules/ajustes/ajustes.controller.js",
   "src/modules/ajustes/ajustes.view.js",
   "src/modules/ajustes/ajustes.css",
+  "src/modules/actualizaciones/actualizaciones.controller.js",
+  "src/modules/actualizaciones/actualizaciones.view.js",
+  "src/modules/actualizaciones/actualizaciones.css",
   "src/features/_template/template.menu.js",
   "src/features/_template/template.routes.js",
   "src/features/_template/template.module.js"
@@ -115,6 +121,16 @@ const semanticChecks = [
     file: "src/modules/ajustes/ajustes.css",
     mustInclude: ["background: rgba(255, 255, 255, 0.94)", "var(--fj-action-bg", "background: #ffffff"],
     message: "Ajustes debe estar alineado al modo claro."
+  },
+  {
+    file: "src/modules/actualizaciones/actualizaciones.css",
+    mustInclude: ["background: rgba(255, 255, 255, 0.94)", "var(--fj-action-bg", "fj-update-progress__bar"],
+    message: "Actualizaciones debe estar alineado al modo claro."
+  },
+  {
+    file: "src/features/entrenamiento/stats/stats.css",
+    mustInclude: ["background: rgba(255, 255, 255, 0.94)", "var(--fj-text-strong", "entreno-stats-card--ok"],
+    message: "Stats de Entrenamiento debe estar alineado al modo claro."
   }
 ];
 
@@ -207,7 +223,7 @@ function run() {
     console.log("Inicio abre hacia Hoy y usa modo claro.");
     console.log("Registro integra ayuda ? y mapa corporal.");
     console.log("Progreso usa presenter para una vista ordenada.");
-    console.log("Historial y Ajustes usan modo claro.");
+    console.log("Historial, Ajustes, Actualizaciones y Stats usan modo claro.");
     return;
   }
 
