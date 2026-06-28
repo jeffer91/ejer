@@ -20,6 +20,8 @@ Bloque 17 aplicado: Rutinas claro + pasos.
 
 Bloque 18 aplicado: Jarvis claro.
 
+Bloque 19 aplicado: Control corporal inteligente.
+
 La app queda con una base clara, simple y modular para continuar con mejoras funcionales sin mezclar responsabilidades.
 
 ## Pantalla principal
@@ -310,6 +312,38 @@ Corregido:
 
 Resultado: Jarvis de Diario y Jarvis HIT quedan en modo claro con panel compartido `jarvis-panel`, tarjetas blancas, texto oscuro, estados verdes, historial legible y comando escrito con input claro. Diario y HIT también quedan alineados visualmente al modo claro.
 
+### Bloque 19 - Control corporal inteligente
+
+Creado:
+
+- `src/features/control-corporal/analisis-corporal/analisis-corporal.calculations.js`
+- `src/features/control-corporal/analisis-corporal/analisis-corporal.presenter.js`
+- `src/features/control-corporal/analisis-corporal/avatar-corporal.view.js`
+- `src/features/control-corporal/analisis-corporal/avatar-corporal.css`
+
+Corregido:
+
+- `src/features/control-corporal/registro.schema.js`
+- `src/features/control-corporal/inicio/inicio.constants.js`
+- `src/features/control-corporal/inicio/inicio.view.js`
+- `src/features/control-corporal/inicio/inicio.validator.js`
+- `src/features/control-corporal/inicio/inicio.service.js`
+- `src/features/control-corporal/inicio/inicio.css`
+- `src/features/control-corporal/registro/ingreso.constants.js`
+- `src/features/control-corporal/registro/ayudas-medidas.constants.js`
+- `src/features/control-corporal/registro/mapa-corporal.view.js`
+- `src/features/control-corporal/registro/medidas-modal/medidas-modal.constants.js`
+- `src/features/control-corporal/registro/medidas-modal/medidas-figura.svg.js`
+- `src/features/control-corporal/registro/medidas-modal/medidas-modal.css`
+- `src/features/control-corporal/estadisticas/estadisticas.calculations.js`
+- `src/features/control-corporal/estadisticas/estadisticas.presenter.js`
+- `src/features/control-corporal/estadisticas/estadisticas.view.js`
+- `src/features/control-corporal/estadisticas/estadisticas.constants.js`
+- `scripts/check-structure.cjs`
+- `README.md`
+
+Resultado: Progreso ahora cruza IMC, cintura/altura, cuello y contexto muscular. También muestra un avatar corporal orientativo y evita juzgar el estado corporal solo por el peso.
+
 ## Documento de cierre
 
 El cierre detallado de la fase visual esta en:
@@ -375,10 +409,10 @@ npm run desktop:win
 - Las medidas corporales deben explicarse con popup visual, no solo con texto corto.
 - Rutinas debe mantenerse en modo claro y por pasos, no como una pantalla larga saturada.
 - Jarvis debe mantenerse en modo claro compartido para Diario y HIT.
+- Control corporal debe cruzar IMC con medidas y contexto muscular antes de sacar conclusiones.
 
 ## Siguiente fase recomendada
 
 Fase funcional de Actividad y Entrenamiento:
 
-1. Control corporal inteligente.
-2. Dispositivos / Cubitt CT4 / Google Fit preparado.
+1. Dispositivos / Cubitt CT4 / Google Fit preparado.
