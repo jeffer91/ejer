@@ -27,6 +27,7 @@ FitJeff tiene una base modular funcional y visualmente clara. La app trabaja en 
 - Local-first real: la app abre con datos locales primero y Firebase se restaura en segundo plano.
 - Metadata de sincronización por módulo para saber qué cambió sin consultar Firebase.
 - Cola diferencial con deduplicación por entidad para no repetir operaciones pendientes.
+- Sincronización diaria automática y sincronización manual desde Ajustes.
 
 ### Preparado, pero pendiente de conexion real
 
@@ -63,6 +64,7 @@ Bloques funcionales y correctivos aplicados:
 - Bloque 32: Local-first real.
 - Bloque 33: Metadata de sincronización.
 - Bloque 34: Cola diferencial con deduplicación por entidad.
+- Bloque 35: Sincronización diaria automática.
 
 ## Pantalla principal
 
@@ -185,6 +187,29 @@ Cada operación tiene:
 
 Si se edita el mismo registro varias veces antes de sincronizar, FitJeff conserva una sola operación pendiente con la versión más reciente. Esto evita que Firebase reciba cambios repetidos e innecesarios.
 
+## Sincronización diaria automática
+
+La programación local de sincronización se administra desde:
+
+```text
+src/core/sync/sync-scheduler.service.js
+```
+
+El estado del scheduler se guarda en:
+
+```text
+fitjeff:sync:scheduler
+```
+
+Reglas actuales:
+
+1. Al abrir la app, la interfaz se monta primero.
+2. La sincronización automática corre en segundo plano.
+3. Si ya se revisó hoy y no hay cambios, no llama innecesariamente a Firebase.
+4. Si hay cola pendiente, procesa solo la cola diferencial.
+5. Si hay módulos marcados como pendientes y no hay cola, encola un respaldo diferencial de recuperación.
+6. Desde Ajustes existe el botón `Sincronizar ahora` para sincronización manual.
+
 ## Auditoría integral
 
 Comando directo:
@@ -242,15 +267,22 @@ Resultado: FitJeff guarda metadata local de sincronización por módulo. Control
 
 ### Bloque 34 - Cola diferencial
 
+Resultado: la cola de sincronización deduplica por `modulo + entidad + entidadId + accion`. Si el mismo registro se guarda o edita varias veces antes de sincronizar, solo queda una operación pendiente con el último payload. También migra y compacta operaciones antiguas de la cola.
+
+### Bloque 35 - Sincronización diaria automática
+
 Corregido:
 
-- `src/core/sync/sync-queue.service.js`
-- `src/core/sync/sync.service.js`
-- `src/features/control-corporal/registro.service.js`
+- `src/core/sync/sync-scheduler.service.js`
+- `src/app/app.bootstrap.js`
+- `src/modules/ajustes/ajustes.controller.js`
+- `src/modules/ajustes/ajustes.view.js`
+- `src/modules/ajustes/ajustes.css`
+- `scripts/auditar-app.cjs`
 - `scripts/check-structure.cjs`
 - `README.md`
 
-Resultado: la cola de sincronización ahora deduplica por `modulo + entidad + entidadId + accion`. Si el mismo registro se guarda o edita varias veces antes de sincronizar, solo queda una operación pendiente con el último payload. También migra y compacta operaciones antiguas de la cola.
+Resultado: FitJeff ya tiene un scheduler de sincronización. Al abrir, revisa en segundo plano si hay cambios pendientes y evita llamadas repetidas si ya se revisó el día. Además, Ajustes muestra un bloque de sincronización con estado local y botón `Sincronizar ahora`.
 
 ## Comandos
 
@@ -338,12 +370,12 @@ npm run publicar:automatico
 - Firebase nunca debe bloquear el arranque visual de la app.
 - Cada módulo debe marcar su metadata cuando tenga cambios locales.
 - La cola de sincronización debe guardar una sola operación pendiente por entidad modificada.
+- La sincronización automática no debe llamar Firebase si ya se revisó hoy y no hay cambios pendientes.
 
 ## Bloques pendientes
 
-1. Bloque 35: Sincronización diaria automática y sincronización manual.
-2. Bloque 36: Firebase resumen liviano + registros por subcolección.
-3. Bloque 37: Conflictos local/remoto y resolución segura.
-4. Bloque 38: Dispositivos reales o puente claro de importación.
-5. Bloque 39: Rutinas y selección correcta del día de entrenamiento.
-6. Bloque 40: Revisión final para instalador Windows y APK Android.
+1. Bloque 36: Firebase resumen liviano + registros por subcolección.
+2. Bloque 37: Conflictos local/remoto y resolución segura.
+3. Bloque 38: Dispositivos reales o puente claro de importación.
+4. Bloque 39: Rutinas y selección correcta del día de entrenamiento.
+5. Bloque 40: Revisión final para instalador Windows y APK Android.
