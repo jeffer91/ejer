@@ -7,6 +7,7 @@
     - Instalar captura global de errores simples.
     - Restaurar datos locales/Firebase antes de decidir si mostrar Inicio.
     - Montar la estructura principal dentro de #app.
+    - Lanzar sincronización en segundo plano sin bloquear la interfaz.
     - Registrar el service worker si el navegador lo permite.
 
   Se conecta con:
@@ -14,6 +15,7 @@
     - src/app/app-router.js
     - src/app/app.css
     - src/core/bootstrap/app-data-hydration.service.js
+    - src/core/sync/sync.service.js
     - src/core/errors/app-error-handler.service.js
     - service-worker.js
 */
@@ -21,6 +23,7 @@
 import "./app.css";
 import { crearAppErrorHandlerService } from "../core/errors/app-error-handler.service.js";
 import { prepararDatosAntesDeRouter } from "../core/bootstrap/app-data-hydration.service.js";
+import { crearSyncService } from "../core/sync/sync.service.js";
 import { crearRouterFitJeff } from "./app-router.js";
 
 const errorHandler = crearAppErrorHandlerService();
@@ -40,6 +43,18 @@ function renderizarErrorInicio(error) {
   }
 }
 
+function sincronizarEnSegundoPlano() {
+  const syncService = crearSyncService();
+
+  syncService.sincronizarAhora().catch((error) => {
+    errorHandler.registrarError(error, {
+      modulo: "sync",
+      accion: "sincronizar-inicio",
+      mensajeUsuario: "Tus datos locales están guardados. La nube se sincronizará después."
+    });
+  });
+}
+
 async function iniciarFitJeff() {
   const preparacionDatos = await prepararDatosAntesDeRouter();
 
@@ -49,6 +64,7 @@ async function iniciarFitJeff() {
   });
 
   router.iniciar();
+  sincronizarEnSegundoPlano();
 }
 
 iniciarFitJeff().catch(renderizarErrorInicio);
