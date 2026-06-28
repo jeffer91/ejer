@@ -22,9 +22,9 @@ FitJeff tiene una base modular funcional y visualmente clara. La app trabaja en 
 - Control corporal depurado con guardado inicial unico, medicion principal por semana y comparaciones confiables.
 - npm start seguro con puerto automatico si 5173 esta ocupado.
 - BAT raiz para abrir FitJeff y BAT raiz para actualizar version automaticamente.
-- Restauracion Firebase antes de Inicio cuando Firebase tiene configuracion valida.
 - Firebase resuelto desde código mediante `src/core/config/firebase.project.config.js`, sin BAT de configuración.
 - Auditoría integral agregada para validar scripts, archivos críticos, imports locales, Firebase y build antes de seguir programando.
+- Local-first real: la app abre con datos locales primero y Firebase se restaura en segundo plano.
 
 ### Preparado, pero pendiente de conexion real
 
@@ -58,6 +58,7 @@ Bloques funcionales y correctivos aplicados:
 - Bloque 29: Restauración Firebase antes de Inicio.
 - Bloque 30: Firebase resuelto desde código.
 - Bloque 31: Auditoría integral.
+- Bloque 32: Local-first real.
 
 ## Pantalla principal
 
@@ -109,7 +110,7 @@ La configuración de Firebase se resuelve en este archivo:
 src/core/config/firebase.project.config.js
 ```
 
-Ese archivo exporta `FIREBASE_PROJECT_CONFIG`. Cuando `apiKey`, `projectId` y `appId` tienen valores reales, FitJeff puede consultar Firebase antes de mostrar la pantalla de primer uso.
+Ese archivo exporta `FIREBASE_PROJECT_CONFIG`. Cuando `apiKey`, `projectId` y `appId` tienen valores reales, FitJeff puede consultar Firebase en segundo plano.
 
 La prioridad de lectura es:
 
@@ -117,7 +118,19 @@ La prioridad de lectura es:
 2. `FIREBASE_PROJECT_CONFIG` escrito en código.
 3. Modo local si no hay credenciales completas.
 
-Ya no existe BAT de configuración de Firebase. Si Firebase tiene datos remotos y la configuración está completa, `app-data-hydration.service.js` restaura el respaldo, marca Inicio como completado y abre la app sin mostrar `Configura FitJeff`.
+Ya no existe BAT de configuración de Firebase. Si Firebase tiene datos remotos y la configuración está completa, `app-data-hydration.service.js` restaura el respaldo en segundo plano, marca Inicio como completado y abre Hoy sin bloquear el arranque.
+
+## Local-first real
+
+FitJeff debe abrir rápido aunque Firebase esté lento o sin conexión.
+
+Flujo actual:
+
+1. Lee datos locales.
+2. Monta la interfaz inmediatamente.
+3. Si local está vacío, consulta Firebase en segundo plano.
+4. Si Firebase tiene perfil, objetivo o registros, guarda local y entra a Hoy.
+5. La sincronización de inicio solo procesa cola pendiente; ya no sube todo el estado local automáticamente.
 
 ## Auditoría integral
 
@@ -152,58 +165,33 @@ Ese BAT llama a `scripts/publicar-version-automatica.bat` y ejecuta revision de 
 
 ### Bloque 28 - Inicio seguro y actualización automática
 
-Corregido:
-
-- `package.json`
-- `scripts/start-electron-dev.cjs`
-- `electron/electron-path.service.js`
-- `electron/electron-window.service.js`
-- `scripts/abrir-electron-dev.bat`
-- `scripts/actualizar-todo.bat`
-- `scripts/publicar-version-automatica.bat`
-- `ABRIR_FITJEFF.bat`
-- `ACTUALIZAR_VERSION_FITJEFF.bat`
-- `scripts/check-structure.cjs`
-- `README.md`
-
 Resultado: `npm start` no depende obligatoriamente del puerto 5173. Si el puerto está ocupado, busca otro puerto libre y Electron abre la URL correcta.
 
 ### Bloque 29 - Restauración Firebase antes de Inicio
 
-Corregido:
-
-- `src/core/config/firebase.config.js`
-- `src/core/firebase/firebase-database.service.js`
-- `src/core/bootstrap/app-data-hydration.service.js`
-
-Resultado: antes de mostrar Inicio, FitJeff consulta Firebase si está configurado. Si encuentra perfil, objetivo o registros remotos, guarda el estado local, marca Inicio como completado y abre la app.
+Resultado: FitJeff puede leer Firebase si está configurado. Si encuentra perfil, objetivo o registros remotos, guarda el estado local y marca Inicio como completado.
 
 ### Bloque 30 - Firebase resuelto desde código
-
-Corregido:
-
-- `src/core/config/firebase.project.config.js`
-- `src/core/config/firebase.config.js`
-- `package.json`
-- `scripts/check-structure.cjs`
-- `README.md`
 
 Resultado: Firebase ya no depende de un BAT de configuración. La app puede usar configuración escrita en código desde `firebase.project.config.js`. También se retiraron los BAT no solicitados de configuración Firebase.
 
 ### Bloque 31 - Auditoría integral
 
+Resultado: la app tiene una auditoría estática propia. La revisión local valida herramientas, estructura, rutas/imports locales, archivos críticos, scripts obligatorios y build antes de continuar.
+
+### Bloque 32 - Local-first real
+
 Corregido:
 
-- `scripts/auditar-app.cjs`
-- `scripts/check-local.cjs`
-- `scripts/check-tools.cjs`
-- `scripts/check-structure.cjs`
+- `src/core/bootstrap/app-data-hydration.service.js`
 - `src/app/app.bootstrap.js`
 - `src/app/app-router.js`
-- `package.json`
+- `src/core/sync/sync.service.js`
+- `src/features/control-corporal/registro.service.js`
+- `scripts/check-structure.cjs`
 - `README.md`
 
-Resultado: la app ahora tiene una auditoría estática propia. La revisión local valida herramientas, estructura, rutas/imports locales, archivos críticos, scripts obligatorios y build antes de continuar. También se protegió el arranque si falta `#app` y el router ahora valida su contenedor principal.
+Resultado: la app ya no espera Firebase para montar la interfaz. Primero abre con datos locales. Si local está vacío, Firebase se revisa en segundo plano y, si hay respaldo, la app entra a Hoy. Además, el inicio ya no encola ni sube todo el estado local automáticamente; solo procesa cambios pendientes.
 
 ## Comandos
 
@@ -288,3 +276,15 @@ npm run publicar:automatico
 - `npm start` debe abrir siempre con puerto automatico y no depender de 5173 libre.
 - La version de Windows y Android debe salir desde el mismo `package.json`.
 - Ningún bloque nuevo debe saltarse `npm run audit:app` y `npm run check:local`.
+- Firebase nunca debe bloquear el arranque visual de la app.
+
+## Bloques pendientes
+
+1. Bloque 33: Metadata de sincronización por módulo.
+2. Bloque 34: Cola diferencial con deduplicación por entidad.
+3. Bloque 35: Sincronización diaria automática y sincronización manual.
+4. Bloque 36: Firebase resumen liviano + registros por subcolección.
+5. Bloque 37: Conflictos local/remoto y resolución segura.
+6. Bloque 38: Dispositivos reales o puente claro de importación.
+7. Bloque 39: Rutinas y selección correcta del día de entrenamiento.
+8. Bloque 40: Revisión final para instalador Windows y APK Android.
