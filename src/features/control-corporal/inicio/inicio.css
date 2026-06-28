@@ -6,6 +6,7 @@
     - Dar estilo propio al Inicio de primera vez.
     - Mantener una pantalla compacta, clara y visual para celular y computadora.
     - Alinear la primera configuracion con la experiencia de Hoy.
+    - Incluir contexto muscular para análisis corporal inteligente.
     - No depender de estilos globales fuera del modulo.
 
   Se conecta con:
@@ -24,7 +25,7 @@
 .inicio-card {
   position: relative;
   overflow: hidden;
-  width: min(540px, 100%);
+  width: min(560px, 100%);
   border: 1px solid var(--fj-border, #d9e4f1);
   border-radius: var(--fj-radius, 16px);
   background:
@@ -109,6 +110,12 @@
 .inicio-field--error .inicio-field__input {
   border-color: var(--fj-red, #dc2626);
   box-shadow: 0 0 0 3px var(--fj-red-soft, rgba(220, 38, 38, 0.12));
+}
+
+.inicio-field__hint {
+  color: var(--fj-blue, #2563eb);
+  font-size: 0.72rem;
+  line-height: 1.35;
 }
 
 .inicio-field__error {
