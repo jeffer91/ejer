@@ -5,9 +5,14 @@ const ROOT = process.cwd();
 
 const requiredFiles = [
   "README.md",
+  "index.html",
+  "manifest.webmanifest",
+  "service-worker.js",
+  "public/icons/icon.svg",
   "docs/fase-visual-2026-cierre.md",
   "src/core/utils/date.util.js",
   "src/app/app-router.js",
+  "src/app/app.bootstrap.js",
   "src/app/app.css",
   "src/app/theme-light.css",
   "src/app/status-colors.css",
@@ -56,6 +61,10 @@ const requiredFiles = [
   "src/features/control-corporal/registro/medidas-modal/medidas-figura.svg.js",
   "src/features/control-corporal/registro/medidas-modal/medidas-modal.view.js",
   "src/features/control-corporal/registro/medidas-modal/medidas-modal.css",
+  "src/features/control-corporal/guia-medidas/guia-medidas.controller.js",
+  "src/features/control-corporal/guia-medidas/guia-medidas.view.js",
+  "src/features/control-corporal/guia-medidas/guia-medidas.data.js",
+  "src/features/control-corporal/guia-medidas/guia-medidas.css",
   "src/features/control-corporal/historial/historial.controller.js",
   "src/features/control-corporal/historial/historial.view.js",
   "src/features/control-corporal/historial/historial.css",
@@ -129,7 +138,11 @@ const blockedPatterns = [
 ];
 
 const semanticChecks = [
-  { file: "README.md", mustInclude: ["Bloque 21 - Analisis y correccion de errores", "preservar configuracion", "refresca el panel"], message: "README debe documentar el bloque 21." },
+  { file: "README.md", mustInclude: ["Bloque 22 - Base PWA clara y estado real", "PWA base real", "service worker"], message: "README debe documentar el bloque 22." },
+  { file: "index.html", mustInclude: ["theme-color\" content=\"#f8fafc", "color-scheme\" content=\"light", "manifest.webmanifest"], message: "index.html debe declarar modo claro y manifest." },
+  { file: "manifest.webmanifest", mustInclude: ["\"background_color\": \"#f8fafc\"", "\"theme_color\": \"#2563eb\"", "./icons/icon.svg"], message: "Manifest debe estar alineado al tema claro." },
+  { file: "service-worker.js", mustInclude: ["CACHE_VERSION", "PRECACHE_URLS", "self.addEventListener(\"fetch\"", "responderDinamico"], message: "Service worker debe tener base PWA real." },
+  { file: "src/app/app.bootstrap.js", mustInclude: ["debeRegistrarServiceWorker", "!window.fitJeffDesktop", "!import.meta.env.DEV", "registrarServiceWorkerPwa"], message: "Bootstrap debe registrar PWA solo en producción web." },
   { file: "src/app/app.css", mustInclude: ["@import \"./theme-light.css\";", "@import \"./status-colors.css\";"], message: "app.css debe cargar tema claro y estados." },
   { file: "src/features/actividad/actividad.menu.js", mustInclude: ["conexiones preparadas", "Manual y conexiones"], message: "Menu de Actividad debe reflejar conexiones." },
   { file: "src/features/actividad/actividad.routes.js", mustInclude: ["DISPOSITIVOS", "actividad-dispositivos", "Cubitt CT4 y Google Fit"], message: "Actividad debe tener ruta de dispositivos." },
@@ -144,6 +157,9 @@ const semanticChecks = [
   { file: "src/features/actividad/dispositivos/adapters/google-fit.adapter.js", mustInclude: ["crearGoogleFitAdapter", "normalizarActividadLectura"], message: "Debe existir adapter Google Fit." },
   { file: "src/features/actividad/dispositivos/dispositivos.view.js", mustInclude: ["crearDispositivosView", "identificador local", "Google Fit", "Puente FitJeff"], message: "Debe existir vista de dispositivos." },
   { file: "src/features/actividad/dispositivos/dispositivos.css", mustInclude: ["dispositivos-screen", "dispositivos-status-grid", "dispositivos-button--primary"], message: "Debe existir estilo de dispositivos." },
+  { file: "src/features/control-corporal/guia-medidas/guia-medidas.view.js", mustInclude: ["crearGuiaMedidasView", "crearSilueta", "Zona seleccionada", "Cómo medirte bien"], message: "Guia de medidas debe existir como pantalla completa." },
+  { file: "src/features/control-corporal/guia-medidas/guia-medidas.data.js", mustInclude: ["GUIA_MEDIDAS_ZONAS", "GUIA_MEDIDAS_PASOS", "cintura"], message: "Guia de medidas debe tener datos de zonas." },
+  { file: "src/features/control-corporal/guia-medidas/guia-medidas.css", mustInclude: ["guia-medidas-screen", "guia-medidas-silhouette", "guia-medidas-point"], message: "Guia de medidas debe tener estilos propios." },
   { file: "src/features/control-corporal/analisis-corporal/analisis-corporal.calculations.js", mustInclude: ["construirAnalisisCorporal", "relacionCinturaAltura", "nivelMuscular"], message: "Debe existir analisis corporal inteligente." },
   { file: "src/features/entrenamiento/rutinas/rutinas.view.js", mustInclude: ["crearRutinasStepper", "RUTINAS_STEPS", "Avanza por pasos"], message: "Vista de Rutinas debe usar pasos." },
   { file: "src/features/entrenamiento/jarvis/jarvis-panel.css", mustInclude: [".entreno-diario-jarvis", ".entreno-hit-jarvis", "background: linear-gradient"], message: "Jarvis debe tener estilos claros compartidos." }
@@ -220,6 +236,7 @@ function run() {
     console.log("Bloque 19 aplicado: Control corporal inteligente.");
     console.log("Bloque 20 aplicado: Dispositivos, Cubitt CT4 y Google Fit preparados.");
     console.log("Bloque 21 aplicado: Analisis y correccion de errores.");
+    console.log("Bloque 22 aplicado: Base PWA clara y estado real.");
     return;
   }
 
