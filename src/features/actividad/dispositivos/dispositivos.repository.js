@@ -1,13 +1,20 @@
-import { DISPOSITIVOS_STORAGE_KEY, crearEstadoDispositivosBase } from "./dispositivos.constants.js";
+/*
+  Nombre completo: dispositivos.repository.js
+  Ruta o ubicación: src/features/actividad/dispositivos/dispositivos.repository.js
 
-function leerJsonSeguro(valor) {
-  try {
-    return valor ? JSON.parse(valor) : null;
-  } catch (error) {
-    console.warn("No se pudo leer la configuración de dispositivos.", error);
-    return null;
-  }
-}
+  Función o funciones:
+    - Leer y guardar configuración local de Dispositivos con almacenamiento seguro.
+    - Mezclar datos guardados con estructura base para evitar campos perdidos.
+    - Evitar que configuración dañada de Cubitt, Google Fit o puente rompa Actividad.
+
+  Se conecta con:
+    - src/features/actividad/dispositivos/dispositivos.service.js
+    - src/features/actividad/dispositivos/dispositivos.constants.js
+    - src/core/storage/safe-local-storage.service.js
+*/
+
+import { crearSafeLocalStorageService } from "../../../core/storage/safe-local-storage.service.js";
+import { DISPOSITIVOS_STORAGE_KEY, crearEstadoDispositivosBase } from "./dispositivos.constants.js";
 
 function mezclarEstado(guardado) {
   const base = crearEstadoDispositivosBase();
@@ -35,9 +42,9 @@ function mezclarEstado(guardado) {
   };
 }
 
-export function crearDispositivosRepository(storage = localStorage) {
+export function crearDispositivosRepository(storage = crearSafeLocalStorageService()) {
   function obtenerEstado() {
-    return mezclarEstado(leerJsonSeguro(storage.getItem(DISPOSITIVOS_STORAGE_KEY)));
+    return mezclarEstado(storage.leerJson(DISPOSITIVOS_STORAGE_KEY, null));
   }
 
   function guardarEstado(estado) {
@@ -46,7 +53,7 @@ export function crearDispositivosRepository(storage = localStorage) {
       actualizadoEn: new Date().toISOString()
     };
 
-    storage.setItem(DISPOSITIVOS_STORAGE_KEY, JSON.stringify(estadoFinal));
+    storage.guardarJson(DISPOSITIVOS_STORAGE_KEY, estadoFinal);
     return estadoFinal;
   }
 
