@@ -15,6 +15,16 @@ export const MEDIDAS_MODAL_INFO = Object.freeze({
     evitar: "Evita compararte en horarios distintos si comiste, entrenaste o bebiste mucha agua antes.",
     consejo: "Lo más útil no es un peso aislado, sino la tendencia de varios registros."
   },
+  cuelloCm: {
+    titulo: "Cuello",
+    zona: "cuello",
+    resumen: "Mide alrededor del cuello, con la cinta recta y sin apretar.",
+    donde: "Coloca la cinta alrededor de la parte media del cuello, por debajo de la nuez o zona más prominente.",
+    como: "Mira al frente, hombros relajados y cuello en posición natural.",
+    cinta: "La cinta debe tocar la piel o ropa fina, sin hundirse ni quedar floja.",
+    evitar: "No inclines la cabeza ni midas justo debajo de la mandíbula.",
+    consejo: "Cuello junto con cintura ayuda a que el análisis no dependa solo del IMC."
+  },
   cinturaCm: {
     titulo: "Cintura",
     zona: "cintura",
