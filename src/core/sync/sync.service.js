@@ -9,6 +9,7 @@
     - Procesar solo cambios pendientes ya guardados en la cola local.
     - Usar metadata local para saber qué módulo tiene cambios pendientes.
     - Encolar operaciones diferenciales identificadas por módulo, entidad y entidadId.
+    - Detectar conflictos local/remoto antes de subir cambios pendientes.
     - Evitar que el arranque de la app encole y suba todo el estado local.
     - Mantener cambios en cola si Firebase está habilitado pero falla la conexión.
     - Evitar que un estado local vacío reemplace un respaldo válido en Firebase.
@@ -20,11 +21,13 @@
     - src/core/sync/sync-queue.service.js
     - src/core/sync/sync-status.service.js
     - src/core/sync/sync-metadata.service.js
+    - src/core/sync/sync-conflict.service.js
     - src/features/control-corporal/registro.service.js
 */
 
 import { firebaseEstaConfigurado, obtenerEstadoFirebaseConexion } from "../config/firebase.config.js";
 import { crearFirebaseDatabaseService } from "../firebase/firebase-database.service.js";
+import { crearSyncConflictService } from "./sync-conflict.service.js";
 import { crearSyncMetadataService, SYNC_MODULES } from "./sync-metadata.service.js";
 import { crearSyncQueueService } from "./sync-queue.service.js";
 import { crearSyncStatusService } from "./sync-status.service.js";
@@ -63,6 +66,7 @@ export function crearSyncService({
   queue = crearSyncQueueService(),
   status = crearSyncStatusService(),
   syncMetadata = crearSyncMetadataService(),
+  syncConflict = crearSyncConflictService(),
   registroService = crearRegistroService()
 } = {}) {
   function obtenerEstadoConexion() {
@@ -140,6 +144,44 @@ export function crearSyncService({
     };
   }
 
+  async function validarConflictosAntesDeSubir() {
+    const pendientes = queue.contar();
+    const metadata = syncMetadata.leer();
+    const hayPendientesLocales = pendientes > 0 || syncMetadata.hayCambiosPendientes();
+
+    if (!hayPendientesLocales) {
+      return { ok: true, conflicto: false };
+    }
+
+    const resumenRemoto = await firebaseDatabase.leerResumenUsuario();
+
+    if (!resumenRemoto.ok || !resumenRemoto.existe || !resumenRemoto.tieneDatos) {
+      return { ok: true, conflicto: false };
+    }
+
+    const evaluacion = syncConflict.evaluarLocalRemoto({
+      estadoLocal: registroService.obtenerEstado(),
+      resumenRemoto: resumenRemoto.data,
+      metadata,
+      colaPendiente: pendientes
+    });
+
+    if (!evaluacion.hayConflicto) {
+      return { ok: true, conflicto: false, evaluacion };
+    }
+
+    const conflicto = syncConflict.registrarConflicto(evaluacion);
+    syncMetadata.marcarError(conflicto.modulo, conflicto.mensaje);
+    status.marcarError(conflicto.mensaje);
+
+    return {
+      ok: false,
+      conflicto: true,
+      mensaje: conflicto.mensaje,
+      conflictoRegistrado: conflicto
+    };
+  }
+
   async function procesarItem(item) {
     if (item.tipo === "estado-general") {
       return firebaseDatabase.guardarEstadoGeneral(item.payload);
@@ -158,6 +200,17 @@ export function crearSyncService({
   async function sincronizarPendientes() {
     if (!puedeSincronizar()) {
       return responderModoLocal();
+    }
+
+    const conflicto = await validarConflictosAntesDeSubir();
+
+    if (!conflicto.ok) {
+      return {
+        ok: false,
+        mensaje: conflicto.mensaje,
+        procesados: 0,
+        conflicto: conflicto.conflictoRegistrado
+      };
     }
 
     const pendientes = queue.listar();
