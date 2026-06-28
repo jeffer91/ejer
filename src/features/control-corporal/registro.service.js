@@ -9,6 +9,7 @@
     - Guardar la configuracion inicial en una sola operacion local.
     - Marcar Inicio como completado cuando ya existen datos reales.
     - Encolar cambios locales aunque Firebase todavia no este listo.
+    - Marcar Control corporal como modulo sucio en metadata de sincronizacion.
     - Registrar cambios para que el Historial pueda mostrar correcciones.
     - Usar fecha local para registros diarios y evitar desfases por UTC.
     - Limitar medidas a una medicion principal por semana para evitar duplicados.
@@ -20,11 +21,13 @@
     - src/features/control-corporal/registro.constants.js
     - src/features/control-corporal/inicio/inicio.constants.js
     - src/core/sync/sync-queue.service.js
+    - src/core/sync/sync-metadata.service.js
     - src/core/utils/date.util.js
     - src/core/storage/safe-local-storage.service.js
 */
 
 import { crearSafeLocalStorageService } from "../../core/storage/safe-local-storage.service.js";
+import { crearSyncMetadataService, SYNC_MODULES } from "../../core/sync/sync-metadata.service.js";
 import { crearSyncQueueService } from "../../core/sync/sync-queue.service.js";
 import { convertirAFechaSegura, formatearFechaLocalISO, obtenerFechaHoraISO, obtenerFechaHoyISO } from "../../core/utils/date.util.js";
 import { INICIO_STORAGE_KEYS } from "./inicio/inicio.constants.js";
@@ -75,7 +78,8 @@ function existeMedidasEnSemana(registros, fecha) {
 export function crearRegistroService(
   repository = crearRegistroRepository(),
   queue = crearSyncQueueService(),
-  storage = crearSafeLocalStorageService()
+  storage = crearSafeLocalStorageService(),
+  syncMetadata = crearSyncMetadataService()
 ) {
   function obtenerEstado() {
     return repository.obtenerEstado();
@@ -83,6 +87,10 @@ export function crearRegistroService(
 
   function marcarInicioCompletadoSiHayDatos() {
     storage.guardarTexto(INICIO_STORAGE_KEYS.COMPLETADO, "true");
+  }
+
+  function marcarCambioLocal(descripcion) {
+    syncMetadata.marcarModuloSucio(SYNC_MODULES.CONTROL_CORPORAL, descripcion);
   }
 
   function puedeEncolarSync() {
@@ -159,6 +167,7 @@ export function crearRegistroService(
     });
 
     marcarInicioCompletadoSiHayDatos();
+    marcarCambioLocal("Configuración inicial de Control corporal");
 
     if (registroPeso) {
       encolarRegistro(registroPeso);
@@ -190,6 +199,7 @@ export function crearRegistroService(
 
     repository.guardarPerfil(perfil);
     marcarInicioCompletadoSiHayDatos();
+    marcarCambioLocal("Perfil corporal actualizado");
     encolarEstadoGeneral(obtenerEstado());
     return perfil;
   }
@@ -204,6 +214,7 @@ export function crearRegistroService(
 
     repository.guardarObjetivo(objetivo);
     marcarInicioCompletadoSiHayDatos();
+    marcarCambioLocal("Objetivo corporal actualizado");
     encolarEstadoGeneral(obtenerEstado());
     return objetivo;
   }
@@ -227,6 +238,7 @@ export function crearRegistroService(
     const registros = [registro, ...estado.registros];
     repository.guardarRegistros(registros);
     marcarInicioCompletadoSiHayDatos();
+    marcarCambioLocal("Peso corporal guardado");
     encolarRegistro(registro);
     encolarEstadoGeneral(obtenerEstado());
 
@@ -256,6 +268,7 @@ export function crearRegistroService(
     const registros = [registro, ...estado.registros];
     repository.guardarRegistros(registros);
     marcarInicioCompletadoSiHayDatos();
+    marcarCambioLocal("Medidas corporales guardadas");
     encolarRegistro(registro);
     encolarEstadoGeneral(obtenerEstado());
 
@@ -289,6 +302,7 @@ export function crearRegistroService(
 
     repository.guardarRegistros(registros);
     repository.guardarHistorialCambios([cambio, ...estado.historialCambios]);
+    marcarCambioLocal("Registro corporal editado");
     encolarRegistro(despues);
     encolarEstadoGeneral(obtenerEstado());
 
@@ -316,6 +330,7 @@ export function crearRegistroService(
     repository.guardarRegistros(registros);
     repository.guardarPapelera(papelera);
     repository.guardarHistorialCambios([cambio, ...estado.historialCambios]);
+    marcarCambioLocal("Registro corporal enviado a papelera");
     encolarRegistro(registroEliminado);
     encolarEstadoGeneral(obtenerEstado());
 
