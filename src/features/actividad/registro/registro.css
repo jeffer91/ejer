@@ -1,0 +1,159 @@
+.actividad-registro-screen {
+  display: grid;
+  gap: 12px;
+}
+
+.actividad-registro-header,
+.actividad-registro-form {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--fj-border, #d9e4f1);
+  border-radius: var(--fj-radius, 16px);
+  background: rgba(255, 255, 255, 0.94);
+  padding: 12px;
+  box-shadow: var(--fj-shadow-soft, 0 8px 22px rgba(15, 23, 42, 0.06));
+}
+
+.actividad-registro-header::before,
+.actividad-registro-form::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 5px;
+  background: var(--fj-green, #16a34a);
+}
+
+.actividad-registro-kicker {
+  margin: 0 0 5px;
+  color: var(--fj-green, #16a34a);
+  font-size: 0.72rem;
+  font-weight: 950;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.actividad-registro-header h2 {
+  margin: 0 0 6px;
+  color: var(--fj-text-strong, #07111f);
+  font-size: clamp(1.25rem, 2.8vw, 1.75rem);
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+}
+
+.actividad-registro-header p:last-child {
+  margin: 0;
+  color: var(--fj-muted, #64748b);
+  font-size: 0.86rem;
+  line-height: 1.4;
+}
+
+.actividad-registro-form {
+  display: grid;
+  gap: 10px;
+}
+
+.actividad-registro-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+}
+
+.actividad-form-field {
+  display: grid;
+  gap: 5px;
+}
+
+.actividad-form-field__label {
+  color: var(--fj-muted, #64748b);
+  font-size: 0.74rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.actividad-form-field__input {
+  width: 100%;
+  min-height: 40px;
+  border: 1px solid var(--fj-border, #d9e4f1);
+  border-radius: var(--fj-radius-sm, 12px);
+  background: #ffffff;
+  padding: 8px 10px;
+  color: var(--fj-text, #172033);
+  outline: none;
+}
+
+.actividad-form-field__input:focus {
+  border-color: var(--fj-border-active, rgba(37, 99, 235, 0.7));
+  background: var(--fj-surface-2, #f7fbff);
+  box-shadow: 0 0 0 3px var(--fj-blue-soft, rgba(37, 99, 235, 0.12));
+}
+
+.actividad-form-field--error .actividad-form-field__input {
+  border-color: var(--fj-red, #dc2626);
+  box-shadow: 0 0 0 3px var(--fj-red-soft, rgba(220, 38, 38, 0.12));
+}
+
+.actividad-form-field__error {
+  min-height: 13px;
+  color: var(--fj-red, #dc2626);
+  font-size: 0.7rem;
+  font-weight: 760;
+}
+
+.actividad-registro-message {
+  margin: 0;
+  min-height: 18px;
+  color: var(--fj-muted, #64748b);
+  font-size: 0.78rem;
+  font-weight: 850;
+}
+
+.actividad-registro-message--ok {
+  color: var(--fj-green, #16a34a);
+}
+
+.actividad-registro-message--error {
+  color: var(--fj-red, #dc2626);
+}
+
+.actividad-registro-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.actividad-registro-button {
+  min-height: 40px;
+  border: 1px solid transparent;
+  border-radius: var(--fj-radius-sm, 12px);
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 0.86rem;
+  font-weight: 950;
+}
+
+.actividad-registro-button--primary {
+  background: var(--fj-action-bg, linear-gradient(135deg, #2563eb, #0ea5e9));
+  color: var(--fj-action-text, #ffffff);
+}
+
+.actividad-registro-button--secondary {
+  border-color: rgba(37, 99, 235, 0.28);
+  background: var(--fj-blue-soft, rgba(37, 99, 235, 0.12));
+  color: var(--fj-blue, #2563eb);
+}
+
+@media (max-width: 720px) {
+  .actividad-registro-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .actividad-registro-header,
+  .actividad-registro-form {
+    padding: 10px;
+  }
+
+  .actividad-registro-actions {
+    display: grid;
+  }
+}
