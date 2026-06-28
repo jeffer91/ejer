@@ -5,6 +5,7 @@
   Funcion o funciones:
     - Calcular peso actual, peso inicial, cambio total, tendencia, IMC y proxima medicion.
     - Preparar datos visuales para tarjetas, grafico, barra de progreso y mensaje inteligente.
+    - Integrar análisis corporal inteligente con cintura/altura y contexto muscular.
     - Evitar conclusiones falsas cuando hay pocos registros.
     - Interpretar progreso de peso sin promover cambios extremos.
     - Usar fecha local en proxima medicion para evitar desfases por UTC.
@@ -12,10 +13,12 @@
   Se conecta con:
     - src/features/control-corporal/estadisticas/estadisticas.service.js
     - src/features/control-corporal/estadisticas/estadisticas.constants.js
+    - src/features/control-corporal/analisis-corporal/analisis-corporal.calculations.js
     - src/core/utils/date.util.js
 */
 
 import { formatearFechaLocalISO } from "../../../core/utils/date.util.js";
+import { construirAnalisisCorporal } from "../analisis-corporal/analisis-corporal.calculations.js";
 import { ESTADISTICAS_TENDENCIAS } from "./estadisticas.constants.js";
 
 function ordenarPorFechaAsc(registros) {
@@ -107,8 +110,8 @@ export function calcularImc(pesoKg, alturaCm) {
 
   if (valor < 18.5) return { valor, categoria: "Bajo" };
   if (valor < 25) return { valor, categoria: "Normal" };
-  if (valor < 30) return { valor, categoria: "Sobrepeso" };
-  return { valor, categoria: "Alto" };
+  if (valor < 30) return { valor, categoria: "Elevado" };
+  return { valor, categoria: "Muy alto" };
 }
 
 export function calcularTendencia(pesos) {
@@ -218,6 +221,7 @@ export function construirResumenEstadisticas(estado) {
   const pesoAnterior = pesos.length > 1 ? pesos[pesos.length - 2].datos.pesoKg : null;
   const pesoActual = pesos[pesos.length - 1]?.datos?.pesoKg || null;
   const pesoObjetivo = estado.objetivo?.pesoObjetivoKg || null;
+  const ultimasMedidas = obtenerUltimasMedidas(medidas);
   const cambioKg = pesoAnterior && pesoActual ? redondear(pesoActual - pesoAnterior, 1) : null;
   const cambioTotalKg = pesoActual && primerPeso ? redondear(pesoActual - primerPeso, 1) : null;
   const cambioSemanaKg = calcularCambioContra(pesoActual, registroSemana);
@@ -227,6 +231,12 @@ export function construirResumenEstadisticas(estado) {
   const tendencia = calcularTendencia(pesos);
   const faltanteObjetivoKg = calcularFaltanteObjetivo(pesoActual, pesoObjetivo);
   const diasRegistro = primerRegistroPeso && pesos[pesos.length - 1] ? diasEntre(primerRegistroPeso.fecha, pesos[pesos.length - 1].fecha) : null;
+  const analisisCorporal = construirAnalisisCorporal({
+    perfil: estado.perfil || {},
+    pesoActualKg: pesoActual,
+    medidas: ultimasMedidas,
+    imc
+  });
 
   return {
     pesoInicialKg: primerPeso,
@@ -242,6 +252,7 @@ export function construirResumenEstadisticas(estado) {
     tendencia,
     edad: calcularEdad(estado.perfil?.fechaNacimiento),
     imc,
+    analisisCorporal,
     progresoObjetivo,
     mensajeInteligente: construirMensajeInteligente({
       pesos,
@@ -254,7 +265,7 @@ export function construirResumenEstadisticas(estado) {
       tendencia
     }),
     proximaMedicion: calcularProximaMedicion(medidas),
-    ultimasMedidas: obtenerUltimasMedidas(medidas),
+    ultimasMedidas,
     graficoPeso: prepararGraficoPeso(pesos),
     cantidadPesos: pesos.length,
     cantidadMedidas: medidas.length
