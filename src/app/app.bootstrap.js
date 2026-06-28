@@ -5,6 +5,7 @@
   Función o funciones:
     - Iniciar FitJeff en modo web, PWA o Electron.
     - Instalar captura global de errores simples.
+    - Validar que exista el contenedor #app antes de montar la app.
     - Restaurar datos locales/Firebase antes de decidir si mostrar Inicio.
     - Montar la estructura principal dentro de #app.
     - Lanzar sincronización en segundo plano sin bloquear la interfaz.
@@ -31,6 +32,15 @@ errorHandler.instalarCapturaGlobal();
 
 const raiz = document.getElementById("app");
 
+function mostrarMensajeSinRaiz(mensaje) {
+  const contenedor = document.createElement("main");
+  contenedor.style.fontFamily = "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+  contenedor.style.padding = "24px";
+  contenedor.style.color = "#111827";
+  contenedor.textContent = mensaje;
+  document.body.appendChild(contenedor);
+}
+
 function renderizarErrorInicio(error) {
   const resultado = errorHandler.registrarError(error, {
     modulo: "app",
@@ -40,7 +50,10 @@ function renderizarErrorInicio(error) {
 
   if (raiz) {
     raiz.textContent = resultado.mensaje;
+    return;
   }
+
+  mostrarMensajeSinRaiz(resultado.mensaje);
 }
 
 function sincronizarEnSegundoPlano() {
@@ -77,7 +90,17 @@ function registrarServiceWorkerPwa() {
   });
 }
 
+function validarRaiz() {
+  if (raiz) {
+    return;
+  }
+
+  throw new Error("No existe el contenedor #app en index.html.");
+}
+
 async function iniciarFitJeff() {
+  validarRaiz();
+
   const preparacionDatos = await prepararDatosAntesDeRouter();
 
   const router = crearRouterFitJeff({
