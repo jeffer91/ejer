@@ -18,6 +18,7 @@ FitJeff tiene una base modular funcional y visualmente clara. La app ya puede tr
 - Rutinas, Diario, HIIT, Stats y Ajustes de entrenamiento.
 - Actualizaciones preparadas para Electron instalado.
 - PWA base real con manifest claro y service worker de cache basico.
+- Storage seguro aplicado a repositories principales, Inicio, Ajustes, backup e hidratacion inicial.
 
 ### Preparado, pero pendiente de conexion real
 
@@ -43,6 +44,7 @@ Bloques funcionales y correctivos aplicados:
 - Bloque 20: Dispositivos / Cubitt CT4 / Google Fit preparado.
 - Bloque 21: Analisis y correccion de errores.
 - Bloque 22: Base PWA clara y estado real.
+- Bloque 23: Almacenamiento local seguro.
 
 ## Pantalla principal
 
@@ -160,6 +162,26 @@ Corregido:
 
 Resultado: la app declara modo claro tambien en metadatos, el manifest queda alineado al tema claro, el service worker deja de ser un archivo vacio y la PWA base real queda activada solo en produccion web para no mezclar cache viejo en desarrollo o Electron.
 
+### Bloque 23 - Almacenamiento local seguro
+
+Corregido:
+
+- `src/core/storage/safe-local-storage.service.js`
+- `src/core/bootstrap/app-data-hydration.service.js`
+- `src/core/backup/backup-local.service.js`
+- `src/core/backup/backup-restore.service.js`
+- `src/features/control-corporal/registro.repository.js`
+- `src/features/control-corporal/inicio/inicio.service.js`
+- `src/features/actividad/actividad.repository.js`
+- `src/features/actividad/dispositivos/dispositivos.repository.js`
+- `src/features/entrenamiento/entrenamiento.repository.js`
+- `src/features/entrenamiento/ajustes/gemini-settings.repository.js`
+- `src/modules/ajustes/ajustes.service.js`
+- `scripts/check-structure.cjs`
+- `README.md`
+
+Resultado: los repositories principales, Inicio, Ajustes, backup e hidratacion inicial usan storage seguro. Si un JSON local se dana o localStorage falla, FitJeff debe volver a valores seguros sin romper la pantalla completa.
+
 ## Comandos
 
 Instalar dependencias:
@@ -217,18 +239,18 @@ npm run desktop:win
 - Jarvis debe mantenerse en modo claro compartido para Diario y HIT.
 - Control corporal debe cruzar IMC con medidas y contexto muscular antes de sacar conclusiones.
 - PWA debe registrarse solo en produccion web para evitar cache viejo durante desarrollo.
+- Los datos locales deben pasar por storage seguro cuando sean leidos o escritos desde servicios/repositories.
 
 ## Siguiente fase recomendada
 
 Correcciones pendientes por prioridad:
 
-1. Unificar almacenamiento seguro para todos los repositories.
-2. Corregir memoria de ultima pantalla y textos del shell.
-3. Mejorar reglas de Control corporal: onboarding, medidas semanales y comparaciones.
-4. Corregir duplicados de Actividad.
-5. Aclarar o implementar conexiones reales de Dispositivos.
-6. Mejorar Rutinas y seleccion del dia de entrenamiento.
-7. Revisar seguridad y texto de Gemini API Key.
-8. Decidir Firebase activo o modo local-only.
-9. Publicar primer release Windows real.
-10. Crear proyecto Android/Capacitor solo cuando se vaya a generar APK real.
+1. Corregir memoria de ultima pantalla y textos del shell.
+2. Mejorar reglas de Control corporal: onboarding, medidas semanales y comparaciones.
+3. Corregir duplicados de Actividad.
+4. Aclarar o implementar conexiones reales de Dispositivos.
+5. Mejorar Rutinas y seleccion del dia de entrenamiento.
+6. Revisar seguridad y texto de Gemini API Key.
+7. Decidir Firebase activo o modo local-only.
+8. Publicar primer release Windows real.
+9. Crear proyecto Android/Capacitor solo cuando se vaya a generar APK real.
