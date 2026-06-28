@@ -7,19 +7,18 @@
     - Decidir que accion mostrar primero segun lo que falte.
     - Preparar tarjetas compactas con estados visuales.
     - Evitar saturar al usuario con todos los numeros de estadisticas.
+    - Usar fecha local para detectar correctamente el registro de hoy.
 
   Se conecta con:
     - src/features/control-corporal/hoy/hoy.service.js
     - src/features/control-corporal/hoy/hoy.constants.js
     - src/features/control-corporal/control-corporal.routes.js
+    - src/core/utils/date.util.js
 */
 
+import { obtenerFechaHoyISO } from "../../../core/utils/date.util.js";
 import { CONTROL_CORPORAL_ROUTES } from "../control-corporal.routes.js";
 import { HOY_ESTADOS, HOY_LABELS, HOY_TEXTOS } from "./hoy.constants.js";
-
-function fechaHoyISO() {
-  return new Date().toISOString().slice(0, 10);
-}
 
 function formatearKg(valor) {
   return valor === null || valor === undefined ? "Sin dato" : `${valor} kg`;
@@ -33,7 +32,7 @@ function estaActivo(registro) {
   return registro && registro.estado !== "eliminado";
 }
 
-function tienePesoHoy(registros, fecha = fechaHoyISO()) {
+function tienePesoHoy(registros, fecha = obtenerFechaHoyISO()) {
   return registros.some((registro) => (
     estaActivo(registro)
     && registro.tipo === "peso"
@@ -139,7 +138,7 @@ export function construirResumenHoy({ estado, estadisticas }) {
   const accionPrincipal = construirAccionPrincipal({ hayPesoActual, pesoRegistradoHoy, medidasPendientes });
 
   return {
-    fecha: fechaHoyISO(),
+    fecha: obtenerFechaHoyISO(),
     accionPrincipal,
     tarjetas: construirTarjetas({ estadisticas, pesoRegistradoHoy, medidasPendientes }),
     graficoPeso: (estadisticas.graficoPeso || []).slice(-7),
