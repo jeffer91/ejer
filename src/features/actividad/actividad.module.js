@@ -1,4 +1,5 @@
 import { ACTIVIDAD_ROUTES, esRutaActividad } from "./actividad.routes.js";
+import { crearDispositivosController } from "./dispositivos/dispositivos.controller.js";
 import { crearActividadResumenController } from "./resumen/resumen.controller.js";
 import { crearActividadRegistroController } from "./registro/registro.controller.js";
 
@@ -9,6 +10,12 @@ export function montarPantallaActividad(rutaId, contenedor, opciones = {}) {
     const controller = crearActividadRegistroController({
       alNavegar: opciones.alNavegar
     });
+    controller.montar(contenedor);
+    return controller;
+  }
+
+  if (rutaId === ACTIVIDAD_ROUTES.DISPOSITIVOS) {
+    const controller = crearDispositivosController();
     controller.montar(contenedor);
     return controller;
   }
