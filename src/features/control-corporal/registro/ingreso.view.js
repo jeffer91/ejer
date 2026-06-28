@@ -1,19 +1,24 @@
 /*
   Nombre completo: ingreso.view.js
-  Ruta o ubicación: src/features/control-corporal/registro/ingreso.view.js
+  Ruta o ubicacion: src/features/control-corporal/registro/ingreso.view.js
 
-  Función o funciones:
+  Funcion o funciones:
     - Construir la pantalla de Registro / Ingreso.
-    - Mostrar peso diario y medidas semanales en una vista compacta.
+    - Mostrar peso diario y medidas corporales en una vista compacta.
+    - Integrar ayuda ? debajo de cada campo sin abrir otra pantalla.
     - Mantener la vista separada de guardado y validaciones.
 
   Se conecta con:
     - src/features/control-corporal/registro/registro.controller.js
     - src/features/control-corporal/registro/ingreso.constants.js
+    - src/features/control-corporal/registro/ayudas-medidas.constants.js
+    - src/features/control-corporal/registro/mapa-corporal.view.js
     - src/features/control-corporal/registro/ingreso.css
 */
 
 import { INGRESO_CAMPOS_MEDIDAS, INGRESO_CAMPOS_PESO, INGRESO_LABELS, INGRESO_TEXTOS } from "./ingreso.constants.js";
+import { obtenerAyudaMedida } from "./ayudas-medidas.constants.js";
+import { crearMapaCorporal } from "./mapa-corporal.view.js";
 import { fechaHoy } from "./ingreso.parser.js";
 import "./ingreso.css";
 
@@ -24,31 +29,74 @@ function crearElemento(etiqueta, clase, texto) {
     elemento.className = clase;
   }
 
-  if (texto) {
+  if (texto !== undefined && texto !== null && texto !== "") {
     elemento.textContent = texto;
   }
 
   return elemento;
 }
 
-function crearCampo({ id, label, placeholder, tipo, valor }) {
-  const grupo = crearElemento("label", "ingreso-field");
-  const texto = crearElemento("span", "ingreso-field__label", label);
+function crearAyudaCampo(id) {
+  const ayuda = obtenerAyudaMedida(id);
+  const contenedor = crearElemento("div", "ingreso-field__help");
+
+  contenedor.hidden = true;
+
+  if (!ayuda) {
+    return contenedor;
+  }
+
+  contenedor.appendChild(crearElemento("strong", "", ayuda.titulo));
+  contenedor.appendChild(crearElemento("span", "", ayuda.texto));
+
+  return contenedor;
+}
+
+function crearBotonAyuda(id, ayudaBox) {
+  const boton = crearElemento("button", "ingreso-help-button", "?");
+  boton.type = "button";
+  boton.setAttribute("aria-label", `Ver ayuda de ${INGRESO_LABELS[id] || id}`);
+  boton.setAttribute("aria-expanded", "false");
+
+  boton.addEventListener("click", () => {
+    const mostrar = ayudaBox.hidden;
+    ayudaBox.hidden = !mostrar;
+    boton.setAttribute("aria-expanded", String(mostrar));
+    boton.classList.toggle("ingreso-help-button--active", mostrar);
+  });
+
+  return boton;
+}
+
+function crearCampo({ id, label, placeholder, tipo, valor, inputMode }) {
+  const grupo = crearElemento("div", "ingreso-field");
+  const encabezado = crearElemento("div", "ingreso-field__head");
+  const texto = crearElemento("label", "ingreso-field__label", label);
+  const ayuda = crearAyudaCampo(id);
+  const botonAyuda = crearBotonAyuda(id, ayuda);
   const input = crearElemento("input", "ingreso-field__input");
   const error = crearElemento("small", "ingreso-field__error");
 
+  texto.htmlFor = id;
   input.name = id;
   input.id = id;
   input.type = tipo || "text";
   input.placeholder = placeholder || "";
   input.autocomplete = "off";
 
+  if (inputMode) {
+    input.inputMode = inputMode;
+  }
+
   if (valor) {
     input.value = valor;
   }
 
-  grupo.appendChild(texto);
+  encabezado.appendChild(texto);
+  encabezado.appendChild(botonAyuda);
+  grupo.appendChild(encabezado);
   grupo.appendChild(input);
+  grupo.appendChild(ayuda);
   grupo.appendChild(error);
 
   return grupo;
@@ -63,8 +111,9 @@ function crearFormularioPeso() {
   form.appendChild(crearElemento("h3", "ingreso-card__title", INGRESO_TEXTOS.PESO_TITULO));
   form.appendChild(crearCampo({
     id: INGRESO_CAMPOS_PESO.PESO_KG,
-    label: "Peso",
-    placeholder: "Ejemplo: 86.3 kg"
+    label: INGRESO_LABELS.pesoKg,
+    placeholder: "Ejemplo: 86.3 kg",
+    inputMode: "decimal"
   }));
 
   boton.type = "submit";
@@ -82,6 +131,7 @@ function crearFormularioMedidas() {
 
   form.dataset.form = "medidas";
   form.appendChild(crearElemento("h3", "ingreso-card__title", INGRESO_TEXTOS.MEDIDAS_TITULO));
+  form.appendChild(crearMapaCorporal());
 
   grid.appendChild(crearCampo({
     id: INGRESO_CAMPOS_MEDIDAS.FECHA,
@@ -96,7 +146,8 @@ function crearFormularioMedidas() {
       grid.appendChild(crearCampo({
         id: campo,
         label: INGRESO_LABELS[campo],
-        placeholder: "cm"
+        placeholder: "cm",
+        inputMode: "decimal"
       }));
     });
 
