@@ -1,0 +1,103 @@
+/*
+  Nombre completo: status-colors.css
+  Ruta o ubicacion: src/app/status-colors.css
+
+  Funcion o funciones:
+    - Definir indicadores de estado reutilizables para FitJeff.
+    - Mantener colores fuertes para estados importantes dentro de un modo claro.
+    - Preparar chips, puntos, bordes y tarjetas de estado para pantallas simples.
+
+  Se conecta con:
+    - src/app/app.css
+    - src/features/control-corporal/shared/*
+    - futuras pantallas Hoy, Actividad y Registro visual
+*/
+
+.fj-status-dot {
+  width: 10px;
+  height: 10px;
+  display: inline-block;
+  flex: 0 0 auto;
+  border-radius: 999px;
+  background: var(--fj-gray);
+  box-shadow: 0 0 0 3px var(--fj-gray-soft);
+}
+
+.fj-chip,
+.fj-status-chip {
+  min-height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 1px solid var(--fj-border);
+  border-radius: 999px;
+  background: var(--fj-surface);
+  color: var(--fj-text);
+  padding: 5px 10px;
+  font-size: 0.78rem;
+  font-weight: 900;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.fj-state-success,
+.fj-status--success {
+  border-color: rgba(22, 163, 74, 0.34);
+  background: var(--fj-green-soft);
+  color: var(--fj-green);
+}
+
+.fj-state-info,
+.fj-status--info {
+  border-color: rgba(37, 99, 235, 0.34);
+  background: var(--fj-blue-soft);
+  color: var(--fj-blue);
+}
+
+.fj-state-pending,
+.fj-status--pending {
+  border-color: rgba(245, 158, 11, 0.42);
+  background: var(--fj-yellow-soft);
+  color: #b45309;
+}
+
+.fj-state-alert,
+.fj-status--alert,
+.fj-status--error {
+  border-color: rgba(220, 38, 38, 0.34);
+  background: var(--fj-red-soft);
+  color: var(--fj-red);
+}
+
+.fj-state-empty,
+.fj-status--empty {
+  border-color: rgba(100, 116, 139, 0.28);
+  background: var(--fj-gray-soft);
+  color: var(--fj-gray);
+}
+
+.fj-status-dot--success {
+  background: var(--fj-green);
+  box-shadow: 0 0 0 3px var(--fj-green-soft);
+}
+
+.fj-status-dot--info {
+  background: var(--fj-blue);
+  box-shadow: 0 0 0 3px var(--fj-blue-soft);
+}
+
+.fj-status-dot--pending {
+  background: var(--fj-yellow);
+  box-shadow: 0 0 0 3px var(--fj-yellow-soft);
+}
+
+.fj-status-dot--alert {
+  background: var(--fj-red);
+  box-shadow: 0 0 0 3px var(--fj-red-soft);
+}
+
+.fj-status-dot--empty {
+  background: var(--fj-gray);
+  box-shadow: 0 0 0 3px var(--fj-gray-soft);
+}
