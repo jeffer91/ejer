@@ -1,11 +1,12 @@
 /*
   Nombre completo: ingreso.constants.js
-  Ruta o ubicación: src/features/control-corporal/registro/ingreso.constants.js
+  Ruta o ubicacion: src/features/control-corporal/registro/ingreso.constants.js
 
-  Función o funciones:
-    - Centralizar campos, textos y límites de la pantalla Registro / Ingreso.
+  Funcion o funciones:
+    - Centralizar campos, textos y limites de la pantalla Registro / Ingreso.
     - Separar peso diario de medidas semanales.
-    - Mantener el módulo preparado para crecer sin mezclar estadísticas ni historial.
+    - Mantener el modulo preparado para crecer sin mezclar estadisticas ni historial.
+    - Usar textos simples para una experiencia compacta y visual.
 
   Se conecta con:
     - src/features/control-corporal/registro/ingreso.parser.js
@@ -51,14 +52,14 @@ export const INGRESO_LABELS = Object.freeze({
   brazoCm: "Brazo",
   piernaCm: "Pierna",
   caderaCm: "Cadera",
-  fecha: "Fecha de medición"
+  fecha: "Fecha"
 });
 
 export const INGRESO_TEXTOS = Object.freeze({
-  TITULO: "Registro",
-  SUBTITULO: "Guarda tu peso diario y tus medidas semanales en una pantalla compacta.",
+  TITULO: "Registro rápido",
+  SUBTITULO: "Guarda lo importante sin salir de esta pantalla. Usa ? si necesitas una aclaración.",
   PESO_TITULO: "Peso de hoy",
-  MEDIDAS_TITULO: "Medidas semanales",
+  MEDIDAS_TITULO: "Medidas corporales",
   BOTON_PESO: "Guardar peso",
   BOTON_MEDIDAS: "Guardar medidas",
   DATOS_RAROS: "Hay un cambio poco común. Revisa antes de guardar.",
