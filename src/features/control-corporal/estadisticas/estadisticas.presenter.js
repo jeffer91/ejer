@@ -7,6 +7,7 @@
     - Separar la seleccion de tarjetas y textos de la vista HTML.
     - Reducir saturacion mostrando primero lo importante y luego el detalle.
     - Integrar análisis corporal inteligente sin etiquetar cuerpos por peso.
+    - Explicar cuando una comparacion semanal o mensual aun no tiene datos suficientes.
 
   Se conecta con:
     - src/features/control-corporal/estadisticas/estadisticas.view.js
@@ -41,6 +42,10 @@ function estadoTendencia(tendencia) {
 function estadoProximaMedicion(proximaMedicion) {
   if (!proximaMedicion) return "empty";
   return proximaMedicion.pendiente ? "pending" : "success";
+}
+
+function detalleComparacion(disponible, dias) {
+  return disponible ? `Comparación de al menos ${dias} días` : `Faltan ${dias} días de datos`;
 }
 
 function crearResumenPrincipal(resumen) {
@@ -99,15 +104,15 @@ function crearDetallePeso(resumen) {
       id: "cambio-semana",
       titulo: ESTADISTICAS_LABELS.cambioSemanaKg,
       valor: formatearCambio(resumen.cambioSemanaKg),
-      detalle: "Comparación reciente",
-      estado: resumen.cambioSemanaKg === null || resumen.cambioSemanaKg === undefined ? "empty" : "info"
+      detalle: detalleComparacion(resumen.comparacionSemanaDisponible, 7),
+      estado: resumen.comparacionSemanaDisponible ? "info" : "empty"
     },
     {
       id: "cambio-mes",
       titulo: ESTADISTICAS_LABELS.cambioMesKg,
       valor: formatearCambio(resumen.cambioMesKg),
-      detalle: "Comparación mensual",
-      estado: resumen.cambioMesKg === null || resumen.cambioMesKg === undefined ? "empty" : "info"
+      detalle: detalleComparacion(resumen.comparacionMesDisponible, 30),
+      estado: resumen.comparacionMesDisponible ? "info" : "empty"
     },
     {
       id: "imc",
