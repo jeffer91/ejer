@@ -8,6 +8,7 @@
     - Evitar llamadas repetidas a Firebase si ya se sincronizó hoy y no hay cambios pendientes.
     - Procesar solo cola diferencial pendiente.
     - Usar metadata local para decidir si hay cambios sin consultar Firebase.
+    - Mostrar si existen conflictos local/remoto pendientes.
     - Guardar estado simple de última sincronización automática y manual.
 
   Se conecta con:
@@ -16,11 +17,13 @@
     - src/core/sync/sync.service.js
     - src/core/sync/sync-queue.service.js
     - src/core/sync/sync-metadata.service.js
+    - src/core/sync/sync-conflict.service.js
     - src/modules/ajustes/ajustes.controller.js
 */
 
 import { crearSafeLocalStorageService } from "../storage/safe-local-storage.service.js";
 import { obtenerFechaHoraISO, obtenerFechaHoyISO } from "../utils/date.util.js";
+import { crearSyncConflictService } from "./sync-conflict.service.js";
 import { crearSyncMetadataService } from "./sync-metadata.service.js";
 import { crearSyncQueueService } from "./sync-queue.service.js";
 import { crearSyncService } from "./sync.service.js";
@@ -53,11 +56,12 @@ function normalizarEstado(estado = {}) {
   };
 }
 
-function crearResumenDecision({ debeSincronizar, motivo, colaPendiente, modulosSucios }) {
+function crearResumenDecision({ debeSincronizar, motivo, colaPendiente, modulosSucios, conflictosPendientes }) {
   return {
     debeSincronizar,
     motivo,
     colaPendiente,
+    conflictosPendientes,
     modulosSucios: modulosSucios.map((modulo) => modulo.nombre)
   };
 }
@@ -66,6 +70,7 @@ export function crearSyncSchedulerService({
   storage = crearSafeLocalStorageService(),
   queue = crearSyncQueueService(),
   syncMetadata = crearSyncMetadataService(),
+  syncConflict = crearSyncConflictService(),
   syncService = crearSyncService()
 } = {}) {
   function leerEstado() {
@@ -87,10 +92,19 @@ export function crearSyncSchedulerService({
     const metadata = syncMetadata.leer();
     const modulosSucios = syncMetadata.obtenerModulosSucios();
     const colaPendiente = queue.contar();
+    const conflictosActivos = syncConflict.listarActivos();
 
     return {
       ...leerEstado(),
       colaPendiente,
+      conflictosPendientes: conflictosActivos.length,
+      conflictos: conflictosActivos.map((conflicto) => ({
+        id: conflicto.id,
+        modulo: conflicto.modulo,
+        mensaje: conflicto.mensaje,
+        fechaLocal: conflicto.fechaLocal,
+        fechaRemota: conflicto.fechaRemota
+      })),
       hayCambiosPendientes: colaPendiente > 0 || modulosSucios.length > 0,
       modulosSucios: modulosSucios.map((modulo) => ({
         nombre: modulo.nombre,
@@ -108,13 +122,25 @@ export function crearSyncSchedulerService({
     const hoy = obtenerFechaHoyISO();
     const colaPendiente = queue.contar();
     const modulosSucios = syncMetadata.obtenerModulosSucios();
+    const conflictosPendientes = syncConflict.contarActivos();
+
+    if (conflictosPendientes > 0) {
+      return crearResumenDecision({
+        debeSincronizar: false,
+        motivo: "Hay conflictos pendientes. La sincronización se detuvo para proteger los datos.",
+        colaPendiente,
+        modulosSucios,
+        conflictosPendientes
+      });
+    }
 
     if (colaPendiente > 0) {
       return crearResumenDecision({
         debeSincronizar: true,
         motivo: "Hay cambios pendientes en cola diferencial.",
         colaPendiente,
-        modulosSucios
+        modulosSucios,
+        conflictosPendientes
       });
     }
 
@@ -123,7 +149,8 @@ export function crearSyncSchedulerService({
         debeSincronizar: true,
         motivo: "Hay módulos con cambios locales y todavía no se sincronizó hoy.",
         colaPendiente,
-        modulosSucios
+        modulosSucios,
+        conflictosPendientes
       });
     }
 
@@ -132,7 +159,8 @@ export function crearSyncSchedulerService({
         debeSincronizar: false,
         motivo: "La sincronización automática de hoy ya fue revisada.",
         colaPendiente,
-        modulosSucios
+        modulosSucios,
+        conflictosPendientes
       });
     }
 
@@ -140,7 +168,8 @@ export function crearSyncSchedulerService({
       debeSincronizar: false,
       motivo: "No hay cambios diferentes para sincronizar.",
       colaPendiente,
-      modulosSucios
+      modulosSucios,
+      conflictosPendientes
     });
   }
 
@@ -170,7 +199,7 @@ export function crearSyncSchedulerService({
         ultimoResultado: decision.motivo,
         ultimoModo: MODO_AUTO,
         ultimaDecision: decision.motivo,
-        ultimoError: ""
+        ultimoError: decision.conflictosPendientes > 0 ? decision.motivo : ""
       });
 
       return {
