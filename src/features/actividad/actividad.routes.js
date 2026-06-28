@@ -1,6 +1,7 @@
 export const ACTIVIDAD_ROUTES = {
   RESUMEN: "actividad-resumen",
-  REGISTRO: "actividad-registro"
+  REGISTRO: "actividad-registro",
+  DISPOSITIVOS: "actividad-dispositivos"
 };
 
 export const ACTIVIDAD_ROUTE_ITEMS = [
@@ -15,6 +16,12 @@ export const ACTIVIDAD_ROUTE_ITEMS = [
     label: "Registrar",
     shortLabel: "Registrar",
     description: "Agregar actividad manual"
+  },
+  {
+    id: ACTIVIDAD_ROUTES.DISPOSITIVOS,
+    label: "Dispositivos",
+    shortLabel: "Dispositivos",
+    description: "Cubitt CT4 y Google Fit"
   }
 ];
 
