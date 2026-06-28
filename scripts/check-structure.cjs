@@ -43,6 +43,7 @@ const requiredFiles = [
   "src/core/sync/sync-status.service.js",
   "src/core/sync/sync-queue.service.js",
   "src/core/sync/sync-metadata.service.js",
+  "src/core/sync/sync-conflict.service.js",
   "src/core/sync/sync-scheduler.service.js",
   "src/app/app-router.js",
   "src/app/app.bootstrap.js",
@@ -88,24 +89,25 @@ const blockedPatterns = [
 ];
 
 const semanticChecks = [
-  { file: "README.md", mustInclude: ["Bloque 36 - Firebase resumen liviano", "registros por subcolección", "Bloques pendientes"], message: "README debe documentar el bloque 36 y pendientes." },
+  { file: "README.md", mustInclude: ["Bloque 37 - Conflictos local/remoto", "sync-conflict.service.js", "Bloques pendientes"], message: "README debe documentar el bloque 37 y pendientes." },
   { file: "package.json", mustInclude: ["\"start\": \"node scripts/start-electron-dev.cjs\"", "\"audit:app\": \"node scripts/auditar-app.cjs\"", "publicar:automatico"], message: "package.json debe usar inicio seguro y auditoria." },
   { file: "scripts/check-local.cjs", mustInclude: ["Auditoría estática", "scripts/auditar-app.cjs", "Build de Vite"], message: "check-local debe ejecutar auditoria antes del build." },
   { file: "scripts/check-tools.cjs", mustInclude: ["audit:app", "publicar:automatico", "No debe existir configurar:firebase"], message: "check-tools debe validar auditoria y no permitir configurar:firebase." },
-  { file: "scripts/auditar-app.cjs", mustInclude: ["auditarImportsLocales", "archivosNoPermitidos", "sync-scheduler.service.js"], message: "Auditoria debe incluir scheduler de sincronizacion." },
+  { file: "scripts/auditar-app.cjs", mustInclude: ["auditarImportsLocales", "archivosNoPermitidos", "sync-conflict.service.js"], message: "Auditoria debe incluir conflictos de sincronizacion." },
+  { file: "src/core/sync/sync-conflict.service.js", mustInclude: ["SYNC_CONFLICTS_KEY", "evaluarLocalRemoto", "registrarConflicto", "resolverMantenerLocal", "contarActivos"], message: "Debe existir servicio de conflictos local/remoto." },
   { file: "src/core/firebase/firebase-database.service.js", mustInclude: ["FIREBASE_STRUCTURE_VERSION", "guardarResumenUsuario", "leerResumenUsuario", "leerCambiosDesde", "SYNC_SUBCOLLECTION", "crearCamposPesadosParaEliminar"], message: "Firebase database debe separar resumen liviano, registros y sync." },
   { file: "src/core/sync/sync-metadata.service.js", mustInclude: ["SYNC_METADATA_KEY", "SYNC_MODULES", "marcarModuloSucio", "ultimoPullFirebaseEn", "obtenerModulosSucios"], message: "Debe existir metadata de sincronización por módulo." },
   { file: "src/core/sync/sync-queue.service.js", mustInclude: ["operationKey", "deduplicarCola", "payloadHash", "listarPorModulo", "entidadId"], message: "La cola debe ser diferencial y deduplicada por entidad." },
-  { file: "src/core/sync/sync-scheduler.service.js", mustInclude: ["ejecutarSyncAutomatico", "sincronizarManual", "ultimoAutoSyncDia", "decidirSyncAutomatico", "SYNC_SCHEDULER_KEY"], message: "Debe existir sincronización diaria automática y manual." },
+  { file: "src/core/sync/sync-scheduler.service.js", mustInclude: ["ejecutarSyncAutomatico", "sincronizarManual", "conflictosPendientes", "crearSyncConflictService", "SYNC_SCHEDULER_KEY"], message: "Scheduler debe mostrar conflictos y sincronización diaria." },
+  { file: "src/core/sync/sync.service.js", mustInclude: ["validarConflictosAntesDeSubir", "crearSyncConflictService", "registrarConflicto", "leerResumenUsuario"], message: "Sync debe detenerse ante conflictos local/remoto." },
   { file: "src/app/app.bootstrap.js", mustInclude: ["crearSyncSchedulerService", "sincronizarAutomaticoEnSegundoPlano", "ejecutarSyncAutomatico", "router.iniciar()"], message: "Bootstrap debe usar scheduler diario sin bloquear la app." },
   { file: "src/modules/ajustes/ajustes.controller.js", mustInclude: ["crearSyncSchedulerService", "sincronizarManual", "refrescarSync", "vista.syncBoton"], message: "Ajustes debe permitir sincronización manual." },
-  { file: "src/modules/ajustes/ajustes.view.js", mustInclude: ["crearBloqueSync", "actualizarEstadoSync", "Sincronizar ahora", "Cola pendiente"], message: "Vista Ajustes debe mostrar bloque de sincronización." },
-  { file: "src/modules/ajustes/ajustes.css", mustInclude: ["ajustes-card--sync", "ajustes-sync-status", "ajustes-sync-status__row"], message: "Ajustes debe tener estilos de sincronización." },
+  { file: "src/modules/ajustes/ajustes.view.js", mustInclude: ["crearBloqueSync", "actualizarEstadoSync", "Conflictos pendientes", "ajustes-sync-status__row--alert"], message: "Vista Ajustes debe mostrar conflictos." },
+  { file: "src/modules/ajustes/ajustes.css", mustInclude: ["ajustes-card--sync", "ajustes-sync-status", "ajustes-sync-status__row--alert"], message: "Ajustes debe tener estilos de conflicto." },
   { file: "src/app/app-router.js", mustInclude: ["marcarPerfilCompletadoDesdeSync", "FitJeff no puede renderizar", "rutaActual = SHELL_DEFAULT_ROUTE_ID"], message: "Router debe permitir entrada a Hoy tras restauracion." },
   { file: "src/core/config/firebase.project.config.js", mustInclude: ["FIREBASE_PROJECT_CONFIG", "apiKey", "collection: \"fitjeff\"", "userDocument: \"jeff\""], message: "Debe existir configuracion Firebase desde codigo." },
   { file: "src/core/config/firebase.config.js", mustInclude: ["FIREBASE_PROJECT_CONFIG", "leerValor", "resolverFirebaseEnabled", "obtenerEstadoFirebaseConexion"], message: "Firebase config debe leer variables o configuracion desde codigo." },
   { file: "src/core/bootstrap/app-data-hydration.service.js", mustInclude: ["restaurarFirebaseEnSegundoPlano", "marcarPullFirebase", "firebasePendienteSegundoPlano", "repository.guardarEstado"], message: "Hidratacion debe ser local-first y registrar pull remoto." },
-  { file: "src/core/sync/sync.service.js", mustInclude: ["syncMetadata", "entidadId", "listarPorModulo", "return sincronizarPendientes();"], message: "Sync debe usar metadata y cola diferencial." },
   { file: "src/features/control-corporal/registro.service.js", mustInclude: ["marcarCambioLocal", "entidadId: registro.id", "entidad: \"registro\""], message: "Control corporal debe encolar operaciones por entidad." },
   { file: "scripts/start-electron-dev.cjs", mustInclude: ["encontrarPuertoDisponible", "PUERTO_BASE", "FITJEFF_DEV_SERVER_URL", "concurrently"], message: "npm start debe buscar puerto libre y pasar URL a Electron." },
   { file: "electron/electron-path.service.js", mustInclude: ["FITJEFF_DEV_SERVER_URL", "http://localhost:5173/"], message: "Electron debe leer la URL real de desarrollo." },
@@ -220,6 +222,7 @@ function run() {
     console.log("Bloque 34 aplicado: Cola diferencial con deduplicacion por entidad.");
     console.log("Bloque 35 aplicado: Sincronizacion diaria automatica y manual.");
     console.log("Bloque 36 aplicado: Firebase resumen liviano y registros por subcoleccion.");
+    console.log("Bloque 37 aplicado: Conflictos local/remoto y resolucion segura.");
     return;
   }
 
