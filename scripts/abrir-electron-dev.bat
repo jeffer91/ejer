@@ -6,10 +6,11 @@ REM  Funcion o funciones:
 REM    - Abrir FitJeff en modo Electron de desarrollo.
 REM    - Revisar herramientas antes de iniciar.
 REM    - Instalar dependencias si node_modules no existe.
-REM    - Mantener una entrada simple para trabajar desde Visual Studio Code.
+REM    - Usar npm start seguro para evitar error por puerto 5173 ocupado.
 REM
 REM  Se conecta con:
 REM    - package.json
+REM    - scripts/start-electron-dev.cjs
 REM    - scripts/check-tools.cjs
 REM    - electron/main.js
 REM    - electron/preload.cjs
@@ -52,8 +53,8 @@ if not exist "node_modules" (
 )
 
 echo.
-echo Abriendo FitJeff en modo Electron...
-call npm run electron:dev
+echo Abriendo FitJeff en modo Electron con npm start seguro...
+call npm start
 
 if errorlevel 1 (
   echo.
