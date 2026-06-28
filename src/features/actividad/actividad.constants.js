@@ -1,3 +1,5 @@
+import { obtenerFechaHoyISO } from "../../core/utils/date.util.js";
+
 export const ACTIVIDAD_STORAGE_KEY = "fitjeff:actividad:registros";
 
 export const ACTIVIDAD_TIPOS = Object.freeze({
@@ -18,5 +20,5 @@ export const ACTIVIDAD_TEXTOS = Object.freeze({
 });
 
 export function fechaHoyISO() {
-  return new Date().toISOString().slice(0, 10);
+  return obtenerFechaHoyISO();
 }
