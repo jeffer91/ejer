@@ -9,6 +9,7 @@
     - Pegar e interpretar rutinas generadas por IA con el contrato FITJEFF_RUTINA_V1.
     - Mostrar vista previa antes de guardar una rutina interpretada por IA.
     - Editar, duplicar, activar, archivar y restaurar rutinas guardadas.
+    - Elegir manualmente el día de entrenamiento que debe cargarse hoy en Diario.
 
   Se conecta con:
     - src/features/entrenamiento/rutinas/rutinas.controller.js
@@ -97,16 +98,16 @@ function crearMensaje(mensaje) {
   return caja;
 }
 
-function crearBoton(texto, clase = "", accion) {
-  const boton = crearElemento("button", `entreno-rutinas-button ${clase}`.trim(), texto);
+function crearBoton(textoBoton, clase = "", accion) {
+  const boton = crearElemento("button", `entreno-rutinas-button ${clase}`.trim(), textoBoton);
   boton.type = "button";
   boton.addEventListener("click", () => accion?.());
   return boton;
 }
 
-function copiarTextoConFallback(texto) {
+function copiarTextoConFallback(textoCopiar) {
   const temporal = document.createElement("textarea");
-  temporal.value = texto;
+  temporal.value = textoCopiar;
   temporal.setAttribute("readonly", "");
   temporal.style.position = "fixed";
   temporal.style.left = "-9999px";
@@ -295,7 +296,7 @@ function crearResumenInterpretacion(resultado, { onCargarFormulario, onGuardarRu
   return contenedor;
 }
 
-function crearPanelRutinaIA({ onInterpretarRutinaIA, onGuardarRutinaIA, formulario }) {
+function crearPanelRutinaIA({ onInterpretarRutinaIA, onGuardarRutinaIA, formulario } = {}) {
   const panel = crearElemento("section", "entreno-rutinas-ia");
   const top = crearElemento("div", "entreno-rutinas-form__top");
   const textoTop = crearElemento("div", "");
@@ -390,7 +391,8 @@ function crearMetaRutinaGuardada(rutina = {}) {
     crearChipRutina(rutina.nivel),
     crearChipRutina(rutina.lugar),
     crearChipRutina(rutina.equipo),
-    crearChipRutina(rutina.duracionSesion)
+    crearChipRutina(rutina.duracionSesion),
+    rutina.selectorDia?.diaNombre ? crearChipRutina(`Hoy: ${rutina.selectorDia.diaNombre}`, "entreno-rutinas-chip--selected-day") : null
   ].filter(Boolean).forEach((chip) => meta.appendChild(chip));
   return meta.childNodes.length ? meta : null;
 }
@@ -455,14 +457,16 @@ function crearResumenDias(rutina) {
     const header = crearElemento("div", "entreno-rutinas-day__head");
     const meta = crearElemento("div", "entreno-rutinas-card-meta");
     const bloques = Array.isArray(dia.bloques) ? dia.bloques : [];
+    const seleccionado = rutina.selectorDia?.diaRutinaId === dia.id;
 
-    header.appendChild(crearElemento("strong", "", dia.nombre || `Día ${indice + 1}`));
+    header.appendChild(crearElemento("strong", "", `${dia.nombre || `Día ${indice + 1}`}${seleccionado ? " · seleccionado" : ""}`));
     header.appendChild(crearElemento("span", "", `${bloques.length || 0} bloque(s) · ${(dia.ejercicios || []).length} ejercicio(s)`));
     bloque.appendChild(header);
 
     [
       dia.enfoque ? crearChipRutina(`Enfoque: ${dia.enfoque}`) : null,
-      dia.calentamiento ? crearChipRutina(`Calentamiento: ${dia.calentamiento}`) : null
+      dia.calentamiento ? crearChipRutina(`Calentamiento: ${dia.calentamiento}`) : null,
+      seleccionado ? crearChipRutina("Cargará hoy", "entreno-rutinas-chip--selected-day") : null
     ].filter(Boolean).forEach((chip) => meta.appendChild(chip));
 
     if (meta.childNodes.length) bloque.appendChild(meta);
@@ -504,6 +508,41 @@ function crearFormularioEdicionPlan(rutina, onActualizarPlan) {
   return details;
 }
 
+function crearSelectorDiaActual(rutina, onSeleccionarDia) {
+  const dias = Array.isArray(rutina.dias) ? rutina.dias : [];
+  if (dias.length === 0 || typeof onSeleccionarDia !== "function") return null;
+
+  const form = crearElemento("form", "entreno-rutinas-day-selector");
+  const label = crearElemento("label", "entreno-rutinas-field");
+  const textoLabel = crearElemento("span", "", "Día para cargar hoy en Diario");
+  const select = document.createElement("select");
+  const guardar = crearElemento("button", "entreno-rutinas-button entreno-rutinas-button--ok", "Usar este día hoy");
+  const ayuda = crearElemento("small", "", "Si hoy toca otro bloque, elige el día correcto y Diario cargará ese plan.");
+  const seleccionado = rutina.selectorDia?.diaRutinaId || "";
+
+  select.name = "diaRutinaId";
+  dias.forEach((dia, indice) => {
+    const option = document.createElement("option");
+    option.value = dia.id;
+    option.textContent = `${dia.nombre || `Día ${indice + 1}`} · ${(dia.ejercicios || []).length} ejercicio(s)`;
+    option.selected = seleccionado ? dia.id === seleccionado : indice === 0;
+    select.appendChild(option);
+  });
+
+  guardar.type = "submit";
+  label.appendChild(textoLabel);
+  label.appendChild(select);
+  form.appendChild(label);
+  form.appendChild(guardar);
+  form.appendChild(ayuda);
+  form.addEventListener("submit", (evento) => {
+    evento.preventDefault();
+    onSeleccionarDia(rutina.id, { diaRutinaId: new FormData(form).get("diaRutinaId") });
+  });
+
+  return form;
+}
+
 function crearRutinaCard(rutina, acciones) {
   const card = crearElemento("article", `entreno-rutinas-card entreno-rutinas-card--${rutina.estado}`);
   const top = crearElemento("div", "entreno-rutinas-card__top");
@@ -516,6 +555,7 @@ function crearRutinaCard(rutina, acciones) {
   const archivada = rutina.estado === "archivada";
   const metaRutina = crearMetaRutinaGuardada(rutina);
   const editorAvanzado = crearEditorAvanzadoRutina({ rutina, onActualizarEjercicioAvanzado: acciones.onActualizarEjercicioAvanzado });
+  const selectorDia = !archivada ? crearSelectorDiaActual(rutina, acciones.onSeleccionarDia) : null;
 
   inputNombre.name = "nombre";
   inputNombre.value = rutina.nombre;
@@ -544,6 +584,7 @@ function crearRutinaCard(rutina, acciones) {
   card.appendChild(top);
   if (metaRutina) card.appendChild(metaRutina);
   card.appendChild(botones);
+  if (selectorDia) card.appendChild(selectorDia);
   card.appendChild(formNombre);
   card.appendChild(crearResumenDias(rutina));
 
@@ -564,7 +605,7 @@ function crearResumenSuperior(rutinas = []) {
   return resumen;
 }
 
-export function crearEntrenamientoRutinasView({ rutinas = [], mensaje = null, onInterpretarRutinaIA, onGuardarRutinaIA, onGuardar, onActivar, onEditarNombre, onActualizarPlan, onActualizarEjercicioAvanzado, onDuplicar, onArchivar, onRestaurar } = {}) {
+export function crearEntrenamientoRutinasView({ rutinas = [], mensaje = null, onInterpretarRutinaIA, onGuardarRutinaIA, onGuardar, onActivar, onSeleccionarDia, onEditarNombre, onActualizarPlan, onActualizarEjercicioAvanzado, onDuplicar, onArchivar, onRestaurar } = {}) {
   const pantalla = crearElemento("section", "entreno-rutinas-screen");
   const header = crearElemento("div", "entreno-rutinas-header");
   const formBox = crearElemento("section", "entreno-rutinas-form");
@@ -578,11 +619,11 @@ export function crearEntrenamientoRutinasView({ rutinas = [], mensaje = null, on
   const guardar = crearElemento("button", "entreno-rutinas-save", "Guardar rutina");
   const activar = crearElemento("label", "entreno-rutinas-check");
   const check = document.createElement("input");
-  const accionesCard = { onActivar, onEditarNombre, onActualizarPlan, onActualizarEjercicioAvanzado, onDuplicar, onArchivar, onRestaurar };
+  const accionesCard = { onActivar, onSeleccionarDia, onEditarNombre, onActualizarPlan, onActualizarEjercicioAvanzado, onDuplicar, onArchivar, onRestaurar };
 
   header.appendChild(crearElemento("p", "entreno-rutinas-kicker", "Planes"));
   header.appendChild(crearElemento("h2", "", "Rutinas"));
-  header.appendChild(crearElemento("p", "", "Avanza por pasos: interpreta una rutina IA, crea o ajusta manualmente y administra tus rutinas guardadas."));
+  header.appendChild(crearElemento("p", "", "Avanza por pasos: interpreta una rutina IA, crea o ajusta manualmente y elige qué día debe cargarse hoy."));
   header.appendChild(crearResumenSuperior(rutinas));
 
   formulario.appendChild(crearCampo({ nombre: "nombre", label: "Nombre", placeholder: "Ejemplo: Casa 4 días" }));
