@@ -29,6 +29,7 @@ FitJeff tiene una base modular funcional y visualmente clara. La app trabaja en 
 - Cola diferencial con deduplicación por entidad para no repetir operaciones pendientes.
 - Sincronización diaria automática y sincronización manual desde Ajustes.
 - Firebase con resumen liviano en el documento principal y registros pesados en subcolección.
+- Conflictos local/remoto guardados localmente para evitar sobrescrituras peligrosas.
 
 ### Preparado, pero pendiente de conexion real
 
@@ -67,6 +68,7 @@ Bloques funcionales y correctivos aplicados:
 - Bloque 34: Cola diferencial con deduplicación por entidad.
 - Bloque 35: Sincronización diaria automática.
 - Bloque 36: Firebase resumen liviano + registros por subcolección.
+- Bloque 37: Conflictos local/remoto.
 
 ## Pantalla principal
 
@@ -138,13 +140,7 @@ fitjeff / jeff / registros
 fitjeff / jeff / sync / status
 ```
 
-El documento principal `fitjeff/jeff` debe ser liviano. Guarda solo:
-
-- `perfil`;
-- `objetivo`;
-- `resumenLocal`;
-- `controlCorporal.resumen`;
-- `sync`.
+El documento principal `fitjeff/jeff` debe ser liviano. Guarda solo `perfil`, `objetivo`, `resumenLocal`, `controlCorporal.resumen` y `sync`.
 
 Los registros pesados se guardan en:
 
@@ -231,6 +227,28 @@ Reglas actuales:
 5. Si hay módulos marcados como pendientes y no hay cola, encola un respaldo diferencial de recuperación.
 6. Desde Ajustes existe el botón `Sincronizar ahora` para sincronización manual.
 
+## Conflictos local/remoto
+
+Los conflictos se guardan localmente en:
+
+```text
+fitjeff:sync:conflicts
+```
+
+y se administran desde:
+
+```text
+src/core/sync/sync-conflict.service.js
+```
+
+Regla de seguridad:
+
+```text
+Si hay cambios locales pendientes y Firebase tiene datos remotos más recientes, FitJeff detiene la sincronización y registra un conflicto.
+```
+
+Esto evita que la app sobrescriba información remota o local sin dejar evidencia. Ajustes muestra cuántos conflictos están pendientes.
+
 ## Auditoría integral
 
 Comando directo:
@@ -296,13 +314,22 @@ Resultado: FitJeff tiene un scheduler de sincronización. Al abrir, revisa en se
 
 ### Bloque 36 - Firebase resumen liviano
 
+Resultado: Firebase ya no depende de guardar todo en el documento principal. El documento `fitjeff/jeff` guarda resumen liviano, perfil y objetivo; los registros van en `fitjeff/jeff/registros`; y el estado técnico va en `fitjeff/jeff/sync/status`. También se mantiene compatibilidad con estructuras antiguas.
+
+### Bloque 37 - Conflictos local/remoto
+
 Corregido:
 
-- `src/core/firebase/firebase-database.service.js`
+- `src/core/sync/sync-conflict.service.js`
+- `src/core/sync/sync.service.js`
+- `src/core/sync/sync-scheduler.service.js`
+- `src/modules/ajustes/ajustes.view.js`
+- `src/modules/ajustes/ajustes.css`
+- `scripts/auditar-app.cjs`
 - `scripts/check-structure.cjs`
 - `README.md`
 
-Resultado: Firebase ya no depende de guardar todo en el documento principal. El documento `fitjeff/jeff` guarda resumen liviano, perfil y objetivo; los registros van en `fitjeff/jeff/registros`; y el estado técnico va en `fitjeff/jeff/sync/status`. También se mantiene compatibilidad con estructuras antiguas.
+Resultado: si hay cambios locales pendientes y Firebase tiene datos remotos más recientes, FitJeff registra un conflicto y detiene la sincronización para evitar sobrescrituras. Ajustes muestra si existen conflictos pendientes.
 
 ## Comandos
 
@@ -392,10 +419,10 @@ npm run publicar:automatico
 - La cola de sincronización debe guardar una sola operación pendiente por entidad modificada.
 - La sincronización automática no debe llamar Firebase si ya se revisó hoy y no hay cambios pendientes.
 - El documento principal de Firebase debe mantenerse liviano; los registros deben ir en subcolección.
+- Nunca se debe sobrescribir local o remoto si hay conflicto pendiente.
 
 ## Bloques pendientes
 
-1. Bloque 37: Conflictos local/remoto y resolución segura.
-2. Bloque 38: Dispositivos reales o puente claro de importación.
-3. Bloque 39: Rutinas y selección correcta del día de entrenamiento.
-4. Bloque 40: Revisión final para instalador Windows y APK Android.
+1. Bloque 38: Dispositivos reales o puente claro de importación.
+2. Bloque 39: Rutinas y selección correcta del día de entrenamiento.
+3. Bloque 40: Revisión final para instalador Windows y APK Android.
