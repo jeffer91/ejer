@@ -4,6 +4,7 @@
 
   Función o funciones:
     - Preparar la rutina activa del día.
+    - Permitir cambiar manualmente el día de rutina que se cargará hoy.
     - Iniciar, guardar progreso y completar sesiones diarias con guardado local.
     - Calcular ejercicios, series, repeticiones, tiempo y distancia estimada.
     - Registrar sesiones con ejercicios por repeticiones, tiempo, mixtos o distancia.
@@ -107,6 +108,15 @@ function crearSesionBase(rutina, dia, estado = ENTRENAMIENTO_ESTADOS_SESION.INIC
   };
 }
 
+function listarDiasDisponibles(rutina = {}) {
+  return (rutina.dias || []).map((dia, indice) => ({
+    id: dia.id,
+    nombre: dia.nombre || `Día ${indice + 1}`,
+    orden: indice + 1,
+    totalEjercicios: (dia.ejercicios || []).length
+  }));
+}
+
 export function crearDiarioService(entrenamientoService = crearEntrenamientoService()) {
   function obtenerDiario() {
     const estado = entrenamientoService.obtenerEstado();
@@ -119,7 +129,11 @@ export function crearDiarioService(entrenamientoService = crearEntrenamientoServ
     const distanciaPlanificadaKm = Math.round(sumarDistanciaPlanificada(dia) * 100) / 100;
 
     return {
-      rutinaDelDia,
+      rutinaDelDia: {
+        ...rutinaDelDia,
+        diasDisponibles: rutina ? listarDiasDisponibles(rutina) : [],
+        diaSeleccionadoId: dia?.id || ""
+      },
       resumen,
       sesionHoy,
       metricas: {
@@ -135,6 +149,20 @@ export function crearDiarioService(entrenamientoService = crearEntrenamientoServ
         porDistancia: contarPorMedicion(dia, "distancia")
       }
     };
+  }
+
+  function seleccionarDiaActual(diaRutinaId) {
+    const diario = obtenerDiario();
+    const { rutina } = diario.rutinaDelDia;
+
+    if (!rutina) {
+      return {
+        ok: false,
+        mensaje: "Primero activa una rutina."
+      };
+    }
+
+    return entrenamientoService.seleccionarDiaRutina(rutina.id, diaRutinaId);
   }
 
   function iniciarSesion() {
@@ -246,6 +274,7 @@ export function crearDiarioService(entrenamientoService = crearEntrenamientoServ
 
   return {
     obtenerDiario,
+    seleccionarDiaActual,
     iniciarSesion,
     guardarProgreso,
     completarSesion
