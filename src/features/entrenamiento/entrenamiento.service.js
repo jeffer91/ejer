@@ -5,6 +5,7 @@
   Función o funciones:
     - Coordinar la lógica principal del módulo Entrenamiento.
     - Guardar, actualizar, activar y eliminar rutinas usando repository.
+    - Seleccionar correctamente el día actual de una rutina activa.
     - Guardar sesiones, cardio y ajustes usando repository.
     - Calcular resumen básico para Stats y Diario.
 */
@@ -29,6 +30,7 @@ import {
   normalizarRutinaEntrenamiento,
   normalizarSesionEntrenamiento
 } from "./entrenamiento.schema.tiempo.js";
+import { crearSelectorManualDiaRutina, resolverDiaRutinaActual } from "./rutinas/rutinas-day-selector.service.js";
 
 function ordenarPorFechaDesc(a, b) {
   return String(b.fecha || b.creadoEn || "").localeCompare(String(a.fecha || a.creadoEn || ""));
@@ -178,6 +180,28 @@ export function crearEntrenamientoService(repository = crearEntrenamientoReposit
     return estado.rutinas.find((rutina) => rutina.estado === ENTRENAMIENTO_ESTADOS_RUTINA.ACTIVA) || null;
   }
 
+  function seleccionarDiaRutina(rutinaId, diaRutinaId) {
+    const estado = obtenerEstado();
+    const rutina = estado.rutinas.find((item) => item.id === rutinaId);
+
+    if (!rutina) {
+      return { ok: false, mensaje: "No se encontró la rutina para seleccionar día." };
+    }
+
+    const selectorDia = crearSelectorManualDiaRutina(rutina, diaRutinaId);
+
+    if (!selectorDia) {
+      return { ok: false, mensaje: "Selecciona un día válido de la rutina." };
+    }
+
+    const resultado = actualizarRutina(rutinaId, { selectorDia });
+
+    return {
+      ...resultado,
+      mensaje: resultado.ok ? `Día seleccionado: ${selectorDia.diaNombre}.` : resultado.mensaje
+    };
+  }
+
   function obtenerRutinaDelDia() {
     const rutina = obtenerRutinaActiva();
 
@@ -185,17 +209,16 @@ export function crearEntrenamientoService(repository = crearEntrenamientoReposit
       return {
         rutina: null,
         dia: null,
-        diaSemana: obtenerDiaSemanaActual()
+        diaSemana: obtenerDiaSemanaActual(),
+        diaIndice: -1,
+        diaTotal: 0,
+        modoSeleccion: "sin-rutina",
+        selectorDia: null,
+        explicacion: "No hay rutina activa."
       };
     }
 
-    const indice = new Date().getDay() % Math.max(rutina.dias.length, 1);
-
-    return {
-      rutina,
-      dia: rutina.dias[indice] || rutina.dias[0] || null,
-      diaSemana: obtenerDiaSemanaActual()
-    };
+    return resolverDiaRutinaActual(rutina, new Date());
   }
 
   function guardarSesion(datosSesion) {
@@ -349,6 +372,7 @@ export function crearEntrenamientoService(repository = crearEntrenamientoReposit
     actualizarRutina,
     eliminarRutina,
     activarRutina,
+    seleccionarDiaRutina,
     obtenerRutinaActiva,
     obtenerRutinaDelDia,
     guardarSesion,
