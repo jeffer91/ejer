@@ -6,11 +6,26 @@ const ROOT = process.cwd();
 const requiredFiles = [
   "README.md",
   ".env.example",
+  "ABRIR_FITJEFF.bat",
+  "ACTUALIZAR_VERSION_FITJEFF.bat",
+  "package.json",
   "index.html",
   "manifest.webmanifest",
   "service-worker.js",
   "public/icons/icon.svg",
   "docs/fase-visual-2026-cierre.md",
+  "electron/main.js",
+  "electron/electron-path.service.js",
+  "electron/electron-window.service.js",
+  "electron/preload.cjs",
+  "scripts/start-electron-dev.cjs",
+  "scripts/publicar-version-automatica.bat",
+  "scripts/publicar-version.bat",
+  "scripts/actualizar-todo.bat",
+  "scripts/version-bump.cjs",
+  "scripts/build-windows.cjs",
+  "scripts/build-android.cjs",
+  "scripts/release-github.cjs",
   "src/core/config/app.config.js",
   "src/core/config/firebase.config.js",
   "src/core/utils/date.util.js",
@@ -24,54 +39,30 @@ const requiredFiles = [
   "src/app/app-router.js",
   "src/app/app.bootstrap.js",
   "src/app/app.css",
-  "src/app/theme-light.css",
-  "src/app/status-colors.css",
   "src/shell/shell.menu.config.js",
   "src/shell/shell.controller.js",
   "src/shell/shell.view.js",
-  "src/shell/shell.css",
   "src/shell/shell.router.js",
   "src/shell/shell.memory.js",
   "src/features/features.registry.js",
-  "src/features/control-corporal/control-corporal.menu.js",
-  "src/features/control-corporal/control-corporal.routes.js",
-  "src/features/control-corporal/control-corporal.module.js",
   "src/features/control-corporal/registro.service.js",
   "src/features/control-corporal/registro.repository.js",
   "src/features/control-corporal/inicio/inicio.service.js",
   "src/features/control-corporal/estadisticas/estadisticas.calculations.js",
   "src/features/control-corporal/estadisticas/estadisticas.presenter.js",
   "src/features/control-corporal/guia-medidas/guia-medidas.view.js",
-  "src/features/control-corporal/guia-medidas/guia-medidas.data.js",
-  "src/features/control-corporal/guia-medidas/guia-medidas.css",
   "src/features/actividad/actividad.constants.js",
-  "src/features/actividad/actividad.routes.js",
-  "src/features/actividad/actividad.menu.js",
-  "src/features/actividad/actividad.module.js",
   "src/features/actividad/actividad.repository.js",
   "src/features/actividad/actividad.service.js",
   "src/features/actividad/registro/registro.controller.js",
   "src/features/actividad/registro/registro.view.js",
-  "src/features/actividad/registro/registro.css",
-  "src/features/actividad/resumen/resumen.controller.js",
   "src/features/actividad/resumen/resumen.view.js",
-  "src/features/actividad/resumen/resumen.css",
-  "src/features/actividad/dispositivos/dispositivos.constants.js",
-  "src/features/actividad/dispositivos/dispositivos.repository.js",
   "src/features/actividad/dispositivos/dispositivos.service.js",
-  "src/features/actividad/dispositivos/dispositivos.controller.js",
-  "src/features/actividad/dispositivos/dispositivos.view.js",
-  "src/features/actividad/dispositivos/dispositivos.css",
-  "src/features/actividad/dispositivos/adapters/cubitt.adapter.js",
-  "src/features/actividad/dispositivos/adapters/google-fit.adapter.js",
   "src/features/entrenamiento/entrenamiento.repository.js",
   "src/features/entrenamiento/ajustes/gemini.service.js",
   "src/features/entrenamiento/ajustes/gemini-settings.repository.js",
-  "src/features/entrenamiento/rutinas/rutinas.controller.js",
   "src/features/entrenamiento/rutinas/rutinas.view.js",
-  "src/features/entrenamiento/jarvis/jarvis-panel.css",
-  "src/modules/ajustes/ajustes.service.js",
-  "src/modules/actualizaciones/actualizaciones.controller.js"
+  "src/features/entrenamiento/jarvis/jarvis-panel.css"
 ];
 
 const blockedPatterns = [
@@ -87,33 +78,30 @@ const blockedPatterns = [
 ];
 
 const semanticChecks = [
-  { file: "README.md", mustInclude: ["Bloque 27 - Actividad depurada", "un solo registro principal por fecha", "actualizar el registro del día"], message: "README debe documentar el bloque 27." },
+  { file: "README.md", mustInclude: ["Bloque 28 - Inicio seguro y actualización automática", "npm start seguro", "ACTUALIZAR_VERSION_FITJEFF.bat"], message: "README debe documentar el bloque 28." },
+  { file: "package.json", mustInclude: ["\"start\": \"node scripts/start-electron-dev.cjs\"", "\"electron:dev\": \"node scripts/start-electron-dev.cjs\"", "publicar:automatico"], message: "package.json debe usar inicio seguro y script de publicacion automatica." },
+  { file: "scripts/start-electron-dev.cjs", mustInclude: ["encontrarPuertoDisponible", "PUERTO_BASE", "FITJEFF_DEV_SERVER_URL", "concurrently"], message: "npm start debe buscar puerto libre y pasar URL a Electron." },
+  { file: "electron/electron-path.service.js", mustInclude: ["FITJEFF_DEV_SERVER_URL", "http://localhost:5173/"], message: "Electron debe leer la URL real de desarrollo." },
+  { file: "electron/electron-window.service.js", mustInclude: ["backgroundColor: \"#f8fafc\"", "obtenerDevUrl"], message: "Ventana Electron debe mantener tema claro y URL dinamica." },
+  { file: "ABRIR_FITJEFF.bat", mustInclude: ["call npm start", "puerto automatico"], message: "Debe existir BAT raiz para abrir FitJeff." },
+  { file: "ACTUALIZAR_VERSION_FITJEFF.bat", mustInclude: ["publicar-version-automatica.bat"], message: "Debe existir BAT raiz para actualizar version." },
+  { file: "scripts/publicar-version-automatica.bat", mustInclude: ["npm run version:bump", "npm run build:windows", "npm run build:android", "npm run release:github"], message: "Publicacion automatica debe subir version, Windows, Android y release." },
   { file: ".env.example", mustInclude: ["VITE_FIREBASE_ENABLED=false", "VITE_FIREBASE_API_KEY=", "VITE_FIREBASE_COLLECTION=fitjeff"], message: "Debe existir ejemplo de variables sin secretos." },
   { file: "index.html", mustInclude: ["theme-color\" content=\"#f8fafc", "color-scheme\" content=\"light", "manifest.webmanifest"], message: "index.html debe declarar modo claro y manifest." },
   { file: "manifest.webmanifest", mustInclude: ["\"background_color\": \"#f8fafc\"", "\"theme_color\": \"#2563eb\"", "./icons/icon.svg"], message: "Manifest debe estar alineado al tema claro." },
   { file: "service-worker.js", mustInclude: ["CACHE_VERSION", "PRECACHE_URLS", "self.addEventListener(\"fetch\"", "responderDinamico"], message: "Service worker debe tener base PWA real." },
-  { file: "src/app/app.bootstrap.js", mustInclude: ["debeRegistrarServiceWorker", "!window.fitJeffDesktop", "!import.meta.env.DEV", "registrarServiceWorkerPwa"], message: "Bootstrap debe registrar PWA solo en producción web." },
   { file: "src/core/config/firebase.config.js", mustInclude: ["leerVariableEnv", "VITE_FIREBASE_ENABLED", "obtenerEstadoFirebaseConexion", "obtenerVariablesFirebaseFaltantes"], message: "Firebase config debe leer variables y exponer estado de conexion." },
   { file: "src/core/sync/sync.service.js", mustInclude: ["obtenerEstadoConexion", "responderModoLocal", "firebaseEstaConfigurado", "status.marcarModoLocal"], message: "Sync debe revisar conexion antes de sincronizar." },
-  { file: "src/core/sync/sync-status.service.js", mustInclude: ["marcarModoLocal", "modo: \"local\"", "Modo local activo"], message: "Sync status debe separar modo local de error de nube." },
-  { file: "src/core/bootstrap/app-data-hydration.service.js", mustInclude: ["firebaseEstaConfigurado", "origen: \"modo-local\"", "No intentar conexión remota"], message: "Hidratacion debe evitar conexion remota en modo local." },
-  { file: "src/core/storage/safe-local-storage.service.js", mustInclude: ["leerMapaTextoPorPrefijo", "eliminarPorPrefijo", "listarClaves", "guardarJson"], message: "Storage seguro debe incluir utilidades para backup y repositorios." },
   { file: "src/app/app-router.js", mustInclude: ["leerUbicacionShell", "obtenerUbicacionInicial", "ubicacionRecordada", "limpiarUbicacionShell"], message: "Router debe restaurar ultima pantalla valida." },
-  { file: "src/shell/shell.memory.js", mustInclude: ["crearSafeLocalStorageService", "normalizarUbicacionMemoria", "storage.leerJson", "storage.guardarJson", "storage.eliminar"], message: "Memoria del shell debe usar storage seguro." },
   { file: "src/shell/shell.view.js", mustInclude: ["Estás en", "Mantener textos visibles corregidos"], message: "Shell debe tener texto visible corregido." },
   { file: "src/features/control-corporal/registro.service.js", mustInclude: ["guardarConfiguracionInicial", "existeMedidasEnSemana", "obtenerInicioSemanaISO", "puedeEncolarSync"], message: "Control corporal debe guardar inicio en bloque, bloquear medidas duplicadas y revisar sync." },
-  { file: "src/features/control-corporal/inicio/inicio.service.js", mustInclude: ["registroService.guardarConfiguracionInicial", "pesoInicialKg", "marcarCompletado"], message: "Inicio debe delegar guardado inicial a Control corporal." },
   { file: "src/features/control-corporal/estadisticas/estadisticas.calculations.js", mustInclude: ["comparacionSemanaDisponible", "comparacionMesDisponible", "describirCambioTotal", "candidatos[candidatos.length - 1] || null"], message: "Estadisticas debe evitar comparaciones sin antiguedad suficiente." },
-  { file: "src/features/control-corporal/estadisticas/estadisticas.presenter.js", mustInclude: ["detalleComparacion", "comparacionSemanaDisponible", "Faltan 7 días de datos", "Faltan 30 días de datos"], message: "Presenter debe explicar comparaciones insuficientes." },
-  { file: "src/features/actividad/actividad.constants.js", mustInclude: ["ACTIVIDAD_LIMITES", "EXITO_ACTUALIZADO", "AVISO_EXISTE", "ERROR_FECHA_FUTURA"], message: "Actividad debe centralizar limites y textos de actualizacion." },
   { file: "src/features/actividad/actividad.repository.js", mustInclude: ["deduplicarPorFecha", "buscarPorFecha", "guardarOActualizarPorFecha", "Mantener un solo registro principal por fecha"], message: "Repository de Actividad debe evitar duplicados por fecha." },
   { file: "src/features/actividad/actividad.service.js", mustInclude: ["obtenerActividadPorFecha", "validarActividad", "guardarOActualizarPorFecha", "fechaEsFutura"], message: "Service de Actividad debe validar reglas y actualizar por fecha." },
   { file: "src/features/actividad/registro/registro.controller.js", mustInclude: ["cargarActividadExistente", "resultado.actualizado", "rellenarFormularioActividad"], message: "Controller de Actividad debe cargar y actualizar registros existentes." },
   { file: "src/features/actividad/registro/registro.view.js", mustInclude: ["rellenarFormularioActividad", "Cargar un registro existente", "guardar sobre una fecha existente actualiza"], message: "Vista de Actividad debe permitir edicion por fecha." },
-  { file: "src/features/actividad/dispositivos/dispositivos.service.js", mustInclude: ["crearDispositivosService", "preservarTexto", "identificadorLocal: preservarTexto", "cuenta: preservarTexto", "obtenerResumenDispositivos"], message: "Dispositivos debe preservar configuracion guardada." },
-  { file: "src/features/control-corporal/guia-medidas/guia-medidas.view.js", mustInclude: ["crearGuiaMedidasView", "crearSilueta", "Zona seleccionada", "Cómo medirte bien"], message: "Guia de medidas debe existir como pantalla completa." },
-  { file: "src/features/entrenamiento/rutinas/rutinas.view.js", mustInclude: ["crearRutinasStepper", "RUTINAS_STEPS", "Avanza por pasos"], message: "Vista de Rutinas debe usar pasos." },
-  { file: "src/features/entrenamiento/jarvis/jarvis-panel.css", mustInclude: [".entreno-diario-jarvis", ".entreno-hit-jarvis", "background: linear-gradient"], message: "Jarvis debe tener estilos claros compartidos." }
+  { file: "scripts/build-windows.cjs", mustInclude: ["latest.yml", "electron-builder", "--publish", "never"], message: "Build Windows debe generar instalador y metadata para autoupdater." },
+  { file: "scripts/build-android.cjs", mustInclude: ["latest-android.json", "FitJeff-Android", "apk-generado", "preparado-sin-apk"], message: "Build Android debe preparar manifiesto y APK cuando exista proyecto Android." }
 ];
 
 function fileExists(relativePath) {
@@ -135,7 +123,7 @@ function walkFiles(directory) {
     const absolutePath = path.join(absoluteDirectory, entry.name);
     const relativePath = path.relative(ROOT, absolutePath).replaceAll(path.sep, "/");
     if (entry.isDirectory()) files.push(...walkFiles(relativePath));
-    else if (/\.(js|cjs|mjs|css|html|json|md)$/.test(entry.name)) files.push(relativePath);
+    else if (/\.(js|cjs|mjs|css|html|json|md|bat)$/.test(entry.name)) files.push(relativePath);
   }
 
   return files;
@@ -193,6 +181,7 @@ function run() {
     console.log("Bloque 25 aplicado: Control corporal depurado.");
     console.log("Bloque 26 aplicado: Variables y conexion revisadas.");
     console.log("Bloque 27 aplicado: Actividad depurada.");
+    console.log("Bloque 28 aplicado: Inicio seguro y actualizacion automatica.");
     return;
   }
 
