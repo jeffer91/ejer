@@ -4,7 +4,7 @@
 
   Funcion o funciones:
     - Construir la pantalla visual de Inicio de primera vez.
-    - Mostrar campos de altura, fecha de nacimiento, peso inicial y peso objetivo.
+    - Mostrar campos de altura, fecha de nacimiento, contexto muscular, peso inicial y peso objetivo.
     - Mantener una experiencia clara y coherente con la pantalla Hoy.
     - Mantener la vista sin logica de guardado.
 
@@ -14,7 +14,7 @@
     - src/features/control-corporal/inicio/inicio.css
 */
 
-import { INICIO_CAMPOS, INICIO_TEXTOS } from "./inicio.constants.js";
+import { INICIO_CAMPOS, INICIO_OPCIONES, INICIO_TEXTOS } from "./inicio.constants.js";
 import "./inicio.css";
 
 function crearElemento(etiqueta, clase, texto) {
@@ -54,6 +54,29 @@ function crearCampo({ id, label, tipo, placeholder, inputMode }) {
   return grupo;
 }
 
+function crearSelect({ id, label, opciones = [], ayuda = "" }) {
+  const grupo = crearElemento("label", "inicio-field");
+  const texto = crearElemento("span", "inicio-field__label", label);
+  const select = crearElemento("select", "inicio-field__input");
+  const error = crearElemento("small", "inicio-field__error");
+
+  select.id = id;
+  select.name = id;
+
+  opciones.forEach((opcion) => {
+    const item = document.createElement("option");
+    item.value = opcion.value;
+    item.textContent = opcion.label;
+    select.appendChild(item);
+  });
+
+  grupo.appendChild(texto);
+  grupo.appendChild(select);
+  if (ayuda) grupo.appendChild(crearElemento("small", "inicio-field__hint", ayuda));
+  grupo.appendChild(error);
+  return grupo;
+}
+
 export function crearInicioView() {
   const pantalla = crearElemento("section", "inicio-screen");
   const tarjeta = crearElemento("article", "inicio-card");
@@ -77,6 +100,13 @@ export function crearInicioView() {
     id: INICIO_CAMPOS.FECHA_NACIMIENTO,
     label: "Fecha de nacimiento",
     tipo: "date"
+  }));
+
+  formulario.appendChild(crearSelect({
+    id: INICIO_CAMPOS.NIVEL_MUSCULAR,
+    label: "Contexto muscular",
+    opciones: INICIO_OPCIONES.nivelMuscular,
+    ayuda: "Ayuda a que FitJeff no confunda peso alto por músculo con un problema automático."
   }));
 
   formulario.appendChild(crearCampo({
@@ -114,6 +144,7 @@ export function leerDatosInicio(formulario) {
   return {
     alturaCm: datos.get(INICIO_CAMPOS.ALTURA_CM),
     fechaNacimiento: datos.get(INICIO_CAMPOS.FECHA_NACIMIENTO),
+    nivelMuscular: datos.get(INICIO_CAMPOS.NIVEL_MUSCULAR),
     pesoInicialKg: datos.get(INICIO_CAMPOS.PESO_INICIAL_KG),
     pesoObjetivoKg: datos.get(INICIO_CAMPOS.PESO_OBJETIVO_KG)
   };
@@ -121,7 +152,7 @@ export function leerDatosInicio(formulario) {
 
 export function mostrarErroresInicio(formulario, errores) {
   formulario.querySelectorAll(".inicio-field").forEach((campo) => {
-    const input = campo.querySelector("input");
+    const input = campo.querySelector("input, select");
     const error = campo.querySelector(".inicio-field__error");
     const mensaje = errores[input.name] || "";
 
