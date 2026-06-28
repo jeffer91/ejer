@@ -24,6 +24,7 @@ FitJeff tiene una base modular funcional y visualmente clara. La app trabaja en 
 - BAT raiz para abrir FitJeff y BAT raiz para actualizar version automaticamente.
 - Restauracion Firebase antes de Inicio cuando Firebase tiene configuracion valida.
 - Firebase resuelto desde código mediante `src/core/config/firebase.project.config.js`, sin BAT de configuración.
+- Auditoría integral agregada para validar scripts, archivos críticos, imports locales, Firebase y build antes de seguir programando.
 
 ### Preparado, pero pendiente de conexion real
 
@@ -56,6 +57,7 @@ Bloques funcionales y correctivos aplicados:
 - Bloque 28: Inicio seguro y actualización automática.
 - Bloque 29: Restauración Firebase antes de Inicio.
 - Bloque 30: Firebase resuelto desde código.
+- Bloque 31: Auditoría integral.
 
 ## Pantalla principal
 
@@ -117,6 +119,25 @@ La prioridad de lectura es:
 
 Ya no existe BAT de configuración de Firebase. Si Firebase tiene datos remotos y la configuración está completa, `app-data-hydration.service.js` restaura el respaldo, marca Inicio como completado y abre la app sin mostrar `Configura FitJeff`.
 
+## Auditoría integral
+
+Comando directo:
+
+```bash
+npm run audit:app
+```
+
+La auditoría revisa:
+
+- scripts obligatorios de `package.json`;
+- archivos críticos de app, Electron, Firebase, Windows y Android;
+- imports locales rotos;
+- configuradores Firebase no solicitados;
+- contenedor `#app` en `index.html`;
+- aviso si Firebase desde código sigue sin credenciales reales.
+
+`npm run check:local` ahora ejecuta herramientas, estructura, auditoría y build de Vite.
+
 ## Actualizar version con doble clic
 
 Para aumentar version, compilar instalador Windows, preparar Android/APK y publicar release, usar:
@@ -169,6 +190,21 @@ Corregido:
 
 Resultado: Firebase ya no depende de un BAT de configuración. La app puede usar configuración escrita en código desde `firebase.project.config.js`. También se retiraron los BAT no solicitados de configuración Firebase.
 
+### Bloque 31 - Auditoría integral
+
+Corregido:
+
+- `scripts/auditar-app.cjs`
+- `scripts/check-local.cjs`
+- `scripts/check-tools.cjs`
+- `scripts/check-structure.cjs`
+- `src/app/app.bootstrap.js`
+- `src/app/app-router.js`
+- `package.json`
+- `README.md`
+
+Resultado: la app ahora tiene una auditoría estática propia. La revisión local valida herramientas, estructura, rutas/imports locales, archivos críticos, scripts obligatorios y build antes de continuar. También se protegió el arranque si falta `#app` y el router ahora valida su contenedor principal.
+
 ## Comandos
 
 Instalar dependencias:
@@ -183,7 +219,13 @@ Revisar estructura:
 npm run check:structure
 ```
 
-Revisar estructura, herramientas y build local:
+Auditar app:
+
+```bash
+npm run audit:app
+```
+
+Revisar estructura, herramientas, auditoría y build local:
 
 ```bash
 npm run check:local
@@ -245,3 +287,4 @@ npm run publicar:automatico
 - Actividad debe manejar un solo registro principal por fecha y actualizar el registro del día si ya existe.
 - `npm start` debe abrir siempre con puerto automatico y no depender de 5173 libre.
 - La version de Windows y Android debe salir desde el mismo `package.json`.
+- Ningún bloque nuevo debe saltarse `npm run audit:app` y `npm run check:local`.
