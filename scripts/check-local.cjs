@@ -4,7 +4,7 @@
 
   Funcion o funciones:
     - Ejecutar una revision local completa antes de abrir la app.
-    - Revisar herramientas, estructura modular, auditoria estatica y build de Vite.
+    - Revisar herramientas, estructura modular, auditoria estatica, release preflight y build de Vite.
     - Detenerse en el primer error para que sea facil copiar la consola.
     - Servir como punto de prueba despues de cada bloque grande.
 
@@ -13,6 +13,7 @@
     - scripts/check-tools.cjs
     - scripts/check-structure.cjs
     - scripts/auditar-app.cjs
+    - scripts/revision-release-final.cjs
     - vite build
 */
 
@@ -40,6 +41,12 @@ const pasos = [
     nombre: "Auditoría estática",
     comando: "node",
     args: ["scripts/auditar-app.cjs"],
+    requerido: true
+  },
+  {
+    nombre: "Release preflight",
+    comando: "node",
+    args: ["scripts/revision-release-final.cjs"],
     requerido: true
   },
   {
