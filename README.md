@@ -25,6 +25,7 @@ FitJeff tiene una base modular funcional y visualmente clara. La app trabaja en 
 - Firebase resuelto desde código mediante `src/core/config/firebase.project.config.js`, sin BAT de configuración.
 - Auditoría integral agregada para validar scripts, archivos críticos, imports locales, Firebase y build antes de seguir programando.
 - Local-first real: la app abre con datos locales primero y Firebase se restaura en segundo plano.
+- Metadata de sincronización por módulo para saber qué cambió sin consultar Firebase.
 
 ### Preparado, pero pendiente de conexion real
 
@@ -59,6 +60,7 @@ Bloques funcionales y correctivos aplicados:
 - Bloque 30: Firebase resuelto desde código.
 - Bloque 31: Auditoría integral.
 - Bloque 32: Local-first real.
+- Bloque 33: Metadata de sincronización.
 
 ## Pantalla principal
 
@@ -132,6 +134,29 @@ Flujo actual:
 4. Si Firebase tiene perfil, objetivo o registros, guarda local y entra a Hoy.
 5. La sincronización de inicio solo procesa cola pendiente; ya no sube todo el estado local automáticamente.
 
+## Metadata de sincronización
+
+La metadata local se guarda en:
+
+```text
+fitjeff:sync:metadata
+```
+
+y se administra desde:
+
+```text
+src/core/sync/sync-metadata.service.js
+```
+
+Permite saber, sin consultar Firebase, si hay cambios pendientes en:
+
+- Control corporal;
+- Actividad;
+- Entrenamiento;
+- Sistema.
+
+Cada módulo guarda `dirty`, `versionLocal`, `versionRemota`, `ultimoCambioLocalEn`, `ultimoSyncEn`, `ultimoIntentoSyncEn` y `ultimoError`. Esto prepara la sincronización diaria y la cola diferencial.
+
 ## Auditoría integral
 
 Comando directo:
@@ -181,17 +206,21 @@ Resultado: la app tiene una auditoría estática propia. La revisión local vali
 
 ### Bloque 32 - Local-first real
 
+Resultado: la app ya no espera Firebase para montar la interfaz. Primero abre con datos locales. Si local está vacío, Firebase se revisa en segundo plano y, si hay respaldo, la app entra a Hoy. Además, el inicio ya no encola ni sube todo el estado local automáticamente; solo procesa cambios pendientes.
+
+### Bloque 33 - Metadata de sincronización
+
 Corregido:
 
-- `src/core/bootstrap/app-data-hydration.service.js`
-- `src/app/app.bootstrap.js`
-- `src/app/app-router.js`
+- `src/core/sync/sync-metadata.service.js`
 - `src/core/sync/sync.service.js`
+- `src/core/bootstrap/app-data-hydration.service.js`
 - `src/features/control-corporal/registro.service.js`
+- `scripts/auditar-app.cjs`
 - `scripts/check-structure.cjs`
 - `README.md`
 
-Resultado: la app ya no espera Firebase para montar la interfaz. Primero abre con datos locales. Si local está vacío, Firebase se revisa en segundo plano y, si hay respaldo, la app entra a Hoy. Además, el inicio ya no encola ni sube todo el estado local automáticamente; solo procesa cambios pendientes.
+Resultado: FitJeff ahora guarda metadata local de sincronización por módulo. Control corporal se marca como pendiente cuando hay cambios locales. Sync registra intentos, errores y módulos sincronizados. La restauración desde Firebase registra el último pull remoto.
 
 ## Comandos
 
@@ -277,14 +306,14 @@ npm run publicar:automatico
 - La version de Windows y Android debe salir desde el mismo `package.json`.
 - Ningún bloque nuevo debe saltarse `npm run audit:app` y `npm run check:local`.
 - Firebase nunca debe bloquear el arranque visual de la app.
+- Cada módulo debe marcar su metadata cuando tenga cambios locales.
 
 ## Bloques pendientes
 
-1. Bloque 33: Metadata de sincronización por módulo.
-2. Bloque 34: Cola diferencial con deduplicación por entidad.
-3. Bloque 35: Sincronización diaria automática y sincronización manual.
-4. Bloque 36: Firebase resumen liviano + registros por subcolección.
-5. Bloque 37: Conflictos local/remoto y resolución segura.
-6. Bloque 38: Dispositivos reales o puente claro de importación.
-7. Bloque 39: Rutinas y selección correcta del día de entrenamiento.
-8. Bloque 40: Revisión final para instalador Windows y APK Android.
+1. Bloque 34: Cola diferencial con deduplicación por entidad.
+2. Bloque 35: Sincronización diaria automática y sincronización manual.
+3. Bloque 36: Firebase resumen liviano + registros por subcolección.
+4. Bloque 37: Conflictos local/remoto y resolución segura.
+5. Bloque 38: Dispositivos reales o puente claro de importación.
+6. Bloque 39: Rutinas y selección correcta del día de entrenamiento.
+7. Bloque 40: Revisión final para instalador Windows y APK Android.
