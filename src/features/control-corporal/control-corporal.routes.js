@@ -5,8 +5,8 @@
   Funcion o funciones:
     - Definir las rutas internas de Control corporal.
     - Evitar rutas escritas manualmente en varios archivos.
-    - Preparar el modulo para crecer sin tocar el shell global.
-    - Agregar Hoy como pantalla principal simple tipo entrenador.
+    - Mantener el menu simple: Hoy, Registrar, Progreso e Historial.
+    - Dejar la guia de medidas integrada dentro de Registro mediante ayuda ?.
 
   Se conecta con:
     - src/features/control-corporal/control-corporal.menu.js
@@ -31,7 +31,7 @@ export const CONTROL_CORPORAL_ROUTE_ITEMS = [
   },
   {
     id: CONTROL_CORPORAL_ROUTES.REGISTRO,
-    label: "Registrar datos",
+    label: "Registrar",
     shortLabel: "Registrar",
     description: "Agregar peso y medidas"
   },
@@ -39,13 +39,7 @@ export const CONTROL_CORPORAL_ROUTE_ITEMS = [
     id: CONTROL_CORPORAL_ROUTES.ESTADISTICAS,
     label: "Progreso",
     shortLabel: "Progreso",
-    description: "Resumen de peso y medidas"
-  },
-  {
-    id: CONTROL_CORPORAL_ROUTES.GUIA_MEDIDAS,
-    label: "Guía de medidas",
-    shortLabel: "Guía",
-    description: "Dónde y cómo medirte"
+    description: "Ver evolución y detalles"
   },
   {
     id: CONTROL_CORPORAL_ROUTES.HISTORIAL,
