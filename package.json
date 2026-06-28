@@ -18,6 +18,7 @@
     "desktop:win": "npm run build && electron-builder --win nsis",
     "tools:check": "node scripts/check-tools.cjs",
     "check:structure": "node scripts/check-structure.cjs",
+    "check:local": "node scripts/check-local.cjs",
     "version:bump": "node scripts/version-bump.cjs",
     "build:windows": "node scripts/build-windows.cjs",
     "build:android": "node scripts/build-android.cjs",
