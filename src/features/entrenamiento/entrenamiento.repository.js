@@ -3,11 +3,13 @@
   Ruta o ubicación: src/features/entrenamiento/entrenamiento.repository.js
 
   Función o funciones:
-    - Leer y guardar los datos de Entrenamiento en almacenamiento local.
+    - Leer y guardar los datos de Entrenamiento en almacenamiento local seguro.
     - Separar el acceso a datos de las pantallas y servicios.
+    - Evitar que JSON dañado o localStorage no disponible rompa Rutinas, Diario, HIIT o Ajustes.
     - Preparar sincronización futura sin cambiar la interfaz visual.
 */
 
+import { crearSafeLocalStorageService } from "../../core/storage/safe-local-storage.service.js";
 import { ENTRENAMIENTO_STORAGE_KEYS } from "./entrenamiento.constants.js";
 import { crearEstadoEntrenamientoInicial } from "./entrenamiento.state.js";
 import {
@@ -17,25 +19,20 @@ import {
   normalizarSesionEntrenamiento
 } from "./entrenamiento.schema.tiempo.js";
 
-function leerJson(clave, valorDefecto) {
-  try {
-    const texto = localStorage.getItem(clave);
-    return texto ? JSON.parse(texto) : valorDefecto;
-  } catch {
-    return valorDefecto;
-  }
-}
-
-function guardarJson(clave, valor) {
-  localStorage.setItem(clave, JSON.stringify(valor));
-  return valor;
-}
-
 function normalizarLista(valor, normalizador) {
   return Array.isArray(valor) ? valor.map(normalizador) : [];
 }
 
-export function crearEntrenamientoRepository() {
+export function crearEntrenamientoRepository(storage = crearSafeLocalStorageService()) {
+  function leerJson(clave, valorDefecto) {
+    return storage.leerJson(clave, valorDefecto);
+  }
+
+  function guardarJson(clave, valor) {
+    storage.guardarJson(clave, valor);
+    return valor;
+  }
+
   function obtenerEstado() {
     const inicial = crearEstadoEntrenamientoInicial();
 
@@ -79,7 +76,7 @@ export function crearEntrenamientoRepository() {
   }
 
   function limpiarTodo() {
-    Object.values(ENTRENAMIENTO_STORAGE_KEYS).forEach((clave) => localStorage.removeItem(clave));
+    Object.values(ENTRENAMIENTO_STORAGE_KEYS).forEach((clave) => storage.eliminar(clave));
     return obtenerEstado();
   }
 
