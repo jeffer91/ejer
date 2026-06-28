@@ -5,6 +5,7 @@
   Función o funciones:
     - Construir la pantalla Ajustes de Entrenamiento.
     - Guardar API Key, modelo, IA y voz automática.
+    - Mostrar estado de persistencia blindada Gemini.
     - Probar Gemini y voz desde la interfaz.
     - Mostrar el modelo Gemini vigente y recordar que cada solicitud envía contexto.
 
@@ -136,7 +137,10 @@ export function crearEntrenamientoAjustesView({ vista = {}, mensaje = null, onGu
     nombre: "geminiApiKey",
     label: "API Key Gemini",
     tipo: "password",
-    placeholder: ajustes.geminiApiKeyVisible ? `Guardada: ${ajustes.geminiApiKeyVisible}` : "Pega aquí tu API Key"
+    placeholder: ajustes.geminiApiKeyVisible ? `Guardada: ${ajustes.geminiApiKeyVisible}` : "Pega aquí tu API Key",
+    ayuda: ajustes.geminiApiKeyVisible
+      ? "Ya hay una API Key guardada. Si dejas este campo vacío, FitJeff conserva la clave actual."
+      : "Pega tu API Key una sola vez. FitJeff la guardará en almacenamiento local separado."
   }));
   form.appendChild(crearCampo({
     nombre: "geminiModelo",
@@ -179,9 +183,11 @@ export function crearEntrenamientoAjustesView({ vista = {}, mensaje = null, onGu
   panel.appendChild(form);
 
   estadoPanel.appendChild(crearElemento("h3", "", "Estado"));
+  estadoPanel.appendChild(crearEstado("Persistencia Gemini", Boolean(ajustes.geminiApiKeyVisible), `${ajustes.geminiPersistencia || "Sin estado"}${ajustes.geminiActualizadoEn ? ` · ${ajustes.geminiActualizadoEn}` : ""}`));
   estadoPanel.appendChild(crearEstado("Gemini", Boolean(ajustes.geminiApiKeyVisible), ajustes.ultimaPruebaGemini?.mensaje || "Pendiente de prueba."));
   estadoPanel.appendChild(crearEstado("IA", Boolean(ajustes.iaActiva), "Controla sugerencias inteligentes con contexto enviado en cada solicitud."));
   estadoPanel.appendChild(crearEstado("Voz", Boolean(ajustes.vozActiva), vista.vozSoportada ? "Voz disponible en este entorno." : "Voz no disponible en este entorno."));
+  estadoPanel.appendChild(crearElemento("p", "entreno-ajustes-safe", "La API Key no se muestra completa. Solo se borra si usas el botón Borrar Key."));
   estadoPanel.appendChild(crearElemento("p", "entreno-ajustes-safe", "La guía de entrenamiento debe ajustarse a tu nivel. Detén la sesión si aparece dolor fuerte, mareo o malestar."));
 
   pantalla.appendChild(header);
