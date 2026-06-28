@@ -3,8 +3,9 @@
   Ruta o ubicacion: src/features/control-corporal/inicio/inicio.service.js
 
   Funcion o funciones:
-    - Guardar la configuracion inicial de FitJeff.
-    - Crear perfil, objetivo y primer registro de peso.
+    - Validar la configuracion inicial de FitJeff.
+    - Enviar perfil, objetivo y primer peso al servicio de Control corporal.
+    - Guardar la configuracion inicial como una sola operacion local.
     - Guardar contexto muscular para análisis corporal inteligente.
     - Marcar el Inicio como completado para abrir Hoy por defecto.
     - Usar fecha local para el primer registro de peso.
@@ -49,30 +50,24 @@ export function crearInicioService(registroService = crearRegistroService(), sto
     }
 
     const datosLimpios = validacion.datosLimpios;
-
-    registroService.guardarPerfil({
+    const resultado = registroService.guardarConfiguracionInicial({
       alturaCm: datosLimpios.alturaCm,
       fechaNacimiento: datosLimpios.fechaNacimiento,
-      nivelMuscular: datosLimpios.nivelMuscular
-    });
-
-    registroService.guardarObjetivo({
+      nivelMuscular: datosLimpios.nivelMuscular,
       pesoObjetivoKg: datosLimpios.pesoObjetivoKg,
-      ritmoInteligente: true
+      pesoInicialKg: datosLimpios.pesoInicialKg,
+      fecha: fechaHoy()
     });
 
-    const pesoGuardado = registroService.guardarPeso({
-      pesoKg: datosLimpios.pesoInicialKg,
-      fecha: fechaHoy(),
-      origen: "inicio"
-    });
-
-    marcarCompletado();
+    if (resultado.ok) {
+      marcarCompletado();
+    }
 
     return {
-      ok: true,
-      mensaje: "Perfil inicial guardado. Abriendo Hoy.",
-      pesoGuardado
+      ok: resultado.ok,
+      mensaje: resultado.mensaje,
+      errores: {},
+      pesoGuardado: resultado.pesoGuardado
     };
   }
 
