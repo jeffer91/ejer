@@ -1,30 +1,35 @@
+/*
+  Nombre completo: gemini-settings.repository.js
+  Ruta o ubicación: src/features/entrenamiento/ajustes/gemini-settings.repository.js
+
+  Función o funciones:
+    - Leer y guardar ajustes separados de Gemini con almacenamiento local seguro.
+    - Evitar que un JSON dañado borre o rompa los ajustes de IA.
+    - Mantener una acción explícita para borrar la API Key.
+
+  Se conecta con:
+    - src/features/entrenamiento/ajustes/gemini-settings.service.js
+    - src/features/entrenamiento/ajustes/gemini-settings.migration.js
+    - src/core/storage/safe-local-storage.service.js
+*/
+
+import { crearSafeLocalStorageService } from "../../../core/storage/safe-local-storage.service.js";
 import { GEMINI_SETTINGS_STORAGE_KEY } from "../entrenamiento.constants.js";
 import { normalizarGeminiSettings } from "./gemini-settings.migration.js";
 
-function leerJson(clave, valorDefecto) {
-  try {
-    const texto = localStorage.getItem(clave);
-    return texto ? JSON.parse(texto) : valorDefecto;
-  } catch {
-    return valorDefecto;
-  }
-}
-
-function guardarJson(clave, valor) {
-  localStorage.setItem(clave, JSON.stringify(valor));
-  return valor;
-}
-
-export function crearGeminiSettingsRepository() {
+export function crearGeminiSettingsRepository(storage = crearSafeLocalStorageService()) {
   function obtener() {
-    return normalizarGeminiSettings(leerJson(GEMINI_SETTINGS_STORAGE_KEY, {}));
+    return normalizarGeminiSettings(storage.leerJson(GEMINI_SETTINGS_STORAGE_KEY, {}));
   }
 
   function guardar(settings) {
-    return guardarJson(GEMINI_SETTINGS_STORAGE_KEY, normalizarGeminiSettings({
+    const normalizado = normalizarGeminiSettings({
       ...settings,
       actualizadoEn: new Date().toISOString()
-    }));
+    });
+
+    storage.guardarJson(GEMINI_SETTINGS_STORAGE_KEY, normalizado);
+    return normalizado;
   }
 
   function borrarApiKey() {
