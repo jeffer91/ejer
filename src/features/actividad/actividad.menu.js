@@ -6,8 +6,8 @@ export const ACTIVIDAD_MENU = {
   id: ACTIVIDAD_MODULE_ID,
   label: "Actividad",
   shortLabel: "Actividad",
-  description: "Pasos, bicicleta y movimiento diario.",
+  description: "Pasos, bicicleta y conexiones preparadas.",
   defaultRoute: ACTIVIDAD_ROUTES.RESUMEN,
-  status: "Registro manual",
+  status: "Manual y conexiones",
   routes: ACTIVIDAD_ROUTE_ITEMS
 };
