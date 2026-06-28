@@ -1,13 +1,13 @@
 {
   "name": "FitJeff",
   "short_name": "FitJeff",
-  "description": "App personal para registro corporal, estadísticas y progreso.",
+  "description": "App personal local-first para control corporal, actividad, entrenamiento y progreso.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait-primary",
-  "background_color": "#0a0f1c",
-  "theme_color": "#00f5ff",
+  "background_color": "#f8fafc",
+  "theme_color": "#2563eb",
   "lang": "es-EC",
   "categories": ["health", "fitness", "productivity"],
   "icons": [
