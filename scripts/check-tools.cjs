@@ -5,11 +5,13 @@
   Función o funciones:
     - Revisar herramientas necesarias para desarrollo y publicación de FitJeff.
     - Validar Node.js, npm, Git y GitHub CLI.
-    - Confirmar que package.json tenga los scripts base de Electron, Windows, Android, revisión y publicación.
+    - Confirmar que package.json tenga los scripts base de inicio, auditoría, Electron, Windows, Android, revisión y publicación.
     - Avisar claramente qué falta antes de compilar o publicar.
 
   Se conecta con:
     - package.json
+    - scripts/start-electron-dev.cjs
+    - scripts/auditar-app.cjs
     - scripts/abrir-electron-dev.bat
     - scripts/build-windows.cjs
     - scripts/build-android.cjs
@@ -65,6 +67,7 @@ function revisarPackage() {
   const pkg = JSON.parse(fs.readFileSync(packagePath, "utf8"));
   const scripts = pkg.scripts || {};
   const scriptsNecesarios = [
+    "start",
     "dev",
     "build",
     "electron:dev",
@@ -72,19 +75,32 @@ function revisarPackage() {
     "desktop:win",
     "version:bump",
     "tools:check",
+    "check:structure",
+    "check:local",
+    "audit:app",
     "build:windows",
     "build:android",
     "release:github",
     "review:updates",
     "publicar:version",
+    "publicar:automatico",
     "actualizar:todo",
     "revisar:todo"
   ];
   const faltantes = scriptsNecesarios.filter((script) => !scripts[script]);
+  const errores = faltantes.map((script) => `Falta script npm: ${script}`);
+
+  if (scripts["configurar:firebase"]) {
+    errores.push("No debe existir configurar:firebase. Firebase se resuelve desde código.");
+  }
+
+  if (scripts.start !== "node scripts/start-electron-dev.cjs") {
+    errores.push("El script start debe usar node scripts/start-electron-dev.cjs.");
+  }
 
   return {
-    ok: faltantes.length === 0,
-    errores: faltantes.map((script) => `Falta script npm: ${script}`),
+    ok: errores.length === 0,
+    errores,
     version: pkg.version || "sin-version"
   };
 }
