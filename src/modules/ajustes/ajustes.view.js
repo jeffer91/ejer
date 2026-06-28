@@ -8,6 +8,7 @@
     - Crear boton para reabrir Inicio.
     - Crear bloque simple de copia de seguridad.
     - Crear bloque de sincronización manual sin exponer detalles técnicos pesados.
+    - Mostrar si hay conflictos local/remoto pendientes.
     - Mantener la vista sin logica de guardado.
 
   Se conecta con:
@@ -242,16 +243,18 @@ export function actualizarEstadoSync(vista, estado = {}) {
   if (!vista?.syncEstado) return;
 
   const modulos = (estado.modulosSucios || []).map((modulo) => modulo.nombre).join(", ") || "Ninguno";
+  const conflictos = Number(estado.conflictosPendientes || 0);
   vista.syncEstado.innerHTML = "";
 
   [
     ["Cola pendiente", `${estado.colaPendiente || 0} cambio(s)`],
+    ["Conflictos pendientes", conflictos > 0 ? `${conflictos} conflicto(s): revisar antes de subir` : "Ninguno"],
     ["Cambios por módulo", modulos],
     ["Último automático", fechaCorta(estado.ultimoAutoSyncEn)],
     ["Último manual", fechaCorta(estado.ultimoManualSyncEn)],
     ["Último resultado", estado.ultimoResultado || "Sin registro"]
   ].forEach(([label, value]) => {
-    const fila = crearElemento("p", "ajustes-sync-status__row");
+    const fila = crearElemento("p", conflictos > 0 && label === "Conflictos pendientes" ? "ajustes-sync-status__row ajustes-sync-status__row--alert" : "ajustes-sync-status__row");
     fila.appendChild(crearElemento("strong", "", label));
     fila.appendChild(crearElemento("span", "", value));
     vista.syncEstado.appendChild(fila);
