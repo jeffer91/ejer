@@ -42,6 +42,7 @@ const requiredFiles = [
   "src/core/sync/sync-status.service.js",
   "src/core/sync/sync-queue.service.js",
   "src/core/sync/sync-metadata.service.js",
+  "src/core/sync/sync-scheduler.service.js",
   "src/app/app-router.js",
   "src/app/app.bootstrap.js",
   "src/app/app.css",
@@ -86,14 +87,18 @@ const blockedPatterns = [
 ];
 
 const semanticChecks = [
-  { file: "README.md", mustInclude: ["Bloque 34 - Cola diferencial", "deduplicación por entidad", "Bloques pendientes"], message: "README debe documentar el bloque 34 y pendientes." },
+  { file: "README.md", mustInclude: ["Bloque 35 - Sincronización diaria automática", "sync-scheduler.service.js", "Bloques pendientes"], message: "README debe documentar el bloque 35 y pendientes." },
   { file: "package.json", mustInclude: ["\"start\": \"node scripts/start-electron-dev.cjs\"", "\"audit:app\": \"node scripts/auditar-app.cjs\"", "publicar:automatico"], message: "package.json debe usar inicio seguro y auditoria." },
   { file: "scripts/check-local.cjs", mustInclude: ["Auditoría estática", "scripts/auditar-app.cjs", "Build de Vite"], message: "check-local debe ejecutar auditoria antes del build." },
   { file: "scripts/check-tools.cjs", mustInclude: ["audit:app", "publicar:automatico", "No debe existir configurar:firebase"], message: "check-tools debe validar auditoria y no permitir configurar:firebase." },
-  { file: "scripts/auditar-app.cjs", mustInclude: ["auditarImportsLocales", "archivosNoPermitidos", "Resultado: auditoría sin errores críticos"], message: "Debe existir auditoria estatica integral." },
+  { file: "scripts/auditar-app.cjs", mustInclude: ["auditarImportsLocales", "archivosNoPermitidos", "sync-scheduler.service.js"], message: "Auditoria debe incluir scheduler de sincronizacion." },
   { file: "src/core/sync/sync-metadata.service.js", mustInclude: ["SYNC_METADATA_KEY", "SYNC_MODULES", "marcarModuloSucio", "ultimoPullFirebaseEn", "obtenerModulosSucios"], message: "Debe existir metadata de sincronización por módulo." },
   { file: "src/core/sync/sync-queue.service.js", mustInclude: ["operationKey", "deduplicarCola", "payloadHash", "listarPorModulo", "entidadId"], message: "La cola debe ser diferencial y deduplicada por entidad." },
-  { file: "src/app/app.bootstrap.js", mustInclude: ["prepararDatosAntesDeRouter", "restaurarFirebaseSinBloquear", "restaurarFirebaseEnSegundoPlano", "router.iniciar()"], message: "Bootstrap debe montar local primero y restaurar Firebase despues." },
+  { file: "src/core/sync/sync-scheduler.service.js", mustInclude: ["ejecutarSyncAutomatico", "sincronizarManual", "ultimoAutoSyncDia", "decidirSyncAutomatico", "SYNC_SCHEDULER_KEY"], message: "Debe existir sincronización diaria automática y manual." },
+  { file: "src/app/app.bootstrap.js", mustInclude: ["crearSyncSchedulerService", "sincronizarAutomaticoEnSegundoPlano", "ejecutarSyncAutomatico", "router.iniciar()"], message: "Bootstrap debe usar scheduler diario sin bloquear la app." },
+  { file: "src/modules/ajustes/ajustes.controller.js", mustInclude: ["crearSyncSchedulerService", "sincronizarManual", "refrescarSync", "vista.syncBoton"], message: "Ajustes debe permitir sincronización manual." },
+  { file: "src/modules/ajustes/ajustes.view.js", mustInclude: ["crearBloqueSync", "actualizarEstadoSync", "Sincronizar ahora", "Cola pendiente"], message: "Vista Ajustes debe mostrar bloque de sincronización." },
+  { file: "src/modules/ajustes/ajustes.css", mustInclude: ["ajustes-card--sync", "ajustes-sync-status", "ajustes-sync-status__row"], message: "Ajustes debe tener estilos de sincronización." },
   { file: "src/app/app-router.js", mustInclude: ["marcarPerfilCompletadoDesdeSync", "FitJeff no puede renderizar", "rutaActual = SHELL_DEFAULT_ROUTE_ID"], message: "Router debe permitir entrada a Hoy tras restauracion." },
   { file: "src/core/config/firebase.project.config.js", mustInclude: ["FIREBASE_PROJECT_CONFIG", "apiKey", "collection: \"fitjeff\"", "userDocument: \"jeff\""], message: "Debe existir configuracion Firebase desde codigo." },
   { file: "src/core/config/firebase.config.js", mustInclude: ["FIREBASE_PROJECT_CONFIG", "leerValor", "resolverFirebaseEnabled", "obtenerEstadoFirebaseConexion"], message: "Firebase config debe leer variables o configuracion desde codigo." },
@@ -212,6 +217,7 @@ function run() {
     console.log("Bloque 32 aplicado: Local-first real.");
     console.log("Bloque 33 aplicado: Metadata de sincronizacion por modulo.");
     console.log("Bloque 34 aplicado: Cola diferencial con deduplicacion por entidad.");
+    console.log("Bloque 35 aplicado: Sincronizacion diaria automatica y manual.");
     return;
   }
 
