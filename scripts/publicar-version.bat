@@ -5,6 +5,7 @@ REM
 REM  Funcion o funciones:
 REM    - Publicar una nueva version estable de FitJeff.
 REM    - Instalar dependencias, subir version, compilar Windows, preparar Android/APK y crear GitHub Release.
+REM    - Ejecutar revision final de instalador Windows y Android antes de subir el release.
 REM    - Confirmar antes de subir cambios a GitHub.
 REM    - Dejar la app instalada lista para detectar actualizaciones automaticas.
 REM
@@ -13,6 +14,7 @@ REM    - package.json
 REM    - scripts/version-bump.cjs
 REM    - scripts/build-windows.cjs
 REM    - scripts/build-android.cjs
+REM    - scripts/revision-release-final.cjs
 REM    - scripts/release-github.cjs
 REM    - GitHub Releases
 
@@ -73,6 +75,16 @@ if errorlevel 1 (
 )
 
 echo.
+echo Revision local antes de publicar...
+call npm run check:local
+if errorlevel 1 (
+  echo.
+  echo ERROR: La revision local fallo.
+  pause
+  exit /b 1
+)
+
+echo.
 echo Aumentando version automaticamente...
 call npm run version:bump
 if errorlevel 1 (
@@ -105,6 +117,16 @@ call npm run build:android
 if errorlevel 1 (
   echo.
   echo ERROR: No se pudo preparar Android/APK.
+  pause
+  exit /b 1
+)
+
+echo.
+echo Revision final de instalador y Android...
+call npm run release:check:built
+if errorlevel 1 (
+  echo.
+  echo ERROR: La revision final de release fallo.
   pause
   exit /b 1
 )
