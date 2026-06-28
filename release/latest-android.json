@@ -1,0 +1,16 @@
+{
+  "app": "FitJeff",
+  "platform": "android",
+  "channel": "stable",
+  "versionName": "0.1.0",
+  "versionCode": 1000,
+  "packageId": "com.jeff.fitjeff",
+  "repository": "jeffer91/ejer",
+  "releaseProvider": "github",
+  "installMode": "apk-fuera-de-play-store",
+  "userConfirmationRequired": true,
+  "status": "preparado-sin-apk",
+  "message": "La configuración Android está preparada. Falta crear el proyecto Android/Capacitor para generar APK real.",
+  "generatedAt": "",
+  "apk": null
+}
