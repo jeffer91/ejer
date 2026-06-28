@@ -1,30 +1,32 @@
 # FitJeff
 
-App personal local-first para control corporal, actividad, registro de peso, medidas, progreso visual, historial, backups, PWA y escritorio Electron.
+App personal local-first para control corporal, actividad, entrenamiento, progreso visual, historial, backups, PWA y escritorio Electron.
 
-La app se trabaja por bloques para evitar cambios mezclados y mantener cada modulo separado.
+## Estado actual
 
-## Estado actual del redisenio visual
+Fase visual 2026 cerrada.
 
-La app esta migrando de un estilo oscuro/tecnico a una experiencia clara, simple y visual.
+Bloques completados: 12 de 12.
 
-Pantalla principal definida:
+La app queda con una base clara, simple y modular para continuar con mejoras funcionales sin mezclar responsabilidades.
 
-- Hoy
-
-Menu principal de Control corporal:
+## Pantalla principal
 
 - Hoy
-- Registrar
-- Progreso
-- Historial
 
-Modulos principales visibles:
+## Modulos visibles
 
 - Control corporal
 - Actividad
 - Entrenamiento
 - Sistema
+
+## Menu de Control corporal
+
+- Hoy
+- Registrar
+- Progreso
+- Historial
 
 ## Redisenio 2026 - Bloques aplicados
 
@@ -37,13 +39,7 @@ Creado y conectado:
 - `src/app/app.css`
 - `src/shell/shell.css`
 
-Resultado:
-
-- Modo claro global
-- Tarjetas limpias
-- Texto oscuro legible
-- Sombras suaves
-- Indicadores fuertes: verde, azul, amarillo, rojo y gris
+Resultado: modo claro global, tarjetas limpias, texto oscuro legible, sombras suaves e indicadores fuertes.
 
 ### Bloque 2 - Shell simple
 
@@ -51,12 +47,7 @@ Corregido:
 
 - `src/shell/shell.view.js`
 
-Resultado:
-
-- Menos lenguaje tecnico
-- Cambio de "App modular" a "Tu control diario"
-- Menu principal como "Secciones"
-- Submenu como "Acciones"
+Resultado: menos lenguaje tecnico, menu como Secciones y submenu como Acciones.
 
 ### Bloque 3 - Pantalla Hoy
 
@@ -77,11 +68,7 @@ Corregido:
 - `src/features/features.registry.js`
 - `src/app/app-router.js`
 
-Resultado:
-
-- FitJeff abre en Hoy
-- Hoy muestra conclusion, accion recomendada, tarjetas compactas, mini grafico y accesos rapidos
-- Botones internos navegan a Registrar, Progreso e Historial
+Resultado: FitJeff abre en Hoy y muestra conclusion, accion recomendada, tarjetas compactas, mini grafico y accesos rapidos.
 
 ### Bloque 4 - Registro con ayuda integrada
 
@@ -97,12 +84,7 @@ Corregido:
 - `src/features/control-corporal/registro/ingreso.css`
 - `src/features/control-corporal/registro/ingreso.constants.js`
 
-Resultado:
-
-- Cada campo importante tiene boton ?
-- La explicacion se abre debajo del campo
-- Registro incluye mapa corporal visual
-- No hace falta abrir una pantalla separada para entender medidas basicas
+Resultado: cada campo importante tiene boton ?, explicacion integrada y mapa corporal visual.
 
 ### Bloque 5 - Menu de Control corporal limpio
 
@@ -110,11 +92,7 @@ Corregido:
 
 - `src/features/control-corporal/control-corporal.routes.js`
 
-Resultado:
-
-- Se quito Guia de medidas del menu visible
-- La guia queda integrada dentro de Registro con ayuda ?
-- El menu queda: Hoy, Registrar, Progreso, Historial
+Resultado: se quito Guia de medidas del menu visible porque la ayuda vive dentro de Registro.
 
 ### Bloque 6 - Progreso como vista de detalle
 
@@ -128,13 +106,7 @@ Corregido:
 - `src/features/control-corporal/estadisticas/estadisticas.css`
 - `src/features/control-corporal/estadisticas/estadisticas.constants.js`
 
-Resultado:
-
-- Estadisticas pasa a funcionar visualmente como Progreso
-- La pantalla se organiza por secciones
-- Primero muestra resumen principal
-- Luego avance hacia la meta, grafico, detalle de peso y medidas
-- Se reduce la saturacion visual
+Resultado: Estadisticas pasa a funcionar visualmente como Progreso, con resumen, avance, grafico, detalle de peso y medidas.
 
 ### Bloque 7 - Estructura y documentacion
 
@@ -143,10 +115,7 @@ Corregido:
 - `scripts/check-structure.cjs`
 - `README.md`
 
-Resultado:
-
-- El check de estructura reconoce tema claro, Hoy, Registro visual y Progreso con presenter
-- La documentacion refleja la arquitectura actual del redisenio
+Resultado: el check reconoce tema claro, Hoy, Registro visual y Progreso con presenter.
 
 ### Bloque 8 - Inicio claro y salida hacia Hoy
 
@@ -158,12 +127,7 @@ Corregido:
 - `src/features/control-corporal/inicio/inicio.css`
 - `scripts/check-structure.cjs`
 
-Resultado:
-
-- Inicio usa modo claro
-- El boton dice Guardar y abrir Hoy
-- El mensaje de exito indica que abre Hoy
-- El check valida que Inicio este alineado al nuevo flujo
+Resultado: Inicio usa modo claro y abre Hoy al completar la configuracion inicial.
 
 ### Bloque 9 - Historial y Ajustes claros
 
@@ -175,13 +139,7 @@ Corregido:
 - `scripts/check-structure.cjs`
 - `README.md`
 
-Resultado:
-
-- Historial ya no usa estilo oscuro
-- Ajustes ya no usa estilo oscuro
-- Botones de editar, cambios y borrar tienen indicadores claros
-- Formularios de Ajustes usan inputs claros y teclado decimal cuando corresponde
-- El check valida Historial y Ajustes dentro del redisenio visual
+Resultado: Historial y Ajustes quedan alineados al modo claro.
 
 ### Bloque 10 - Revision visual e integracion final
 
@@ -192,12 +150,7 @@ Corregido:
 - `scripts/check-structure.cjs`
 - `README.md`
 
-Resultado:
-
-- Actualizaciones ya no usa estilo oscuro/neon
-- Stats de Entrenamiento queda alineado al modo claro
-- El check valida Actualizaciones y Stats como parte del redisenio visual
-- La app mantiene una base visual coherente antes de crear Actividad
+Resultado: Actualizaciones y Stats de Entrenamiento quedan alineados al modo claro.
 
 ### Bloque 11 - Actividad manual
 
@@ -223,51 +176,28 @@ Corregido:
 - `scripts/check-structure.cjs`
 - `README.md`
 
-Resultado:
+Resultado: Actividad queda como modulo independiente con registro manual de pasos, minutos de bicicleta y kilometros de bicicleta.
 
-- Actividad queda como modulo independiente
-- Permite registro manual de pasos, minutos de bicicleta y kilometros de bicicleta
-- Tiene resumen de hoy, resumen semanal y registros recientes
-- Guarda localmente en `localStorage`
-- No toca Firebase, Sync, Backup, Electron ni Android
+### Bloque 12 - Cierre
 
-## Bloques originales de construccion
+Creado:
 
-### Base inicial
+- `docs/fase-visual-2026-cierre.md`
 
-Incluye Vite, HTML principal, Manifest PWA, icono base, bootstrap, router, estilos base y service worker reservado.
+Corregido:
 
-### Base central de Registro
+- `scripts/check-structure.cjs`
+- `README.md`
 
-Incluye modulo central, constantes, estado, esquema de datos, repository local, service principal y estilos propios del modulo.
+Resultado: fase visual cerrada, documentacion final creada y check de estructura actualizado para validar el cierre 12/12.
 
-### Inicio de primera vez
+## Documento de cierre
 
-Incluye altura, fecha de nacimiento, peso inicial, peso objetivo, validacion inteligente basica, guardado en Registro y salto automatico a Hoy.
+El cierre detallado de esta fase esta en:
 
-### Registro e ingreso
-
-Incluye peso diario, medidas semanales, validacion de rangos, deteccion de cambios poco comunes, ayuda integrada con botones ? y mapa corporal visual.
-
-### Progreso
-
-Incluye peso actual, objetivo, cambios, tendencia, IMC, proxima medicion, barra de progreso, grafico simple y tarjetas compactas de medidas.
-
-### Actividad
-
-Incluye registro manual de pasos, minutos de bicicleta, kilometros de bicicleta, resumen diario, resumen semanal y registros recientes.
-
-### Historial
-
-Incluye lista compacta por fecha, visualizacion de peso y medidas, edicion, confirmacion antes de borrar, papelera interna y consulta simple de cambios.
-
-### Ajustes
-
-Incluye perfil, objetivo, editar altura, editar fecha de nacimiento, editar peso objetivo, reabrir Inicio, backups locales, exportacion e importacion JSON.
-
-### Core local, Firebase, backups y Electron
-
-Incluye configuracion central, storage local seguro, diagnostico, Firebase base, cola de sincronizacion, backups, exportacion local y escritorio Electron.
+```txt
+ docs/fase-visual-2026-cierre.md
+```
 
 ## Comandos
 
@@ -275,6 +205,12 @@ Instalar dependencias:
 
 ```bash
 npm install
+```
+
+Revisar estructura:
+
+```bash
+npm run check:structure
 ```
 
 Abrir en navegador:
@@ -287,18 +223,6 @@ Abrir en Electron:
 
 ```bash
 npm run electron:dev
-```
-
-Revisar herramientas y estructura antes de abrir Electron:
-
-```bash
-npm run electron:dev:check
-```
-
-Revisar solo estructura:
-
-```bash
-npm run check:structure
 ```
 
 Probar modo escritorio con dist:
@@ -322,3 +246,13 @@ npm run desktop:win
 - Registro debe mantener ayuda ? integrada.
 - Progreso debe ser detalle, no dashboard saturado.
 - Actividad manual debe crecer antes de conectar sensores o apps externas.
+
+## Siguiente fase recomendada
+
+Fase funcional de Actividad:
+
+1. Mejorar historial de Actividad.
+2. Agregar edicion y eliminacion segura.
+3. Integrar Actividad con Hoy.
+4. Preparar sync local-first.
+5. Luego evaluar sensores, Health Connect o Google Fit.
