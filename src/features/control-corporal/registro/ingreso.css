@@ -5,12 +5,13 @@
   Funcion o funciones:
     - Dar estilo propio a la pantalla Registro / Ingreso.
     - Mantener formularios compactos para celular y computadora.
-    - Mostrar ayuda ? debajo de cada campo sin abrir otra pantalla.
+    - Mostrar ayuda corta debajo del campo y popup visual desde el botón ?.
     - Usar modo claro con indicadores fuertes y tarjetas limpias.
 
   Se conecta con:
     - src/features/control-corporal/registro/ingreso.view.js
     - src/features/control-corporal/registro/registro.controller.js
+    - src/features/control-corporal/registro/medidas-modal/medidas-modal.css
     - src/app/theme-light.css
     - src/app/status-colors.css
 */
@@ -153,7 +154,7 @@
 }
 
 .ingreso-help-button:hover,
-.ingreso-help-button--active {
+.ingreso-help-button:focus-visible {
   border-color: var(--fj-border-strong, rgba(37, 99, 235, 0.36));
   background: var(--fj-blue, #2563eb);
   color: #ffffff;
