@@ -1,12 +1,12 @@
 /*
   Nombre completo: control-corporal.routes.js
-  Ruta o ubicación: src/features/control-corporal/control-corporal.routes.js
+  Ruta o ubicacion: src/features/control-corporal/control-corporal.routes.js
 
-  Función o funciones:
+  Funcion o funciones:
     - Definir las rutas internas de Control corporal.
     - Evitar rutas escritas manualmente en varios archivos.
-    - Preparar el módulo para crecer sin tocar el shell global.
-    - Agregar acceso directo a la guía visual de medidas corporales.
+    - Preparar el modulo para crecer sin tocar el shell global.
+    - Agregar Hoy como pantalla principal simple tipo entrenador.
 
   Se conecta con:
     - src/features/control-corporal/control-corporal.menu.js
@@ -15,6 +15,7 @@
 */
 
 export const CONTROL_CORPORAL_ROUTES = {
+  HOY: "hoy",
   ESTADISTICAS: "estadisticas",
   REGISTRO: "registro",
   GUIA_MEDIDAS: "guia-medidas",
@@ -23,16 +24,22 @@ export const CONTROL_CORPORAL_ROUTES = {
 
 export const CONTROL_CORPORAL_ROUTE_ITEMS = [
   {
-    id: CONTROL_CORPORAL_ROUTES.ESTADISTICAS,
-    label: "Progreso",
-    shortLabel: "Progreso",
-    description: "Resumen de peso y medidas"
+    id: CONTROL_CORPORAL_ROUTES.HOY,
+    label: "Hoy",
+    shortLabel: "Hoy",
+    description: "Qué debes hacer hoy"
   },
   {
     id: CONTROL_CORPORAL_ROUTES.REGISTRO,
     label: "Registrar datos",
     shortLabel: "Registrar",
     description: "Agregar peso y medidas"
+  },
+  {
+    id: CONTROL_CORPORAL_ROUTES.ESTADISTICAS,
+    label: "Progreso",
+    shortLabel: "Progreso",
+    description: "Resumen de peso y medidas"
   },
   {
     id: CONTROL_CORPORAL_ROUTES.GUIA_MEDIDAS,
