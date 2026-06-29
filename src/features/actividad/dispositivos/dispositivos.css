@@ -191,7 +191,8 @@
 }
 
 .dispositivos-bluetooth-actions,
-.dispositivos-import-actions {
+.dispositivos-import-actions,
+.dispositivos-private-pager {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
@@ -201,6 +202,22 @@
 .dispositivos-import-actions .dispositivos-button {
   grid-column: auto;
   flex: 1 1 180px;
+}
+
+.dispositivos-private-pager {
+  grid-column: 1 / -1;
+  align-items: center;
+  border: 1px solid rgba(37, 99, 235, 0.12);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.72);
+  padding: 8px;
+}
+
+.dispositivos-private-pager .dispositivos-button {
+  grid-column: auto;
+  flex: 1 1 54px;
+  min-height: 36px;
+  padding: 7px 9px;
 }
 
 .dispositivos-diagnostic,
@@ -224,6 +241,7 @@
 .dispositivos-private-explorer h4,
 .dispositivos-private-explorer > p,
 .dispositivos-private-explorer > .dispositivos-bluetooth-actions,
+.dispositivos-private-step,
 .dispositivos-private-table {
   grid-column: 1 / -1;
 }
@@ -256,6 +274,20 @@
   border-top: 1px solid rgba(37, 99, 235, 0.12);
   padding-top: 8px;
   font-weight: 800;
+}
+
+.dispositivos-private-step {
+  display: grid;
+  gap: 8px;
+  border: 1px solid rgba(124, 58, 237, 0.16);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.76);
+  padding: 10px;
+}
+
+.dispositivos-private-step__title {
+  color: var(--fj-text-strong, #07111f);
+  font-size: 0.96rem;
 }
 
 .dispositivos-private-table {
@@ -329,9 +361,13 @@
   font-weight: 950;
 }
 
+.dispositivos-button[hidden] {
+  display: none;
+}
+
 .dispositivos-button:disabled {
-  cursor: wait;
-  opacity: 0.68;
+  cursor: not-allowed;
+  opacity: 0.55;
 }
 
 .dispositivos-button--primary {
@@ -367,7 +403,8 @@
   }
 
   .dispositivos-import-actions,
-  .dispositivos-bluetooth-actions {
+  .dispositivos-bluetooth-actions,
+  .dispositivos-private-pager {
     display: grid;
   }
 
