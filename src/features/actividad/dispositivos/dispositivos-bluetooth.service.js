@@ -5,9 +5,9 @@
   Función o funciones:
     - Usar Web Bluetooth para anexar un reloj Cubitt CT4 desde la app.
     - Probar conexión básica GATT sin prometer lectura automática de pasos.
-    - Explorar servicios privados candidatos del reloj.
+    - Explorar servicios privados candidatos del reloj con UUID válidos.
     - Tomar lecturas crudas en HEX para comparar cambios y ubicar posibles pasos.
-    - Leer datos seguros de diagnóstico: batería e información del dispositivo cuando estén disponibles.
+    - Reautorizar el reloj cuando la sesión Bluetooth no conserva el dispositivo permitido.
     - Devolver mensajes claros para que la pantalla Dispositivos pueda guiar al usuario.
 
   Se conecta con:
@@ -21,7 +21,7 @@ const SERVICIOS_ESTANDAR = Object.freeze([
   "heart_rate"
 ]);
 
-const SERVICIOS_PRIVADOS_CANDIDATOS = Object.freeze([
+const SERVICIOS_PRIVADOS_CANDIDATOS_RAW = Object.freeze([
   "0000fee0-0000-1000-8000-00805f9b34fb",
   "0000fee1-0000-1000-8000-00805f9b34fb",
   "0000fee7-0000-1000-8000-00805f9b34fb",
@@ -36,15 +36,28 @@ const SERVICIOS_PRIVADOS_CANDIDATOS = Object.freeze([
   "0000fef5-0000-1000-8000-00805f9b34fb",
   "0000fef6-0000-1000-8000-00805f9b34fb",
   "6e400001-b5a3-f393-e0a9-e50e24dcca9e",
-  "49535343-fe7d-4ae5-8fa9-9fafd205e4555"
+  "49535343-fe7d-4ae5-8fa9-9fafd205e455"
 ]);
 
-const SERVICIOS_OPCIONALES = Object.freeze([
-  ...SERVICIOS_ESTANDAR,
-  ...SERVICIOS_PRIVADOS_CANDIDATOS
-]);
+const UUID_VALIDO = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 
-const NOMBRE_RELOJ_ESPERADO = /cubitt|ct4/i;
+function normalizarServicioBluetooth(servicio) {
+  const valor = String(servicio || "").trim().toLowerCase();
+  if (["battery_service", "device_information", "heart_rate"].includes(valor)) return valor;
+  if (/^0x[0-9a-f]{4}$/.test(valor)) return valor;
+  if (UUID_VALIDO.test(valor)) return valor;
+  return "";
+}
+
+const SERVICIOS_PRIVADOS_CANDIDATOS = Object.freeze(
+  SERVICIOS_PRIVADOS_CANDIDATOS_RAW.map(normalizarServicioBluetooth).filter(Boolean)
+);
+
+const SERVICIOS_OPCIONALES = Object.freeze(
+  [...SERVICIOS_ESTANDAR, ...SERVICIOS_PRIVADOS_CANDIDATOS].map(normalizarServicioBluetooth).filter(Boolean)
+);
+
+const NOMBRE_RELOJ_ESPERADO = /cubitt|ct\s*4|ct4/i;
 
 let ultimoDispositivoBluetooth = null;
 
@@ -210,6 +223,22 @@ function resumirLecturaCaracteristica(caracteristica, lectura = null, error = nu
   return base;
 }
 
+async function solicitarDispositivoBluetooth() {
+  const bluetooth = obtenerBluetoothApi();
+
+  if (!bluetoothDisponible()) {
+    throw new Error("Bluetooth no está disponible en este entorno. Abre FitJeff en Electron y verifica que Bluetooth esté activo en Windows.");
+  }
+
+  const device = await bluetooth.requestDevice({
+    acceptAllDevices: true,
+    optionalServices: SERVICIOS_OPCIONALES
+  });
+
+  ultimoDispositivoBluetooth = device;
+  return device;
+}
+
 async function obtenerDispositivoGuardado({ id = "", nombre = "" } = {}) {
   if (ultimoDispositivoBluetooth) {
     return ultimoDispositivoBluetooth;
@@ -228,18 +257,19 @@ async function obtenerDispositivoGuardado({ id = "", nombre = "" } = {}) {
   return permitidos.find((device) => {
     const mismoId = idLimpio && device.id === idLimpio;
     const mismoNombre = nombreLimpio && limpiarTexto(device.name).toLowerCase() === nombreLimpio;
-    return mismoId || mismoNombre;
+    const pareceCubitt = NOMBRE_RELOJ_ESPERADO.test(device.name || "");
+    return mismoId || mismoNombre || pareceCubitt;
   }) || null;
 }
 
-async function conectarDispositivo(configuracion = {}) {
-  const device = await obtenerDispositivoGuardado({
+async function conectarDispositivo(configuracion = {}, opciones = {}) {
+  let device = await obtenerDispositivoGuardado({
     id: configuracion.bluetoothId || configuracion.identificadorLocal,
     nombre: configuracion.bluetoothNombre || configuracion.alias
   });
 
-  if (!device) {
-    throw new Error("No encontré un reloj autorizado en esta sesión. Primero pulsa Escanear y anexar reloj.");
+  if (!device || opciones.forzarSelector) {
+    device = await solicitarDispositivoBluetooth();
   }
 
   ultimoDispositivoBluetooth = device;
@@ -397,25 +427,14 @@ function compararMapasLectura(lectura1 = {}, lectura2 = {}) {
 
 export function crearDispositivosBluetoothService() {
   async function solicitarCubitt() {
-    const bluetooth = obtenerBluetoothApi();
-
-    if (!bluetoothDisponible()) {
-      return crearError("Bluetooth no está disponible en este entorno. Abre FitJeff en Electron y verifica que Bluetooth esté activo en Windows.");
-    }
-
     try {
-      const device = await bluetooth.requestDevice({
-        acceptAllDevices: true,
-        optionalServices: SERVICIOS_OPCIONALES
-      });
-
-      ultimoDispositivoBluetooth = device;
+      const device = await solicitarDispositivoBluetooth();
       const dispositivo = normalizarDispositivo(device);
 
       return {
         ok: true,
         mensaje: dispositivo.coincideCubitt
-          ? "Cubitt CT4 anexado. Ahora puedes probar conexión y explorar servicios privados."
+          ? "Cubitt CT4 anexado. Ahora puedes avanzar por las verificaciones."
           : "Dispositivo anexado. Si no es Cubitt CT4, vuelve a escanear y selecciona el reloj correcto.",
         dispositivo,
         creadoEn: ahoraIso()
@@ -443,7 +462,7 @@ export function crearDispositivosBluetoothService() {
         ok: true,
         mensaje: diagnostico.serviciosLeidos.length
           ? "Conexión Bluetooth correcta. FitJeff pudo leer diagnóstico básico del reloj."
-          : "Conexión Bluetooth correcta, pero el reloj no entregó servicios estándar. Usa Explorar servicios privados.",
+          : "Conexión Bluetooth correcta, pero el reloj no entregó servicios estándar. Avanza a Explorar servicios privados.",
         dispositivo: normalizarDispositivo(device),
         conectado,
         diagnostico,
@@ -485,7 +504,7 @@ export function crearDispositivosBluetoothService() {
         ok: encontrados.length > 0,
         mensaje: encontrados.length > 0
           ? `Exploración lista: ${resumen.totalServicios} servicio(s), ${resumen.totalCaracteristicas} característica(s), ${resumen.totalLeidas} lectura(s) HEX.`
-          : "No se encontraron servicios privados candidatos. Puede requerir una lista de UUID más específica o protocolo propietario bloqueado.",
+          : "No se encontraron servicios privados candidatos. Vuelve a Escanear y anexar reloj para reautorizar permisos Bluetooth ampliados.",
         exploracion,
         creadoEn: exploracion.creadoEn
       };
