@@ -9,6 +9,7 @@
     - Probar conexión básica Bluetooth/GATT del reloj.
     - Explorar servicios privados del reloj.
     - Tomar lectura 1, tomar lectura 2 y comparar cambios HEX.
+    - Navegar el asistente de verificaciones por paginación.
     - Ejecutar importación CSV/JSON pegada por el usuario.
     - Pegar ejemplo de importación para facilitar pruebas.
     - Re-renderizar estado, resumen e historial después de cada acción.
@@ -42,6 +43,11 @@ export function crearDispositivosController() {
     bloquearBoton(boton, true, textoTemporal);
     const resultado = await accion();
     bloquearBoton(boton, false);
+    renderizar(contenedor, resultado.estado || service.obtenerEstado(), resultado);
+  }
+
+  function cambiarPagina(contenedor, pagina) {
+    const resultado = service.cambiarPaginaVerificacionCubitt(pagina);
     renderizar(contenedor, resultado.estado || service.obtenerEstado(), resultado);
   }
 
@@ -103,6 +109,12 @@ export function crearDispositivosController() {
     vista.cubittCompararBoton.addEventListener("click", () => {
       const resultadoComparacion = service.compararLecturasCubittPrivadas();
       renderizar(contenedor, resultadoComparacion.estado || service.obtenerEstado(), resultadoComparacion);
+    });
+
+    vista.cubittPaginaAnteriorBoton.addEventListener("click", () => cambiarPagina(contenedor, vista.cubittPaginaActual - 1));
+    vista.cubittPaginaSiguienteBoton.addEventListener("click", () => cambiarPagina(contenedor, vista.cubittPaginaActual + 1));
+    vista.cubittPaginaBotones.forEach((boton) => {
+      boton.addEventListener("click", () => cambiarPagina(contenedor, Number(boton.dataset.pagina || 1)));
     });
 
     vista.importForm.addEventListener("submit", (evento) => {
