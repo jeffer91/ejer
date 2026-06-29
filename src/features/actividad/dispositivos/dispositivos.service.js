@@ -6,8 +6,10 @@
     - Coordinar configuración local de Cubitt CT4, Google Fit y Puente FitJeff.
     - Anexar Cubitt CT4 por Web Bluetooth desde la app cuando el reloj aparece en Windows.
     - Probar conexión básica GATT sin prometer lectura automática de pasos.
+    - Explorar protocolo privado del reloj mediante servicios GATT candidatos.
+    - Tomar dos lecturas HEX y comparar cambios para ubicar posibles pasos.
     - Importar datos pegados mediante puente CSV/JSON hacia Actividad.
-    - Guardar historial local de preparación, anexado, diagnóstico e importación.
+    - Guardar historial local de preparación, anexado, diagnóstico, exploración e importación.
     - Construir resumen visual de dispositivos para Actividad.
 
   Se conecta con:
@@ -73,19 +75,22 @@ function crearEstadoConResumen(estado, importBridge) {
 function construirResumen(estado) {
   const cubittAnexado = Boolean(estado.cubitt.bluetoothId || estado.cubitt.identificadorLocal || estado.cubitt.bluetoothNombre);
   const cubittConectado = estado.cubitt.estado === DISPOSITIVOS_ESTADOS.CONECTADO;
+  const cubittExplorado = Boolean(estado.cubitt.bluetoothExploracion?.resumen?.totalServicios);
   const googlePreparado = estado.googleFit.estado === DISPOSITIVOS_ESTADOS.PREPARADO && Boolean(estado.googleFit.cuenta);
   const ultimoImporte = estado.puente.ultimoImportadoEn ? "Última importación guardada" : "Sin importaciones todavía";
 
   return {
     cubitt: {
       titulo: `${estado.cubitt.marca} ${estado.cubitt.modelo}`.trim(),
-      etiqueta: cubittConectado ? "Conectado" : cubittAnexado ? "Anexado" : "Pendiente",
-      detalle: cubittConectado
-        ? `Última conexión: ${fechaCorta(estado.cubitt.bluetoothUltimaConexionEn)}`
-        : cubittAnexado
-          ? `Anexado como ${estado.cubitt.bluetoothNombre || estado.cubitt.alias}`
-          : "Pendiente de escanear por Bluetooth",
-      estado: cubittConectado || cubittAnexado ? "success" : "pending"
+      etiqueta: cubittExplorado ? "Explorado" : cubittConectado ? "Conectado" : cubittAnexado ? "Anexado" : "Pendiente",
+      detalle: cubittExplorado
+        ? `${estado.cubitt.bluetoothExploracion.resumen.totalServicios} servicio(s), ${estado.cubitt.bluetoothExploracion.resumen.totalLeidas} lectura(s) HEX`
+        : cubittConectado
+          ? `Última conexión: ${fechaCorta(estado.cubitt.bluetoothUltimaConexionEn)}`
+          : cubittAnexado
+            ? `Anexado como ${estado.cubitt.bluetoothNombre || estado.cubitt.alias}`
+            : "Pendiente de escanear por Bluetooth",
+      estado: cubittExplorado || cubittConectado || cubittAnexado ? "success" : "pending"
     },
     googleFit: {
       titulo: "Google Fit",
@@ -264,6 +269,95 @@ export function crearDispositivosService(
     };
   }
 
+  async function explorarCubittPrivado() {
+    const anterior = repository.obtenerEstado();
+    const resultado = await bluetooth.explorarServiciosPrivados(anterior.cubitt);
+    const estado = repository.guardarEstado({
+      ...anterior,
+      cubitt: {
+        ...anterior.cubitt,
+        estado: resultado.exploracion ? DISPOSITIVOS_ESTADOS.CONECTADO : DISPOSITIVOS_ESTADOS.ERROR,
+        bluetoothExploracion: resultado.exploracion || anterior.cubitt.bluetoothExploracion,
+        bluetoothUltimoDiagnostico: resultado.mensaje,
+        ultimoIntento: new Date().toISOString(),
+        nota: resultado.mensaje
+      },
+      historial: [
+        crearEvento(resultado.exploracion ? "bluetooth-exploracion" : "bluetooth-error", resultado.mensaje),
+        ...(anterior.historial || [])
+      ].slice(0, 20)
+    });
+
+    return {
+      ...resultado,
+      estado: crearEstadoConResumen(estado, importBridge)
+    };
+  }
+
+  async function tomarLecturaCubittPrivada(numero = 1) {
+    const slot = Number(numero) === 2 ? 2 : 1;
+    const anterior = repository.obtenerEstado();
+    const resultado = await bluetooth.tomarLecturaPrivada(anterior.cubitt, slot);
+    const cubittActualizado = {
+      ...anterior.cubitt,
+      estado: resultado.lectura ? DISPOSITIVOS_ESTADOS.CONECTADO : DISPOSITIVOS_ESTADOS.ERROR,
+      bluetoothExploracion: resultado.exploracion || anterior.cubitt.bluetoothExploracion,
+      bluetoothUltimoDiagnostico: resultado.mensaje,
+      ultimoIntento: new Date().toISOString(),
+      nota: resultado.mensaje
+    };
+
+    if (slot === 1 && resultado.lectura) {
+      cubittActualizado.bluetoothLectura1 = resultado.lectura;
+      cubittActualizado.bluetoothLectura2 = null;
+      cubittActualizado.bluetoothComparacion = null;
+    }
+
+    if (slot === 2 && resultado.lectura) {
+      cubittActualizado.bluetoothLectura2 = resultado.lectura;
+      cubittActualizado.bluetoothComparacion = null;
+    }
+
+    const estado = repository.guardarEstado({
+      ...anterior,
+      cubitt: cubittActualizado,
+      historial: [
+        crearEvento(resultado.lectura ? `bluetooth-lectura-${slot}` : "bluetooth-error", resultado.mensaje),
+        ...(anterior.historial || [])
+      ].slice(0, 20)
+    });
+
+    return {
+      ...resultado,
+      estado: crearEstadoConResumen(estado, importBridge)
+    };
+  }
+
+  function compararLecturasCubittPrivadas() {
+    const anterior = repository.obtenerEstado();
+    const resultado = bluetooth.compararLecturas(anterior.cubitt.bluetoothLectura1, anterior.cubitt.bluetoothLectura2);
+
+    const estado = repository.guardarEstado({
+      ...anterior,
+      cubitt: {
+        ...anterior.cubitt,
+        bluetoothComparacion: resultado.comparacion || anterior.cubitt.bluetoothComparacion,
+        bluetoothUltimoDiagnostico: resultado.mensaje,
+        ultimoIntento: new Date().toISOString(),
+        nota: resultado.mensaje
+      },
+      historial: [
+        crearEvento(resultado.ok ? "bluetooth-comparacion" : "bluetooth-error", resultado.mensaje),
+        ...(anterior.historial || [])
+      ].slice(0, 20)
+    });
+
+    return {
+      ...resultado,
+      estado: crearEstadoConResumen(estado, importBridge)
+    };
+  }
+
   function importarDatosPegados(texto) {
     const anterior = repository.obtenerEstado();
     const resultado = importBridge.importarTexto(texto, {
@@ -295,6 +389,9 @@ export function crearDispositivosService(
     guardarPreparacion,
     anexarCubittBluetooth,
     probarConexionCubittBluetooth,
+    explorarCubittPrivado,
+    tomarLecturaCubittPrivada,
+    compararLecturasCubittPrivadas,
     importarDatosPegados
   };
 }
