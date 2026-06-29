@@ -5,7 +5,7 @@
   Función o funciones:
     - Construir la pantalla de Dispositivos y Bluetooth.
     - Mostrar anexado local de Cubitt CT4 por Bluetooth.
-    - Mostrar explorador privado GATT para buscar pasos en datos HEX.
+    - Mostrar verificaciones privadas GATT por paginación.
     - Mostrar preparación local de Google Fit y puente FitJeff.
     - Mostrar puente claro de importación CSV/JSON.
     - Leer formularios de configuración e importación.
@@ -19,6 +19,15 @@
 
 import { DISPOSITIVOS_FUENTES, DISPOSITIVOS_TEXTOS } from "./dispositivos.constants.js";
 import "./dispositivos.css";
+
+const TOTAL_PAGINAS_VERIFICACION = 5;
+const PAGINAS_VERIFICACION = Object.freeze([
+  { numero: 1, titulo: "Explorar", ayuda: "Busca servicios privados y características del reloj." },
+  { numero: 2, titulo: "Lectura 1", ayuda: "Guarda los valores HEX actuales antes de caminar." },
+  { numero: 3, titulo: "Lectura 2", ayuda: "Camina 20 o 30 pasos y guarda la segunda lectura." },
+  { numero: 4, titulo: "Comparar", ayuda: "Compara lectura 1 contra lectura 2." },
+  { numero: 5, titulo: "Resultados", ayuda: "Revisa qué características cambiaron." }
+]);
 
 function crearElemento(etiqueta, clase = "", texto = "") {
   const elemento = document.createElement(etiqueta);
@@ -138,6 +147,12 @@ function uuidCorto(uuid = "") {
   return texto.length > 18 ? `${texto.slice(0, 8)}…${texto.slice(-6)}` : texto || "—";
 }
 
+function normalizarPaginaVerificacion(valor) {
+  const numero = Number(valor);
+  if (!Number.isFinite(numero)) return 1;
+  return Math.min(TOTAL_PAGINAS_VERIFICACION, Math.max(1, Math.round(numero)));
+}
+
 function obtenerCaracteristicasExploradas(cubitt = {}) {
   const servicios = Array.isArray(cubitt.bluetoothExploracion?.servicios) ? cubitt.bluetoothExploracion.servicios : [];
   return servicios.flatMap((servicio) => (servicio.caracteristicas || []).map((caracteristica) => ({
@@ -200,39 +215,115 @@ function crearTablaCambios(cubitt = {}) {
   return tabla;
 }
 
+function crearPaginadorVerificacion(paginaActual) {
+  const wrap = crearElemento("div", "dispositivos-private-pager");
+  const botonesPagina = [];
+  const anterior = crearBotonAccion(DISPOSITIVOS_TEXTOS.BOTON_ANTERIOR, "cubitt-pagina-anterior", "secondary");
+  const siguiente = crearBotonAccion(DISPOSITIVOS_TEXTOS.BOTON_SIGUIENTE, "cubitt-pagina-siguiente", "secondary");
+
+  anterior.disabled = paginaActual <= 1;
+  siguiente.disabled = paginaActual >= TOTAL_PAGINAS_VERIFICACION;
+
+  wrap.appendChild(anterior);
+
+  PAGINAS_VERIFICACION.forEach((pagina) => {
+    const boton = crearBotonAccion(String(pagina.numero), `cubitt-pagina-${pagina.numero}`, pagina.numero === paginaActual ? "primary" : "secondary");
+    boton.dataset.pagina = String(pagina.numero);
+    boton.title = pagina.titulo;
+    botonesPagina.push(boton);
+    wrap.appendChild(boton);
+  });
+
+  wrap.appendChild(siguiente);
+
+  return {
+    wrap,
+    anterior,
+    siguiente,
+    botonesPagina
+  };
+}
+
+function crearContenidoPaginaVerificacion(paginaActual, cubitt, botones) {
+  const paginaInfo = PAGINAS_VERIFICACION[paginaActual - 1];
+  const contenido = crearElemento("div", "dispositivos-private-step");
+  const accion = crearElemento("div", "dispositivos-bluetooth-actions");
+
+  contenido.appendChild(crearElemento("strong", "dispositivos-private-step__title", `Paso ${paginaInfo.numero} de ${TOTAL_PAGINAS_VERIFICACION}: ${paginaInfo.titulo}`));
+  contenido.appendChild(crearElemento("p", "", paginaInfo.ayuda));
+
+  botones.explorar.hidden = paginaActual !== 1;
+  botones.lectura1.hidden = paginaActual !== 2;
+  botones.lectura2.hidden = paginaActual !== 3;
+  botones.comparar.hidden = paginaActual !== 4;
+
+  accion.appendChild(botones.explorar);
+  accion.appendChild(botones.lectura1);
+  accion.appendChild(botones.lectura2);
+  accion.appendChild(botones.comparar);
+  contenido.appendChild(accion);
+
+  if (paginaActual === 1) {
+    contenido.appendChild(crearTablaExploracion(cubitt));
+  }
+
+  if (paginaActual === 2) {
+    contenido.appendChild(crearElemento("p", "dispositivos-note", cubitt.bluetoothLectura1?.creadoEn ? `Lectura 1 guardada: ${fechaCorta(cubitt.bluetoothLectura1.creadoEn)}` : "Cuando pulses este botón, no camines todavía. Guarda primero el estado actual del reloj."));
+  }
+
+  if (paginaActual === 3) {
+    contenido.appendChild(crearElemento("p", "dispositivos-note", cubitt.bluetoothLectura2?.creadoEn ? `Lectura 2 guardada: ${fechaCorta(cubitt.bluetoothLectura2.creadoEn)}` : "Camina 20 o 30 pasos reales con el reloj puesto y luego pulsa Tomar lectura 2."));
+  }
+
+  if (paginaActual === 4) {
+    contenido.appendChild(crearTablaCambios(cubitt));
+  }
+
+  if (paginaActual === 5) {
+    contenido.appendChild(crearTablaExploracion(cubitt));
+    contenido.appendChild(crearTablaCambios(cubitt));
+  }
+
+  return contenido;
+}
+
 function crearExploradorPrivado(cubitt = {}) {
   const panel = crearElemento("section", "dispositivos-private-explorer");
-  const acciones = crearElemento("div", "dispositivos-bluetooth-actions");
+  const paginaActual = normalizarPaginaVerificacion(cubitt.bluetoothVerificacionPagina || 1);
   const explorarBoton = crearBotonAccion(DISPOSITIVOS_TEXTOS.BOTON_EXPLORAR_PRIVADO, "cubitt-explorar", "primary");
-  const lectura1Boton = crearBotonAccion(DISPOSITIVOS_TEXTOS.BOTON_LECTURA_1, "cubitt-lectura-1", "secondary");
-  const lectura2Boton = crearBotonAccion(DISPOSITIVOS_TEXTOS.BOTON_LECTURA_2, "cubitt-lectura-2", "secondary");
-  const compararBoton = crearBotonAccion(DISPOSITIVOS_TEXTOS.BOTON_COMPARAR, "cubitt-comparar", "secondary");
+  const lectura1Boton = crearBotonAccion(DISPOSITIVOS_TEXTOS.BOTON_LECTURA_1, "cubitt-lectura-1", "primary");
+  const lectura2Boton = crearBotonAccion(DISPOSITIVOS_TEXTOS.BOTON_LECTURA_2, "cubitt-lectura-2", "primary");
+  const compararBoton = crearBotonAccion(DISPOSITIVOS_TEXTOS.BOTON_COMPARAR, "cubitt-comparar", "primary");
   const resumen = cubitt.bluetoothExploracion?.resumen || {};
-
-  acciones.appendChild(explorarBoton);
-  acciones.appendChild(lectura1Boton);
-  acciones.appendChild(lectura2Boton);
-  acciones.appendChild(compararBoton);
+  const paginador = crearPaginadorVerificacion(paginaActual);
 
   panel.appendChild(crearElemento("h4", "", DISPOSITIVOS_TEXTOS.EXPLORADOR_TITULO));
-  panel.appendChild(crearElemento("p", "", "Usa esto para encontrar dónde el reloj guarda pasos. Primero explora, luego toma lectura 1, camina 20 o 30 pasos y toma lectura 2."));
-  panel.appendChild(acciones);
+  panel.appendChild(crearElemento("p", "", "Las pruebas están separadas por páginas para evitar errores: explora, guarda lectura 1, camina, guarda lectura 2 y compara."));
+  panel.appendChild(paginador.wrap);
+  panel.appendChild(crearDatoDiagnostico("Página actual", `${paginaActual} de ${TOTAL_PAGINAS_VERIFICACION}`));
   panel.appendChild(crearDatoDiagnostico("Última exploración", cubitt.bluetoothExploracion?.creadoEn ? fechaCorta(cubitt.bluetoothExploracion.creadoEn) : "Pendiente"));
   panel.appendChild(crearDatoDiagnostico("Servicios privados", resumen.totalServicios ? String(resumen.totalServicios) : "Pendiente"));
-  panel.appendChild(crearDatoDiagnostico("Características", resumen.totalCaracteristicas ? String(resumen.totalCaracteristicas) : "Pendiente"));
   panel.appendChild(crearDatoDiagnostico("Lecturas HEX", resumen.totalLeidas ? String(resumen.totalLeidas) : "Pendiente"));
   panel.appendChild(crearDatoDiagnostico("Lectura 1", cubitt.bluetoothLectura1?.creadoEn ? fechaCorta(cubitt.bluetoothLectura1.creadoEn) : "Pendiente"));
   panel.appendChild(crearDatoDiagnostico("Lectura 2", cubitt.bluetoothLectura2?.creadoEn ? fechaCorta(cubitt.bluetoothLectura2.creadoEn) : "Pendiente"));
   panel.appendChild(crearDatoDiagnostico("Cambios detectados", cubitt.bluetoothComparacion?.totalCambios ? String(cubitt.bluetoothComparacion.totalCambios) : "Pendiente"));
-  panel.appendChild(crearTablaExploracion(cubitt));
-  panel.appendChild(crearTablaCambios(cubitt));
+  panel.appendChild(crearContenidoPaginaVerificacion(paginaActual, cubitt, {
+    explorar: explorarBoton,
+    lectura1: lectura1Boton,
+    lectura2: lectura2Boton,
+    comparar: compararBoton
+  }));
 
   return {
     panel,
+    paginaActual,
     explorarBoton,
     lectura1Boton,
     lectura2Boton,
-    compararBoton
+    compararBoton,
+    paginaAnteriorBoton: paginador.anterior,
+    paginaSiguienteBoton: paginador.siguiente,
+    paginaBotones: paginador.botonesPagina
   };
 }
 
@@ -321,7 +412,7 @@ export function crearDispositivosView(estado) {
   bluetoothAcciones.appendChild(cubittProbarBoton);
 
   cubittPanel.appendChild(crearElemento("h3", "", DISPOSITIVOS_TEXTOS.CUBITT_TITULO));
-  cubittPanel.appendChild(crearElemento("p", "", "Anexa el reloj directo por Bluetooth. Si conecta pero no entrega servicios estándar, usa el explorador privado."));
+  cubittPanel.appendChild(crearElemento("p", "", "Anexa el reloj directo por Bluetooth. Si conecta pero no entrega servicios estándar, usa las verificaciones paginadas."));
   cubittPanel.appendChild(bluetoothAcciones);
   cubittPanel.appendChild(crearDiagnosticoCubitt(estado.cubitt));
   cubittPanel.appendChild(exploradorPrivado.panel);
@@ -373,6 +464,10 @@ export function crearDispositivosView(estado) {
     cubittLectura1Boton: exploradorPrivado.lectura1Boton,
     cubittLectura2Boton: exploradorPrivado.lectura2Boton,
     cubittCompararBoton: exploradorPrivado.compararBoton,
+    cubittPaginaActual: exploradorPrivado.paginaActual,
+    cubittPaginaAnteriorBoton: exploradorPrivado.paginaAnteriorBoton,
+    cubittPaginaSiguienteBoton: exploradorPrivado.paginaSiguienteBoton,
+    cubittPaginaBotones: exploradorPrivado.paginaBotones,
     importForm: importacion.form,
     importTextarea: importacion.textarea,
     importMensaje: importacion.mensaje,
