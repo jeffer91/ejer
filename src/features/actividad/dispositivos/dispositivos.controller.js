@@ -5,6 +5,7 @@
   Función o funciones:
     - Montar la pantalla Dispositivos.
     - Navegar subpáginas independientes: Cubitt CT4, Google Fit, Puente FitJeff e Historial.
+    - Permitir navegación tanto desde subpestañas como desde tarjetas de resumen.
     - Guardar preparación local sin afectar configuraciones de otras subpáginas.
     - Anexar Cubitt CT4 por Bluetooth cuando el usuario lo aprueba.
     - Probar conexión básica Bluetooth/GATT del reloj.
@@ -45,11 +46,25 @@ export function crearDispositivosController() {
     boton.addEventListener("click", handler);
   }
 
+  function crearResultadoError(error) {
+    return {
+      ok: false,
+      mensaje: error?.message || "No se pudo completar la acción solicitada. Revisa la consola y vuelve a intentar."
+    };
+  }
+
   async function ejecutarAccionBluetooth({ boton, textoTemporal, accion, contenedor }) {
     bloquearBoton(boton, true, textoTemporal);
-    const resultado = await accion();
-    bloquearBoton(boton, false);
-    renderizar(contenedor, resultado.estado || service.obtenerEstado(), resultado);
+
+    try {
+      const resultado = await accion();
+      renderizar(contenedor, resultado.estado || service.obtenerEstado(), resultado);
+    } catch (error) {
+      const resultadoError = crearResultadoError(error);
+      renderizar(contenedor, service.obtenerEstado(), resultadoError);
+    } finally {
+      bloquearBoton(boton, false);
+    }
   }
 
   function cambiarPagina(contenedor, pagina) {
@@ -62,11 +77,19 @@ export function crearDispositivosController() {
     renderizar(contenedor, resultado.estado || service.obtenerEstado());
   }
 
+  function conectarTarjetasResumen(contenedor, pantalla) {
+    pantalla.querySelectorAll(".dispositivos-status[data-pagina]").forEach((card) => {
+      agregarClick(card, () => cambiarSubpagina(contenedor, card.dataset.pagina));
+    });
+  }
+
   function renderizar(contenedor, estado = service.obtenerEstado(), resultado = null, resultadoImportacion = null) {
     const vista = crearDispositivosView(estado);
 
     contenedor.innerHTML = "";
     contenedor.appendChild(vista.pantalla);
+
+    conectarTarjetasResumen(contenedor, vista.pantalla);
 
     if (resultado) {
       pintarMensajeDispositivos(vista.mensaje, resultado);
