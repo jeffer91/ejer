@@ -7,6 +7,7 @@
     - Mantener Cubitt CT4, Google Fit y puente de importación separados.
     - Preparar anexado Bluetooth local de Cubitt CT4 sin prometer lectura automática de pasos.
     - Preparar estructura para exploración privada GATT y comparación de lecturas HEX.
+    - Guardar la página actual del asistente de verificaciones Bluetooth.
 
   Se conecta con:
     - src/features/actividad/dispositivos/dispositivos.service.js
@@ -36,7 +37,7 @@ export const DISPOSITIVOS_TEXTOS = Object.freeze({
   GOOGLE_FIT_TITULO: "Google Fit",
   PUENTE_TITULO: "Puente FitJeff",
   IMPORTAR_TITULO: "Importar actividad",
-  EXPLORADOR_TITULO: "Explorador privado Cubitt CT4",
+  EXPLORADOR_TITULO: "Verificaciones privadas Cubitt CT4",
   BOTON_GUARDAR: "Guardar preparación",
   BOTON_IMPORTAR: "Importar datos pegados",
   BOTON_BLUETOOTH_ANEXAR: "Escanear y anexar reloj",
@@ -45,6 +46,8 @@ export const DISPOSITIVOS_TEXTOS = Object.freeze({
   BOTON_LECTURA_1: "Tomar lectura 1",
   BOTON_LECTURA_2: "Tomar lectura 2",
   BOTON_COMPARAR: "Comparar cambios",
+  BOTON_ANTERIOR: "Anterior",
+  BOTON_SIGUIENTE: "Siguiente",
   EXITO: "Preparación guardada localmente.",
   BLUETOOTH_EXITO: "Reloj anexado localmente.",
   AVISO_PRIVADO: "El identificador Bluetooth y las lecturas HEX se guardan solo en tu PC. No se suben al código.",
@@ -69,7 +72,8 @@ export const CUBITT_BASE = Object.freeze({
   bluetoothExploracion: null,
   bluetoothLectura1: null,
   bluetoothLectura2: null,
-  bluetoothComparacion: null
+  bluetoothComparacion: null,
+  bluetoothVerificacionPagina: 1
 });
 
 export const GOOGLE_FIT_BASE = Object.freeze({
@@ -82,7 +86,7 @@ export const GOOGLE_FIT_BASE = Object.freeze({
 
 export function crearEstadoDispositivosBase() {
   return {
-    version: "0.4.0",
+    version: "0.4.1",
     actualizadoEn: "",
     cubitt: {
       ...CUBITT_BASE,
