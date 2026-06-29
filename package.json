@@ -16,13 +16,16 @@
     "electron:dev:check": "npm run tools:check && npm run check:structure && npm run audit:app && npm run electron:dev",
     "desktop:pack": "npm run build && electron-builder --dir",
     "desktop:win": "npm run build && electron-builder --win nsis",
+    "android:init": "npx cap add android",
+    "android:sync": "npm run build && npx cap sync android",
+    "android:apk": "npm run build:android",
     "tools:check": "node scripts/check-tools.cjs",
     "check:structure": "node scripts/check-structure.cjs",
     "check:local": "node scripts/check-local.cjs",
     "audit:app": "node scripts/auditar-app.cjs",
     "version:bump": "node scripts/version-bump.cjs",
     "build:windows": "node scripts/build-windows.cjs",
-    "build:android": "node scripts/build-android.cjs",
+    "build:android": "npm run build && node scripts/build-android.cjs",
     "release:check": "node scripts/revision-release-final.cjs",
     "release:check:built": "node scripts/revision-release-final.cjs --after-build",
     "release:github": "node scripts/release-github.cjs",
@@ -33,10 +36,13 @@
     "revisar:todo": "scripts\\revisar-todo.bat"
   },
   "dependencies": {
+    "@capacitor/android": "latest",
+    "@capacitor/core": "latest",
     "electron-updater": "latest",
     "firebase": "^10.14.1"
   },
   "devDependencies": {
+    "@capacitor/cli": "latest",
     "concurrently": "latest",
     "cross-env": "latest",
     "electron": "^41.2.1",
