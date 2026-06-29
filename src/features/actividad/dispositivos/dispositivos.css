@@ -33,6 +33,10 @@
   background: var(--fj-cyan, #0ea5e9);
 }
 
+.dispositivos-panel--cubitt::before {
+  background: linear-gradient(180deg, #2563eb, #0ea5e9);
+}
+
 .dispositivos-status--success::before {
   background: var(--fj-green, #16a34a);
 }
@@ -41,8 +45,13 @@
   background: var(--fj-yellow, #f59e0b);
 }
 
+.dispositivos-status--error::before {
+  background: var(--fj-red, #dc2626);
+}
+
 .dispositivos-header h2,
-.dispositivos-panel h3 {
+.dispositivos-panel h3,
+.dispositivos-diagnostic h4 {
   margin: 0;
   color: var(--fj-text-strong, #07111f);
   line-height: 1.15;
@@ -144,6 +153,11 @@
   min-height: 40px;
 }
 
+.dispositivos-input[readonly] {
+  background: var(--fj-surface-2, #f7fbff);
+  color: var(--fj-muted, #64748b);
+}
+
 .dispositivos-textarea {
   min-height: 150px;
   resize: vertical;
@@ -173,6 +187,64 @@
 .dispositivos-check input {
   width: 16px;
   height: 16px;
+}
+
+.dispositivos-bluetooth-actions,
+.dispositivos-import-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.dispositivos-bluetooth-actions .dispositivos-button,
+.dispositivos-import-actions .dispositivos-button {
+  grid-column: auto;
+  flex: 1 1 180px;
+}
+
+.dispositivos-diagnostic {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  border: 1px solid rgba(37, 99, 235, 0.14);
+  border-radius: var(--fj-radius-sm, 12px);
+  background: linear-gradient(180deg, rgba(37, 99, 235, 0.08), rgba(14, 165, 233, 0.05));
+  padding: 10px;
+}
+
+.dispositivos-diagnostic h4,
+.dispositivos-diagnostic__note {
+  grid-column: 1 / -1;
+}
+
+.dispositivos-diagnostic__item {
+  display: grid;
+  gap: 3px;
+  border: 1px solid rgba(37, 99, 235, 0.12);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.8);
+  padding: 7px;
+}
+
+.dispositivos-diagnostic__item span {
+  color: var(--fj-muted, #64748b);
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.dispositivos-diagnostic__item strong {
+  overflow-wrap: anywhere;
+  color: var(--fj-text-strong, #07111f);
+  font-size: 0.78rem;
+}
+
+.dispositivos-diagnostic__note {
+  margin: 0;
+  border-top: 1px solid rgba(37, 99, 235, 0.12);
+  padding-top: 8px;
+  font-weight: 800;
 }
 
 .dispositivos-message {
@@ -205,6 +277,11 @@
   font-weight: 950;
 }
 
+.dispositivos-button:disabled {
+  cursor: wait;
+  opacity: 0.68;
+}
+
 .dispositivos-button--primary {
   background: var(--fj-action-bg, linear-gradient(135deg, #2563eb, #0ea5e9));
   color: #ffffff;
@@ -216,16 +293,6 @@
 
 .dispositivos-import-form {
   display: grid;
-}
-
-.dispositivos-import-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.dispositivos-import-actions .dispositivos-button {
-  grid-column: auto;
 }
 
 .dispositivos-history {
@@ -247,7 +314,12 @@
     grid-template-columns: 1fr;
   }
 
-  .dispositivos-import-actions {
+  .dispositivos-import-actions,
+  .dispositivos-bluetooth-actions {
     display: grid;
+  }
+
+  .dispositivos-diagnostic {
+    grid-template-columns: 1fr;
   }
 }
