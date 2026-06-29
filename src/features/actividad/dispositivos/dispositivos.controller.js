@@ -4,7 +4,8 @@
 
   Función o funciones:
     - Montar la pantalla Dispositivos.
-    - Guardar preparación local de Cubitt CT4, Google Fit y Puente FitJeff.
+    - Navegar subpáginas independientes: Cubitt CT4, Google Fit, Puente FitJeff e Historial.
+    - Guardar preparación local sin afectar configuraciones de otras subpáginas.
     - Anexar Cubitt CT4 por Bluetooth cuando el usuario lo aprueba.
     - Probar conexión básica Bluetooth/GATT del reloj.
     - Explorar servicios privados del reloj.
@@ -39,6 +40,11 @@ export function crearDispositivosController() {
     boton.disabled = false;
   }
 
+  function agregarClick(boton, handler) {
+    if (!boton || typeof handler !== "function") return;
+    boton.addEventListener("click", handler);
+  }
+
   async function ejecutarAccionBluetooth({ boton, textoTemporal, accion, contenedor }) {
     bloquearBoton(boton, true, textoTemporal);
     const resultado = await accion();
@@ -49,6 +55,11 @@ export function crearDispositivosController() {
   function cambiarPagina(contenedor, pagina) {
     const resultado = service.cambiarPaginaVerificacionCubitt(pagina);
     renderizar(contenedor, resultado.estado || service.obtenerEstado(), resultado);
+  }
+
+  function cambiarSubpagina(contenedor, pagina) {
+    const resultado = service.cambiarPaginaDispositivos(pagina);
+    renderizar(contenedor, resultado.estado || service.obtenerEstado());
   }
 
   function renderizar(contenedor, estado = service.obtenerEstado(), resultado = null, resultadoImportacion = null) {
@@ -65,65 +76,74 @@ export function crearDispositivosController() {
       pintarMensajeDispositivos(vista.importMensaje, resultadoImportacion);
     }
 
-    vista.form.addEventListener("submit", (evento) => {
-      evento.preventDefault();
-      const guardado = service.guardarPreparacion(leerDispositivosForm(vista.form));
-      renderizar(contenedor, guardado.estado || service.obtenerEstado(), guardado);
+    vista.paginaBotones.forEach((boton) => {
+      agregarClick(boton, () => cambiarSubpagina(contenedor, boton.dataset.pagina));
     });
 
-    vista.cubittEscanearBoton.addEventListener("click", () => ejecutarAccionBluetooth({
+    if (vista.form) {
+      vista.form.addEventListener("submit", (evento) => {
+        evento.preventDefault();
+        const guardado = service.guardarPreparacion(leerDispositivosForm(vista.form));
+        renderizar(contenedor, guardado.estado || service.obtenerEstado(), guardado);
+      });
+    }
+
+    agregarClick(vista.cubittEscanearBoton, () => ejecutarAccionBluetooth({
       boton: vista.cubittEscanearBoton,
       textoTemporal: "Escaneando...",
       accion: () => service.anexarCubittBluetooth(),
       contenedor
     }));
 
-    vista.cubittProbarBoton.addEventListener("click", () => ejecutarAccionBluetooth({
+    agregarClick(vista.cubittProbarBoton, () => ejecutarAccionBluetooth({
       boton: vista.cubittProbarBoton,
       textoTemporal: "Conectando...",
       accion: () => service.probarConexionCubittBluetooth(),
       contenedor
     }));
 
-    vista.cubittExplorarBoton.addEventListener("click", () => ejecutarAccionBluetooth({
+    agregarClick(vista.cubittExplorarBoton, () => ejecutarAccionBluetooth({
       boton: vista.cubittExplorarBoton,
       textoTemporal: "Explorando...",
       accion: () => service.explorarCubittPrivado(),
       contenedor
     }));
 
-    vista.cubittLectura1Boton.addEventListener("click", () => ejecutarAccionBluetooth({
+    agregarClick(vista.cubittLectura1Boton, () => ejecutarAccionBluetooth({
       boton: vista.cubittLectura1Boton,
       textoTemporal: "Leyendo 1...",
       accion: () => service.tomarLecturaCubittPrivada(1),
       contenedor
     }));
 
-    vista.cubittLectura2Boton.addEventListener("click", () => ejecutarAccionBluetooth({
+    agregarClick(vista.cubittLectura2Boton, () => ejecutarAccionBluetooth({
       boton: vista.cubittLectura2Boton,
       textoTemporal: "Leyendo 2...",
       accion: () => service.tomarLecturaCubittPrivada(2),
       contenedor
     }));
 
-    vista.cubittCompararBoton.addEventListener("click", () => {
+    agregarClick(vista.cubittCompararBoton, () => {
       const resultadoComparacion = service.compararLecturasCubittPrivadas();
       renderizar(contenedor, resultadoComparacion.estado || service.obtenerEstado(), resultadoComparacion);
     });
 
-    vista.cubittPaginaAnteriorBoton.addEventListener("click", () => cambiarPagina(contenedor, vista.cubittPaginaActual - 1));
-    vista.cubittPaginaSiguienteBoton.addEventListener("click", () => cambiarPagina(contenedor, vista.cubittPaginaActual + 1));
+    agregarClick(vista.cubittPaginaAnteriorBoton, () => cambiarPagina(contenedor, vista.cubittPaginaActual - 1));
+    agregarClick(vista.cubittPaginaSiguienteBoton, () => cambiarPagina(contenedor, vista.cubittPaginaActual + 1));
     vista.cubittPaginaBotones.forEach((boton) => {
-      boton.addEventListener("click", () => cambiarPagina(contenedor, Number(boton.dataset.pagina || 1)));
+      agregarClick(boton, () => cambiarPagina(contenedor, Number(boton.dataset.pagina || 1)));
     });
 
-    vista.importForm.addEventListener("submit", (evento) => {
-      evento.preventDefault();
-      const resultadoImportar = service.importarDatosPegados(vista.importTextarea.value);
-      renderizar(contenedor, resultadoImportar.estado || service.obtenerEstado(), null, resultadoImportar);
-    });
+    if (vista.importForm) {
+      vista.importForm.addEventListener("submit", (evento) => {
+        evento.preventDefault();
+        const resultadoImportar = service.importarDatosPegados(vista.importTextarea?.value || "");
+        renderizar(contenedor, resultadoImportar.estado || service.obtenerEstado(), null, resultadoImportar);
+      });
+    }
 
-    vista.ejemploBoton.addEventListener("click", () => {
+    agregarClick(vista.ejemploBoton, () => {
+      if (!vista.importTextarea) return;
       vista.importTextarea.value = vista.ejemploImportacion;
       vista.importTextarea.focus();
     });
