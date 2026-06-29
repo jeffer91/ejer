@@ -8,6 +8,7 @@
     - Probar conexión básica GATT sin prometer lectura automática de pasos.
     - Explorar protocolo privado del reloj mediante servicios GATT candidatos.
     - Tomar dos lecturas HEX y comparar cambios para ubicar posibles pasos.
+    - Manejar paginación del asistente de verificaciones Bluetooth.
     - Importar datos pegados mediante puente CSV/JSON hacia Actividad.
     - Guardar historial local de preparación, anexado, diagnóstico, exploración e importación.
     - Construir resumen visual de dispositivos para Actividad.
@@ -27,6 +28,8 @@ import { DISPOSITIVOS_ESTADOS, DISPOSITIVOS_FUENTES, DISPOSITIVOS_TEXTOS } from 
 import { crearDispositivosImportBridgeService } from "./dispositivos-import-bridge.service.js";
 import { crearDispositivosRepository } from "./dispositivos.repository.js";
 
+const TOTAL_PAGINAS_VERIFICACION = 5;
+
 function limpiarTexto(valor, max = 120) {
   return String(valor || "").trim().slice(0, max);
 }
@@ -38,6 +41,12 @@ function leerBooleano(valor) {
 function preservarTexto(nuevoValor, valorAnterior, max = 120) {
   const nuevo = limpiarTexto(nuevoValor, max);
   return nuevo || limpiarTexto(valorAnterior, max);
+}
+
+function normalizarPaginaVerificacion(pagina) {
+  const numero = Number(pagina);
+  if (!Number.isFinite(numero)) return 1;
+  return Math.min(TOTAL_PAGINAS_VERIFICACION, Math.max(1, Math.round(numero)));
 }
 
 function crearEvento(tipo, mensaje) {
@@ -129,7 +138,8 @@ export function crearDispositivosService(
       variante: preservarTexto(datos.cubittVariante, anterior.cubitt.variante, 60),
       alias: preservarTexto(datos.cubittAlias, anterior.cubitt.alias, 80),
       identificadorLocal: preservarTexto(datos.cubittIdentificadorLocal, anterior.cubitt.identificadorLocal, 120),
-      bluetoothNombre: preservarTexto(datos.cubittBluetoothNombre, anterior.cubitt.bluetoothNombre, 120)
+      bluetoothNombre: preservarTexto(datos.cubittBluetoothNombre, anterior.cubitt.bluetoothNombre, 120),
+      bluetoothVerificacionPagina: normalizarPaginaVerificacion(anterior.cubitt.bluetoothVerificacionPagina || 1)
     };
     const googleFit = {
       ...anterior.googleFit,
@@ -178,6 +188,24 @@ export function crearDispositivosService(
     };
   }
 
+  function cambiarPaginaVerificacionCubitt(pagina) {
+    const anterior = repository.obtenerEstado();
+    const paginaNormalizada = normalizarPaginaVerificacion(pagina);
+    const estado = repository.guardarEstado({
+      ...anterior,
+      cubitt: {
+        ...anterior.cubitt,
+        bluetoothVerificacionPagina: paginaNormalizada
+      }
+    });
+
+    return {
+      ok: true,
+      mensaje: `Verificación ${paginaNormalizada} de ${TOTAL_PAGINAS_VERIFICACION}.`,
+      estado: crearEstadoConResumen(estado, importBridge)
+    };
+  }
+
   async function anexarCubittBluetooth() {
     const anterior = repository.obtenerEstado();
     const resultado = await bluetooth.solicitarCubitt();
@@ -190,6 +218,7 @@ export function crearDispositivosService(
           estado: anterior.cubitt.bluetoothId ? anterior.cubitt.estado : DISPOSITIVOS_ESTADOS.ERROR,
           ultimoIntento: new Date().toISOString(),
           bluetoothUltimoDiagnostico: resultado.mensaje,
+          bluetoothVerificacionPagina: 1,
           nota: resultado.mensaje
         },
         historial: [
@@ -216,6 +245,7 @@ export function crearDispositivosService(
         bluetoothNombre: dispositivo.nombre || anterior.cubitt.bluetoothNombre,
         bluetoothAnexadoEn: resultado.creadoEn || new Date().toISOString(),
         bluetoothUltimoDiagnostico: resultado.mensaje,
+        bluetoothVerificacionPagina: 1,
         estado: DISPOSITIVOS_ESTADOS.PREPARADO,
         ultimoIntento: new Date().toISOString(),
         nota: resultado.mensaje
@@ -254,6 +284,7 @@ export function crearDispositivosService(
         bluetoothFabricante: diagnostico.fabricante || anterior.cubitt.bluetoothFabricante,
         bluetoothModeloDetectado: diagnostico.modelo || anterior.cubitt.bluetoothModeloDetectado,
         bluetoothServiciosLeidos: Array.isArray(diagnostico.serviciosLeidos) ? diagnostico.serviciosLeidos : anterior.cubitt.bluetoothServiciosLeidos,
+        bluetoothVerificacionPagina: resultado.ok ? 1 : normalizarPaginaVerificacion(anterior.cubitt.bluetoothVerificacionPagina || 1),
         ultimoIntento: new Date().toISOString(),
         nota: resultado.mensaje
       },
@@ -279,6 +310,7 @@ export function crearDispositivosService(
         estado: resultado.exploracion ? DISPOSITIVOS_ESTADOS.CONECTADO : DISPOSITIVOS_ESTADOS.ERROR,
         bluetoothExploracion: resultado.exploracion || anterior.cubitt.bluetoothExploracion,
         bluetoothUltimoDiagnostico: resultado.mensaje,
+        bluetoothVerificacionPagina: resultado.exploracion ? 2 : normalizarPaginaVerificacion(anterior.cubitt.bluetoothVerificacionPagina || 1),
         ultimoIntento: new Date().toISOString(),
         nota: resultado.mensaje
       },
@@ -303,6 +335,7 @@ export function crearDispositivosService(
       estado: resultado.lectura ? DISPOSITIVOS_ESTADOS.CONECTADO : DISPOSITIVOS_ESTADOS.ERROR,
       bluetoothExploracion: resultado.exploracion || anterior.cubitt.bluetoothExploracion,
       bluetoothUltimoDiagnostico: resultado.mensaje,
+      bluetoothVerificacionPagina: resultado.lectura ? (slot === 1 ? 3 : 4) : normalizarPaginaVerificacion(anterior.cubitt.bluetoothVerificacionPagina || 1),
       ultimoIntento: new Date().toISOString(),
       nota: resultado.mensaje
     };
@@ -343,6 +376,7 @@ export function crearDispositivosService(
         ...anterior.cubitt,
         bluetoothComparacion: resultado.comparacion || anterior.cubitt.bluetoothComparacion,
         bluetoothUltimoDiagnostico: resultado.mensaje,
+        bluetoothVerificacionPagina: resultado.comparacion ? 5 : normalizarPaginaVerificacion(anterior.cubitt.bluetoothVerificacionPagina || 4),
         ultimoIntento: new Date().toISOString(),
         nota: resultado.mensaje
       },
@@ -387,6 +421,7 @@ export function crearDispositivosService(
   return {
     obtenerEstado,
     guardarPreparacion,
+    cambiarPaginaVerificacionCubitt,
     anexarCubittBluetooth,
     probarConexionCubittBluetooth,
     explorarCubittPrivado,
