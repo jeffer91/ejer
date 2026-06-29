@@ -4,7 +4,8 @@
 
   Función o funciones:
     - Construir la pantalla de Dispositivos y Google Fit.
-    - Mostrar preparación local de Cubitt CT4 y Google Fit.
+    - Mostrar anexado local de Cubitt CT4 por Bluetooth.
+    - Mostrar preparación local de Google Fit y puente FitJeff.
     - Mostrar puente claro de importación CSV/JSON.
     - Leer formularios de configuración e importación.
     - Mantener la vista sin lógica de guardado.
@@ -25,7 +26,7 @@ function crearElemento(etiqueta, clase = "", texto = "") {
   return elemento;
 }
 
-function crearInput({ name, label, value = "", placeholder = "", type = "text" }) {
+function crearInput({ name, label, value = "", placeholder = "", type = "text", readonly = false }) {
   const campo = crearElemento("label", "dispositivos-field");
   const texto = crearElemento("span", "", label);
   const input = crearElemento("input", "dispositivos-input");
@@ -35,6 +36,7 @@ function crearInput({ name, label, value = "", placeholder = "", type = "text" }
   input.value = value || "";
   input.placeholder = placeholder;
   input.autocomplete = "off";
+  input.readOnly = Boolean(readonly);
 
   campo.appendChild(texto);
   campo.appendChild(input);
@@ -50,6 +52,13 @@ function crearCheck({ name, label, checked = false }) {
   campo.appendChild(input);
   campo.appendChild(crearElemento("span", "", label));
   return campo;
+}
+
+function crearBotonAccion(texto, action, variante = "secondary") {
+  const boton = crearElemento("button", `dispositivos-button dispositivos-button--${variante}`, texto);
+  boton.type = "button";
+  boton.dataset.action = action;
+  return boton;
 }
 
 function crearSelectFuente(valorActual) {
@@ -76,12 +85,36 @@ function crearSelectFuente(valorActual) {
   return campo;
 }
 
-function crearEstadoCard(titulo, detalle, estado) {
+function crearEstadoCard(titulo, detalle, estado, etiqueta = "") {
   const card = crearElemento("article", `dispositivos-status dispositivos-status--${estado}`);
   card.appendChild(crearElemento("span", "dispositivos-status__label", titulo));
-  card.appendChild(crearElemento("strong", "", estado === "success" ? "Listo" : estado === "pending" ? "Pendiente" : "Preparado"));
+  card.appendChild(crearElemento("strong", "", etiqueta || (estado === "success" ? "Listo" : estado === "pending" ? "Pendiente" : "Preparado")));
   card.appendChild(crearElemento("small", "", detalle));
   return card;
+}
+
+function crearDatoDiagnostico(label, valor = "") {
+  const item = crearElemento("article", "dispositivos-diagnostic__item");
+  item.appendChild(crearElemento("span", "", label));
+  item.appendChild(crearElemento("strong", "", valor || "—"));
+  return item;
+}
+
+function crearDiagnosticoCubitt(cubitt = {}) {
+  const panel = crearElemento("section", "dispositivos-diagnostic");
+  const servicios = Array.isArray(cubitt.bluetoothServiciosLeidos) && cubitt.bluetoothServiciosLeidos.length
+    ? cubitt.bluetoothServiciosLeidos.join(", ")
+    : "Pendiente";
+
+  panel.appendChild(crearElemento("h4", "", "Diagnóstico Bluetooth"));
+  panel.appendChild(crearDatoDiagnostico("Nombre detectado", cubitt.bluetoothNombre || cubitt.alias));
+  panel.appendChild(crearDatoDiagnostico("ID local", cubitt.bluetoothId || cubitt.identificadorLocal));
+  panel.appendChild(crearDatoDiagnostico("Batería", cubitt.bluetoothBateria === null || cubitt.bluetoothBateria === undefined ? "Pendiente" : `${cubitt.bluetoothBateria}%`));
+  panel.appendChild(crearDatoDiagnostico("Fabricante", cubitt.bluetoothFabricante));
+  panel.appendChild(crearDatoDiagnostico("Modelo detectado", cubitt.bluetoothModeloDetectado));
+  panel.appendChild(crearDatoDiagnostico("Servicios leídos", servicios));
+  panel.appendChild(crearElemento("p", "dispositivos-diagnostic__note", cubitt.bluetoothUltimoDiagnostico || cubitt.nota || "Escanea el reloj para anexarlo a FitJeff."));
+  return panel;
 }
 
 function crearHistorial(historial = []) {
@@ -145,34 +178,43 @@ export function crearDispositivosView(estado) {
   const header = crearElemento("section", "dispositivos-header");
   const statusGrid = crearElemento("section", "dispositivos-status-grid");
   const form = crearElemento("form", "dispositivos-form");
-  const cubittPanel = crearElemento("section", "dispositivos-panel");
+  const cubittPanel = crearElemento("section", "dispositivos-panel dispositivos-panel--cubitt");
+  const bluetoothAcciones = crearElemento("div", "dispositivos-bluetooth-actions");
   const googlePanel = crearElemento("section", "dispositivos-panel");
   const puentePanel = crearElemento("section", "dispositivos-panel dispositivos-panel--bridge");
   const importacion = crearPanelImportacion(estado);
   const mensaje = crearElemento("p", "dispositivos-message");
   const boton = crearElemento("button", "dispositivos-button dispositivos-button--primary", DISPOSITIVOS_TEXTOS.BOTON_GUARDAR);
+  const cubittEscanearBoton = crearBotonAccion(DISPOSITIVOS_TEXTOS.BOTON_BLUETOOTH_ANEXAR, "cubitt-escanear", "primary");
+  const cubittProbarBoton = crearBotonAccion(DISPOSITIVOS_TEXTOS.BOTON_BLUETOOTH_PROBAR, "cubitt-probar", "secondary");
 
   header.appendChild(crearElemento("p", "dispositivos-kicker", "Conexiones"));
   header.appendChild(crearElemento("h2", "", DISPOSITIVOS_TEXTOS.TITULO));
   header.appendChild(crearElemento("p", "", DISPOSITIVOS_TEXTOS.SUBTITULO));
   header.appendChild(crearElemento("small", "dispositivos-privacy", DISPOSITIVOS_TEXTOS.AVISO_PRIVADO));
 
-  statusGrid.appendChild(crearEstadoCard(estado.resumen.cubitt.titulo, estado.resumen.cubitt.detalle, estado.resumen.cubitt.estado));
-  statusGrid.appendChild(crearEstadoCard(estado.resumen.googleFit.titulo, estado.resumen.googleFit.detalle, estado.resumen.googleFit.estado));
-  statusGrid.appendChild(crearEstadoCard(estado.resumen.puente.titulo, estado.resumen.puente.detalle, estado.resumen.puente.estado));
+  statusGrid.appendChild(crearEstadoCard(estado.resumen.cubitt.titulo, estado.resumen.cubitt.detalle, estado.resumen.cubitt.estado, estado.resumen.cubitt.etiqueta));
+  statusGrid.appendChild(crearEstadoCard(estado.resumen.googleFit.titulo, estado.resumen.googleFit.detalle, estado.resumen.googleFit.estado, estado.resumen.googleFit.etiqueta));
+  statusGrid.appendChild(crearEstadoCard(estado.resumen.puente.titulo, estado.resumen.puente.detalle, estado.resumen.puente.estado, estado.resumen.puente.etiqueta));
+
+  bluetoothAcciones.appendChild(cubittEscanearBoton);
+  bluetoothAcciones.appendChild(cubittProbarBoton);
 
   cubittPanel.appendChild(crearElemento("h3", "", DISPOSITIVOS_TEXTOS.CUBITT_TITULO));
-  cubittPanel.appendChild(crearElemento("p", "", "Prepara el reloj para que luego un conector real pueda leer pasos o actividad."));
-  cubittPanel.appendChild(crearCheck({ name: "cubittActivo", label: "Usar Cubitt como dispositivo preparado", checked: estado.cubitt.activo }));
+  cubittPanel.appendChild(crearElemento("p", "", "Anexa el reloj directo por Bluetooth. Primero guarda el dispositivo; después probamos si permite lectura básica."));
+  cubittPanel.appendChild(bluetoothAcciones);
+  cubittPanel.appendChild(crearDiagnosticoCubitt(estado.cubitt));
+  cubittPanel.appendChild(crearCheck({ name: "cubittActivo", label: "Usar Cubitt como dispositivo principal", checked: estado.cubitt.activo }));
   cubittPanel.appendChild(crearInput({ name: "cubittMarca", label: "Marca", value: estado.cubitt.marca }));
   cubittPanel.appendChild(crearInput({ name: "cubittModelo", label: "Modelo", value: estado.cubitt.modelo }));
   cubittPanel.appendChild(crearInput({ name: "cubittVariante", label: "Variante", value: estado.cubitt.variante }));
   cubittPanel.appendChild(crearInput({ name: "cubittAlias", label: "Alias visible", value: estado.cubitt.alias }));
-  cubittPanel.appendChild(crearInput({ name: "cubittIdentificadorLocal", label: "identificador local del reloj", value: estado.cubitt.identificadorLocal, placeholder: "Escríbelo solo en tu PC" }));
+  cubittPanel.appendChild(crearInput({ name: "cubittBluetoothNombre", label: "Nombre Bluetooth", value: estado.cubitt.bluetoothNombre, placeholder: "Cubitt CT4", readonly: true }));
+  cubittPanel.appendChild(crearInput({ name: "cubittIdentificadorLocal", label: "Identificador local del reloj", value: estado.cubitt.identificadorLocal, placeholder: "Se llena al anexar por Bluetooth" }));
   cubittPanel.appendChild(crearElemento("small", "dispositivos-note", estado.cubitt.nota));
 
   googlePanel.appendChild(crearElemento("h3", "", DISPOSITIVOS_TEXTOS.GOOGLE_FIT_TITULO));
-  googlePanel.appendChild(crearElemento("p", "", "Deja lista la cuenta y qué datos quieres importar cuando exista la conexión real."));
+  googlePanel.appendChild(crearElemento("p", "", "Opcional. Para este reloj viejo, el camino principal será Bluetooth directo desde FitJeff."));
   googlePanel.appendChild(crearCheck({ name: "googleFitActivo", label: "Preparar Google Fit", checked: estado.googleFit.activo }));
   googlePanel.appendChild(crearInput({ name: "googleFitCuenta", label: "Cuenta Google", value: estado.googleFit.cuenta, placeholder: "correo o alias local" }));
   googlePanel.appendChild(crearCheck({ name: "googleFitLecturaPasos", label: "Importar pasos", checked: estado.googleFit.lecturaPasos }));
@@ -204,6 +246,8 @@ export function crearDispositivosView(estado) {
     pantalla,
     form,
     mensaje,
+    cubittEscanearBoton,
+    cubittProbarBoton,
     importForm: importacion.form,
     importTextarea: importacion.textarea,
     importMensaje: importacion.mensaje,
