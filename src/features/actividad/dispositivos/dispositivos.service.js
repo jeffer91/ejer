@@ -4,6 +4,7 @@
 
   Función o funciones:
     - Coordinar configuración local de Cubitt CT4, Google Fit y Puente FitJeff.
+    - Separar la pantalla Dispositivos en subpáginas para reducir distracciones visuales.
     - Anexar Cubitt CT4 por Web Bluetooth desde la app cuando el reloj aparece en Windows.
     - Probar conexión básica GATT sin prometer lectura automática de pasos.
     - Explorar protocolo privado del reloj mediante servicios GATT candidatos.
@@ -24,18 +25,28 @@
 import { crearCubittAdapter } from "./adapters/cubitt.adapter.js";
 import { crearGoogleFitAdapter } from "./adapters/google-fit.adapter.js";
 import { crearDispositivosBluetoothService } from "./dispositivos-bluetooth.service.js";
-import { DISPOSITIVOS_ESTADOS, DISPOSITIVOS_FUENTES, DISPOSITIVOS_TEXTOS } from "./dispositivos.constants.js";
+import { DISPOSITIVOS_ESTADOS, DISPOSITIVOS_FUENTES, DISPOSITIVOS_PAGINAS, DISPOSITIVOS_TEXTOS } from "./dispositivos.constants.js";
 import { crearDispositivosImportBridgeService } from "./dispositivos-import-bridge.service.js";
 import { crearDispositivosRepository } from "./dispositivos.repository.js";
 
 const TOTAL_PAGINAS_VERIFICACION = 5;
+const PAGINAS_DISPOSITIVOS_VALIDAS = Object.values(DISPOSITIVOS_PAGINAS);
 
 function limpiarTexto(valor, max = 120) {
   return String(valor || "").trim().slice(0, max);
 }
 
+function tieneCampo(datos, campo) {
+  return Object.prototype.hasOwnProperty.call(datos || {}, campo);
+}
+
 function leerBooleano(valor) {
   return valor === true || valor === "true" || valor === "on";
+}
+
+function leerBooleanoCampo(datos, campo, valorAnterior = false) {
+  if (!tieneCampo(datos, campo)) return Boolean(valorAnterior);
+  return leerBooleano(datos[campo]);
 }
 
 function preservarTexto(nuevoValor, valorAnterior, max = 120) {
@@ -43,10 +54,20 @@ function preservarTexto(nuevoValor, valorAnterior, max = 120) {
   return nuevo || limpiarTexto(valorAnterior, max);
 }
 
+function preservarTextoCampo(datos, campo, valorAnterior, max = 120) {
+  if (!tieneCampo(datos, campo)) return limpiarTexto(valorAnterior, max);
+  return preservarTexto(datos[campo], valorAnterior, max);
+}
+
 function normalizarPaginaVerificacion(pagina) {
   const numero = Number(pagina);
   if (!Number.isFinite(numero)) return 1;
   return Math.min(TOTAL_PAGINAS_VERIFICACION, Math.max(1, Math.round(numero)));
+}
+
+function normalizarPaginaDispositivos(pagina) {
+  const valor = limpiarTexto(pagina, 40);
+  return PAGINAS_DISPOSITIVOS_VALIDAS.includes(valor) ? valor : DISPOSITIVOS_PAGINAS.CUBITT;
 }
 
 function crearEvento(tipo, mensaje) {
@@ -74,8 +95,14 @@ function fechaCorta(iso) {
 }
 
 function crearEstadoConResumen(estado, importBridge) {
+  const paginaActiva = normalizarPaginaDispositivos(estado.paginaActiva);
   return {
     ...estado,
+    paginaActiva,
+    cubitt: {
+      ...estado.cubitt,
+      bluetoothVerificacionPagina: normalizarPaginaVerificacion(estado.cubitt?.bluetoothVerificacionPagina || 1)
+    },
     ejemploImportacion: importBridge.ejemploCsv(),
     resumen: construirResumen(estado)
   };
@@ -99,19 +126,29 @@ function construirResumen(estado) {
           : cubittAnexado
             ? `Anexado como ${estado.cubitt.bluetoothNombre || estado.cubitt.alias}`
             : "Pendiente de escanear por Bluetooth",
-      estado: cubittExplorado || cubittConectado || cubittAnexado ? "success" : "pending"
+      estado: cubittExplorado || cubittConectado || cubittAnexado ? "success" : "pending",
+      pagina: DISPOSITIVOS_PAGINAS.CUBITT
     },
     googleFit: {
       titulo: "Google Fit",
       etiqueta: googlePreparado ? "Preparado" : "Opcional",
       detalle: googlePreparado ? "Cuenta preparada" : "No necesario para Cubitt CT4",
-      estado: googlePreparado ? "success" : "info"
+      estado: googlePreparado ? "success" : "info",
+      pagina: DISPOSITIVOS_PAGINAS.GOOGLE_FIT
     },
     puente: {
       titulo: "Puente FitJeff",
       etiqueta: estado.puente.ultimoImportadoEn ? "Usado" : "Preparado",
       detalle: estado.puente.fuentePreferida === DISPOSITIVOS_FUENTES.MANUAL ? ultimoImporte : `Fuente: ${estado.puente.fuentePreferida}`,
-      estado: estado.puente.ultimoImportadoEn ? "success" : "info"
+      estado: estado.puente.ultimoImportadoEn ? "success" : "info",
+      pagina: DISPOSITIVOS_PAGINAS.PUENTE
+    },
+    historial: {
+      titulo: "Historial local",
+      etiqueta: Array.isArray(estado.historial) && estado.historial.length ? `${estado.historial.length} eventos` : "Vacío",
+      detalle: Array.isArray(estado.historial) && estado.historial.length ? "Últimas acciones guardadas en esta PC" : "Sin eventos todavía",
+      estado: "info",
+      pagina: DISPOSITIVOS_PAGINAS.HISTORIAL
     }
   };
 }
@@ -128,40 +165,58 @@ export function crearDispositivosService(
     return crearEstadoConResumen(repository.obtenerEstado(), importBridge);
   }
 
+  function cambiarPaginaDispositivos(pagina) {
+    const anterior = repository.obtenerEstado();
+    const paginaActiva = normalizarPaginaDispositivos(pagina);
+    const estado = repository.guardarEstado({
+      ...anterior,
+      paginaActiva
+    });
+
+    return {
+      ok: true,
+      mensaje: `Subpágina activa: ${paginaActiva}.`,
+      estado: crearEstadoConResumen(estado, importBridge)
+    };
+  }
+
   function guardarPreparacion(datos = {}) {
     const anterior = repository.obtenerEstado();
     const cubitt = {
       ...anterior.cubitt,
-      activo: leerBooleano(datos.cubittActivo),
-      marca: preservarTexto(datos.cubittMarca, anterior.cubitt.marca, 60),
-      modelo: preservarTexto(datos.cubittModelo, anterior.cubitt.modelo, 60),
-      variante: preservarTexto(datos.cubittVariante, anterior.cubitt.variante, 60),
-      alias: preservarTexto(datos.cubittAlias, anterior.cubitt.alias, 80),
-      identificadorLocal: preservarTexto(datos.cubittIdentificadorLocal, anterior.cubitt.identificadorLocal, 120),
-      bluetoothNombre: preservarTexto(datos.cubittBluetoothNombre, anterior.cubitt.bluetoothNombre, 120),
+      activo: leerBooleanoCampo(datos, "cubittActivo", anterior.cubitt.activo),
+      marca: preservarTextoCampo(datos, "cubittMarca", anterior.cubitt.marca, 60),
+      modelo: preservarTextoCampo(datos, "cubittModelo", anterior.cubitt.modelo, 60),
+      variante: preservarTextoCampo(datos, "cubittVariante", anterior.cubitt.variante, 60),
+      alias: preservarTextoCampo(datos, "cubittAlias", anterior.cubitt.alias, 80),
+      identificadorLocal: preservarTextoCampo(datos, "cubittIdentificadorLocal", anterior.cubitt.identificadorLocal, 120),
+      bluetoothNombre: preservarTextoCampo(datos, "cubittBluetoothNombre", anterior.cubitt.bluetoothNombre, 120),
       bluetoothVerificacionPagina: normalizarPaginaVerificacion(anterior.cubitt.bluetoothVerificacionPagina || 1)
     };
     const googleFit = {
       ...anterior.googleFit,
-      activo: leerBooleano(datos.googleFitActivo),
-      cuenta: preservarTexto(datos.googleFitCuenta, anterior.googleFit.cuenta, 120),
-      lecturaPasos: leerBooleano(datos.googleFitLecturaPasos),
-      lecturaBicicleta: leerBooleano(datos.googleFitLecturaBicicleta),
-      sincronizacionAutomatica: leerBooleano(datos.googleFitSincronizacionAutomatica)
+      activo: leerBooleanoCampo(datos, "googleFitActivo", anterior.googleFit.activo),
+      cuenta: preservarTextoCampo(datos, "googleFitCuenta", anterior.googleFit.cuenta, 120),
+      lecturaPasos: leerBooleanoCampo(datos, "googleFitLecturaPasos", anterior.googleFit.lecturaPasos),
+      lecturaBicicleta: leerBooleanoCampo(datos, "googleFitLecturaBicicleta", anterior.googleFit.lecturaBicicleta),
+      sincronizacionAutomatica: leerBooleanoCampo(datos, "googleFitSincronizacionAutomatica", anterior.googleFit.sincronizacionAutomatica)
+    };
+    const puente = {
+      ...anterior.puente,
+      fuentePreferida: tieneCampo(datos, "fuentePreferida")
+        ? limpiarTexto(datos.fuentePreferida || DISPOSITIVOS_FUENTES.CUBITT, 30)
+        : anterior.puente.fuentePreferida,
+      importarPasos: leerBooleanoCampo(datos, "importarPasos", anterior.puente.importarPasos),
+      importarBicicleta: leerBooleanoCampo(datos, "importarBicicleta", anterior.puente.importarBicicleta),
+      evitarDuplicados: leerBooleanoCampo(datos, "evitarDuplicados", anterior.puente.evitarDuplicados),
+      estado: DISPOSITIVOS_ESTADOS.PREPARADO
     };
     const cubittPreparado = cubittAdapter.prepararConfiguracion(cubitt);
     const googlePreparado = googleFitAdapter.prepararConfiguracion(googleFit);
-    const puente = {
-      ...anterior.puente,
-      fuentePreferida: limpiarTexto(datos.fuentePreferida || DISPOSITIVOS_FUENTES.CUBITT, 30),
-      importarPasos: leerBooleano(datos.importarPasos),
-      importarBicicleta: leerBooleano(datos.importarBicicleta),
-      evitarDuplicados: leerBooleano(datos.evitarDuplicados),
-      estado: DISPOSITIVOS_ESTADOS.PREPARADO
-    };
 
     const estado = repository.guardarEstado({
       ...anterior,
+      paginaActiva: normalizarPaginaDispositivos(anterior.paginaActiva),
       cubitt: {
         ...cubitt,
         estado: cubitt.bluetoothId || cubitt.identificadorLocal ? cubittPreparado.estado : DISPOSITIVOS_ESTADOS.PENDIENTE,
@@ -193,6 +248,7 @@ export function crearDispositivosService(
     const paginaNormalizada = normalizarPaginaVerificacion(pagina);
     const estado = repository.guardarEstado({
       ...anterior,
+      paginaActiva: DISPOSITIVOS_PAGINAS.CUBITT,
       cubitt: {
         ...anterior.cubitt,
         bluetoothVerificacionPagina: paginaNormalizada
@@ -213,6 +269,7 @@ export function crearDispositivosService(
     if (!resultado.ok) {
       const estadoError = repository.guardarEstado({
         ...anterior,
+        paginaActiva: DISPOSITIVOS_PAGINAS.CUBITT,
         cubitt: {
           ...anterior.cubitt,
           estado: anterior.cubitt.bluetoothId ? anterior.cubitt.estado : DISPOSITIVOS_ESTADOS.ERROR,
@@ -236,6 +293,7 @@ export function crearDispositivosService(
     const dispositivo = resultado.dispositivo || {};
     const estado = repository.guardarEstado({
       ...anterior,
+      paginaActiva: DISPOSITIVOS_PAGINAS.CUBITT,
       cubitt: {
         ...anterior.cubitt,
         activo: true,
@@ -275,6 +333,7 @@ export function crearDispositivosService(
     const diagnostico = resultado.diagnostico || {};
     const estado = repository.guardarEstado({
       ...anterior,
+      paginaActiva: DISPOSITIVOS_PAGINAS.CUBITT,
       cubitt: {
         ...anterior.cubitt,
         estado: resultado.ok ? DISPOSITIVOS_ESTADOS.CONECTADO : DISPOSITIVOS_ESTADOS.ERROR,
@@ -305,6 +364,7 @@ export function crearDispositivosService(
     const resultado = await bluetooth.explorarServiciosPrivados(anterior.cubitt);
     const estado = repository.guardarEstado({
       ...anterior,
+      paginaActiva: DISPOSITIVOS_PAGINAS.CUBITT,
       cubitt: {
         ...anterior.cubitt,
         estado: resultado.exploracion ? DISPOSITIVOS_ESTADOS.CONECTADO : DISPOSITIVOS_ESTADOS.ERROR,
@@ -353,6 +413,7 @@ export function crearDispositivosService(
 
     const estado = repository.guardarEstado({
       ...anterior,
+      paginaActiva: DISPOSITIVOS_PAGINAS.CUBITT,
       cubitt: cubittActualizado,
       historial: [
         crearEvento(resultado.lectura ? `bluetooth-lectura-${slot}` : "bluetooth-error", resultado.mensaje),
@@ -372,6 +433,7 @@ export function crearDispositivosService(
 
     const estado = repository.guardarEstado({
       ...anterior,
+      paginaActiva: DISPOSITIVOS_PAGINAS.CUBITT,
       cubitt: {
         ...anterior.cubitt,
         bluetoothComparacion: resultado.comparacion || anterior.cubitt.bluetoothComparacion,
@@ -400,6 +462,7 @@ export function crearDispositivosService(
 
     const estado = repository.guardarEstado({
       ...anterior,
+      paginaActiva: DISPOSITIVOS_PAGINAS.PUENTE,
       puente: {
         ...anterior.puente,
         estado: resultado.ok ? DISPOSITIVOS_ESTADOS.CONECTADO : DISPOSITIVOS_ESTADOS.ERROR,
@@ -420,6 +483,7 @@ export function crearDispositivosService(
 
   return {
     obtenerEstado,
+    cambiarPaginaDispositivos,
     guardarPreparacion,
     cambiarPaginaVerificacionCubitt,
     anexarCubittBluetooth,
