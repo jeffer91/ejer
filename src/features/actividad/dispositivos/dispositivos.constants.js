@@ -3,8 +3,8 @@
   Ruta o ubicación: src/features/actividad/dispositivos/dispositivos.constants.js
 
   Función o funciones:
-    - Definir textos, fuentes, estados y estructura base de Dispositivos.
-    - Mantener Cubitt CT4, Google Fit y puente de importación separados.
+    - Definir textos, fuentes, páginas, estados y estructura base de Dispositivos.
+    - Mantener Cubitt CT4, Google Fit, Puente FitJeff e Historial como subpáginas separadas.
     - Preparar anexado Bluetooth local de Cubitt CT4 sin prometer lectura automática de pasos.
     - Preparar estructura para exploración privada GATT y comparación de lecturas HEX.
     - Guardar la página actual del asistente de verificaciones Bluetooth.
@@ -30,12 +30,20 @@ export const DISPOSITIVOS_FUENTES = Object.freeze({
   GOOGLE_FIT: "google-fit"
 });
 
+export const DISPOSITIVOS_PAGINAS = Object.freeze({
+  CUBITT: "cubitt",
+  GOOGLE_FIT: "googleFit",
+  PUENTE: "puente",
+  HISTORIAL: "historial"
+});
+
 export const DISPOSITIVOS_TEXTOS = Object.freeze({
   TITULO: "Dispositivos y Bluetooth",
-  SUBTITULO: "Anexa tu Cubitt CT4 por Bluetooth desde esta PC. Primero se guarda el reloj; luego se exploran servicios privados para encontrar pasos.",
+  SUBTITULO: "Cada conexión tiene su propia subpágina para trabajar sin distracciones. Cubitt CT4 queda separado porque requiere verificaciones Bluetooth privadas.",
   CUBITT_TITULO: "Cubitt CT4",
   GOOGLE_FIT_TITULO: "Google Fit",
   PUENTE_TITULO: "Puente FitJeff",
+  HISTORIAL_TITULO: "Historial local",
   IMPORTAR_TITULO: "Importar actividad",
   EXPLORADOR_TITULO: "Verificaciones privadas Cubitt CT4",
   BOTON_GUARDAR: "Guardar preparación",
@@ -86,8 +94,9 @@ export const GOOGLE_FIT_BASE = Object.freeze({
 
 export function crearEstadoDispositivosBase() {
   return {
-    version: "0.4.1",
+    version: "0.5.0",
     actualizadoEn: "",
+    paginaActiva: DISPOSITIVOS_PAGINAS.CUBITT,
     cubitt: {
       ...CUBITT_BASE,
       activo: false,
