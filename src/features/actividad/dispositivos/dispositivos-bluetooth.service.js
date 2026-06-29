@@ -31,6 +31,14 @@ function limpiarTexto(valor, max = 160) {
   return String(valor || "").trim().slice(0, max);
 }
 
+function obtenerBluetoothApi() {
+  if (typeof navigator === "undefined" || !navigator.bluetooth) {
+    return null;
+  }
+
+  return navigator.bluetooth;
+}
+
 function crearError(mensaje, error = null) {
   return {
     ok: false,
@@ -42,7 +50,8 @@ function crearError(mensaje, error = null) {
 }
 
 function bluetoothDisponible() {
-  return Boolean(typeof navigator !== "undefined" && navigator.bluetooth && typeof navigator.bluetooth.requestDevice === "function");
+  const bluetooth = obtenerBluetoothApi();
+  return Boolean(bluetooth && typeof bluetooth.requestDevice === "function");
 }
 
 function normalizarDispositivo(device) {
@@ -98,11 +107,13 @@ async function obtenerDispositivoGuardado({ id = "", nombre = "" } = {}) {
     return ultimoDispositivoBluetooth;
   }
 
-  if (typeof navigator?.bluetooth?.getDevices !== "function") {
+  const bluetooth = obtenerBluetoothApi();
+
+  if (!bluetooth || typeof bluetooth.getDevices !== "function") {
     return null;
   }
 
-  const permitidos = await navigator.bluetooth.getDevices();
+  const permitidos = await bluetooth.getDevices();
   const idLimpio = limpiarTexto(id);
   const nombreLimpio = limpiarTexto(nombre).toLowerCase();
 
@@ -157,12 +168,14 @@ async function leerDiagnosticoBasico(server) {
 
 export function crearDispositivosBluetoothService() {
   async function solicitarCubitt() {
+    const bluetooth = obtenerBluetoothApi();
+
     if (!bluetoothDisponible()) {
       return crearError("Bluetooth no está disponible en este entorno. Abre FitJeff en Electron y verifica que Bluetooth esté activo en Windows.");
     }
 
     try {
-      const device = await navigator.bluetooth.requestDevice({
+      const device = await bluetooth.requestDevice({
         acceptAllDevices: true,
         optionalServices: SERVICIOS_OPCIONALES
       });
