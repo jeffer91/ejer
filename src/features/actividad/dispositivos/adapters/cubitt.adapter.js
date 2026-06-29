@@ -2,15 +2,15 @@ import { DISPOSITIVOS_ESTADOS } from "../dispositivos.constants.js";
 
 export function crearCubittAdapter() {
   function prepararConfiguracion(configuracion = {}) {
-    const identificadorLocal = String(configuracion.identificadorLocal || "").trim();
+    const identificadorLocal = String(configuracion.identificadorLocal || configuracion.bluetoothId || "").trim();
 
     return {
       proveedor: "cubitt",
       listoParaConectar: Boolean(identificadorLocal),
       estado: identificadorLocal ? DISPOSITIVOS_ESTADOS.PREPARADO : DISPOSITIVOS_ESTADOS.PENDIENTE,
       mensaje: identificadorLocal
-        ? "Cubitt CT4 preparado para un conector real futuro."
-        : "Escribe el identificador local del reloj desde la app para dejarlo preparado."
+        ? "Cubitt CT4 anexado localmente. Ahora puedes probar conexión Bluetooth."
+        : "Pulsa Escanear y anexar reloj para guardar el Cubitt CT4 en esta PC."
     };
   }
 
