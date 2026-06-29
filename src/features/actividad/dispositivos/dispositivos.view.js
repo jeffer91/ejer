@@ -4,10 +4,11 @@
 
   Función o funciones:
     - Construir la pantalla de Dispositivos y Bluetooth.
-    - Mostrar anexado local de Cubitt CT4 por Bluetooth.
-    - Mostrar verificaciones privadas GATT por paginación.
-    - Mostrar preparación local de Google Fit y puente FitJeff.
-    - Mostrar puente claro de importación CSV/JSON.
+    - Separar Cubitt CT4, Google Fit, Puente FitJeff e Historial en subpáginas independientes.
+    - Mostrar anexado local de Cubitt CT4 por Bluetooth sin mezclarlo con otras configuraciones.
+    - Mostrar verificaciones privadas GATT por paginación dentro de la subpágina Cubitt CT4.
+    - Mostrar preparación local de Google Fit en su propia subpágina.
+    - Mostrar puente claro de importación CSV/JSON en su propia subpágina.
     - Leer formularios de configuración e importación.
     - Mantener la vista sin lógica de guardado.
 
@@ -17,7 +18,7 @@
     - src/features/actividad/dispositivos/dispositivos.constants.js
 */
 
-import { DISPOSITIVOS_FUENTES, DISPOSITIVOS_TEXTOS } from "./dispositivos.constants.js";
+import { DISPOSITIVOS_FUENTES, DISPOSITIVOS_PAGINAS, DISPOSITIVOS_TEXTOS } from "./dispositivos.constants.js";
 import "./dispositivos.css";
 
 const TOTAL_PAGINAS_VERIFICACION = 5;
@@ -27,6 +28,13 @@ const PAGINAS_VERIFICACION = Object.freeze([
   { numero: 3, titulo: "Lectura 2", ayuda: "Camina 20 o 30 pasos y guarda la segunda lectura." },
   { numero: 4, titulo: "Comparar", ayuda: "Compara lectura 1 contra lectura 2." },
   { numero: 5, titulo: "Resultados", ayuda: "Revisa qué características cambiaron." }
+]);
+
+const SUBPAGINAS = Object.freeze([
+  { id: DISPOSITIVOS_PAGINAS.CUBITT, label: "Cubitt CT4", descripcion: "Bluetooth y verificaciones" },
+  { id: DISPOSITIVOS_PAGINAS.GOOGLE_FIT, label: "Google Fit", descripcion: "Configuración opcional" },
+  { id: DISPOSITIVOS_PAGINAS.PUENTE, label: "Puente FitJeff", descripcion: "Importación CSV/JSON" },
+  { id: DISPOSITIVOS_PAGINAS.HISTORIAL, label: "Historial", descripcion: "Eventos locales" }
 ]);
 
 function crearElemento(etiqueta, clase = "", texto = "") {
@@ -71,6 +79,12 @@ function crearBotonAccion(texto, action, variante = "secondary") {
   return boton;
 }
 
+function crearSubmitGuardar() {
+  const boton = crearElemento("button", "dispositivos-button dispositivos-button--primary", DISPOSITIVOS_TEXTOS.BOTON_GUARDAR);
+  boton.type = "submit";
+  return boton;
+}
+
 function crearSelectFuente(valorActual) {
   const campo = crearElemento("label", "dispositivos-field");
   const texto = crearElemento("span", "", "Fuente preferida");
@@ -95,8 +109,9 @@ function crearSelectFuente(valorActual) {
   return campo;
 }
 
-function crearEstadoCard(titulo, detalle, estado, etiqueta = "") {
+function crearEstadoCard(titulo, detalle, estado, etiqueta = "", pagina = "") {
   const card = crearElemento("article", `dispositivos-status dispositivos-status--${estado}`);
+  card.dataset.pagina = pagina;
   card.appendChild(crearElemento("span", "dispositivos-status__label", titulo));
   card.appendChild(crearElemento("strong", "", etiqueta || (estado === "success" ? "Listo" : estado === "pending" ? "Pendiente" : "Preparado")));
   card.appendChild(crearElemento("small", "", detalle));
@@ -108,6 +123,21 @@ function crearDatoDiagnostico(label, valor = "") {
   item.appendChild(crearElemento("span", "", label));
   item.appendChild(crearElemento("strong", "", valor || "—"));
   return item;
+}
+
+function crearSubnavegacion(paginaActiva) {
+  const nav = crearElemento("nav", "dispositivos-subnav");
+  const botones = [];
+
+  SUBPAGINAS.forEach((pagina) => {
+    const boton = crearBotonAccion(pagina.label, `pagina-${pagina.id}`, pagina.id === paginaActiva ? "primary" : "secondary");
+    boton.dataset.pagina = pagina.id;
+    boton.appendChild(crearElemento("small", "", pagina.descripcion));
+    botones.push(boton);
+    nav.appendChild(boton);
+  });
+
+  return { nav, botones };
 }
 
 function crearDiagnosticoCubitt(cubitt = {}) {
@@ -223,7 +253,6 @@ function crearPaginadorVerificacion(paginaActual) {
 
   anterior.disabled = paginaActual <= 1;
   siguiente.disabled = paginaActual >= TOTAL_PAGINAS_VERIFICACION;
-
   wrap.appendChild(anterior);
 
   PAGINAS_VERIFICACION.forEach((pagina) => {
@@ -235,13 +264,7 @@ function crearPaginadorVerificacion(paginaActual) {
   });
 
   wrap.appendChild(siguiente);
-
-  return {
-    wrap,
-    anterior,
-    siguiente,
-    botonesPagina
-  };
+  return { wrap, anterior, siguiente, botonesPagina };
 }
 
 function crearContenidoPaginaVerificacion(paginaActual, cubitt, botones) {
@@ -263,22 +286,10 @@ function crearContenidoPaginaVerificacion(paginaActual, cubitt, botones) {
   accion.appendChild(botones.comparar);
   contenido.appendChild(accion);
 
-  if (paginaActual === 1) {
-    contenido.appendChild(crearTablaExploracion(cubitt));
-  }
-
-  if (paginaActual === 2) {
-    contenido.appendChild(crearElemento("p", "dispositivos-note", cubitt.bluetoothLectura1?.creadoEn ? `Lectura 1 guardada: ${fechaCorta(cubitt.bluetoothLectura1.creadoEn)}` : "Cuando pulses este botón, no camines todavía. Guarda primero el estado actual del reloj."));
-  }
-
-  if (paginaActual === 3) {
-    contenido.appendChild(crearElemento("p", "dispositivos-note", cubitt.bluetoothLectura2?.creadoEn ? `Lectura 2 guardada: ${fechaCorta(cubitt.bluetoothLectura2.creadoEn)}` : "Camina 20 o 30 pasos reales con el reloj puesto y luego pulsa Tomar lectura 2."));
-  }
-
-  if (paginaActual === 4) {
-    contenido.appendChild(crearTablaCambios(cubitt));
-  }
-
+  if (paginaActual === 1) contenido.appendChild(crearTablaExploracion(cubitt));
+  if (paginaActual === 2) contenido.appendChild(crearElemento("p", "dispositivos-note", cubitt.bluetoothLectura1?.creadoEn ? `Lectura 1 guardada: ${fechaCorta(cubitt.bluetoothLectura1.creadoEn)}` : "Cuando pulses este botón, no camines todavía. Guarda primero el estado actual del reloj."));
+  if (paginaActual === 3) contenido.appendChild(crearElemento("p", "dispositivos-note", cubitt.bluetoothLectura2?.creadoEn ? `Lectura 2 guardada: ${fechaCorta(cubitt.bluetoothLectura2.creadoEn)}` : "Camina 20 o 30 pasos reales con el reloj puesto y luego pulsa Tomar lectura 2."));
+  if (paginaActual === 4) contenido.appendChild(crearTablaCambios(cubitt));
   if (paginaActual === 5) {
     contenido.appendChild(crearTablaExploracion(cubitt));
     contenido.appendChild(crearTablaCambios(cubitt));
@@ -298,7 +309,7 @@ function crearExploradorPrivado(cubitt = {}) {
   const paginador = crearPaginadorVerificacion(paginaActual);
 
   panel.appendChild(crearElemento("h4", "", DISPOSITIVOS_TEXTOS.EXPLORADOR_TITULO));
-  panel.appendChild(crearElemento("p", "", "Las pruebas están separadas por páginas para evitar errores: explora, guarda lectura 1, camina, guarda lectura 2 y compara."));
+  panel.appendChild(crearElemento("p", "", "Las pruebas del reloj están separadas por páginas: explora, lectura 1, camina, lectura 2 y compara."));
   panel.appendChild(paginador.wrap);
   panel.appendChild(crearDatoDiagnostico("Página actual", `${paginaActual} de ${TOTAL_PAGINAS_VERIFICACION}`));
   panel.appendChild(crearDatoDiagnostico("Última exploración", cubitt.bluetoothExploracion?.creadoEn ? fechaCorta(cubitt.bluetoothExploracion.creadoEn) : "Pendiente"));
@@ -327,25 +338,70 @@ function crearExploradorPrivado(cubitt = {}) {
   };
 }
 
-function crearHistorial(historial = []) {
-  const panel = crearElemento("section", "dispositivos-panel");
-  const lista = crearElemento("div", "dispositivos-history");
+function crearPanelCubitt(estado) {
+  const form = crearElemento("form", "dispositivos-page-form");
+  const panel = crearElemento("section", "dispositivos-panel dispositivos-panel--cubitt dispositivos-page-panel");
+  const acciones = crearElemento("div", "dispositivos-bluetooth-actions");
+  const mensaje = crearElemento("p", "dispositivos-message");
+  const cubittEscanearBoton = crearBotonAccion(DISPOSITIVOS_TEXTOS.BOTON_BLUETOOTH_ANEXAR, "cubitt-escanear", "primary");
+  const cubittProbarBoton = crearBotonAccion(DISPOSITIVOS_TEXTOS.BOTON_BLUETOOTH_PROBAR, "cubitt-probar", "secondary");
+  const exploradorPrivado = crearExploradorPrivado(estado.cubitt);
 
-  panel.appendChild(crearElemento("h3", "", "Historial local"));
+  acciones.appendChild(cubittEscanearBoton);
+  acciones.appendChild(cubittProbarBoton);
 
-  if (!historial.length) {
-    lista.appendChild(crearElemento("p", "dispositivos-empty", "Aún no hay preparaciones guardadas."));
-  } else {
-    historial.slice(0, 5).forEach((evento) => {
-      const item = crearElemento("article", "dispositivos-history__item");
-      item.appendChild(crearElemento("strong", "", evento.mensaje || evento.tipo));
-      item.appendChild(crearElemento("span", "", evento.creadoEn || ""));
-      lista.appendChild(item);
-    });
-  }
+  panel.appendChild(crearElemento("h3", "", DISPOSITIVOS_TEXTOS.CUBITT_TITULO));
+  panel.appendChild(crearElemento("p", "", "Esta subpágina queda dedicada solo al reloj: anexado, diagnóstico Bluetooth y búsqueda de datos privados."));
+  panel.appendChild(acciones);
+  panel.appendChild(crearDiagnosticoCubitt(estado.cubitt));
+  panel.appendChild(exploradorPrivado.panel);
+  panel.appendChild(crearCheck({ name: "cubittActivo", label: "Usar Cubitt como dispositivo principal", checked: estado.cubitt.activo }));
+  panel.appendChild(crearInput({ name: "cubittMarca", label: "Marca", value: estado.cubitt.marca }));
+  panel.appendChild(crearInput({ name: "cubittModelo", label: "Modelo", value: estado.cubitt.modelo }));
+  panel.appendChild(crearInput({ name: "cubittVariante", label: "Variante", value: estado.cubitt.variante }));
+  panel.appendChild(crearInput({ name: "cubittAlias", label: "Alias visible", value: estado.cubitt.alias }));
+  panel.appendChild(crearInput({ name: "cubittBluetoothNombre", label: "Nombre Bluetooth", value: estado.cubitt.bluetoothNombre, placeholder: "Cubitt CT4", readonly: true }));
+  panel.appendChild(crearInput({ name: "cubittIdentificadorLocal", label: "Identificador local del reloj", value: estado.cubitt.identificadorLocal, placeholder: "Se llena al anexar por Bluetooth" }));
+  panel.appendChild(crearElemento("small", "dispositivos-note", estado.cubitt.nota));
+  panel.appendChild(mensaje);
+  panel.appendChild(crearSubmitGuardar());
+  form.appendChild(panel);
 
-  panel.appendChild(lista);
-  return panel;
+  return {
+    elemento: form,
+    form,
+    mensaje,
+    cubittEscanearBoton,
+    cubittProbarBoton,
+    cubittExplorarBoton: exploradorPrivado.explorarBoton,
+    cubittLectura1Boton: exploradorPrivado.lectura1Boton,
+    cubittLectura2Boton: exploradorPrivado.lectura2Boton,
+    cubittCompararBoton: exploradorPrivado.compararBoton,
+    cubittPaginaActual: exploradorPrivado.paginaActual,
+    cubittPaginaAnteriorBoton: exploradorPrivado.paginaAnteriorBoton,
+    cubittPaginaSiguienteBoton: exploradorPrivado.paginaSiguienteBoton,
+    cubittPaginaBotones: exploradorPrivado.paginaBotones
+  };
+}
+
+function crearPanelGoogleFit(estado) {
+  const form = crearElemento("form", "dispositivos-page-form");
+  const panel = crearElemento("section", "dispositivos-panel dispositivos-page-panel");
+  const mensaje = crearElemento("p", "dispositivos-message");
+
+  panel.appendChild(crearElemento("h3", "", DISPOSITIVOS_TEXTOS.GOOGLE_FIT_TITULO));
+  panel.appendChild(crearElemento("p", "", "Configuración opcional separada del reloj. Para Cubitt CT4 viejo, esta no es la ruta principal."));
+  panel.appendChild(crearCheck({ name: "googleFitActivo", label: "Preparar Google Fit", checked: estado.googleFit.activo }));
+  panel.appendChild(crearInput({ name: "googleFitCuenta", label: "Cuenta Google", value: estado.googleFit.cuenta, placeholder: "correo o alias local" }));
+  panel.appendChild(crearCheck({ name: "googleFitLecturaPasos", label: "Importar pasos", checked: estado.googleFit.lecturaPasos }));
+  panel.appendChild(crearCheck({ name: "googleFitLecturaBicicleta", label: "Importar bicicleta", checked: estado.googleFit.lecturaBicicleta }));
+  panel.appendChild(crearCheck({ name: "googleFitSincronizacionAutomatica", label: "Sincronización automática futura", checked: estado.googleFit.sincronizacionAutomatica }));
+  panel.appendChild(crearElemento("small", "dispositivos-note", estado.googleFit.nota));
+  panel.appendChild(mensaje);
+  panel.appendChild(crearSubmitGuardar());
+  form.appendChild(panel);
+
+  return { elemento: form, form, mensaje };
 }
 
 function crearPanelImportacion(estado) {
@@ -361,7 +417,6 @@ function crearPanelImportacion(estado) {
   textarea.rows = 7;
   textarea.placeholder = estado.ejemploImportacion || "fecha,pasos,bicicletaMin,bicicletaKm,fuente,nota";
   textarea.autocomplete = "off";
-
   importarBoton.type = "submit";
   ejemploBoton.type = "button";
   ejemploBoton.dataset.action = "pegar-ejemplo";
@@ -375,104 +430,119 @@ function crearPanelImportacion(estado) {
   panel.appendChild(mensaje);
   form.appendChild(panel);
 
+  return { form, textarea, mensaje, ejemploBoton };
+}
+
+function crearPanelPuente(estado) {
+  const wrap = crearElemento("section", "dispositivos-page-stack");
+  const form = crearElemento("form", "dispositivos-page-form");
+  const panel = crearElemento("section", "dispositivos-panel dispositivos-panel--bridge dispositivos-page-panel");
+  const mensaje = crearElemento("p", "dispositivos-message");
+  const importacion = crearPanelImportacion(estado);
+
+  panel.appendChild(crearElemento("h3", "", DISPOSITIVOS_TEXTOS.PUENTE_TITULO));
+  panel.appendChild(crearElemento("p", "", "Esta subpágina define cómo FitJeff trata datos importados y evita duplicados."));
+  panel.appendChild(crearSelectFuente(estado.puente.fuentePreferida));
+  panel.appendChild(crearCheck({ name: "importarPasos", label: "Permitir pasos importados", checked: estado.puente.importarPasos }));
+  panel.appendChild(crearCheck({ name: "importarBicicleta", label: "Permitir bicicleta importada", checked: estado.puente.importarBicicleta }));
+  panel.appendChild(crearCheck({ name: "evitarDuplicados", label: "Evitar duplicados por fecha y fuente", checked: estado.puente.evitarDuplicados }));
+  panel.appendChild(crearElemento("small", "dispositivos-note", estado.puente.ultimoResultadoImportacion || "Puente preparado para importación manual o futura lectura automática."));
+  panel.appendChild(mensaje);
+  panel.appendChild(crearSubmitGuardar());
+  form.appendChild(panel);
+
+  wrap.appendChild(form);
+  wrap.appendChild(importacion.form);
+
   return {
+    elemento: wrap,
     form,
-    textarea,
     mensaje,
-    ejemploBoton
+    importForm: importacion.form,
+    importTextarea: importacion.textarea,
+    importMensaje: importacion.mensaje,
+    ejemploBoton: importacion.ejemploBoton,
+    ejemploImportacion: estado.ejemploImportacion || ""
   };
+}
+
+function crearPanelHistorial(historial = []) {
+  const panel = crearElemento("section", "dispositivos-panel dispositivos-page-panel");
+  const lista = crearElemento("div", "dispositivos-history");
+
+  panel.appendChild(crearElemento("h3", "", DISPOSITIVOS_TEXTOS.HISTORIAL_TITULO));
+  panel.appendChild(crearElemento("p", "", "Aquí quedan las últimas acciones locales de dispositivos, anexado Bluetooth, verificaciones e importaciones."));
+
+  if (!historial.length) {
+    lista.appendChild(crearElemento("p", "dispositivos-empty", "Aún no hay preparaciones guardadas."));
+  } else {
+    historial.slice(0, 12).forEach((evento) => {
+      const item = crearElemento("article", "dispositivos-history__item");
+      item.appendChild(crearElemento("strong", "", evento.mensaje || evento.tipo));
+      item.appendChild(crearElemento("span", "", evento.creadoEn || ""));
+      lista.appendChild(item);
+    });
+  }
+
+  panel.appendChild(lista);
+  return { elemento: panel };
+}
+
+function crearPaginaActiva(estado) {
+  switch (estado.paginaActiva) {
+    case DISPOSITIVOS_PAGINAS.GOOGLE_FIT:
+      return crearPanelGoogleFit(estado);
+    case DISPOSITIVOS_PAGINAS.PUENTE:
+      return crearPanelPuente(estado);
+    case DISPOSITIVOS_PAGINAS.HISTORIAL:
+      return crearPanelHistorial(estado.historial || []);
+    case DISPOSITIVOS_PAGINAS.CUBITT:
+    default:
+      return crearPanelCubitt(estado);
+  }
 }
 
 export function crearDispositivosView(estado) {
   const pantalla = crearElemento("section", "dispositivos-screen");
   const header = crearElemento("section", "dispositivos-header");
   const statusGrid = crearElemento("section", "dispositivos-status-grid");
-  const form = crearElemento("form", "dispositivos-form");
-  const cubittPanel = crearElemento("section", "dispositivos-panel dispositivos-panel--cubitt");
-  const bluetoothAcciones = crearElemento("div", "dispositivos-bluetooth-actions");
-  const googlePanel = crearElemento("section", "dispositivos-panel");
-  const puentePanel = crearElemento("section", "dispositivos-panel dispositivos-panel--bridge");
-  const importacion = crearPanelImportacion(estado);
-  const mensaje = crearElemento("p", "dispositivos-message");
-  const boton = crearElemento("button", "dispositivos-button dispositivos-button--primary", DISPOSITIVOS_TEXTOS.BOTON_GUARDAR);
-  const cubittEscanearBoton = crearBotonAccion(DISPOSITIVOS_TEXTOS.BOTON_BLUETOOTH_ANEXAR, "cubitt-escanear", "primary");
-  const cubittProbarBoton = crearBotonAccion(DISPOSITIVOS_TEXTOS.BOTON_BLUETOOTH_PROBAR, "cubitt-probar", "secondary");
-  const exploradorPrivado = crearExploradorPrivado(estado.cubitt);
+  const subnav = crearSubnavegacion(estado.paginaActiva || DISPOSITIVOS_PAGINAS.CUBITT);
+  const pagina = crearPaginaActiva(estado);
 
   header.appendChild(crearElemento("p", "dispositivos-kicker", "Conexiones"));
   header.appendChild(crearElemento("h2", "", DISPOSITIVOS_TEXTOS.TITULO));
   header.appendChild(crearElemento("p", "", DISPOSITIVOS_TEXTOS.SUBTITULO));
   header.appendChild(crearElemento("small", "dispositivos-privacy", DISPOSITIVOS_TEXTOS.AVISO_PRIVADO));
 
-  statusGrid.appendChild(crearEstadoCard(estado.resumen.cubitt.titulo, estado.resumen.cubitt.detalle, estado.resumen.cubitt.estado, estado.resumen.cubitt.etiqueta));
-  statusGrid.appendChild(crearEstadoCard(estado.resumen.googleFit.titulo, estado.resumen.googleFit.detalle, estado.resumen.googleFit.estado, estado.resumen.googleFit.etiqueta));
-  statusGrid.appendChild(crearEstadoCard(estado.resumen.puente.titulo, estado.resumen.puente.detalle, estado.resumen.puente.estado, estado.resumen.puente.etiqueta));
-
-  bluetoothAcciones.appendChild(cubittEscanearBoton);
-  bluetoothAcciones.appendChild(cubittProbarBoton);
-
-  cubittPanel.appendChild(crearElemento("h3", "", DISPOSITIVOS_TEXTOS.CUBITT_TITULO));
-  cubittPanel.appendChild(crearElemento("p", "", "Anexa el reloj directo por Bluetooth. Si conecta pero no entrega servicios estándar, usa las verificaciones paginadas."));
-  cubittPanel.appendChild(bluetoothAcciones);
-  cubittPanel.appendChild(crearDiagnosticoCubitt(estado.cubitt));
-  cubittPanel.appendChild(exploradorPrivado.panel);
-  cubittPanel.appendChild(crearCheck({ name: "cubittActivo", label: "Usar Cubitt como dispositivo principal", checked: estado.cubitt.activo }));
-  cubittPanel.appendChild(crearInput({ name: "cubittMarca", label: "Marca", value: estado.cubitt.marca }));
-  cubittPanel.appendChild(crearInput({ name: "cubittModelo", label: "Modelo", value: estado.cubitt.modelo }));
-  cubittPanel.appendChild(crearInput({ name: "cubittVariante", label: "Variante", value: estado.cubitt.variante }));
-  cubittPanel.appendChild(crearInput({ name: "cubittAlias", label: "Alias visible", value: estado.cubitt.alias }));
-  cubittPanel.appendChild(crearInput({ name: "cubittBluetoothNombre", label: "Nombre Bluetooth", value: estado.cubitt.bluetoothNombre, placeholder: "Cubitt CT4", readonly: true }));
-  cubittPanel.appendChild(crearInput({ name: "cubittIdentificadorLocal", label: "Identificador local del reloj", value: estado.cubitt.identificadorLocal, placeholder: "Se llena al anexar por Bluetooth" }));
-  cubittPanel.appendChild(crearElemento("small", "dispositivos-note", estado.cubitt.nota));
-
-  googlePanel.appendChild(crearElemento("h3", "", DISPOSITIVOS_TEXTOS.GOOGLE_FIT_TITULO));
-  googlePanel.appendChild(crearElemento("p", "", "Opcional. Para este reloj viejo, el camino principal será Bluetooth directo desde FitJeff."));
-  googlePanel.appendChild(crearCheck({ name: "googleFitActivo", label: "Preparar Google Fit", checked: estado.googleFit.activo }));
-  googlePanel.appendChild(crearInput({ name: "googleFitCuenta", label: "Cuenta Google", value: estado.googleFit.cuenta, placeholder: "correo o alias local" }));
-  googlePanel.appendChild(crearCheck({ name: "googleFitLecturaPasos", label: "Importar pasos", checked: estado.googleFit.lecturaPasos }));
-  googlePanel.appendChild(crearCheck({ name: "googleFitLecturaBicicleta", label: "Importar bicicleta", checked: estado.googleFit.lecturaBicicleta }));
-  googlePanel.appendChild(crearCheck({ name: "googleFitSincronizacionAutomatica", label: "Sincronización automática futura", checked: estado.googleFit.sincronizacionAutomatica }));
-  googlePanel.appendChild(crearElemento("small", "dispositivos-note", estado.googleFit.nota));
-
-  puentePanel.appendChild(crearElemento("h3", "", DISPOSITIVOS_TEXTOS.PUENTE_TITULO));
-  puentePanel.appendChild(crearElemento("p", "", "Define cómo FitJeff debe tratar datos importados para evitar duplicados."));
-  puentePanel.appendChild(crearSelectFuente(estado.puente.fuentePreferida));
-  puentePanel.appendChild(crearCheck({ name: "importarPasos", label: "Permitir pasos importados", checked: estado.puente.importarPasos }));
-  puentePanel.appendChild(crearCheck({ name: "importarBicicleta", label: "Permitir bicicleta importada", checked: estado.puente.importarBicicleta }));
-  puentePanel.appendChild(crearCheck({ name: "evitarDuplicados", label: "Evitar duplicados por fecha y fuente", checked: estado.puente.evitarDuplicados }));
-
-  boton.type = "submit";
-  form.appendChild(cubittPanel);
-  form.appendChild(googlePanel);
-  form.appendChild(puentePanel);
-  form.appendChild(mensaje);
-  form.appendChild(boton);
+  statusGrid.appendChild(crearEstadoCard(estado.resumen.cubitt.titulo, estado.resumen.cubitt.detalle, estado.resumen.cubitt.estado, estado.resumen.cubitt.etiqueta, DISPOSITIVOS_PAGINAS.CUBITT));
+  statusGrid.appendChild(crearEstadoCard(estado.resumen.googleFit.titulo, estado.resumen.googleFit.detalle, estado.resumen.googleFit.estado, estado.resumen.googleFit.etiqueta, DISPOSITIVOS_PAGINAS.GOOGLE_FIT));
+  statusGrid.appendChild(crearEstadoCard(estado.resumen.puente.titulo, estado.resumen.puente.detalle, estado.resumen.puente.estado, estado.resumen.puente.etiqueta, DISPOSITIVOS_PAGINAS.PUENTE));
 
   pantalla.appendChild(header);
   pantalla.appendChild(statusGrid);
-  pantalla.appendChild(form);
-  pantalla.appendChild(importacion.form);
-  pantalla.appendChild(crearHistorial(estado.historial));
+  pantalla.appendChild(subnav.nav);
+  pantalla.appendChild(pagina.elemento);
 
   return {
     pantalla,
-    form,
-    mensaje,
-    cubittEscanearBoton,
-    cubittProbarBoton,
-    cubittExplorarBoton: exploradorPrivado.explorarBoton,
-    cubittLectura1Boton: exploradorPrivado.lectura1Boton,
-    cubittLectura2Boton: exploradorPrivado.lectura2Boton,
-    cubittCompararBoton: exploradorPrivado.compararBoton,
-    cubittPaginaActual: exploradorPrivado.paginaActual,
-    cubittPaginaAnteriorBoton: exploradorPrivado.paginaAnteriorBoton,
-    cubittPaginaSiguienteBoton: exploradorPrivado.paginaSiguienteBoton,
-    cubittPaginaBotones: exploradorPrivado.paginaBotones,
-    importForm: importacion.form,
-    importTextarea: importacion.textarea,
-    importMensaje: importacion.mensaje,
-    ejemploBoton: importacion.ejemploBoton,
-    ejemploImportacion: estado.ejemploImportacion || ""
+    form: pagina.form || null,
+    mensaje: pagina.mensaje || null,
+    paginaBotones: subnav.botones,
+    cubittEscanearBoton: pagina.cubittEscanearBoton || null,
+    cubittProbarBoton: pagina.cubittProbarBoton || null,
+    cubittExplorarBoton: pagina.cubittExplorarBoton || null,
+    cubittLectura1Boton: pagina.cubittLectura1Boton || null,
+    cubittLectura2Boton: pagina.cubittLectura2Boton || null,
+    cubittCompararBoton: pagina.cubittCompararBoton || null,
+    cubittPaginaActual: pagina.cubittPaginaActual || 1,
+    cubittPaginaAnteriorBoton: pagina.cubittPaginaAnteriorBoton || null,
+    cubittPaginaSiguienteBoton: pagina.cubittPaginaSiguienteBoton || null,
+    cubittPaginaBotones: pagina.cubittPaginaBotones || [],
+    importForm: pagina.importForm || null,
+    importTextarea: pagina.importTextarea || null,
+    importMensaje: pagina.importMensaje || null,
+    ejemploBoton: pagina.ejemploBoton || null,
+    ejemploImportacion: pagina.ejemploImportacion || ""
   };
 }
 
@@ -482,6 +552,7 @@ export function leerDispositivosForm(form) {
 }
 
 export function pintarMensajeDispositivos(mensajeNodo, resultado) {
+  if (!mensajeNodo) return;
   mensajeNodo.textContent = resultado?.mensaje || "";
   mensajeNodo.classList.toggle("dispositivos-message--ok", Boolean(resultado?.ok));
   mensajeNodo.classList.toggle("dispositivos-message--error", Boolean(resultado && !resultado.ok));
