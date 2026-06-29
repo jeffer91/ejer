@@ -101,12 +101,19 @@ function configurarSeleccionBluetooth(ventana) {
   ventana.webContents.on("select-bluetooth-device", (event, deviceList, callback) => {
     event.preventDefault();
 
+    let callbackUsado = false;
+    const responder = (deviceId = "") => {
+      if (callbackUsado) return;
+      callbackUsado = true;
+      callback(deviceId);
+    };
+
     const dispositivos = Array.isArray(deviceList) ? deviceList : [];
     const cubitt = dispositivos.find((device) => /cubitt|ct\s*4|ct4/i.test(obtenerNombreDispositivoBluetooth(device)));
 
     if (!cubitt) {
-      console.log("[FitJeff Bluetooth] Escaneo sin Cubitt CT4 todavía.");
-      callback("");
+      console.log("[FitJeff Bluetooth] Esperando Cubitt CT4 en el escaneo...");
+      setTimeout(() => responder(""), 6500);
       return;
     }
 
@@ -115,7 +122,7 @@ function configurarSeleccionBluetooth(ventana) {
       deviceId: cubitt.deviceId
     });
 
-    callback(cubitt.deviceId);
+    responder(cubitt.deviceId);
   });
 
   ventana.webContents.on("bluetooth-pairing-request", (event, details, callback) => {
