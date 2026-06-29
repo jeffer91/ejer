@@ -9,6 +9,7 @@
     - Abrir enlaces externos en el navegador del sistema.
     - Permitir micrófono/audio para Jarvis dentro de Electron.
     - Permitir Web Bluetooth para anexar Cubitt CT4 desde la pantalla Dispositivos.
+    - Seleccionar únicamente dispositivos cuyo nombre parezca Cubitt CT4.
     - Mostrar errores reales cuando Electron no logra cargar la app.
     - Mantener el fondo inicial alineado con el tema claro.
 
@@ -101,20 +102,20 @@ function configurarSeleccionBluetooth(ventana) {
     event.preventDefault();
 
     const dispositivos = Array.isArray(deviceList) ? deviceList : [];
-    const cubitt = dispositivos.find((device) => /cubitt|ct4/i.test(obtenerNombreDispositivoBluetooth(device)));
-    const seleccionado = cubitt || dispositivos[0];
+    const cubitt = dispositivos.find((device) => /cubitt|ct\s*4|ct4/i.test(obtenerNombreDispositivoBluetooth(device)));
 
-    if (!seleccionado) {
+    if (!cubitt) {
+      console.log("[FitJeff Bluetooth] Escaneo sin Cubitt CT4 todavía.");
       callback("");
       return;
     }
 
-    console.log("[FitJeff Bluetooth] Dispositivo seleccionado:", {
-      deviceName: seleccionado.deviceName,
-      deviceId: seleccionado.deviceId
+    console.log("[FitJeff Bluetooth] Cubitt seleccionado:", {
+      deviceName: cubitt.deviceName,
+      deviceId: cubitt.deviceId
     });
 
-    callback(seleccionado.deviceId);
+    callback(cubitt.deviceId);
   });
 
   ventana.webContents.on("bluetooth-pairing-request", (event, details, callback) => {
