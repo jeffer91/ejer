@@ -29,7 +29,7 @@ export const DISPOSITIVOS_FUENTES = Object.freeze({
 });
 
 export const DISPOSITIVOS_TEXTOS = Object.freeze({
-  TITULO: "Dispositivos y Google Fit",
+  TITULO: "Dispositivos y Bluetooth",
   SUBTITULO: "Anexa tu Cubitt CT4 por Bluetooth desde esta PC. Primero se guarda el reloj y luego se prueba si permite conexión y lectura básica.",
   CUBITT_TITULO: "Cubitt CT4",
   GOOGLE_FIT_TITULO: "Google Fit",
