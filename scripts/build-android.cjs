@@ -3,14 +3,17 @@
   Ruta o ubicación: scripts/build-android.cjs
 
   Función o funciones:
-    - Preparar la publicación Android/APK de FitJeff con la misma versión de Windows.
+    - Preparar y generar la APK Android de FitJeff con la misma versión de Windows.
+    - Crear automáticamente el proyecto Android de Capacitor si todavía no existe.
+    - Mantener el proyecto nativo en android/native para no mezclarlo con documentos de configuración.
+    - Sincronizar dist con Capacitor antes de compilar.
     - Limpiar APK/manifiestos Android anteriores antes de preparar la versión actual.
     - Generar manifiesto Android para actualización fuera de Play Store.
-    - Detectar si ya existe proyecto Android/Capacitor y compilar APK cuando esté disponible.
-    - No bloquear la publicación Windows mientras el proyecto Android nativo aún no exista.
+    - Compilar APK release si es posible y usar debug como respaldo instalable.
 
   Se conecta con:
     - package.json
+    - capacitor.config.json
     - android/update-config.json
     - android/signing/README.md
     - release/latest-android.json
@@ -25,9 +28,10 @@ const { spawnSync } = require("node:child_process");
 
 const rootDir = path.resolve(__dirname, "..");
 const packagePath = path.join(rootDir, "package.json");
-const androidDir = path.join(rootDir, "android");
+const androidMetaDir = path.join(rootDir, "android");
 const releaseDir = path.join(rootDir, "release");
-const updateConfigPath = path.join(androidDir, "update-config.json");
+const capacitorConfigPath = path.join(rootDir, "capacitor.config.json");
+const updateConfigPath = path.join(androidMetaDir, "update-config.json");
 const latestAndroidPath = path.join(releaseDir, "latest-android.json");
 const npxCommand = process.platform === "win32" ? "npx.cmd" : "npx";
 
@@ -68,24 +72,32 @@ function ejecutar(comando, args, opciones = {}) {
   return resultado;
 }
 
-function existeProyectoAndroidNativo() {
+function leerCapacitorConfig() {
+  return leerJson(capacitorConfigPath, null);
+}
+
+function resolverAndroidNativeDir(config = {}) {
+  const capacitorConfig = leerCapacitorConfig() || {};
+  const rutaConfigurada = config.androidNativePath || capacitorConfig.android?.path || "android/native";
+  return path.resolve(rootDir, rutaConfigurada);
+}
+
+function existeProyectoAndroidNativo(config = {}) {
+  const androidNativeDir = resolverAndroidNativeDir(config);
   return Boolean(
-    fs.existsSync(path.join(androidDir, "app", "build.gradle")) ||
-    fs.existsSync(path.join(androidDir, "app", "build.gradle.kts"))
+    fs.existsSync(path.join(androidNativeDir, "app", "build.gradle")) ||
+    fs.existsSync(path.join(androidNativeDir, "app", "build.gradle.kts"))
   );
 }
 
 function existeCapacitorConfig() {
-  return Boolean(
-    fs.existsSync(path.join(rootDir, "capacitor.config.json")) ||
-    fs.existsSync(path.join(rootDir, "capacitor.config.ts")) ||
-    fs.existsSync(path.join(rootDir, "capacitor.config.js"))
-  );
+  return fs.existsSync(capacitorConfigPath);
 }
 
-function resolverGradleWrapper() {
-  const gradlewBat = path.join(androidDir, "gradlew.bat");
-  const gradlew = path.join(androidDir, "gradlew");
+function resolverGradleWrapper(config = {}) {
+  const androidNativeDir = resolverAndroidNativeDir(config);
+  const gradlewBat = path.join(androidNativeDir, "gradlew.bat");
+  const gradlew = path.join(androidNativeDir, "gradlew");
 
   if (process.platform === "win32" && fs.existsSync(gradlewBat)) {
     return "gradlew.bat";
@@ -93,6 +105,10 @@ function resolverGradleWrapper() {
 
   if (fs.existsSync(gradlew)) {
     return "./gradlew";
+  }
+
+  if (fs.existsSync(gradlewBat)) {
+    return "gradlew.bat";
   }
 
   return null;
@@ -138,8 +154,9 @@ function buscarApks(dir, encontrados = []) {
   return encontrados;
 }
 
-function copiarApkPublicable(pkg) {
-  const outputsDir = path.join(androidDir, "app", "build", "outputs", "apk");
+function copiarApkPublicable(pkg, config) {
+  const androidNativeDir = resolverAndroidNativeDir(config);
+  const outputsDir = path.join(androidNativeDir, "app", "build", "outputs", "apk");
   const apks = buscarApks(outputsDir).sort((a, b) => fs.statSync(b).mtimeMs - fs.statSync(a).mtimeMs);
 
   if (apks.length === 0) {
@@ -165,7 +182,7 @@ function crearManifestAndroid({ pkg, config, apkPath = null, estado = "preparado
   const payload = {
     app: "FitJeff",
     platform: "android",
-    channel: "stable",
+    channel: config.channel || "stable",
     versionName: pkg.version,
     versionCode: calcularVersionCode(pkg.version),
     packageId: config.packageId || "com.jeff.fitjeff",
@@ -186,44 +203,82 @@ function crearManifestAndroid({ pkg, config, apkPath = null, estado = "preparado
   return payload;
 }
 
-function prepararSinProyectoAndroid(pkg, config) {
+function prepararSinProyectoAndroid(pkg, config, mensaje) {
   const manifest = crearManifestAndroid({
     pkg,
     config,
     estado: "preparado-sin-apk",
-    mensaje: "La configuración Android está preparada. Falta crear el proyecto Android/Capacitor para generar APK real."
+    mensaje: mensaje || "La configuración Android está preparada. Falta crear el proyecto Android/Capacitor para generar APK real."
   });
 
   console.log("----------------------------------------");
   console.log("Android preparado sin compilar APK.");
-  console.log("Motivo: todavía no existe proyecto Android nativo en android/app.");
   console.log(`Manifiesto: ${latestAndroidPath}`);
   console.log(`Versión Android preparada: ${manifest.versionName}`);
   return manifest;
 }
 
-function compilarAndroid(pkg, config) {
-  if (existeCapacitorConfig()) {
-    ejecutar(npxCommand, ["cap", "sync", "android"]);
+function asegurarProyectoAndroidCapacitor(pkg, config) {
+  if (existeProyectoAndroidNativo(config)) {
+    return true;
   }
 
-  const gradleWrapper = resolverGradleWrapper();
+  if (!existeCapacitorConfig()) {
+    prepararSinProyectoAndroid(pkg, config, "Falta capacitor.config.json. No se puede crear el proyecto Android nativo automáticamente.");
+    return false;
+  }
+
+  const androidNativeDir = resolverAndroidNativeDir(config);
+  console.log("----------------------------------------");
+  console.log("No existe proyecto Android nativo todavía.");
+  console.log(`Creando proyecto Capacitor en: ${path.relative(rootDir, androidNativeDir)}`);
+
+  ejecutar(npxCommand, ["cap", "add", "android"]);
+
+  if (!existeProyectoAndroidNativo(config)) {
+    throw new Error(`Capacitor no creó el proyecto Android esperado en ${androidNativeDir}. Revisa capacitor.config.json.`);
+  }
+
+  return true;
+}
+
+function sincronizarCapacitor(config) {
+  if (!existeCapacitorConfig()) {
+    return;
+  }
+
+  console.log("----------------------------------------");
+  console.log("Sincronizando dist con Capacitor Android...");
+  ejecutar(npxCommand, ["cap", "sync", "android"]);
+}
+
+function compilarAndroid(pkg, config) {
+  if (!asegurarProyectoAndroidCapacitor(pkg, config)) {
+    return null;
+  }
+
+  sincronizarCapacitor(config);
+
+  const androidNativeDir = resolverAndroidNativeDir(config);
+  const gradleWrapper = resolverGradleWrapper(config);
 
   if (!gradleWrapper) {
-    throw new Error("No se encontró gradlew/gradlew.bat dentro de android. No se puede compilar APK todavía.");
+    throw new Error(`No se encontró gradlew/gradlew.bat dentro de ${androidNativeDir}. No se puede compilar APK todavía.`);
   }
 
-  ejecutar(gradleWrapper, ["assembleRelease"], { cwd: androidDir, fallar: false });
+  console.log("----------------------------------------");
+  console.log("Compilando APK Android...");
+  ejecutar(gradleWrapper, ["assembleRelease"], { cwd: androidNativeDir, fallar: false });
 
-  let apkPath = copiarApkPublicable(pkg);
+  let apkPath = copiarApkPublicable(pkg, config);
 
   if (!apkPath) {
-    ejecutar(gradleWrapper, ["assembleDebug"], { cwd: androidDir });
-    apkPath = copiarApkPublicable(pkg);
+    ejecutar(gradleWrapper, ["assembleDebug"], { cwd: androidNativeDir });
+    apkPath = copiarApkPublicable(pkg, config);
   }
 
   if (!apkPath) {
-    throw new Error("No se encontró APK generado en android/app/build/outputs/apk.");
+    throw new Error("No se encontró APK generado en app/build/outputs/apk.");
   }
 
   const manifest = crearManifestAndroid({
@@ -250,18 +305,11 @@ function main() {
   console.log("========================================");
   console.log(`Versión: ${pkg.version}`);
   console.log(`Paquete: ${config.packageId || "com.jeff.fitjeff"}`);
+  console.log(`Proyecto nativo: ${path.relative(rootDir, resolverAndroidNativeDir(config))}`);
 
   limpiarArtefactosAndroidPrevios();
-
-  if (!existeProyectoAndroidNativo()) {
-    prepararSinProyectoAndroid(pkg, config);
-    console.log("========================================");
-    console.log("Preparación Android completada sin APK real.");
-    console.log("========================================");
-    return;
-  }
-
   compilarAndroid(pkg, config);
+
   console.log("========================================");
   console.log("Build Android completado.");
   console.log("========================================");
