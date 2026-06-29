@@ -36,13 +36,13 @@
     "revisar:todo": "scripts\\revisar-todo.bat"
   },
   "dependencies": {
-    "@capacitor/android": "latest",
-    "@capacitor/core": "latest",
+    "@capacitor/android": "6.2.1",
+    "@capacitor/core": "6.2.1",
     "electron-updater": "latest",
     "firebase": "^10.14.1"
   },
   "devDependencies": {
-    "@capacitor/cli": "latest",
+    "@capacitor/cli": "6.2.1",
     "concurrently": "latest",
     "cross-env": "latest",
     "electron": "^41.2.1",
