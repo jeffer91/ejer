@@ -30,6 +30,8 @@ npm install
 npm run build:android
 ```
 
+Si antes apareció el error `The Capacitor CLI requires NodeJS >=22.0.0`, vuelve a ejecutar `git pull origin main` y después `npm install`. El proyecto quedó fijado a Capacitor `6.2.1` para evitar que `latest` instale una versión que pida Node 22.
+
 El script hace esto:
 
 1. Compila la app web con Vite.
