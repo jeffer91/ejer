@@ -5,7 +5,7 @@
   Función o funciones:
     - Definir textos, fuentes, estados y estructura base de Dispositivos.
     - Mantener Cubitt CT4, Google Fit y puente de importación separados.
-    - Evitar textos que prometan lectura real cuando solo existe importación manual/puente.
+    - Preparar anexado Bluetooth local de Cubitt CT4 sin prometer lectura automática de pasos.
 
   Se conecta con:
     - src/features/actividad/dispositivos/dispositivos.service.js
@@ -30,15 +30,18 @@ export const DISPOSITIVOS_FUENTES = Object.freeze({
 
 export const DISPOSITIVOS_TEXTOS = Object.freeze({
   TITULO: "Dispositivos y Google Fit",
-  SUBTITULO: "FitJeff todavía no lee datos reales del reloj o Google Fit automáticamente. Por ahora usa un puente claro de importación CSV/JSON.",
+  SUBTITULO: "Anexa tu Cubitt CT4 por Bluetooth desde esta PC. Primero se guarda el reloj y luego se prueba si permite conexión y lectura básica.",
   CUBITT_TITULO: "Cubitt CT4",
   GOOGLE_FIT_TITULO: "Google Fit",
   PUENTE_TITULO: "Puente FitJeff",
   IMPORTAR_TITULO: "Importar actividad",
   BOTON_GUARDAR: "Guardar preparación",
   BOTON_IMPORTAR: "Importar datos pegados",
+  BOTON_BLUETOOTH_ANEXAR: "Escanear y anexar reloj",
+  BOTON_BLUETOOTH_PROBAR: "Probar conexión",
   EXITO: "Preparación guardada localmente.",
-  AVISO_PRIVADO: "El identificador del reloj se guarda solo en tu PC cuando lo escribes en la app. No queda fijo en el código.",
+  BLUETOOTH_EXITO: "Reloj anexado localmente.",
+  AVISO_PRIVADO: "El identificador Bluetooth se guarda solo en tu PC. No se sube al código ni reemplaza la lectura real del reloj.",
   IMPORTAR_AYUDA: "Pega datos exportados con columnas: fecha, pasos, bicicletaMin, bicicletaKm, fuente, nota. También acepta JSON con esos campos."
 });
 
@@ -47,7 +50,16 @@ export const CUBITT_BASE = Object.freeze({
   modelo: "CT4",
   variante: "v59",
   alias: "Cubitt CT4",
-  identificadorLocal: ""
+  identificadorLocal: "",
+  bluetoothNombre: "",
+  bluetoothId: "",
+  bluetoothAnexadoEn: "",
+  bluetoothUltimaConexionEn: "",
+  bluetoothUltimoDiagnostico: "",
+  bluetoothBateria: null,
+  bluetoothFabricante: "",
+  bluetoothModeloDetectado: "",
+  bluetoothServiciosLeidos: []
 });
 
 export const GOOGLE_FIT_BASE = Object.freeze({
@@ -60,24 +72,24 @@ export const GOOGLE_FIT_BASE = Object.freeze({
 
 export function crearEstadoDispositivosBase() {
   return {
-    version: "0.2.0",
+    version: "0.3.0",
     actualizadoEn: "",
     cubitt: {
       ...CUBITT_BASE,
       activo: false,
-      estado: DISPOSITIVOS_ESTADOS.PREPARADO,
+      estado: DISPOSITIVOS_ESTADOS.PENDIENTE,
       ultimoIntento: "",
-      nota: "Preparado para guardar el identificador local del reloj desde la app."
+      nota: "Pendiente de anexar por Bluetooth desde esta PC."
     },
     googleFit: {
       ...GOOGLE_FIT_BASE,
       activo: false,
       estado: DISPOSITIVOS_ESTADOS.PREPARADO,
       ultimoIntento: "",
-      nota: "Preparado para conectar cuando se implemente OAuth/API real."
+      nota: "Opcional. Para este reloj viejo, el camino principal será Bluetooth directo en FitJeff."
     },
     puente: {
-      fuentePreferida: DISPOSITIVOS_FUENTES.MANUAL,
+      fuentePreferida: DISPOSITIVOS_FUENTES.CUBITT,
       importarPasos: true,
       importarBicicleta: true,
       evitarDuplicados: true,
