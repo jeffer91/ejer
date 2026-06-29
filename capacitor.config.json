@@ -1,0 +1,11 @@
+{
+  "appId": "com.jeff.fitjeff",
+  "appName": "FitJeff",
+  "webDir": "dist",
+  "android": {
+    "path": "android/native"
+  },
+  "server": {
+    "androidScheme": "https"
+  }
+}
