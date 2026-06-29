@@ -51,7 +51,8 @@
 
 .dispositivos-header h2,
 .dispositivos-panel h3,
-.dispositivos-diagnostic h4 {
+.dispositivos-diagnostic h4,
+.dispositivos-private-explorer h4 {
   margin: 0;
   color: var(--fj-text-strong, #07111f);
   line-height: 1.15;
@@ -202,7 +203,8 @@
   flex: 1 1 180px;
 }
 
-.dispositivos-diagnostic {
+.dispositivos-diagnostic,
+.dispositivos-private-explorer {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
@@ -212,8 +214,17 @@
   padding: 10px;
 }
 
+.dispositivos-private-explorer {
+  border-color: rgba(124, 58, 237, 0.18);
+  background: linear-gradient(180deg, rgba(124, 58, 237, 0.08), rgba(37, 99, 235, 0.05));
+}
+
 .dispositivos-diagnostic h4,
-.dispositivos-diagnostic__note {
+.dispositivos-diagnostic__note,
+.dispositivos-private-explorer h4,
+.dispositivos-private-explorer > p,
+.dispositivos-private-explorer > .dispositivos-bluetooth-actions,
+.dispositivos-private-table {
   grid-column: 1 / -1;
 }
 
@@ -245,6 +256,47 @@
   border-top: 1px solid rgba(37, 99, 235, 0.12);
   padding-top: 8px;
   font-weight: 800;
+}
+
+.dispositivos-private-table {
+  overflow: auto;
+  border: 1px solid rgba(37, 99, 235, 0.14);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.82);
+}
+
+.dispositivos-private-table__row {
+  display: grid;
+  grid-template-columns: 0.9fr 0.9fr 0.8fr 1.2fr 1.2fr;
+  min-width: 820px;
+  border-top: 1px solid rgba(37, 99, 235, 0.1);
+}
+
+.dispositivos-private-table__row:first-child {
+  border-top: 0;
+}
+
+.dispositivos-private-table__row span {
+  overflow-wrap: anywhere;
+  padding: 8px;
+  color: var(--fj-text, #172033);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.72rem;
+  line-height: 1.35;
+}
+
+.dispositivos-private-table__row--head span {
+  background: rgba(37, 99, 235, 0.08);
+  color: var(--fj-text-strong, #07111f);
+  font-family: inherit;
+  font-size: 0.7rem;
+  font-weight: 950;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.dispositivos-private-table--changes {
+  border-color: rgba(245, 158, 11, 0.22);
 }
 
 .dispositivos-message {
@@ -319,7 +371,8 @@
     display: grid;
   }
 
-  .dispositivos-diagnostic {
+  .dispositivos-diagnostic,
+  .dispositivos-private-explorer {
     grid-template-columns: 1fr;
   }
 }
