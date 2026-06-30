@@ -494,6 +494,8 @@ async function activarJarvis({ diario, pantalla, boton, estadoNodo, transcripcio
   const contexto = crearContextoResumen(diario);
   const ajustes = obtenerAjustesEntrenamiento();
   const recognition = new SpeechRecognition();
+  let saludoInicialEmitido = false;
+
   reconocimientoActivo = recognition;
   jarvisEscuchando = true;
   jarvisInteractuando = false;
@@ -511,9 +513,14 @@ async function activarJarvis({ diario, pantalla, boton, estadoNodo, transcripcio
       boton.textContent = "Detener Jarvis";
       boton.disabled = false;
     }
+
     const estadoGemini = geminiDisponible(ajustes) ? "con Gemini activo" : "sin Gemini activo";
     actualizarEstado(estadoNodo, `Jarvis escuchando ${estadoGemini}. Di: hey Jarvis, iniciemos.`, true);
     actualizarContexto(contextoNodo, crearContextoJarvisCompleto({ diario, pantalla }));
+
+    if (saludoInicialEmitido) return;
+
+    saludoInicialEmitido = true;
     agregarLog(logNodo, `Jarvis activo ${estadoGemini} · ${contexto.rutina} · ${contexto.dia} · ${contexto.ejercicios} ejercicio(s).`);
     hablarJarvis(`Jarvis activo. Tengo lista la rutina ${contexto.rutina}, ${contexto.dia}. Di hey Jarvis, iniciemos.`);
   };
