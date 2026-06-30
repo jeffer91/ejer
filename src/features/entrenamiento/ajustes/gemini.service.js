@@ -5,12 +5,14 @@
   Función o funciones:
     - Probar conexión con Gemini usando la API Key guardada localmente.
     - Generar guías breves de entrenamiento cuando IA esté activa.
+    - Responder conversaciones de Jarvis usando el contexto completo del Diario.
     - Enviar siempre contexto completo porque Gemini no conserva memoria entre llamadas.
     - Evitar fallos por modelos antiguos probando modelos compatibles de respaldo.
     - Mantener Gemini separado de pantallas y ajustes.
 
   Se conecta con:
     - src/features/entrenamiento/ajustes/ajustes.service.js
+    - src/features/entrenamiento/diario/diario.jarvis.js
 */
 
 const GEMINI_ENDPOINT_BASE = "https://generativelanguage.googleapis.com/v1beta/models";
@@ -19,7 +21,6 @@ export const GEMINI_MODELO_RECOMENDADO = "gemini-2.5-flash";
 const GEMINI_MODELOS_RESPALDO = [
   GEMINI_MODELO_RECOMENDADO,
   "gemini-flash-latest",
-  "gemini-3.5-flash",
   "gemini-2.5-flash-lite"
 ];
 
@@ -59,10 +60,10 @@ function crearPromptConContexto({ instruccion = "", contexto = {}, modo = "guia"
   return [
     "CONTEXTO OBLIGATORIO FITJEFF",
     "Gemini no conserva memoria entre llamadas. Usa únicamente este contexto para responder.",
-    "Rol: eres FitJeff, asistente breve y seguro de entrenamiento dentro de una app local.",
-    "Objetivo: dar ayuda clara, corta y útil según los datos actuales de la app.",
+    "Rol: eres Jarvis dentro de FitJeff, un asistente breve, conversacional y seguro de entrenamiento.",
+    "Objetivo: guiar al usuario durante su rutina, responder dudas cortas y ayudar a registrar el entrenamiento cuando corresponda.",
     "Reglas de seguridad: no sugieras esfuerzos extremos; no indiques ignorar dolor, mareo o malestar; recomienda bajar intensidad o detenerse si hay molestias importantes.",
-    "Formato: responde en español, directo y sin explicación larga.",
+    "Formato: responde en español, natural, directo, en máximo 2 frases. No uses formato JSON ni listas largas.",
     `Modo: ${modo}`,
     `Contexto actual de la app: ${JSON.stringify(contexto || {})}`,
     "INSTRUCCIÓN ACTUAL",
@@ -84,7 +85,11 @@ async function llamarGeminiModelo({ apiKey, modelo, prompt }) {
             { text: prompt }
           ]
         }
-      ]
+      ],
+      generationConfig: {
+        temperature: 0.35,
+        maxOutputTokens: 180
+      }
     })
   });
 
@@ -186,8 +191,36 @@ export function crearGeminiService() {
     });
   }
 
+  async function conversarJarvisEntrenamiento(ajustes = {}, contexto = {}, fraseUsuario = "", respuestaLocal = "") {
+    if (!ajustes.iaActiva) {
+      return {
+        ok: false,
+        mensaje: "La IA de entrenamiento está inactiva."
+      };
+    }
+
+    return llamarGemini({
+      apiKey: ajustes.geminiApiKey,
+      modelo: ajustes.geminiModelo,
+      prompt: crearPromptConContexto({
+        modo: "jarvis_conversacion_entrenamiento",
+        contexto: {
+          ...contexto,
+          respuestaLocalJarvis: respuestaLocal || "sin respuesta local previa"
+        },
+        instruccion: [
+          `El usuario dijo: ${texto(fraseUsuario) || "sin frase"}.`,
+          "Responde como Jarvis en conversación natural.",
+          "Si el comando ya fue ejecutado localmente, complementa con una guía breve sin duplicar acciones.",
+          "Si el comando no existe localmente, orienta al usuario con una respuesta útil según la rutina y sugiere un comando válido si hace falta."
+        ].join(" ")
+      })
+    });
+  }
+
   return {
     probarConexion,
-    generarGuiaEntrenamiento
+    generarGuiaEntrenamiento,
+    conversarJarvisEntrenamiento
   };
 }
