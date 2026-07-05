@@ -1,0 +1,40 @@
+{
+  "historial": [
+    {
+      "fecha": "2026-07-05 08:30",
+      "texto": "Registrar agua de la mañana",
+      "accion": "Registrar agua",
+      "categoria": "Hidratación",
+      "valor": "500 ml",
+      "confianza": "Alta",
+      "estado": "Preparado"
+    },
+    {
+      "fecha": "2026-07-05 20:15",
+      "texto": "Registrar entrenamiento con esfuerzo moderado",
+      "accion": "Registrar entrenamiento",
+      "categoria": "Entrenamiento",
+      "valor": "Esfuerzo 4/5",
+      "confianza": "Media",
+      "estado": "Preparado"
+    },
+    {
+      "fecha": "2026-07-06 07:10",
+      "texto": "Registrar energía del día",
+      "accion": "Registrar energía",
+      "categoria": "Progreso",
+      "valor": "Energía 3/5",
+      "confianza": "Alta",
+      "estado": "Pendiente"
+    },
+    {
+      "fecha": "2026-07-06 21:40",
+      "texto": "Guardar nota de caminata",
+      "accion": "Guardar nota",
+      "categoria": "Nota",
+      "valor": "Texto libre",
+      "confianza": "Media",
+      "estado": "Preparado"
+    }
+  ]
+}
