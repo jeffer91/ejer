@@ -3,8 +3,8 @@ Nombre completo: fit-gs-webapp.gs
 Ruta o ubicación: src/shared/integraciones/google-sheets/apps-script/fit-gs-webapp.gs
 Función o funciones:
 - Recibir datos enviados desde Fitness Jeff por Apps Script.
-- Crear hojas si no existen.
-- Agregar filas en Google Sheets.
+- Crear hojas si no existen usando encabezados oficiales.
+- Agregar filas respetando el orden de columnas de cada hoja.
 Con qué se conecta:
 - fit-gs-client.service.js
 - fit-gs-sync.service.js
@@ -27,7 +27,10 @@ function setupTables(tables){
   var ss=SpreadsheetApp.getActiveSpreadsheet();
   Object.keys(tables).forEach(function(name){
     var sheet=ss.getSheetByName(name) || ss.insertSheet(name);
-    if(sheet.getLastRow()===0){sheet.appendRow(tables[name]);}
+    var headers=tables[name] || [];
+    if(sheet.getLastRow()===0 && headers.length){
+      sheet.appendRow(headers);
+    }
   });
   return jsonOutput({ok:true,message:'Tablas listas'});
 }
@@ -36,7 +39,11 @@ function appendRows(tableName,records){
   if(!tableName){return jsonOutput({ok:false,message:'Tabla faltante'});}
   var ss=SpreadsheetApp.getActiveSpreadsheet();
   var sheet=ss.getSheetByName(tableName) || ss.insertSheet(tableName);
-  records.forEach(function(record){sheet.appendRow(objectToRow(record));});
+  ensureHeaders(sheet,records);
+  var headers=getHeaders(sheet);
+  records.forEach(function(record){
+    sheet.appendRow(objectToRow(headers,record));
+  });
   return jsonOutput({ok:true,message:'Filas agregadas',count:records.length});
 }
 
@@ -50,8 +57,27 @@ function batchAppend(batches){
   return jsonOutput({ok:true,message:'Lotes agregados',count:total});
 }
 
-function objectToRow(record){
-  return Object.keys(record).map(function(key){return record[key];});
+function ensureHeaders(sheet,records){
+  if(sheet.getLastRow()>0){return;}
+  var first=records && records.length ? records[0] : {};
+  var keys=Object.keys(first);
+  if(keys.length){sheet.appendRow(keys);}
+}
+
+function getHeaders(sheet){
+  var lastColumn=sheet.getLastColumn();
+  if(lastColumn===0){return [];}
+  return sheet.getRange(1,1,1,lastColumn).getValues()[0];
+}
+
+function objectToRow(headers,record){
+  if(!headers || !headers.length){return Object.keys(record).map(function(key){return record[key];});}
+  return headers.map(function(key){
+    var value=record[key];
+    if(value===undefined || value===null){return '';}
+    if(typeof value==='object'){return JSON.stringify(value);}
+    return value;
+  });
 }
 
 function jsonOutput(data){
