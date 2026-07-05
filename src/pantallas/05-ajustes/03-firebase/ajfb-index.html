@@ -4,11 +4,14 @@ Ruta o ubicación: src/pantallas/05-ajustes/03-firebase/ajfb-index.html
 Función o funciones:
 - Mostrar la subpantalla independiente de Ajustes / Firebase.
 - Guardar configuración local de Firebase como respaldo alterno.
-- Preparar colecciones para futura sincronización real.
+- Probar respaldo y sincronizar datos locales mediante servicios compartidos.
 Con qué se conecta:
 - ajfb.css
 - ajfb-main.js
 - data/ajfb-demo-data.json
+- ../../../shared/integraciones/firebase/fit-fb-schema.js
+- ../../../shared/integraciones/firebase/fit-fb-client.service.js
+- ../../../shared/integraciones/firebase/fit-fb-sync.service.js
 ========================================================= -->
 <!doctype html>
 <html lang="es">
@@ -30,15 +33,15 @@ Con qué se conecta:
     </section>
 
     <section class="ajfb-grid ajfb-grid-summary">
-      <article class="ajfb-card ajfb-card-main"><span class="ajfb-label">Estado</span><strong id="ajfb-resumen-estado">--</strong><small>Configuración local</small></article>
+      <article class="ajfb-card ajfb-card-main"><span class="ajfb-label">Estado</span><strong id="ajfb-resumen-estado">--</strong><small>Configuración</small></article>
       <article class="ajfb-card"><span class="ajfb-label">Proyecto</span><strong id="ajfb-resumen-proyecto">--</strong><small>Project ID</small></article>
       <article class="ajfb-card"><span class="ajfb-label">Colecciones</span><strong id="ajfb-resumen-colecciones">0</strong><small>Preparadas</small></article>
-      <article class="ajfb-card"><span class="ajfb-label">Última prueba</span><strong id="ajfb-resumen-prueba">--</strong><small>Validación local</small></article>
+      <article class="ajfb-card"><span class="ajfb-label">Última prueba</span><strong id="ajfb-resumen-prueba">--</strong><small>Respaldo</small></article>
     </section>
 
     <section class="ajfb-layout">
       <article class="ajfb-card ajfb-form-card">
-        <div class="ajfb-card-header"><div><h2>Configuración Firebase</h2><p>Estos datos se guardan localmente. La conexión real se activará en el bloque de integración.</p></div></div>
+        <div class="ajfb-card-header"><div><h2>Configuración Firebase</h2><p>Estos datos se guardan localmente. El respaldo queda preparado por servicios compartidos.</p></div></div>
         <form id="ajfb-form" class="ajfb-form">
           <label for="ajfb-input-api-key">API Key</label>
           <input id="ajfb-input-api-key" type="text" maxlength="220" placeholder="Pega tu apiKey" required>
@@ -56,18 +59,23 @@ Con qué se conecta:
           <textarea id="ajfb-input-nota" rows="3" placeholder="Ej. Firebase será respaldo alterno de la app."></textarea>
 
           <button type="submit">Guardar configuración</button>
-          <button id="ajfb-btn-probar" type="button" class="ajfb-btn-secondary">Probar configuración local</button>
+          <button id="ajfb-btn-probar" type="button" class="ajfb-btn-secondary">Validar datos</button>
+          <button id="ajfb-btn-conexion" type="button" class="ajfb-btn-secondary">Probar respaldo</button>
+          <button id="ajfb-btn-sincronizar" type="button">Respaldar ahora</button>
           <button id="ajfb-btn-restaurar-demo" type="button" class="ajfb-btn-light">Restaurar demo</button>
         </form>
         <p id="ajfb-mensaje" class="ajfb-message" aria-live="polite"></p>
       </article>
 
       <article class="ajfb-card ajfb-collections-card">
-        <div class="ajfb-card-header"><div><h2>Colecciones preparadas</h2><p>Estructura de respaldo para Firestore.</p></div></div>
+        <div class="ajfb-card-header"><div><h2>Colecciones preparadas</h2><p>Estructura de respaldo para Firebase.</p></div></div>
         <div id="ajfb-colecciones" class="ajfb-collections"></div>
       </article>
     </section>
   </main>
+  <script src="../../../shared/integraciones/firebase/fit-fb-schema.js"></script>
+  <script src="../../../shared/integraciones/firebase/fit-fb-client.service.js"></script>
+  <script src="../../../shared/integraciones/firebase/fit-fb-sync.service.js"></script>
   <script src="./ajfb-main.js"></script>
 </body>
 </html>
