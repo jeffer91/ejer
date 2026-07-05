@@ -1,0 +1,30 @@
+{
+  "configuracion": {
+    "nombre": "HIIT controlado",
+    "trabajoSeg": 30,
+    "descansoSeg": 20,
+    "rondas": 6,
+    "intensidad": 3,
+    "nota": "Sesión demo. Mantener técnica, respiración y descansos."
+  },
+  "historial": [
+    {
+      "fecha": "2026-07-02",
+      "nombre": "HIIT controlado",
+      "trabajoSeg": 30,
+      "descansoSeg": 20,
+      "rondas": 5,
+      "estado": "Completado",
+      "nota": "Demo sin molestias."
+    },
+    {
+      "fecha": "2026-07-04",
+      "nombre": "HIIT corto",
+      "trabajoSeg": 25,
+      "descansoSeg": 25,
+      "rondas": 4,
+      "estado": "Completado",
+      "nota": "Demo suave."
+    }
+  ]
+}
