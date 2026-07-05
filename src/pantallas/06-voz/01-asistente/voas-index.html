@@ -1,0 +1,66 @@
+<!-- =========================================================
+Nombre completo: voas-index.html
+Ruta o ubicación: src/pantallas/06-voz/01-asistente/voas-index.html
+Función o funciones:
+- Mostrar la subpantalla independiente de Voz / Asistente.
+- Permitir dictar o escribir comandos para convertirlos en acciones locales.
+- Guardar el historial de comandos interpretados en localStorage.
+Con qué se conecta:
+- voas.css
+- voas-main.js
+- data/voas-demo-data.json
+========================================================= -->
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Voz / Asistente</title>
+  <link rel="stylesheet" href="./voas.css">
+</head>
+<body>
+  <main class="voas-page">
+    <section class="voas-hero">
+      <div>
+        <p class="voas-eyebrow">Voz / Asistente</p>
+        <h1>Asistente por voz</h1>
+        <p class="voas-subtitle">Dicta o escribe comandos simples para registrar agua, entrenamiento, energía, sueño o notas rápidas.</p>
+      </div>
+      <div class="voas-mode" id="voas-modo-datos">Modo demo</div>
+    </section>
+
+    <section class="voas-grid voas-grid-summary">
+      <article class="voas-card voas-card-main"><span class="voas-label">Estado</span><strong id="voas-estado">--</strong><small>Reconocimiento de voz</small></article>
+      <article class="voas-card"><span class="voas-label">Comandos</span><strong id="voas-total-comandos">0</strong><small>Guardados</small></article>
+      <article class="voas-card"><span class="voas-label">Última acción</span><strong id="voas-ultima-accion">--</strong><small>Interpretación local</small></article>
+      <article class="voas-card"><span class="voas-label">Confianza</span><strong id="voas-confianza">--</strong><small>Regla detectada</small></article>
+    </section>
+
+    <section class="voas-layout">
+      <article class="voas-card voas-command-card">
+        <div class="voas-card-header"><div><h2>Comando actual</h2><p>Usa frases cortas. La app guarda texto interpretado, no archivos de audio.</p></div></div>
+        <textarea id="voas-input-comando" rows="5" placeholder="Ej. Registrar 500 ml de agua después de entrenar"></textarea>
+        <div class="voas-actions">
+          <button id="voas-btn-escuchar">Escuchar</button>
+          <button id="voas-btn-detener" class="voas-btn-secondary">Detener</button>
+          <button id="voas-btn-procesar" class="voas-btn-light">Procesar texto</button>
+        </div>
+        <p id="voas-mensaje" class="voas-message" aria-live="polite"></p>
+      </article>
+
+      <article class="voas-card voas-result-card">
+        <div class="voas-card-header"><div><h2>Resultado interpretado</h2><p>Antes de integrar con la base real, esta pantalla solo prepara la acción.</p></div></div>
+        <div id="voas-resultado" class="voas-result"></div>
+        <button id="voas-btn-guardar" type="button">Guardar en historial</button>
+        <button id="voas-btn-restaurar-demo" type="button" class="voas-btn-light">Restaurar demo</button>
+      </article>
+    </section>
+
+    <section class="voas-card voas-help-card">
+      <div class="voas-card-header"><div><h2>Frases útiles</h2><p>Ejemplos que el asistente puede interpretar localmente.</p></div></div>
+      <div id="voas-frases" class="voas-phrases"></div>
+    </section>
+  </main>
+  <script src="./voas-main.js"></script>
+</body>
+</html>
