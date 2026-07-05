@@ -1,0 +1,80 @@
+<!-- =========================================================
+Nombre completo: enhi-index.html
+Ruta o ubicación: src/pantallas/02-entrenamiento/02-hiit/enhi-index.html
+Función o funciones:
+- Mostrar la subpantalla independiente de Entrenamiento / HIIT.
+- Configurar intervalos de trabajo, descanso y rondas.
+- Ejecutar un temporizador simple con pausa, reinicio y registro local.
+Con qué se conecta:
+- enhi.css
+- enhi-main.js
+- data/enhi-demo-data.json
+========================================================= -->
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Entrenamiento / HIIT</title>
+  <link rel="stylesheet" href="./enhi.css">
+</head>
+<body>
+  <main class="enhi-page">
+    <section class="enhi-hero">
+      <div>
+        <p class="enhi-eyebrow">Entrenamiento / HIIT</p>
+        <h1>Temporizador por intervalos</h1>
+        <p class="enhi-subtitle">Configura trabajo, descanso y rondas. Empieza suave y detente si sientes molestias, mareo o dolor.</p>
+      </div>
+      <div class="enhi-mode" id="enhi-modo-datos">Modo demo</div>
+    </section>
+
+    <section class="enhi-grid enhi-grid-summary">
+      <article class="enhi-card enhi-card-main"><span class="enhi-label">Fase actual</span><strong id="enhi-fase">Listo</strong><small id="enhi-ronda">Ronda 0/0</small></article>
+      <article class="enhi-card"><span class="enhi-label">Tiempo</span><strong id="enhi-tiempo">00:00</strong><small>Cuenta regresiva</small></article>
+      <article class="enhi-card"><span class="enhi-label">Sesiones</span><strong id="enhi-total-sesiones">0</strong><small>Guardadas localmente</small></article>
+      <article class="enhi-card"><span class="enhi-label">Estado</span><strong id="enhi-estado">Detenido</strong><small>Temporizador</small></article>
+    </section>
+
+    <section class="enhi-layout">
+      <article class="enhi-card enhi-timer-card">
+        <div class="enhi-card-header"><div><h2>Temporizador</h2><p>Usa intervalos controlados y deja descanso suficiente.</p></div></div>
+        <div class="enhi-ring" id="enhi-ring"><div><span id="enhi-tiempo-grande">00:00</span><small id="enhi-fase-grande">Listo para iniciar</small></div></div>
+        <div class="enhi-actions">
+          <button id="enhi-btn-iniciar">Iniciar</button>
+          <button id="enhi-btn-pausar" class="enhi-btn-secondary">Pausar</button>
+          <button id="enhi-btn-reiniciar" class="enhi-btn-light">Reiniciar</button>
+        </div>
+        <p id="enhi-mensaje" class="enhi-message" aria-live="polite"></p>
+      </article>
+
+      <article class="enhi-card enhi-form-card">
+        <div class="enhi-card-header"><div><h2>Configuración</h2><p>Ajusta la sesión antes de iniciar.</p></div></div>
+        <form id="enhi-form" class="enhi-form">
+          <label for="enhi-input-nombre">Nombre de sesión</label>
+          <input id="enhi-input-nombre" type="text" maxlength="60" placeholder="Ej. HIIT suave" required>
+
+          <div class="enhi-form-grid">
+            <div><label for="enhi-input-trabajo">Trabajo (seg)</label><input id="enhi-input-trabajo" type="number" min="5" max="180" step="5" required></div>
+            <div><label for="enhi-input-descanso">Descanso (seg)</label><input id="enhi-input-descanso" type="number" min="5" max="240" step="5" required></div>
+            <div><label for="enhi-input-rondas">Rondas</label><input id="enhi-input-rondas" type="number" min="1" max="20" step="1" required></div>
+            <div><label for="enhi-input-intensidad">Intensidad 1 a 5</label><input id="enhi-input-intensidad" type="number" min="1" max="5" step="1" placeholder="Ej. 3"></div>
+          </div>
+
+          <label for="enhi-input-nota">Nota</label>
+          <textarea id="enhi-input-nota" rows="3" placeholder="Ej. Sesión corta, sin molestias."></textarea>
+
+          <button id="enhi-btn-guardar-config" type="submit">Guardar configuración</button>
+          <button id="enhi-btn-restaurar-demo" type="button" class="enhi-btn-light">Restaurar demo</button>
+        </form>
+      </article>
+    </section>
+
+    <section class="enhi-card enhi-history-card">
+      <div class="enhi-card-header"><div><h2>Historial HIIT</h2><p>Sesiones finalizadas o configuradas en esta pantalla.</p></div></div>
+      <div class="enhi-table-wrap"><table class="enhi-table"><thead><tr><th>Fecha</th><th>Sesión</th><th>Trabajo</th><th>Descanso</th><th>Rondas</th><th>Estado</th><th>Nota</th></tr></thead><tbody id="enhi-tabla-body"></tbody></table></div>
+    </section>
+  </main>
+  <script src="./enhi-main.js"></script>
+</body>
+</html>
