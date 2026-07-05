@@ -1,0 +1,43 @@
+{
+  "configuracion": {
+    "apiKey": "PEGAR_API_KEY",
+    "authDomain": "mi-proyecto.firebaseapp.com",
+    "projectId": "mi-proyecto",
+    "storageBucket": "mi-proyecto.appspot.com",
+    "appId": "1:000000000:web:000000000",
+    "modoSync": "Después de Google Sheets",
+    "estado": "Pendiente",
+    "ultimaPrueba": "Sin probar",
+    "nota": "Firebase funcionará como respaldo alterno de cambios importantes."
+  },
+  "colecciones": [
+    {
+      "nombre": "perfil",
+      "descripcion": "Copia del perfil activo y preferencias."
+    },
+    {
+      "nombre": "registrosDiarios",
+      "descripcion": "Copia de registros diarios importantes."
+    },
+    {
+      "nombre": "entrenamientos",
+      "descripcion": "Copia de sesiones y series registradas."
+    },
+    {
+      "nombre": "hidratacion",
+      "descripcion": "Copia de registros de agua."
+    },
+    {
+      "nombre": "recomendaciones",
+      "descripcion": "Copia de recomendaciones aplicadas o descartadas."
+    },
+    {
+      "nombre": "syncPendiente",
+      "descripcion": "Cambios que no pudieron enviarse y deben reintentarse."
+    },
+    {
+      "nombre": "syncLog",
+      "descripcion": "Historial de sincronización, errores y validaciones."
+    }
+  ]
+}
