@@ -1,0 +1,87 @@
+<!-- =========================================================
+Nombre completo: ajpe-index.html
+Ruta o ubicación: src/pantallas/05-ajustes/01-perfil/ajpe-index.html
+Función o funciones:
+- Mostrar la subpantalla independiente de Ajustes / Perfil.
+- Guardar datos generales, preferencias de entrenamiento y hábitos en localStorage.
+- Preparar una estructura de perfil para futuras sincronizaciones con Google Sheets y Firebase.
+Con qué se conecta:
+- ajpe.css
+- ajpe-main.js
+- data/ajpe-demo-data.json
+========================================================= -->
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ajustes / Perfil</title>
+  <link rel="stylesheet" href="./ajpe.css">
+</head>
+<body>
+  <main class="ajpe-page">
+    <section class="ajpe-hero">
+      <div>
+        <p class="ajpe-eyebrow">Ajustes / Perfil</p>
+        <h1>Perfil de la app</h1>
+        <p class="ajpe-subtitle">Configura tus datos básicos y preferencias para que las pantallas trabajen con el mismo perfil.</p>
+      </div>
+      <div class="ajpe-mode" id="ajpe-modo-datos">Modo demo</div>
+    </section>
+
+    <section class="ajpe-grid ajpe-grid-summary">
+      <article class="ajpe-card ajpe-card-main"><span class="ajpe-label">Usuario</span><strong id="ajpe-resumen-nombre">--</strong><small>Perfil activo</small></article>
+      <article class="ajpe-card"><span class="ajpe-label">Modo</span><strong id="ajpe-resumen-modo">Claro</strong><small>Preferencia visual</small></article>
+      <article class="ajpe-card"><span class="ajpe-label">Días activos</span><strong id="ajpe-resumen-dias">0</strong><small>Meta semanal flexible</small></article>
+      <article class="ajpe-card"><span class="ajpe-label">Agua</span><strong id="ajpe-resumen-agua">0 ml</strong><small>Meta diaria referencial</small></article>
+    </section>
+
+    <section class="ajpe-layout">
+      <article class="ajpe-card ajpe-form-card">
+        <div class="ajpe-card-header"><div><h2>Datos generales</h2><p>Estos datos quedan guardados localmente por ahora.</p></div></div>
+        <form id="ajpe-form" class="ajpe-form">
+          <label for="ajpe-input-nombre">Nombre visible</label>
+          <input id="ajpe-input-nombre" type="text" maxlength="80" required>
+
+          <div class="ajpe-form-grid">
+            <div><label for="ajpe-input-unidad">Unidad principal</label><select id="ajpe-input-unidad"><option value="kg/cm">kg / cm</option><option value="lb/in">lb / in</option></select></div>
+            <div><label for="ajpe-input-modo">Modo visual</label><select id="ajpe-input-modo"><option value="Claro">Claro</option><option value="Sistema">Sistema</option></select></div>
+            <div><label for="ajpe-input-dias">Días activos por semana</label><input id="ajpe-input-dias" type="number" min="1" max="7" step="1"></div>
+            <div><label for="ajpe-input-agua">Meta agua diaria ml</label><input id="ajpe-input-agua" type="number" min="500" max="6000" step="50"></div>
+          </div>
+
+          <label for="ajpe-input-enfoque">Enfoque principal</label>
+          <select id="ajpe-input-enfoque">
+            <option value="Constancia">Constancia</option>
+            <option value="Energía">Energía</option>
+            <option value="Fuerza">Fuerza</option>
+            <option value="Hábitos">Hábitos</option>
+            <option value="Salud general">Salud general</option>
+          </select>
+
+          <label for="ajpe-input-horario">Horario preferido</label>
+          <select id="ajpe-input-horario">
+            <option value="Mañana">Mañana</option>
+            <option value="Tarde">Tarde</option>
+            <option value="Noche">Noche</option>
+            <option value="Variable">Variable</option>
+          </select>
+
+          <label for="ajpe-input-nota">Nota personal</label>
+          <textarea id="ajpe-input-nota" rows="4" placeholder="Ej. Prefiero rutinas simples, claras y sostenibles."></textarea>
+
+          <button type="submit">Guardar perfil</button>
+          <button id="ajpe-btn-restaurar-demo" type="button" class="ajpe-btn-light">Restaurar demo</button>
+        </form>
+        <p id="ajpe-mensaje" class="ajpe-message" aria-live="polite"></p>
+      </article>
+
+      <article class="ajpe-card ajpe-preview-card">
+        <div class="ajpe-card-header"><div><h2>Vista del perfil</h2><p>Resumen que usarán las demás pantallas.</p></div></div>
+        <div class="ajpe-profile" id="ajpe-profile-card"></div>
+      </article>
+    </section>
+  </main>
+  <script src="./ajpe-main.js"></script>
+</body>
+</html>
