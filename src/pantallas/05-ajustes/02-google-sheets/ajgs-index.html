@@ -4,11 +4,14 @@ Ruta o ubicación: src/pantallas/05-ajustes/02-google-sheets/ajgs-index.html
 Función o funciones:
 - Mostrar la subpantalla independiente de Ajustes / Google Sheets.
 - Guardar configuración local de Google Sheets y Apps Script.
-- Preparar nombres de hojas/tablas para futura sincronización real.
+- Probar conexión real y sincronizar datos locales mediante servicios compartidos.
 Con qué se conecta:
 - ajgs.css
 - ajgs-main.js
 - data/ajgs-demo-data.json
+- ../../../shared/integraciones/google-sheets/fit-gs-schema.js
+- ../../../shared/integraciones/google-sheets/fit-gs-client.service.js
+- ../../../shared/integraciones/google-sheets/fit-gs-sync.service.js
 ========================================================= -->
 <!doctype html>
 <html lang="es">
@@ -24,21 +27,21 @@ Con qué se conecta:
       <div>
         <p class="ajgs-eyebrow">Ajustes / Google Sheets</p>
         <h1>Base principal en Google Sheets</h1>
-        <p class="ajgs-subtitle">Configura la hoja principal y deja listas las tablas que usará la app para guardar perfil, progreso, entrenamiento, agua y recomendaciones.</p>
+        <p class="ajgs-subtitle">Configura la hoja principal, prueba la Web App de Apps Script y sincroniza datos locales cuando esté lista.</p>
       </div>
       <div class="ajgs-mode" id="ajgs-modo-datos">Modo demo</div>
     </section>
 
     <section class="ajgs-grid ajgs-grid-summary">
-      <article class="ajgs-card ajgs-card-main"><span class="ajgs-label">Estado</span><strong id="ajgs-resumen-estado">--</strong><small>Conexión local</small></article>
+      <article class="ajgs-card ajgs-card-main"><span class="ajgs-label">Estado</span><strong id="ajgs-resumen-estado">--</strong><small>Conexión</small></article>
       <article class="ajgs-card"><span class="ajgs-label">Spreadsheet</span><strong id="ajgs-resumen-sheet">--</strong><small>ID configurado</small></article>
       <article class="ajgs-card"><span class="ajgs-label">Tablas</span><strong id="ajgs-resumen-tablas">0</strong><small>Hojas preparadas</small></article>
-      <article class="ajgs-card"><span class="ajgs-label">Última prueba</span><strong id="ajgs-resumen-prueba">--</strong><small>Validación local</small></article>
+      <article class="ajgs-card"><span class="ajgs-label">Última prueba</span><strong id="ajgs-resumen-prueba">--</strong><small>Conexión real</small></article>
     </section>
 
     <section class="ajgs-layout">
       <article class="ajgs-card ajgs-form-card">
-        <div class="ajgs-card-header"><div><h2>Configuración de conexión</h2><p>Estos datos se guardan localmente. La conexión real se activará en el bloque de integración.</p></div></div>
+        <div class="ajgs-card-header"><div><h2>Configuración de conexión</h2><p>Guarda la URL de Apps Script y prueba la conexión real con Google Sheets.</p></div></div>
         <form id="ajgs-form" class="ajgs-form">
           <label for="ajgs-input-sheet-id">Spreadsheet ID</label>
           <input id="ajgs-input-sheet-id" type="text" maxlength="180" placeholder="ID del archivo de Google Sheets" required>
@@ -55,7 +58,10 @@ Con qué se conecta:
           <textarea id="ajgs-input-nota" rows="3" placeholder="Ej. Hoja principal para sincronizar datos de la app."></textarea>
 
           <button type="submit">Guardar configuración</button>
-          <button id="ajgs-btn-probar" type="button" class="ajgs-btn-secondary">Probar configuración local</button>
+          <button id="ajgs-btn-probar" type="button" class="ajgs-btn-secondary">Validar datos</button>
+          <button id="ajgs-btn-conexion-real" type="button" class="ajgs-btn-secondary">Probar conexión real</button>
+          <button id="ajgs-btn-crear-tablas" type="button" class="ajgs-btn-secondary">Crear tablas</button>
+          <button id="ajgs-btn-sincronizar" type="button">Sincronizar ahora</button>
           <button id="ajgs-btn-restaurar-demo" type="button" class="ajgs-btn-light">Restaurar demo</button>
         </form>
         <p id="ajgs-mensaje" class="ajgs-message" aria-live="polite"></p>
@@ -67,6 +73,9 @@ Con qué se conecta:
       </article>
     </section>
   </main>
+  <script src="../../../shared/integraciones/google-sheets/fit-gs-schema.js"></script>
+  <script src="../../../shared/integraciones/google-sheets/fit-gs-client.service.js"></script>
+  <script src="../../../shared/integraciones/google-sheets/fit-gs-sync.service.js"></script>
   <script src="./ajgs-main.js"></script>
 </body>
 </html>
