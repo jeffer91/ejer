@@ -1,0 +1,74 @@
+<!-- =========================================================
+Nombre completo: vohi-index.html
+Ruta o ubicación: src/pantallas/06-voz/02-historial/vohi-index.html
+Función o funciones:
+- Mostrar la subpantalla independiente de Voz / Historial.
+- Consultar, filtrar y revisar comandos de voz guardados localmente.
+- Exportar el historial visible en formato JSON de texto para copiar.
+Con qué se conecta:
+- vohi.css
+- vohi-main.js
+- data/vohi-demo-data.json
+========================================================= -->
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Voz / Historial</title>
+  <link rel="stylesheet" href="./vohi.css">
+</head>
+<body>
+  <main class="vohi-page">
+    <section class="vohi-hero">
+      <div>
+        <p class="vohi-eyebrow">Voz / Historial</p>
+        <h1>Historial de comandos</h1>
+        <p class="vohi-subtitle">Revisa los comandos dictados o escritos, filtra por categoría y prepara datos para futuras sincronizaciones.</p>
+      </div>
+      <div class="vohi-mode" id="vohi-modo-datos">Modo demo</div>
+    </section>
+
+    <section class="vohi-grid vohi-grid-summary">
+      <article class="vohi-card vohi-card-main"><span class="vohi-label">Total</span><strong id="vohi-total">0</strong><small>Comandos guardados</small></article>
+      <article class="vohi-card"><span class="vohi-label">Hidratación</span><strong id="vohi-agua">0</strong><small>Registros de agua</small></article>
+      <article class="vohi-card"><span class="vohi-label">Entrenamiento</span><strong id="vohi-entrenamiento">0</strong><small>Comandos de rutina</small></article>
+      <article class="vohi-card"><span class="vohi-label">Notas</span><strong id="vohi-notas">0</strong><small>Texto libre</small></article>
+    </section>
+
+    <section class="vohi-layout">
+      <article class="vohi-card vohi-filter-card">
+        <div class="vohi-card-header"><div><h2>Filtros</h2><p>Busca comandos por texto, categoría o estado.</p></div></div>
+        <div class="vohi-form">
+          <label for="vohi-input-buscar">Buscar texto</label>
+          <input id="vohi-input-buscar" type="search" placeholder="Ej. agua, esfuerzo, nota">
+          <div class="vohi-form-grid">
+            <div><label for="vohi-select-categoria">Categoría</label><select id="vohi-select-categoria"><option value="Todas">Todas</option><option value="Hidratación">Hidratación</option><option value="Entrenamiento">Entrenamiento</option><option value="Progreso">Progreso</option><option value="Hábitos">Hábitos</option><option value="Nota">Nota</option></select></div>
+            <div><label for="vohi-select-estado">Estado</label><select id="vohi-select-estado"><option value="Todos">Todos</option><option value="Preparado">Preparado</option><option value="Sincronizado">Sincronizado</option><option value="Pendiente">Pendiente</option></select></div>
+          </div>
+          <button id="vohi-btn-limpiar" type="button" class="vohi-btn-light">Limpiar filtros</button>
+          <button id="vohi-btn-exportar" type="button">Preparar exportación</button>
+          <button id="vohi-btn-restaurar-demo" type="button" class="vohi-btn-light">Restaurar demo</button>
+        </div>
+        <p id="vohi-mensaje" class="vohi-message" aria-live="polite"></p>
+      </article>
+
+      <article class="vohi-card vohi-export-card">
+        <div class="vohi-card-header"><div><h2>Exportación rápida</h2><p>Texto JSON listo para copiar cuando se necesite revisar o sincronizar.</p></div></div>
+        <textarea id="vohi-export-json" rows="12" readonly></textarea>
+      </article>
+    </section>
+
+    <section class="vohi-card vohi-history-card">
+      <div class="vohi-card-header"><div><h2>Comandos registrados</h2><p>Listado local de comandos interpretados.</p></div></div>
+      <div class="vohi-table-wrap">
+        <table class="vohi-table">
+          <thead><tr><th>Fecha</th><th>Acción</th><th>Categoría</th><th>Valor</th><th>Confianza</th><th>Estado</th><th>Texto</th></tr></thead>
+          <tbody id="vohi-tabla-body"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+  <script src="./vohi-main.js"></script>
+</body>
+</html>
