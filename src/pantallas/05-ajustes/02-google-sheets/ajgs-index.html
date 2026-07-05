@@ -1,0 +1,72 @@
+<!-- =========================================================
+Nombre completo: ajgs-index.html
+Ruta o ubicación: src/pantallas/05-ajustes/02-google-sheets/ajgs-index.html
+Función o funciones:
+- Mostrar la subpantalla independiente de Ajustes / Google Sheets.
+- Guardar configuración local de Google Sheets y Apps Script.
+- Preparar nombres de hojas/tablas para futura sincronización real.
+Con qué se conecta:
+- ajgs.css
+- ajgs-main.js
+- data/ajgs-demo-data.json
+========================================================= -->
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ajustes / Google Sheets</title>
+  <link rel="stylesheet" href="./ajgs.css">
+</head>
+<body>
+  <main class="ajgs-page">
+    <section class="ajgs-hero">
+      <div>
+        <p class="ajgs-eyebrow">Ajustes / Google Sheets</p>
+        <h1>Base principal en Google Sheets</h1>
+        <p class="ajgs-subtitle">Configura la hoja principal y deja listas las tablas que usará la app para guardar perfil, progreso, entrenamiento, agua y recomendaciones.</p>
+      </div>
+      <div class="ajgs-mode" id="ajgs-modo-datos">Modo demo</div>
+    </section>
+
+    <section class="ajgs-grid ajgs-grid-summary">
+      <article class="ajgs-card ajgs-card-main"><span class="ajgs-label">Estado</span><strong id="ajgs-resumen-estado">--</strong><small>Conexión local</small></article>
+      <article class="ajgs-card"><span class="ajgs-label">Spreadsheet</span><strong id="ajgs-resumen-sheet">--</strong><small>ID configurado</small></article>
+      <article class="ajgs-card"><span class="ajgs-label">Tablas</span><strong id="ajgs-resumen-tablas">0</strong><small>Hojas preparadas</small></article>
+      <article class="ajgs-card"><span class="ajgs-label">Última prueba</span><strong id="ajgs-resumen-prueba">--</strong><small>Validación local</small></article>
+    </section>
+
+    <section class="ajgs-layout">
+      <article class="ajgs-card ajgs-form-card">
+        <div class="ajgs-card-header"><div><h2>Configuración de conexión</h2><p>Estos datos se guardan localmente. La conexión real se activará en el bloque de integración.</p></div></div>
+        <form id="ajgs-form" class="ajgs-form">
+          <label for="ajgs-input-sheet-id">Spreadsheet ID</label>
+          <input id="ajgs-input-sheet-id" type="text" maxlength="180" placeholder="ID del archivo de Google Sheets" required>
+
+          <label for="ajgs-input-webapp">URL de Apps Script Web App</label>
+          <input id="ajgs-input-webapp" type="url" placeholder="https://script.google.com/macros/s/.../exec" required>
+
+          <div class="ajgs-form-grid">
+            <div><label for="ajgs-input-modo-sync">Modo de sincronización</label><select id="ajgs-input-modo-sync"><option value="Manual">Manual</option><option value="Al guardar">Al guardar</option><option value="Al abrir la app">Al abrir la app</option></select></div>
+            <div><label for="ajgs-input-estado">Estado</label><select id="ajgs-input-estado"><option value="Pendiente">Pendiente</option><option value="Configurado">Configurado</option><option value="Probado">Probado</option></select></div>
+          </div>
+
+          <label for="ajgs-input-nota">Nota</label>
+          <textarea id="ajgs-input-nota" rows="3" placeholder="Ej. Hoja principal para sincronizar datos de la app."></textarea>
+
+          <button type="submit">Guardar configuración</button>
+          <button id="ajgs-btn-probar" type="button" class="ajgs-btn-secondary">Probar configuración local</button>
+          <button id="ajgs-btn-restaurar-demo" type="button" class="ajgs-btn-light">Restaurar demo</button>
+        </form>
+        <p id="ajgs-mensaje" class="ajgs-message" aria-live="polite"></p>
+      </article>
+
+      <article class="ajgs-card ajgs-tables-card">
+        <div class="ajgs-card-header"><div><h2>Tablas preparadas</h2><p>Nombres de hojas que usará la base principal.</p></div></div>
+        <div id="ajgs-tablas" class="ajgs-tables"></div>
+      </article>
+    </section>
+  </main>
+  <script src="./ajgs-main.js"></script>
+</body>
+</html>
