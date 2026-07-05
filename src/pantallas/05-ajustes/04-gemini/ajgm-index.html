@@ -4,11 +4,14 @@ Ruta o ubicación: src/pantallas/05-ajustes/04-gemini/ajgm-index.html
 Función o funciones:
 - Mostrar la subpantalla independiente de Ajustes / Gemini.
 - Guardar configuración local para el motor de recomendaciones con IA.
-- Preparar prompts base para futuras recomendaciones reales.
+- Probar conexión real y generar recomendaciones usando servicios compartidos.
 Con qué se conecta:
 - ajgm.css
 - ajgm-main.js
 - data/ajgm-demo-data.json
+- ../../../shared/integraciones/gemini/fit-gm-prompts.js
+- ../../../shared/integraciones/gemini/fit-gm-client.service.js
+- ../../../shared/integraciones/gemini/fit-gm-recommendations.service.js
 ========================================================= -->
 <!doctype html>
 <html lang="es">
@@ -30,21 +33,21 @@ Con qué se conecta:
     </section>
 
     <section class="ajgm-grid ajgm-grid-summary">
-      <article class="ajgm-card ajgm-card-main"><span class="ajgm-label">Estado</span><strong id="ajgm-resumen-estado">--</strong><small>Configuración local</small></article>
+      <article class="ajgm-card ajgm-card-main"><span class="ajgm-label">Estado</span><strong id="ajgm-resumen-estado">--</strong><small>Configuración</small></article>
       <article class="ajgm-card"><span class="ajgm-label">Modelo</span><strong id="ajgm-resumen-modelo">--</strong><small>Motor elegido</small></article>
       <article class="ajgm-card"><span class="ajgm-label">Temperatura</span><strong id="ajgm-resumen-temp">--</strong><small>Creatividad</small></article>
-      <article class="ajgm-card"><span class="ajgm-label">Última prueba</span><strong id="ajgm-resumen-prueba">--</strong><small>Validación local</small></article>
+      <article class="ajgm-card"><span class="ajgm-label">Última prueba</span><strong id="ajgm-resumen-prueba">--</strong><small>Conexión real</small></article>
     </section>
 
     <section class="ajgm-layout">
       <article class="ajgm-card ajgm-form-card">
-        <div class="ajgm-card-header"><div><h2>Configuración Gemini</h2><p>Por ahora se guarda localmente. La conexión real se activará en el bloque de integración.</p></div></div>
+        <div class="ajgm-card-header"><div><h2>Configuración Gemini</h2><p>Guarda la configuración y prueba la conexión real con el modelo elegido.</p></div></div>
         <form id="ajgm-form" class="ajgm-form">
           <label for="ajgm-input-api-key">API Key</label>
           <input id="ajgm-input-api-key" type="password" maxlength="240" placeholder="Pega tu API Key" required>
 
           <div class="ajgm-form-grid">
-            <div><label for="ajgm-input-modelo">Modelo</label><input id="ajgm-input-modelo" type="text" placeholder="Ej. modelo configurado en Gemini" required></div>
+            <div><label for="ajgm-input-modelo">Modelo</label><input id="ajgm-input-modelo" type="text" placeholder="Ej. gemini-3.5-flash" required></div>
             <div><label for="ajgm-input-temperatura">Temperatura</label><input id="ajgm-input-temperatura" type="number" min="0" max="1" step="0.1" required></div>
             <div><label for="ajgm-input-max-tokens">Máximo de tokens</label><input id="ajgm-input-max-tokens" type="number" min="200" max="8000" step="100" required></div>
             <div><label for="ajgm-input-estado">Estado</label><select id="ajgm-input-estado"><option value="Pendiente">Pendiente</option><option value="Configurado">Configurado</option><option value="Probado">Probado</option></select></div>
@@ -57,7 +60,9 @@ Con qué se conecta:
           <textarea id="ajgm-input-nota" rows="3" placeholder="Ej. Usar respuestas cortas, claras y seguras."></textarea>
 
           <button type="submit">Guardar configuración</button>
-          <button id="ajgm-btn-probar" type="button" class="ajgm-btn-secondary">Probar configuración local</button>
+          <button id="ajgm-btn-probar" type="button" class="ajgm-btn-secondary">Validar datos</button>
+          <button id="ajgm-btn-conexion" type="button" class="ajgm-btn-secondary">Probar conexión real</button>
+          <button id="ajgm-btn-generar" type="button">Generar recomendación real</button>
           <button id="ajgm-btn-restaurar-demo" type="button" class="ajgm-btn-light">Restaurar demo</button>
         </form>
         <p id="ajgm-mensaje" class="ajgm-message" aria-live="polite"></p>
@@ -69,6 +74,9 @@ Con qué se conecta:
       </article>
     </section>
   </main>
+  <script src="../../../shared/integraciones/gemini/fit-gm-prompts.js"></script>
+  <script src="../../../shared/integraciones/gemini/fit-gm-client.service.js"></script>
+  <script src="../../../shared/integraciones/gemini/fit-gm-recommendations.service.js"></script>
   <script src="./ajgm-main.js"></script>
 </body>
 </html>
