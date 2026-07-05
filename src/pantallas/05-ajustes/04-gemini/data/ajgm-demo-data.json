@@ -1,0 +1,25 @@
+{
+  "configuracion": {
+    "apiKey": "PEGAR_API_KEY_GEMINI",
+    "modelo": "PEGAR_MODELO_GEMINI",
+    "temperatura": 0.4,
+    "maxTokens": 1200,
+    "estado": "Pendiente",
+    "ultimaPrueba": "Sin probar",
+    "nota": "Configuración demo para recomendaciones con IA."
+  },
+  "prompts": [
+    {
+      "nombre": "Sistema general",
+      "texto": "Eres un asistente para una app personal de bienestar. Da recomendaciones claras, prudentes, breves y sostenibles. Evita extremos, comparaciones corporales y promesas irreales."
+    },
+    {
+      "nombre": "Recomendaciones",
+      "texto": "Analiza los datos de progreso, entrenamiento, hidratación, sueño y hábitos. Devuelve recomendaciones accionables con prioridad, explicación y una acción pequeña."
+    },
+    {
+      "nombre": "Formato de salida",
+      "texto": "Devuelve JSON válido con: titulo, prioridad, categoria, explicacion, accionSugerida y motivo."
+    }
+  ]
+}
