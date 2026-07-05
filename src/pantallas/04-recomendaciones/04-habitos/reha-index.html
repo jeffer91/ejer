@@ -1,0 +1,63 @@
+<!-- =========================================================
+Nombre completo: reha-index.html
+Ruta o ubicación: src/pantallas/04-recomendaciones/04-habitos/reha-index.html
+Función o funciones:
+- Mostrar la subpantalla independiente de Recomendaciones / Hábitos.
+- Generar recomendaciones locales de prueba sobre sueño, agua, movimiento, registro y organización.
+- Permitir aplicar o descartar recomendaciones guardando el estado en localStorage.
+Con qué se conecta:
+- reha.css
+- reha-main.js
+- data/reha-demo-data.json
+========================================================= -->
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Recomendaciones / Hábitos</title>
+  <link rel="stylesheet" href="./reha.css">
+</head>
+<body>
+  <main class="reha-page">
+    <section class="reha-hero">
+      <div>
+        <p class="reha-eyebrow">Recomendaciones / Hábitos</p>
+        <h1>Hábitos para sostener la rutina</h1>
+        <p class="reha-subtitle">Revisa sueño, agua, movimiento, registros y organización diaria para crear acciones simples y sostenibles.</p>
+      </div>
+      <div class="reha-mode" id="reha-modo-datos">Modo demo</div>
+    </section>
+
+    <section class="reha-grid reha-grid-summary">
+      <article class="reha-card reha-card-main"><span class="reha-label">Estado</span><strong id="reha-estado">--</strong><small>Lectura general</small></article>
+      <article class="reha-card"><span class="reha-label">Sueño</span><strong id="reha-sueno">0 h</strong><small>Promedio demo</small></article>
+      <article class="reha-card"><span class="reha-label">Registro</span><strong id="reha-registro">0/7</strong><small>Días con datos</small></article>
+      <article class="reha-card"><span class="reha-label">Aplicadas</span><strong id="reha-aplicadas">0</strong><small>Acciones aceptadas</small></article>
+    </section>
+
+    <section class="reha-layout">
+      <article class="reha-card reha-panel-card">
+        <div class="reha-card-header"><div><h2>Generar recomendaciones</h2><p>Por ahora usa reglas locales. Luego se conectará a Gemini desde Ajustes.</p></div></div>
+        <div class="reha-actions">
+          <button id="reha-btn-generar">Analizar hábitos</button>
+          <button id="reha-btn-restaurar-demo" class="reha-btn-light">Restaurar demo</button>
+        </div>
+        <p class="reha-note">Las recomendaciones son pequeñas acciones: dormir mejor, registrar mejor, hidratarse, moverse y organizar el día.</p>
+        <p id="reha-mensaje" class="reha-message" aria-live="polite"></p>
+      </article>
+
+      <article class="reha-card reha-panel-card">
+        <div class="reha-card-header"><div><h2>Datos revisados</h2><p>Resumen de hábitos demo disponibles.</p></div></div>
+        <ul class="reha-data-list" id="reha-data-list"></ul>
+      </article>
+    </section>
+
+    <section class="reha-card reha-recommendations-card">
+      <div class="reha-card-header"><div><h2>Recomendaciones de hábitos</h2><p>Cada tarjeta puede aplicarse o descartarse.</p></div></div>
+      <div id="reha-lista-recomendaciones" class="reha-recommendations"></div>
+    </section>
+  </main>
+  <script src="./reha-main.js"></script>
+</body>
+</html>
