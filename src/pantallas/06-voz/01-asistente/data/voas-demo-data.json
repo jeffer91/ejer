@@ -1,0 +1,40 @@
+{
+  "frases": [
+    {
+      "titulo": "Agua",
+      "ejemplo": "Registrar 500 ml de agua después de entrenar"
+    },
+    {
+      "titulo": "Entrenamiento",
+      "ejemplo": "Registrar entrenamiento de piernas con esfuerzo 4"
+    },
+    {
+      "titulo": "Energía",
+      "ejemplo": "Hoy tengo energía 3 y dormí 7 horas"
+    },
+    {
+      "titulo": "Nota",
+      "ejemplo": "Guardar nota: me sentí bien en la caminata"
+    }
+  ],
+  "historial": [
+    {
+      "fecha": "2026-07-05 08:30",
+      "texto": "Registrar 500 ml de agua después de entrenar",
+      "accion": "Registrar agua",
+      "categoria": "Hidratación",
+      "valor": "500 ml",
+      "confianza": "Alta",
+      "estado": "Preparado"
+    },
+    {
+      "fecha": "2026-07-05 20:15",
+      "texto": "Registrar entrenamiento de piernas con esfuerzo 4",
+      "accion": "Registrar entrenamiento",
+      "categoria": "Entrenamiento",
+      "valor": "Esfuerzo 4/5",
+      "confianza": "Media",
+      "estado": "Preparado"
+    }
+  ]
+}
