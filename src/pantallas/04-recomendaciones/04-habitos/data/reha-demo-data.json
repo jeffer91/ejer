@@ -1,0 +1,42 @@
+{
+  "resumenHabitos": {
+    "periodo": "Semana demo",
+    "suenoPromedioHoras": 7.2,
+    "aguaPromedioMl": 2100,
+    "energiaPromedio": 4.1,
+    "diasConRegistro": 5,
+    "diasConMovimiento": 5,
+    "diasDescanso": 2,
+    "notasRegistradas": 6
+  },
+  "datos": {
+    "sueno": "El sueño promedio demo se mantiene estable.",
+    "agua": "La hidratación demo está cerca de la meta y puede distribuirse mejor.",
+    "movimiento": "Hay movimiento en la mayoría de días de la semana.",
+    "registro": "Hay varios registros, pero conviene mantener una nota breve diaria.",
+    "organizacion": "La planificación semanal ayuda a reducir improvisación."
+  },
+  "recomendacionesBase": [
+    {
+      "id": "reha-sueno",
+      "titulo": "Mantener una hora estable para dormir",
+      "explicacion": "El sueño estable ayuda a sostener energía, entrenamiento y organización diaria.",
+      "prioridad": "Media",
+      "categoria": "Descanso"
+    },
+    {
+      "id": "reha-registro",
+      "titulo": "Escribir una nota corta cada día",
+      "explicacion": "Una nota breve permite entender qué hábitos se repiten y cuáles necesitan ajuste.",
+      "prioridad": "Alta",
+      "categoria": "Registro"
+    },
+    {
+      "id": "reha-organizacion",
+      "titulo": "Preparar el día siguiente en 5 minutos",
+      "explicacion": "Dejar lista una acción pequeña para mañana reduce fricción y ayuda a mantener constancia.",
+      "prioridad": "Media",
+      "categoria": "Organización"
+    }
+  ]
+}
