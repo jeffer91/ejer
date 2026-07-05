@@ -1,0 +1,80 @@
+<!-- =========================================================
+Nombre completo: prme-index.html
+Ruta o ubicación: src/pantallas/01-progreso/02-medidas/prme-index.html
+Función o funciones:
+- Mostrar la subpantalla independiente de medidas corporales.
+- Registrar medidas de referencia de forma local.
+- Mostrar historial simple y tendencia por zona.
+Con qué se conecta:
+- prme.css
+- prme-main.js
+- data/prme-demo-data.json
+========================================================= -->
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Progreso / Medidas</title>
+  <link rel="stylesheet" href="./prme.css">
+</head>
+<body>
+  <main class="prme-page">
+    <section class="prme-hero">
+      <div>
+        <p class="prme-eyebrow">Progreso / Medidas</p>
+        <h1>Avance físico por registros</h1>
+        <p class="prme-subtitle">Guarda medidas de referencia para observar cambios con calma, sin comparaciones y junto con tus hábitos.</p>
+      </div>
+      <div class="prme-mode" id="prme-modo-datos">Modo demo</div>
+    </section>
+
+    <section class="prme-grid prme-grid-summary">
+      <article class="prme-card prme-card-main"><span class="prme-label">Último registro</span><strong id="prme-fecha-actual">--</strong><small>Fecha más reciente</small></article>
+      <article class="prme-card"><span class="prme-label">Cintura</span><strong id="prme-cintura-actual">-- cm</strong><small>Referencia abdominal</small></article>
+      <article class="prme-card"><span class="prme-label">Pecho</span><strong id="prme-pecho-actual">-- cm</strong><small>Tren superior</small></article>
+      <article class="prme-card"><span class="prme-label">Registros</span><strong id="prme-total-registros">0</strong><small>Guardados localmente</small></article>
+    </section>
+
+    <section class="prme-layout">
+      <article class="prme-card prme-chart-card">
+        <div class="prme-card-header"><div><h2>Tendencia de medidas</h2><p>Selecciona una zona para ver su historial.</p></div></div>
+        <div class="prme-selector-row">
+          <button class="prme-zone-button prme-zone-active" data-zona="cinturaCm">Cintura</button>
+          <button class="prme-zone-button" data-zona="pechoCm">Pecho</button>
+          <button class="prme-zone-button" data-zona="brazoCm">Brazo</button>
+          <button class="prme-zone-button" data-zona="musloCm">Muslo</button>
+        </div>
+        <div class="prme-chart"><svg id="prme-chart-svg" viewBox="0 0 640 260" role="img" aria-label="Tendencia de medidas"></svg></div>
+      </article>
+
+      <article class="prme-card prme-form-card">
+        <div class="prme-card-header"><div><h2>Registrar medidas</h2><p>El registro queda en este dispositivo. Luego se conectará a Google Sheets y Firebase.</p></div></div>
+        <form id="prme-form" class="prme-form">
+          <label for="prme-input-fecha">Fecha</label>
+          <input id="prme-input-fecha" type="date" required>
+          <label for="prme-input-cintura">Cintura en cm</label>
+          <input id="prme-input-cintura" type="number" step="0.1" min="30" max="200" placeholder="Ej. 94.0" required>
+          <label for="prme-input-pecho">Pecho en cm</label>
+          <input id="prme-input-pecho" type="number" step="0.1" min="30" max="200" placeholder="Ej. 105.0">
+          <label for="prme-input-brazo">Brazo en cm</label>
+          <input id="prme-input-brazo" type="number" step="0.1" min="10" max="100" placeholder="Ej. 36.0">
+          <label for="prme-input-muslo">Muslo en cm</label>
+          <input id="prme-input-muslo" type="number" step="0.1" min="20" max="120" placeholder="Ej. 60.0">
+          <label for="prme-input-nota">Nota</label>
+          <textarea id="prme-input-nota" rows="3" placeholder="Ej. Medición en la mañana, sin prisa."></textarea>
+          <button type="submit">Guardar medidas</button>
+          <button id="prme-btn-restaurar-demo" type="button" class="prme-btn-secondary">Restaurar demo</button>
+        </form>
+        <p id="prme-mensaje" class="prme-message" aria-live="polite"></p>
+      </article>
+    </section>
+
+    <section class="prme-card prme-history-card">
+      <div class="prme-card-header"><div><h2>Historial</h2><p>Registros visibles para revisar cambios por fecha.</p></div></div>
+      <div class="prme-table-wrap"><table class="prme-table"><thead><tr><th>Fecha</th><th>Cintura</th><th>Pecho</th><th>Brazo</th><th>Muslo</th><th>Nota</th></tr></thead><tbody id="prme-tabla-body"></tbody></table></div>
+    </section>
+  </main>
+  <script src="./prme-main.js"></script>
+</body>
+</html>
