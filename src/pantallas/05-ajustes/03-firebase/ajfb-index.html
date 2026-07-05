@@ -1,0 +1,73 @@
+<!-- =========================================================
+Nombre completo: ajfb-index.html
+Ruta o ubicación: src/pantallas/05-ajustes/03-firebase/ajfb-index.html
+Función o funciones:
+- Mostrar la subpantalla independiente de Ajustes / Firebase.
+- Guardar configuración local de Firebase como respaldo alterno.
+- Preparar colecciones para futura sincronización real.
+Con qué se conecta:
+- ajfb.css
+- ajfb-main.js
+- data/ajfb-demo-data.json
+========================================================= -->
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ajustes / Firebase</title>
+  <link rel="stylesheet" href="./ajfb.css">
+</head>
+<body>
+  <main class="ajfb-page">
+    <section class="ajfb-hero">
+      <div>
+        <p class="ajfb-eyebrow">Ajustes / Firebase</p>
+        <h1>Respaldo alterno en Firebase</h1>
+        <p class="ajfb-subtitle">Configura Firebase como respaldo paralelo. La base principal será Google Sheets y Firebase quedará como copia segura de cambios importantes.</p>
+      </div>
+      <div class="ajfb-mode" id="ajfb-modo-datos">Modo demo</div>
+    </section>
+
+    <section class="ajfb-grid ajfb-grid-summary">
+      <article class="ajfb-card ajfb-card-main"><span class="ajfb-label">Estado</span><strong id="ajfb-resumen-estado">--</strong><small>Configuración local</small></article>
+      <article class="ajfb-card"><span class="ajfb-label">Proyecto</span><strong id="ajfb-resumen-proyecto">--</strong><small>Project ID</small></article>
+      <article class="ajfb-card"><span class="ajfb-label">Colecciones</span><strong id="ajfb-resumen-colecciones">0</strong><small>Preparadas</small></article>
+      <article class="ajfb-card"><span class="ajfb-label">Última prueba</span><strong id="ajfb-resumen-prueba">--</strong><small>Validación local</small></article>
+    </section>
+
+    <section class="ajfb-layout">
+      <article class="ajfb-card ajfb-form-card">
+        <div class="ajfb-card-header"><div><h2>Configuración Firebase</h2><p>Estos datos se guardan localmente. La conexión real se activará en el bloque de integración.</p></div></div>
+        <form id="ajfb-form" class="ajfb-form">
+          <label for="ajfb-input-api-key">API Key</label>
+          <input id="ajfb-input-api-key" type="text" maxlength="220" placeholder="Pega tu apiKey" required>
+
+          <div class="ajfb-form-grid">
+            <div><label for="ajfb-input-auth-domain">Auth Domain</label><input id="ajfb-input-auth-domain" type="text" placeholder="proyecto.firebaseapp.com" required></div>
+            <div><label for="ajfb-input-project-id">Project ID</label><input id="ajfb-input-project-id" type="text" placeholder="mi-proyecto" required></div>
+            <div><label for="ajfb-input-storage">Storage Bucket</label><input id="ajfb-input-storage" type="text" placeholder="proyecto.appspot.com"></div>
+            <div><label for="ajfb-input-app-id">App ID</label><input id="ajfb-input-app-id" type="text" placeholder="1:000:web:000"></div>
+            <div><label for="ajfb-input-modo-sync">Modo respaldo</label><select id="ajfb-input-modo-sync"><option value="Manual">Manual</option><option value="Cambios importantes">Cambios importantes</option><option value="Después de Google Sheets">Después de Google Sheets</option></select></div>
+            <div><label for="ajfb-input-estado">Estado</label><select id="ajfb-input-estado"><option value="Pendiente">Pendiente</option><option value="Configurado">Configurado</option><option value="Probado">Probado</option></select></div>
+          </div>
+
+          <label for="ajfb-input-nota">Nota</label>
+          <textarea id="ajfb-input-nota" rows="3" placeholder="Ej. Firebase será respaldo alterno de la app."></textarea>
+
+          <button type="submit">Guardar configuración</button>
+          <button id="ajfb-btn-probar" type="button" class="ajfb-btn-secondary">Probar configuración local</button>
+          <button id="ajfb-btn-restaurar-demo" type="button" class="ajfb-btn-light">Restaurar demo</button>
+        </form>
+        <p id="ajfb-mensaje" class="ajfb-message" aria-live="polite"></p>
+      </article>
+
+      <article class="ajfb-card ajfb-collections-card">
+        <div class="ajfb-card-header"><div><h2>Colecciones preparadas</h2><p>Estructura de respaldo para Firestore.</p></div></div>
+        <div id="ajfb-colecciones" class="ajfb-collections"></div>
+      </article>
+    </section>
+  </main>
+  <script src="./ajfb-main.js"></script>
+</body>
+</html>
