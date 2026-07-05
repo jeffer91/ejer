@@ -1,0 +1,32 @@
+{
+  "perfil": {
+    "nombre": "Jeff",
+    "nota": "Datos demo para probar la pantalla de medidas."
+  },
+  "registros": [
+    {
+      "fecha": "2026-07-01",
+      "cinturaCm": 94.5,
+      "pechoCm": 105.0,
+      "brazoCm": 36.0,
+      "musloCm": 60.0,
+      "nota": "Registro inicial demo."
+    },
+    {
+      "fecha": "2026-07-08",
+      "cinturaCm": 94.0,
+      "pechoCm": 105.2,
+      "brazoCm": 36.1,
+      "musloCm": 60.1,
+      "nota": "Registro semanal demo."
+    },
+    {
+      "fecha": "2026-07-15",
+      "cinturaCm": 93.6,
+      "pechoCm": 105.1,
+      "brazoCm": 36.2,
+      "musloCm": 60.0,
+      "nota": "Registro semanal demo."
+    }
+  ]
+}
