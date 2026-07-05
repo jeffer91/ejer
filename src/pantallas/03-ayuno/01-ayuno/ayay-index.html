@@ -1,0 +1,85 @@
+<!-- =========================================================
+Nombre completo: ayay-index.html
+Ruta o ubicación: src/pantallas/03-ayuno/01-ayuno/ayay-index.html
+Función o funciones:
+- Mostrar la subpantalla independiente de Ayuno / Ayuno.
+- Registrar inicio, fin, tipo, estado y nota del ayuno.
+- Mostrar temporizador visual circular e historial local.
+Con qué se conecta:
+- ayay.css
+- ayay-main.js
+- data/ayay-demo-data.json
+========================================================= -->
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ayuno / Ayuno</title>
+  <link rel="stylesheet" href="./ayay.css">
+</head>
+<body>
+  <main class="ayay-page">
+    <section class="ayay-hero">
+      <div>
+        <p class="ayay-eyebrow">Ayuno / Ayuno</p>
+        <h1>Temporizador de ayuno</h1>
+        <p class="ayay-subtitle">Registra horarios de forma simple. Esta pantalla solo organiza datos; no reemplaza una guía profesional.</p>
+      </div>
+      <div class="ayay-mode" id="ayay-modo-datos">Modo demo</div>
+    </section>
+
+    <section class="ayay-grid ayay-grid-summary">
+      <article class="ayay-card ayay-card-main"><span class="ayay-label">Estado</span><strong id="ayay-estado">--</strong><small id="ayay-tipo-actual">Tipo</small></article>
+      <article class="ayay-card"><span class="ayay-label">Transcurrido</span><strong id="ayay-transcurrido">00:00</strong><small>Horas y minutos</small></article>
+      <article class="ayay-card"><span class="ayay-label">Restante</span><strong id="ayay-restante">00:00</strong><small>Para la meta configurada</small></article>
+      <article class="ayay-card"><span class="ayay-label">Registros</span><strong id="ayay-total-registros">0</strong><small>Guardados localmente</small></article>
+    </section>
+
+    <section class="ayay-layout">
+      <article class="ayay-card ayay-timer-card">
+        <div class="ayay-card-header"><div><h2>Progreso actual</h2><p>Mantén una rutina flexible y detente si no te sientes bien.</p></div></div>
+        <div class="ayay-ring" id="ayay-ring"><div><span id="ayay-porcentaje">0%</span><small id="ayay-ring-text">Sin ayuno activo</small></div></div>
+        <div class="ayay-actions">
+          <button id="ayay-btn-iniciar">Iniciar ahora</button>
+          <button id="ayay-btn-finalizar" class="ayay-btn-secondary">Finalizar</button>
+          <button id="ayay-btn-cancelar" class="ayay-btn-light">Cancelar</button>
+        </div>
+        <p id="ayay-mensaje" class="ayay-message" aria-live="polite"></p>
+      </article>
+
+      <article class="ayay-card ayay-form-card">
+        <div class="ayay-card-header"><div><h2>Configuración</h2><p>Define el tipo y las horas de inicio y fin.</p></div></div>
+        <form id="ayay-form" class="ayay-form">
+          <label for="ayay-input-tipo">Tipo</label>
+          <select id="ayay-input-tipo" required>
+            <option value="12:12">12:12</option>
+            <option value="14:10">14:10</option>
+            <option value="16:8">16:8</option>
+            <option value="Personalizado">Personalizado</option>
+          </select>
+
+          <div class="ayay-form-grid">
+            <div><label for="ayay-input-inicio">Inicio</label><input id="ayay-input-inicio" type="datetime-local" required></div>
+            <div><label for="ayay-input-fin">Fin previsto</label><input id="ayay-input-fin" type="datetime-local" required></div>
+            <div><label for="ayay-input-objetivo">Objetivo horas</label><input id="ayay-input-objetivo" type="number" min="1" max="24" step="0.5" required></div>
+            <div><label for="ayay-input-energia">Energía 1 a 5</label><input id="ayay-input-energia" type="number" min="1" max="5" step="1" placeholder="Opcional"></div>
+          </div>
+
+          <label for="ayay-input-nota">Nota</label>
+          <textarea id="ayay-input-nota" rows="3" placeholder="Ej. Me sentí bien, mantuve hidratación y descansé."></textarea>
+
+          <button type="submit">Guardar configuración</button>
+          <button id="ayay-btn-restaurar-demo" type="button" class="ayay-btn-light">Restaurar demo</button>
+        </form>
+      </article>
+    </section>
+
+    <section class="ayay-card ayay-history-card">
+      <div class="ayay-card-header"><div><h2>Historial</h2><p>Registros locales para revisar horarios y sensaciones.</p></div></div>
+      <div class="ayay-table-wrap"><table class="ayay-table"><thead><tr><th>Fecha</th><th>Tipo</th><th>Inicio</th><th>Fin</th><th>Estado</th><th>Energía</th><th>Nota</th></tr></thead><tbody id="ayay-tabla-body"></tbody></table></div>
+    </section>
+  </main>
+  <script src="./ayay-main.js"></script>
+</body>
+</html>
