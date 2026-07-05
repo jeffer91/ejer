@@ -1,0 +1,42 @@
+{
+  "resumenEntrenamiento": {
+    "periodo": "Semana demo",
+    "entrenamientos": 3,
+    "hiit": 1,
+    "descanso": 2,
+    "caminata": 1,
+    "seriesRegistradas": 8,
+    "esfuerzoPromedio": 4.0,
+    "energiaPromedio": 4.1,
+    "sesionesCompletadas": 4
+  },
+  "datos": {
+    "rutina": "Plan semanal con tren superior, piernas, caminata, HIIT y descanso.",
+    "carga": "El esfuerzo promedio demo es moderado-alto, por eso conviene cuidar descansos.",
+    "registro": "Hay series registradas, pero se puede mejorar la nota de técnica y sensación.",
+    "recuperacion": "La semana incluye descanso, lo cual ayuda a sostener el plan."
+  },
+  "recomendacionesBase": [
+    {
+      "id": "reen-descanso",
+      "titulo": "Mantener al menos dos días de recuperación",
+      "explicacion": "Con tres entrenamientos y una sesión HIIT, la recuperación ayuda a evitar fatiga acumulada y sostiene la constancia.",
+      "prioridad": "Alta",
+      "categoria": "Recuperación"
+    },
+    {
+      "id": "reen-tecnica",
+      "titulo": "Registrar una nota breve de técnica",
+      "explicacion": "Anotar si hubo buena técnica, molestia o cansancio ayuda a ajustar mejor las próximas rutinas.",
+      "prioridad": "Media",
+      "categoria": "Registro"
+    },
+    {
+      "id": "reen-hiit",
+      "titulo": "Mantener el HIIT controlado",
+      "explicacion": "Una sesión HIIT semanal puede ser suficiente si ya hay fuerza y caminata. Mejor controlar intensidad antes que aumentar volumen.",
+      "prioridad": "Media",
+      "categoria": "Intensidad"
+    }
+  ]
+}
