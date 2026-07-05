@@ -1,0 +1,54 @@
+<!-- =========================================================
+Nombre completo: index.html
+Ruta o ubicación: src/index.html
+Función o funciones:
+- Cargar la carcasa principal de la app Fitness Jeff.
+- Mostrar el menú superior.
+- Abrir subpantallas independientes dentro de un iframe.
+Con qué se conecta:
+- src/app/fit-shell.css
+- src/app/fit-shell-main.js
+========================================================= -->
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fitness Jeff</title>
+  <link rel="stylesheet" href="./app/fit-shell.css">
+</head>
+<body>
+  <header class="fit-shell-header">
+    <section class="fit-shell-brand">
+      <div class="fit-shell-logo" aria-hidden="true">FJ</div>
+      <div>
+        <h1>Fitness Jeff</h1>
+        <p>Progreso, entrenamiento, ayuno, IA y voz</p>
+      </div>
+    </section>
+
+    <nav class="fit-shell-menu" aria-label="Menú principal">
+      <div class="fit-shell-menu-item">
+        <button class="fit-shell-menu-button" data-menu="progreso">Progreso</button>
+        <div class="fit-shell-submenu" data-submenu="progreso">
+          <button data-screen="./pantallas/01-progreso/01-peso/prpe-index.html">Peso</button>
+          <button data-pending="true">Medidas</button>
+          <button data-pending="true">Registrar datos</button>
+        </div>
+      </div>
+      <div class="fit-shell-menu-item"><button class="fit-shell-menu-button" data-menu="entrenamiento">Entrenamiento</button><div class="fit-shell-submenu" data-submenu="entrenamiento"><button data-pending="true">Hoy</button><button data-pending="true">HIIT</button><button data-pending="true">Rutinas</button></div></div>
+      <div class="fit-shell-menu-item"><button class="fit-shell-menu-button" data-menu="ayuno">Ayuno</button><div class="fit-shell-submenu" data-submenu="ayuno"><button data-pending="true">Ayuno</button><button data-pending="true">Agua</button></div></div>
+      <div class="fit-shell-menu-item"><button class="fit-shell-menu-button" data-menu="recomendaciones">Recomendaciones</button><div class="fit-shell-submenu" data-submenu="recomendaciones"><button data-pending="true">Análisis general</button><button data-pending="true">Entrenamiento</button><button data-pending="true">Alimentación</button><button data-pending="true">Hábitos</button></div></div>
+      <div class="fit-shell-menu-item"><button class="fit-shell-menu-button" data-menu="ajustes">Ajustes</button><div class="fit-shell-submenu" data-submenu="ajustes"><button data-pending="true">Perfil</button><button data-pending="true">Google Sheets</button><button data-pending="true">Firebase</button><button data-pending="true">Gemini</button></div></div>
+      <div class="fit-shell-menu-item"><button class="fit-shell-menu-button" data-menu="voz">Voz</button><div class="fit-shell-submenu" data-submenu="voz"><button data-pending="true">Asistente</button><button data-pending="true">Historial</button></div></div>
+    </nav>
+  </header>
+
+  <main class="fit-shell-main">
+    <section class="fit-shell-status" id="fit-shell-status" role="status">Abriendo Progreso / Peso...</section>
+    <iframe id="fit-shell-frame" class="fit-shell-frame" title="Subpantalla activa" src="./pantallas/01-progreso/01-peso/prpe-index.html"></iframe>
+  </main>
+
+  <script src="./app/fit-shell-main.js"></script>
+</body>
+</html>
