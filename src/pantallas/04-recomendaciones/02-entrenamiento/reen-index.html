@@ -1,0 +1,63 @@
+<!-- =========================================================
+Nombre completo: reen-index.html
+Ruta o ubicación: src/pantallas/04-recomendaciones/02-entrenamiento/reen-index.html
+Función o funciones:
+- Mostrar la subpantalla independiente de Recomendaciones / Entrenamiento.
+- Generar recomendaciones locales de prueba para ajustar rutina, HIIT, descanso e intensidad.
+- Permitir aplicar o descartar recomendaciones guardando el estado en localStorage.
+Con qué se conecta:
+- reen.css
+- reen-main.js
+- data/reen-demo-data.json
+========================================================= -->
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Recomendaciones / Entrenamiento</title>
+  <link rel="stylesheet" href="./reen.css">
+</head>
+<body>
+  <main class="reen-page">
+    <section class="reen-hero">
+      <div>
+        <p class="reen-eyebrow">Recomendaciones / Entrenamiento</p>
+        <h1>Ajustes para entrenar mejor</h1>
+        <p class="reen-subtitle">Revisa tu semana demo y recibe recomendaciones prudentes sobre rutina, descanso, intensidad y registro.</p>
+      </div>
+      <div class="reen-mode" id="reen-modo-datos">Modo demo</div>
+    </section>
+
+    <section class="reen-grid reen-grid-summary">
+      <article class="reen-card reen-card-main"><span class="reen-label">Balance</span><strong id="reen-balance">--</strong><small>Lectura semanal</small></article>
+      <article class="reen-card"><span class="reen-label">Entrenos</span><strong id="reen-entrenos">0</strong><small>Días planificados</small></article>
+      <article class="reen-card"><span class="reen-label">HIIT</span><strong id="reen-hiit">0</strong><small>Sesiones de intervalos</small></article>
+      <article class="reen-card"><span class="reen-label">Descanso</span><strong id="reen-descanso">0</strong><small>Días de recuperación</small></article>
+    </section>
+
+    <section class="reen-layout">
+      <article class="reen-card reen-panel-card">
+        <div class="reen-card-header"><div><h2>Generar recomendaciones</h2><p>Por ahora usa reglas locales. Luego se conectará a Gemini desde Ajustes.</p></div></div>
+        <div class="reen-actions">
+          <button id="reen-btn-generar">Analizar entrenamiento</button>
+          <button id="reen-btn-restaurar-demo" class="reen-btn-light">Restaurar demo</button>
+        </div>
+        <p class="reen-note">Las recomendaciones no buscan entrenar más por entrenar; buscan ajustar carga, técnica, recuperación y constancia.</p>
+        <p id="reen-mensaje" class="reen-message" aria-live="polite"></p>
+      </article>
+
+      <article class="reen-card reen-panel-card">
+        <div class="reen-card-header"><div><h2>Datos revisados</h2><p>Resumen de rutina semanal y sesiones registradas.</p></div></div>
+        <ul class="reen-data-list" id="reen-data-list"></ul>
+      </article>
+    </section>
+
+    <section class="reen-card reen-recommendations-card">
+      <div class="reen-card-header"><div><h2>Recomendaciones de entrenamiento</h2><p>Cada tarjeta puede aplicarse o descartarse.</p></div></div>
+      <div id="reen-lista-recomendaciones" class="reen-recommendations"></div>
+    </section>
+  </main>
+  <script src="./reen-main.js"></script>
+</body>
+</html>
