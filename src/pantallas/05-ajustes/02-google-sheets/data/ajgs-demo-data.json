@@ -1,0 +1,36 @@
+{
+  "configuracion": {
+    "spreadsheetId": "PEGAR_ID_DE_GOOGLE_SHEETS",
+    "webAppUrl": "https://script.google.com/macros/s/PEGAR_ID_DEPLOYMENT/exec",
+    "modoSync": "Manual",
+    "estado": "Pendiente",
+    "ultimaPrueba": "Sin probar",
+    "nota": "Configuración demo para preparar la base principal en Google Sheets."
+  },
+  "tablas": [
+    {
+      "nombre": "Perfil",
+      "descripcion": "Datos generales y preferencias del usuario."
+    },
+    {
+      "nombre": "RegistrosDiarios",
+      "descripcion": "Peso opcional, medidas opcionales, energía, agua, sueño, actividad y nota."
+    },
+    {
+      "nombre": "Entrenamientos",
+      "descripcion": "Rutinas, series, repeticiones, esfuerzo y notas."
+    },
+    {
+      "nombre": "Hidratacion",
+      "descripcion": "Registros diarios de agua y momentos del día."
+    },
+    {
+      "nombre": "Recomendaciones",
+      "descripcion": "Recomendaciones aplicadas, descartadas o pendientes."
+    },
+    {
+      "nombre": "SyncLog",
+      "descripcion": "Historial de sincronización y errores controlados."
+    }
+  ]
+}
