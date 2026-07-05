@@ -1,0 +1,38 @@
+{
+  "perfil": {
+    "nombre": "Jeff",
+    "nota": "Datos demo para probar el registro diario."
+  },
+  "registros": [
+    {
+      "fecha": "2026-07-01",
+      "pesoKg": 90.5,
+      "cinturaCm": 94.0,
+      "energia": 4,
+      "aguaMl": 1800,
+      "suenoHoras": 7.0,
+      "actividad": "Entrenamiento",
+      "nota": "Día demo con entrenamiento tranquilo."
+    },
+    {
+      "fecha": "2026-07-02",
+      "pesoKg": 90.4,
+      "cinturaCm": 93.9,
+      "energia": 4,
+      "aguaMl": 2100,
+      "suenoHoras": 7.5,
+      "actividad": "Caminata",
+      "nota": "Día demo con caminata."
+    },
+    {
+      "fecha": "2026-07-03",
+      "pesoKg": 90.2,
+      "cinturaCm": 93.8,
+      "energia": 5,
+      "aguaMl": 2300,
+      "suenoHoras": 8.0,
+      "actividad": "Descanso",
+      "nota": "Día demo con mejor descanso."
+    }
+  ]
+}
