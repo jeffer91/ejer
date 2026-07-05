@@ -1,0 +1,33 @@
+{
+  "configuracion": {
+    "tipo": "16:8",
+    "objetivoHoras": 16,
+    "estado": "Activo",
+    "energia": 4,
+    "nota": "Registro demo. Mantener flexibilidad y escuchar el cuerpo."
+  },
+  "actual": {
+    "inicio": "2026-07-04T20:00",
+    "finPrevisto": "2026-07-05T12:00"
+  },
+  "historial": [
+    {
+      "fecha": "2026-07-02",
+      "tipo": "14:10",
+      "inicio": "2026-07-01T21:00",
+      "fin": "2026-07-02T11:00",
+      "estado": "Completado",
+      "energia": 4,
+      "nota": "Demo completado con normalidad."
+    },
+    {
+      "fecha": "2026-07-03",
+      "tipo": "12:12",
+      "inicio": "2026-07-02T21:30",
+      "fin": "2026-07-03T09:30",
+      "estado": "Completado",
+      "energia": 5,
+      "nota": "Demo suave y flexible."
+    }
+  ]
+}
