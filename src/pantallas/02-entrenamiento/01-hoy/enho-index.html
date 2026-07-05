@@ -1,0 +1,77 @@
+<!-- =========================================================
+Nombre completo: enho-index.html
+Ruta o ubicación: src/pantallas/02-entrenamiento/01-hoy/enho-index.html
+Función o funciones:
+- Mostrar la subpantalla independiente de Entrenamiento / Hoy.
+- Permitir registrar ejercicios, series, repeticiones, peso usado, fallo opcional y notas.
+- Funcionar sola con Live Server usando datos demo y localStorage.
+Con qué se conecta:
+- enho.css
+- enho-main.js
+- data/enho-demo-data.json
+========================================================= -->
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Entrenamiento / Hoy</title>
+  <link rel="stylesheet" href="./enho.css">
+</head>
+<body>
+  <main class="enho-page">
+    <section class="enho-hero">
+      <div>
+        <p class="enho-eyebrow">Entrenamiento / Hoy</p>
+        <h1>Rutina del día</h1>
+        <p class="enho-subtitle">Registra tu sesión de forma simple: ejercicios, series, repeticiones y cómo te sentiste.</p>
+      </div>
+      <div class="enho-mode" id="enho-modo-datos">Modo demo</div>
+    </section>
+
+    <section class="enho-grid enho-grid-summary">
+      <article class="enho-card enho-card-main"><span class="enho-label">Enfoque</span><strong id="enho-enfoque">--</strong><small id="enho-fecha">Hoy</small></article>
+      <article class="enho-card"><span class="enho-label">Ejercicios</span><strong id="enho-total-ejercicios">0</strong><small>Planificados</small></article>
+      <article class="enho-card"><span class="enho-label">Series hechas</span><strong id="enho-series-hechas">0</strong><small>Registradas hoy</small></article>
+      <article class="enho-card"><span class="enho-label">Estado</span><strong id="enho-estado">Pendiente</strong><small>Sesión actual</small></article>
+    </section>
+
+    <section class="enho-layout">
+      <article class="enho-card enho-plan-card">
+        <div class="enho-card-header"><div><h2>Ejercicios de hoy</h2><p>Marca cada ejercicio y registra tus series. Evita seguir si aparece dolor o mareo.</p></div></div>
+        <div id="enho-lista-ejercicios" class="enho-exercise-list"></div>
+      </article>
+
+      <article class="enho-card enho-form-card">
+        <div class="enho-card-header"><div><h2>Registrar serie</h2><p>Elige un ejercicio y guarda la serie realizada.</p></div></div>
+        <form id="enho-form" class="enho-form">
+          <label for="enho-input-ejercicio">Ejercicio</label>
+          <select id="enho-input-ejercicio" required></select>
+
+          <div class="enho-form-grid">
+            <div><label for="enho-input-serie">Serie</label><input id="enho-input-serie" type="number" min="1" max="20" step="1" required></div>
+            <div><label for="enho-input-reps">Repeticiones</label><input id="enho-input-reps" type="number" min="1" max="100" step="1" required></div>
+            <div><label for="enho-input-peso">Peso usado</label><input id="enho-input-peso" type="number" min="0" max="400" step="0.5" placeholder="Opcional"></div>
+            <div><label for="enho-input-esfuerzo">Esfuerzo 1 a 5</label><input id="enho-input-esfuerzo" type="number" min="1" max="5" step="1" placeholder="Ej. 4"></div>
+          </div>
+
+          <label class="enho-check"><input id="enho-input-fallo" type="checkbox"> Llegué al fallo o cerca del fallo de forma controlada</label>
+          <label for="enho-input-nota">Nota</label>
+          <textarea id="enho-input-nota" rows="3" placeholder="Ej. Buena técnica, sin molestias."></textarea>
+
+          <button type="submit">Guardar serie</button>
+          <button id="enho-btn-finalizar" type="button" class="enho-btn-secondary">Finalizar sesión</button>
+          <button id="enho-btn-restaurar-demo" type="button" class="enho-btn-light">Restaurar demo</button>
+        </form>
+        <p id="enho-mensaje" class="enho-message" aria-live="polite"></p>
+      </article>
+    </section>
+
+    <section class="enho-card enho-history-card">
+      <div class="enho-card-header"><div><h2>Series registradas</h2><p>Historial local de la sesión actual.</p></div></div>
+      <div class="enho-table-wrap"><table class="enho-table"><thead><tr><th>Ejercicio</th><th>Serie</th><th>Reps</th><th>Peso</th><th>Esfuerzo</th><th>Fallo</th><th>Nota</th></tr></thead><tbody id="enho-tabla-body"></tbody></table></div>
+    </section>
+  </main>
+  <script src="./enho-main.js"></script>
+</body>
+</html>
