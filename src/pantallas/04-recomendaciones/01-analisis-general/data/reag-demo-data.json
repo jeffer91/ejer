@@ -1,0 +1,41 @@
+{
+  "resumen": {
+    "periodo": "Últimos 7 días demo",
+    "energiaPromedio": 4.1,
+    "aguaPromedioMl": 2100,
+    "suenoPromedioHoras": 7.2,
+    "entrenamientosSemana": 3,
+    "hiitSemana": 1,
+    "diasDescanso": 2,
+    "registrosProgreso": 5
+  },
+  "datos": {
+    "progreso": "Hay registros recientes de peso, medidas y energía.",
+    "entrenamiento": "La semana demo tiene 3 entrenamientos, 1 HIIT y 2 días de descanso.",
+    "hidratacion": "El promedio demo de agua está cerca de la meta, pero puede mejorar algunos días.",
+    "descanso": "El sueño promedio demo es estable y suficiente para sostener la rutina."
+  },
+  "recomendacionesBase": [
+    {
+      "id": "rec-hidratacion",
+      "titulo": "Asegurar agua antes y después de entrenar",
+      "explicacion": "El promedio de agua está cerca de la meta. Conviene reforzar los momentos alrededor del entrenamiento sin forzar cantidades excesivas.",
+      "prioridad": "Media",
+      "categoria": "Hábitos"
+    },
+    {
+      "id": "rec-descanso",
+      "titulo": "Mantener días de recuperación",
+      "explicacion": "La semana combina entrenamiento, HIIT y descanso. Mantener recuperación ayuda a sostener la constancia.",
+      "prioridad": "Alta",
+      "categoria": "Entrenamiento"
+    },
+    {
+      "id": "rec-registro",
+      "titulo": "Registrar energía junto con actividad",
+      "explicacion": "La energía ayuda a entender qué rutinas se sienten mejor y qué días requieren bajar intensidad.",
+      "prioridad": "Media",
+      "categoria": "Progreso"
+    }
+  ]
+}
