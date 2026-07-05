@@ -1,0 +1,32 @@
+{
+  "configuracion": {
+    "metaDiariaMl": 2500,
+    "nota": "Meta demo orientativa. Ajustar según actividad, clima y sensación personal."
+  },
+  "registros": [
+    {
+      "fecha": "2026-07-04",
+      "cantidadMl": 500,
+      "momento": "Mañana",
+      "nota": "Demo de la mañana."
+    },
+    {
+      "fecha": "2026-07-04",
+      "cantidadMl": 750,
+      "momento": "Tarde",
+      "nota": "Demo durante el día."
+    },
+    {
+      "fecha": "2026-07-04",
+      "cantidadMl": 500,
+      "momento": "Entrenamiento",
+      "nota": "Demo después de moverse."
+    },
+    {
+      "fecha": "2026-07-03",
+      "cantidadMl": 2100,
+      "momento": "Día completo",
+      "nota": "Demo día anterior."
+    }
+  ]
+}
