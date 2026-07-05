@@ -1,0 +1,87 @@
+<!-- =========================================================
+Nombre completo: ayag-index.html
+Ruta o ubicación: src/pantallas/03-ayuno/02-agua/ayag-index.html
+Función o funciones:
+- Mostrar la subpantalla independiente de Ayuno / Agua.
+- Registrar hidratación diaria con botones rápidos y formulario manual.
+- Mostrar progreso visual, resumen e historial local.
+Con qué se conecta:
+- ayag.css
+- ayag-main.js
+- data/ayag-demo-data.json
+========================================================= -->
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ayuno / Agua</title>
+  <link rel="stylesheet" href="./ayag.css">
+</head>
+<body>
+  <main class="ayag-page">
+    <section class="ayag-hero">
+      <div>
+        <p class="ayag-eyebrow">Ayuno / Agua</p>
+        <h1>Hidratación diaria</h1>
+        <p class="ayag-subtitle">Registra agua de forma simple. La meta es orientativa: ajusta según tu día, clima y cómo te sientas.</p>
+      </div>
+      <div class="ayag-mode" id="ayag-modo-datos">Modo demo</div>
+    </section>
+
+    <section class="ayag-grid ayag-grid-summary">
+      <article class="ayag-card ayag-card-main"><span class="ayag-label">Hoy</span><strong id="ayag-total-hoy">0 ml</strong><small id="ayag-fecha-hoy">Fecha actual</small></article>
+      <article class="ayag-card"><span class="ayag-label">Meta</span><strong id="ayag-meta">0 ml</strong><small>Configurable</small></article>
+      <article class="ayag-card"><span class="ayag-label">Progreso</span><strong id="ayag-progreso">0%</strong><small>Del objetivo diario</small></article>
+      <article class="ayag-card"><span class="ayag-label">Registros</span><strong id="ayag-total-registros">0</strong><small>Guardados localmente</small></article>
+    </section>
+
+    <section class="ayag-layout">
+      <article class="ayag-card ayag-water-card">
+        <div class="ayag-card-header"><div><h2>Botones rápidos</h2><p>Agrega agua según lo que tomaste. Evita forzarte a tomar más de lo necesario.</p></div></div>
+        <div class="ayag-bottle" aria-label="Botella visual"><div id="ayag-bottle-fill" class="ayag-bottle-fill"></div><span id="ayag-bottle-text">0%</span></div>
+        <div class="ayag-actions">
+          <button data-ml="250">+250 ml</button>
+          <button data-ml="500">+500 ml</button>
+          <button data-ml="750">+750 ml</button>
+        </div>
+        <button id="ayag-btn-limpiar-dia" class="ayag-btn-light" type="button">Limpiar día actual</button>
+        <p id="ayag-mensaje" class="ayag-message" aria-live="polite"></p>
+      </article>
+
+      <article class="ayag-card ayag-form-card">
+        <div class="ayag-card-header"><div><h2>Registro manual</h2><p>Guarda una cantidad específica o cambia la meta diaria.</p></div></div>
+        <form id="ayag-form" class="ayag-form">
+          <label for="ayag-input-fecha">Fecha</label>
+          <input id="ayag-input-fecha" type="date" required>
+
+          <div class="ayag-form-grid">
+            <div><label for="ayag-input-ml">Cantidad en ml</label><input id="ayag-input-ml" type="number" min="0" max="3000" step="50" placeholder="Ej. 300" required></div>
+            <div><label for="ayag-input-meta">Meta diaria ml</label><input id="ayag-input-meta" type="number" min="500" max="6000" step="50" required></div>
+          </div>
+
+          <label for="ayag-input-momento">Momento</label>
+          <select id="ayag-input-momento">
+            <option value="Mañana">Mañana</option>
+            <option value="Tarde">Tarde</option>
+            <option value="Noche">Noche</option>
+            <option value="Entrenamiento">Entrenamiento</option>
+          </select>
+
+          <label for="ayag-input-nota">Nota</label>
+          <textarea id="ayag-input-nota" rows="3" placeholder="Ej. Después de entrenar o durante la tarde."></textarea>
+
+          <button type="submit">Guardar agua</button>
+          <button id="ayag-btn-restaurar-demo" type="button" class="ayag-btn-light">Restaurar demo</button>
+        </form>
+      </article>
+    </section>
+
+    <section class="ayag-card ayag-history-card">
+      <div class="ayag-card-header"><div><h2>Historial</h2><p>Registros locales de hidratación.</p></div></div>
+      <div class="ayag-table-wrap"><table class="ayag-table"><thead><tr><th>Fecha</th><th>Cantidad</th><th>Momento</th><th>Nota</th></tr></thead><tbody id="ayag-tabla-body"></tbody></table></div>
+    </section>
+  </main>
+  <script src="./ayag-main.js"></script>
+</body>
+</html>
