@@ -1,0 +1,64 @@
+{
+  "rutinaHoy": {
+    "fecha": "2026-07-04",
+    "enfoque": "Tren superior",
+    "estado": "Pendiente",
+    "notaSeguridad": "Registra con calma. Evita continuar si aparece dolor, mareo o molestia inusual.",
+    "ejercicios": [
+      {
+        "id": "press-banca",
+        "nombre": "Press de banca",
+        "objetivo": "3 series de 8 a 12 repeticiones",
+        "zona": "Pecho y empuje",
+        "permitePeso": true,
+        "permiteFallo": true
+      },
+      {
+        "id": "remo-mancuerna",
+        "nombre": "Remo con mancuerna",
+        "objetivo": "3 series de 10 a 12 repeticiones",
+        "zona": "Espalda",
+        "permitePeso": true,
+        "permiteFallo": true
+      },
+      {
+        "id": "press-hombro",
+        "nombre": "Press de hombro",
+        "objetivo": "3 series de 8 a 10 repeticiones",
+        "zona": "Hombro",
+        "permitePeso": true,
+        "permiteFallo": false
+      },
+      {
+        "id": "plancha",
+        "nombre": "Plancha",
+        "objetivo": "3 series controladas",
+        "zona": "Core",
+        "permitePeso": false,
+        "permiteFallo": false
+      }
+    ]
+  },
+  "series": [
+    {
+      "ejercicioId": "press-banca",
+      "ejercicioNombre": "Press de banca",
+      "serie": 1,
+      "repeticiones": 10,
+      "pesoUsado": 40,
+      "esfuerzo": 4,
+      "falloControlado": false,
+      "nota": "Demo. Técnica controlada."
+    },
+    {
+      "ejercicioId": "remo-mancuerna",
+      "ejercicioNombre": "Remo con mancuerna",
+      "serie": 1,
+      "repeticiones": 12,
+      "pesoUsado": 18,
+      "esfuerzo": 4,
+      "falloControlado": false,
+      "nota": "Demo. Sin molestias."
+    }
+  ]
+}
