@@ -1,0 +1,74 @@
+<!-- =========================================================
+Nombre completo: ajgm-index.html
+Ruta o ubicación: src/pantallas/05-ajustes/04-gemini/ajgm-index.html
+Función o funciones:
+- Mostrar la subpantalla independiente de Ajustes / Gemini.
+- Guardar configuración local para el motor de recomendaciones con IA.
+- Preparar prompts base para futuras recomendaciones reales.
+Con qué se conecta:
+- ajgm.css
+- ajgm-main.js
+- data/ajgm-demo-data.json
+========================================================= -->
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ajustes / Gemini</title>
+  <link rel="stylesheet" href="./ajgm.css">
+</head>
+<body>
+  <main class="ajgm-page">
+    <section class="ajgm-hero">
+      <div>
+        <p class="ajgm-eyebrow">Ajustes / Gemini</p>
+        <h1>Motor de recomendaciones con IA</h1>
+        <p class="ajgm-subtitle">Configura la clave, el modelo y los prompts base para generar recomendaciones claras, prudentes y útiles.</p>
+      </div>
+      <div class="ajgm-mode" id="ajgm-modo-datos">Modo demo</div>
+    </section>
+
+    <section class="ajgm-grid ajgm-grid-summary">
+      <article class="ajgm-card ajgm-card-main"><span class="ajgm-label">Estado</span><strong id="ajgm-resumen-estado">--</strong><small>Configuración local</small></article>
+      <article class="ajgm-card"><span class="ajgm-label">Modelo</span><strong id="ajgm-resumen-modelo">--</strong><small>Motor elegido</small></article>
+      <article class="ajgm-card"><span class="ajgm-label">Temperatura</span><strong id="ajgm-resumen-temp">--</strong><small>Creatividad</small></article>
+      <article class="ajgm-card"><span class="ajgm-label">Última prueba</span><strong id="ajgm-resumen-prueba">--</strong><small>Validación local</small></article>
+    </section>
+
+    <section class="ajgm-layout">
+      <article class="ajgm-card ajgm-form-card">
+        <div class="ajgm-card-header"><div><h2>Configuración Gemini</h2><p>Por ahora se guarda localmente. La conexión real se activará en el bloque de integración.</p></div></div>
+        <form id="ajgm-form" class="ajgm-form">
+          <label for="ajgm-input-api-key">API Key</label>
+          <input id="ajgm-input-api-key" type="password" maxlength="240" placeholder="Pega tu API Key" required>
+
+          <div class="ajgm-form-grid">
+            <div><label for="ajgm-input-modelo">Modelo</label><input id="ajgm-input-modelo" type="text" placeholder="Ej. modelo configurado en Gemini" required></div>
+            <div><label for="ajgm-input-temperatura">Temperatura</label><input id="ajgm-input-temperatura" type="number" min="0" max="1" step="0.1" required></div>
+            <div><label for="ajgm-input-max-tokens">Máximo de tokens</label><input id="ajgm-input-max-tokens" type="number" min="200" max="8000" step="100" required></div>
+            <div><label for="ajgm-input-estado">Estado</label><select id="ajgm-input-estado"><option value="Pendiente">Pendiente</option><option value="Configurado">Configurado</option><option value="Probado">Probado</option></select></div>
+          </div>
+
+          <label for="ajgm-input-prompt">Prompt base</label>
+          <textarea id="ajgm-input-prompt" rows="7" required></textarea>
+
+          <label for="ajgm-input-nota">Nota</label>
+          <textarea id="ajgm-input-nota" rows="3" placeholder="Ej. Usar respuestas cortas, claras y seguras."></textarea>
+
+          <button type="submit">Guardar configuración</button>
+          <button id="ajgm-btn-probar" type="button" class="ajgm-btn-secondary">Probar configuración local</button>
+          <button id="ajgm-btn-restaurar-demo" type="button" class="ajgm-btn-light">Restaurar demo</button>
+        </form>
+        <p id="ajgm-mensaje" class="ajgm-message" aria-live="polite"></p>
+      </article>
+
+      <article class="ajgm-card ajgm-preview-card">
+        <div class="ajgm-card-header"><div><h2>Prompts preparados</h2><p>Bloques base para futuras llamadas reales a Gemini.</p></div></div>
+        <div id="ajgm-prompts" class="ajgm-prompts"></div>
+      </article>
+    </section>
+  </main>
+  <script src="./ajgm-main.js"></script>
+</body>
+</html>
