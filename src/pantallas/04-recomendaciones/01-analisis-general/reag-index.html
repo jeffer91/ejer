@@ -1,0 +1,63 @@
+<!-- =========================================================
+Nombre completo: reag-index.html
+Ruta o ubicación: src/pantallas/04-recomendaciones/01-analisis-general/reag-index.html
+Función o funciones:
+- Mostrar la subpantalla independiente de Recomendaciones / Análisis general.
+- Generar recomendaciones locales de prueba basadas en datos demo.
+- Permitir aplicar o descartar recomendaciones guardando el estado en localStorage.
+Con qué se conecta:
+- reag.css
+- reag-main.js
+- data/reag-demo-data.json
+========================================================= -->
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Recomendaciones / Análisis general</title>
+  <link rel="stylesheet" href="./reag.css">
+</head>
+<body>
+  <main class="reag-page">
+    <section class="reag-hero">
+      <div>
+        <p class="reag-eyebrow">Recomendaciones / Análisis general</p>
+        <h1>Resumen inteligente</h1>
+        <p class="reag-subtitle">Analiza tus registros demo de progreso, entrenamiento, hidratación y descanso para mostrar acciones prudentes y sostenibles.</p>
+      </div>
+      <div class="reag-mode" id="reag-modo-datos">Modo demo</div>
+    </section>
+
+    <section class="reag-grid reag-grid-summary">
+      <article class="reag-card reag-card-main"><span class="reag-label">Estado general</span><strong id="reag-estado-general">--</strong><small>Lectura rápida</small></article>
+      <article class="reag-card"><span class="reag-label">Prioridad alta</span><strong id="reag-prioridad-alta">0</strong><small>Revisar primero</small></article>
+      <article class="reag-card"><span class="reag-label">Aplicadas</span><strong id="reag-aplicadas">0</strong><small>Acciones aceptadas</small></article>
+      <article class="reag-card"><span class="reag-label">Descartadas</span><strong id="reag-descartadas">0</strong><small>Acciones omitidas</small></article>
+    </section>
+
+    <section class="reag-layout">
+      <article class="reag-card reag-panel-card">
+        <div class="reag-card-header"><div><h2>Generar análisis</h2><p>Por ahora usa reglas locales. Luego esta pantalla se conectará a Gemini.</p></div></div>
+        <div class="reag-actions">
+          <button id="reag-btn-generar">Generar recomendaciones</button>
+          <button id="reag-btn-restaurar-demo" class="reag-btn-light">Restaurar demo</button>
+        </div>
+        <p class="reag-note">Las recomendaciones evitan extremos y se enfocan en constancia, recuperación, hidratación, sueño y organización.</p>
+        <p id="reag-mensaje" class="reag-message" aria-live="polite"></p>
+      </article>
+
+      <article class="reag-card reag-panel-card">
+        <div class="reag-card-header"><div><h2>Datos analizados</h2><p>Resumen de datos demo disponibles para esta pantalla.</p></div></div>
+        <ul class="reag-data-list" id="reag-data-list"></ul>
+      </article>
+    </section>
+
+    <section class="reag-card reag-recommendations-card">
+      <div class="reag-card-header"><div><h2>Tarjetas de recomendación</h2><p>Cada tarjeta tiene prioridad, explicación y acción.</p></div></div>
+      <div id="reag-lista-recomendaciones" class="reag-recommendations"></div>
+    </section>
+  </main>
+  <script src="./reag-main.js"></script>
+</body>
+</html>
