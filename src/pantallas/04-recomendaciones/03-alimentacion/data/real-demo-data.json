@@ -1,0 +1,41 @@
+{
+  "resumenAlimentacion": {
+    "periodo": "Semana demo",
+    "comidasPlanificadas": 10,
+    "comidasSinPlan": 3,
+    "aguaPromedioMl": 2100,
+    "energiaPromedio": 4.1,
+    "suenoPromedioHoras": 7.2,
+    "entrenamientos": 3,
+    "diasConNota": 5
+  },
+  "datos": {
+    "horarios": "Hay varios días con comidas planificadas y algunos sin planificación.",
+    "energia": "La energía promedio se mantiene estable en los datos demo.",
+    "hidratacion": "La hidratación está cerca de la meta, pero puede distribuirse mejor durante el día.",
+    "entrenamiento": "Los días de entrenamiento requieren organización previa para no improvisar comidas."
+  },
+  "recomendacionesBase": [
+    {
+      "id": "real-planificar",
+      "titulo": "Planificar una comida base antes de días ocupados",
+      "explicacion": "Tener una opción simple preparada ayuda a no improvisar cuando hay entrenamiento o trabajo acumulado.",
+      "prioridad": "Alta",
+      "categoria": "Organización"
+    },
+    {
+      "id": "real-hidratacion",
+      "titulo": "Distribuir agua entre mañana, tarde y entrenamiento",
+      "explicacion": "La hidratación mejora cuando se reparte durante el día en lugar de dejarla para el final.",
+      "prioridad": "Media",
+      "categoria": "Hidratación"
+    },
+    {
+      "id": "real-nota",
+      "titulo": "Anotar energía después de comer",
+      "explicacion": "Registrar energía y sensación ayuda a identificar qué comidas te funcionan mejor sin hacer reglas extremas.",
+      "prioridad": "Media",
+      "categoria": "Registro"
+    }
+  ]
+}
