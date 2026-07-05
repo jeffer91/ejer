@@ -1,0 +1,13 @@
+{
+  "perfil": {
+    "nombre": "Jeff",
+    "estaturaCm": 175,
+    "metaBienestar": "Mejorar hábitos, energía y condición física.",
+    "nivelActividad": "Moderado"
+  },
+  "registros": [
+    { "fecha": "2026-07-01", "valorKg": 90.5, "energia": 4, "nota": "Registro demo." },
+    { "fecha": "2026-07-02", "valorKg": 90.4, "energia": 4, "nota": "Registro demo." },
+    { "fecha": "2026-07-03", "valorKg": 90.2, "energia": 5, "nota": "Registro demo." }
+  ]
+}
