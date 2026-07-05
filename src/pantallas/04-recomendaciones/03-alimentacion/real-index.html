@@ -1,0 +1,63 @@
+<!-- =========================================================
+Nombre completo: real-index.html
+Ruta o ubicación: src/pantallas/04-recomendaciones/03-alimentacion/real-index.html
+Función o funciones:
+- Mostrar la subpantalla independiente de Recomendaciones / Alimentación.
+- Generar recomendaciones locales de prueba sobre organización de comidas, energía e hidratación.
+- Permitir aplicar o descartar recomendaciones guardando el estado en localStorage.
+Con qué se conecta:
+- real.css
+- real-main.js
+- data/real-demo-data.json
+========================================================= -->
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Recomendaciones / Alimentación</title>
+  <link rel="stylesheet" href="./real.css">
+</head>
+<body>
+  <main class="real-page">
+    <section class="real-hero">
+      <div>
+        <p class="real-eyebrow">Recomendaciones / Alimentación</p>
+        <h1>Ideas simples para comer mejor</h1>
+        <p class="real-subtitle">Revisa tus registros demo y recibe recomendaciones prudentes sobre horarios, hidratación, energía y planificación de comidas.</p>
+      </div>
+      <div class="real-mode" id="real-modo-datos">Modo demo</div>
+    </section>
+
+    <section class="real-grid real-grid-summary">
+      <article class="real-card real-card-main"><span class="real-label">Balance</span><strong id="real-balance">--</strong><small>Lectura general</small></article>
+      <article class="real-card"><span class="real-label">Agua promedio</span><strong id="real-agua">0 ml</strong><small>Dato demo</small></article>
+      <article class="real-card"><span class="real-label">Energía</span><strong id="real-energia">--/5</strong><small>Promedio demo</small></article>
+      <article class="real-card"><span class="real-label">Planificación</span><strong id="real-planificacion">--</strong><small>Comidas organizadas</small></article>
+    </section>
+
+    <section class="real-layout">
+      <article class="real-card real-panel-card">
+        <div class="real-card-header"><div><h2>Generar recomendaciones</h2><p>Por ahora usa reglas locales. Luego se conectará a Gemini desde Ajustes.</p></div></div>
+        <div class="real-actions">
+          <button id="real-btn-generar">Analizar alimentación</button>
+          <button id="real-btn-restaurar-demo" class="real-btn-light">Restaurar demo</button>
+        </div>
+        <p class="real-note">Esta pantalla evita recomendaciones extremas. Se enfoca en comer con regularidad, hidratarse y planificar mejor.</p>
+        <p id="real-mensaje" class="real-message" aria-live="polite"></p>
+      </article>
+
+      <article class="real-card real-panel-card">
+        <div class="real-card-header"><div><h2>Datos revisados</h2><p>Resumen de alimentación, agua, energía y horarios.</p></div></div>
+        <ul class="real-data-list" id="real-data-list"></ul>
+      </article>
+    </section>
+
+    <section class="real-card real-recommendations-card">
+      <div class="real-card-header"><div><h2>Recomendaciones de alimentación</h2><p>Cada tarjeta puede aplicarse o descartarse.</p></div></div>
+      <div id="real-lista-recomendaciones" class="real-recommendations"></div>
+    </section>
+  </main>
+  <script src="./real-main.js"></script>
+</body>
+</html>
