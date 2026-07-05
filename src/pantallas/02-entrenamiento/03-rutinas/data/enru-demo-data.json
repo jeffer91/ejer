@@ -1,0 +1,71 @@
+{
+  "semana": "Semana demo",
+  "dias": [
+    {
+      "dia": "Lunes",
+      "tipo": "Entrenamiento",
+      "enfoque": "Tren superior",
+      "duracionMin": 50,
+      "nota": "Fuerza controlada, técnica y descanso."
+    },
+    {
+      "dia": "Martes",
+      "tipo": "Caminata",
+      "enfoque": "Movimiento suave",
+      "duracionMin": 35,
+      "nota": "Día liviano para mantener actividad."
+    },
+    {
+      "dia": "Miércoles",
+      "tipo": "Entrenamiento",
+      "enfoque": "Piernas y core",
+      "duracionMin": 50,
+      "nota": "Evitar sobrecargar si hay fatiga."
+    },
+    {
+      "dia": "Jueves",
+      "tipo": "Descanso",
+      "enfoque": "Recuperación",
+      "duracionMin": 0,
+      "nota": "Priorizar sueño e hidratación."
+    },
+    {
+      "dia": "Viernes",
+      "tipo": "Entrenamiento",
+      "enfoque": "Tren superior mixto",
+      "duracionMin": 45,
+      "nota": "Sesión moderada."
+    },
+    {
+      "dia": "Sábado",
+      "tipo": "HIIT",
+      "enfoque": "Intervalos controlados",
+      "duracionMin": 18,
+      "nota": "Intensidad moderada y descansos completos."
+    },
+    {
+      "dia": "Domingo",
+      "tipo": "Descanso",
+      "enfoque": "Recuperación total",
+      "duracionMin": 0,
+      "nota": "Revisar progreso semanal."
+    }
+  ],
+  "rutinasBase": [
+    {
+      "nombre": "Tren superior",
+      "descripcion": "Rutina de empuje y espalda con volumen moderado.",
+      "ejercicios": ["Press de banca", "Remo con mancuerna", "Press de hombro", "Plancha"]
+    },
+    {
+      "nombre": "Piernas y core",
+      "descripcion": "Sesión controlada para piernas, estabilidad y zona media.",
+      "ejercicios": ["Sentadilla", "Peso muerto rumano", "Zancadas", "Plancha lateral"]
+    },
+    {
+      "nombre": "Movilidad y recuperación",
+      "descripcion": "Día suave para mantener movilidad y reducir fatiga.",
+      "ejercicios": ["Movilidad de hombro", "Estiramiento suave", "Caminata", "Respiración"]
+    }
+  ]
+}
