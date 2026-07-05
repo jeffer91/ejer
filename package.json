@@ -1,0 +1,21 @@
+{
+  "name": "fitness-jeff",
+  "version": "0.1.0",
+  "description": "App personal de bienestar, entrenamiento, hábitos, voz e integraciones.",
+  "main": "electron/fit-electron-main.cjs",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron .",
+    "cap:init": "npx cap init FitnessJeff com.jeff.fitness --web-dir src",
+    "cap:add:android": "npx cap add android",
+    "cap:sync": "npx cap sync android",
+    "cap:open:android": "npx cap open android"
+  },
+  "devDependencies": {
+    "@capacitor/android": "latest",
+    "@capacitor/cli": "latest",
+    "@capacitor/core": "latest",
+    "electron": "latest"
+  }
+}
