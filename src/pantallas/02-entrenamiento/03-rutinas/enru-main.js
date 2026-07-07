@@ -4,9 +4,9 @@ Ruta o ubicación: src/pantallas/02-entrenamiento/03-rutinas/enru-main.js
 Función o funciones:
 - Cargar planificación semanal guardada localmente.
 - Mostrar calendario semanal de ancho completo.
-- Importar rutinas rápidas desde texto estructurado.
-- Copiar el formato guía para completar rutinas.
-- Dividir rutinas en calentamiento, ejercicios, cierre y notas.
+- Importar la semana completa desde un texto estructurado.
+- Copiar el formato guía semanal para completar rutinas.
+- Dividir cada día en calentamiento, ejercicios, cierre y notas.
 Con qué se conecta:
 - enru-index.html
 - enru.css
@@ -25,7 +25,7 @@ Con qué se conecta:
     capturarElementos();
     cargarDatos();
     conectarEventos();
-    llenarSelectorDias();
+    cargarSemanaEnCaja();
     renderizarTodo();
   }
 
@@ -36,9 +36,8 @@ Con qué se conecta:
     el.totalDescanso=document.getElementById('enru-total-descanso');
     el.calendario=document.getElementById('enru-calendario');
     el.form=document.getElementById('enru-form');
-    el.inputDia=document.getElementById('enru-input-dia');
     el.inputRutina=document.getElementById('enru-input-rutina');
-    el.btnLimpiarDia=document.getElementById('enru-btn-limpiar-dia');
+    el.btnLimpiarSemana=document.getElementById('enru-btn-limpiar-dia');
     el.btnCopiarFormato=document.getElementById('enru-btn-copiar-formato');
     el.formatoRutina=document.getElementById('enru-formato-rutina');
     el.mensaje=document.getElementById('enru-mensaje');
@@ -54,29 +53,19 @@ Con qué se conecta:
   function conectarEventos(){
     el.form.addEventListener('submit',function(event){
       event.preventDefault();
-      cargarRutinaRapida();
+      cargarSemanaCompleta();
     });
-    el.inputDia.addEventListener('change',function(){
-      estado.diaActivo=el.inputDia.value;
-      cargarTextoDelDia(estado.diaActivo);
-      renderizarCalendario();
-    });
-    el.btnLimpiarDia.addEventListener('click',limpiarDiaActual);
+    el.btnLimpiarSemana.addEventListener('click',limpiarSemanaCompleta);
     if(el.btnCopiarFormato){
       el.btnCopiarFormato.addEventListener('click',copiarFormatoRutina);
     }
   }
 
-  function llenarSelectorDias(){
-    el.inputDia.innerHTML='';
-    DIAS.forEach(function(dia){
-      var option=document.createElement('option');
-      option.value=dia;
-      option.textContent=dia;
-      el.inputDia.appendChild(option);
-    });
-    el.inputDia.value=estado.diaActivo;
-    cargarTextoDelDia(estado.diaActivo);
+  function cargarSemanaEnCaja(){
+    var cargadas=estado.dias.filter(function(item){return item.rutinaCargada;});
+    if(cargadas.length){
+      el.inputRutina.value=formatearSemanaParaTexto();
+    }
   }
 
   function copiarFormatoRutina(){
@@ -84,7 +73,7 @@ Con qué se conecta:
     if(!texto){mostrarMensaje('No se encontró el formato para copiar.',true);return;}
     if(navigator.clipboard&&navigator.clipboard.writeText){
       navigator.clipboard.writeText(texto).then(function(){
-        mostrarMensaje('Formato copiado. Ahora pégalo en la caja y edítalo.',false);
+        mostrarMensaje('Formato semanal copiado. Pégalo en la caja y edita los siete días.',false);
       }).catch(function(){copiarConFallback(texto);});
       return;
     }
@@ -101,45 +90,78 @@ Con qué se conecta:
     area.select();
     try{
       document.execCommand('copy');
-      mostrarMensaje('Formato copiado. Ahora pégalo en la caja y edítalo.',false);
+      mostrarMensaje('Formato semanal copiado. Pégalo en la caja y edita los siete días.',false);
     }catch(error){
       mostrarMensaje('No se pudo copiar automáticamente. Selecciona el formato y cópialo manualmente.',true);
     }
     document.body.removeChild(area);
   }
 
-  function cargarRutinaRapida(){
+  function cargarSemanaCompleta(){
     var texto=el.inputRutina.value.trim();
-    if(!texto){mostrarMensaje('Pega una rutina usando el formato indicado.',true);return;}
-    var rutina=parsearRutina(texto);
-    var dia=rutina.dia||el.inputDia.value||estado.diaActivo;
-    if(DIAS.indexOf(dia)===-1){mostrarMensaje('El día no es válido. Usa Lunes, Martes, Miércoles, Jueves, Viernes, Sábado o Domingo.',true);return;}
-    if(!rutina.nombre){mostrarMensaje('La rutina necesita una línea Nombre.',true);return;}
-    rutina.dia=dia;
-    estado.diaActivo=dia;
-    estado.dias=estado.dias.filter(function(item){return item.dia!==dia;});
-    estado.dias.push(rutina);
-    estado.dias=normalizarDias(estado.dias);
-    el.inputDia.value=dia;
+    if(!texto){mostrarMensaje('Pega el plan semanal completo antes de cargar.',true);return;}
+    var resultado=parsearSemana(texto);
+    if(resultado.error){mostrarMensaje(resultado.error,true);return;}
+    estado.semana=resultado.semana||'Semana actual';
+    estado.dias=normalizarDias(resultado.rutinas);
+    estado.diaActivo='Lunes';
     guardarLocal();
-    mostrarMensaje('Rutina cargada correctamente en '+dia+'.',false);
+    mostrarMensaje('Semana completa cargada correctamente: '+resultado.rutinas.length+' días guardados.',false);
     renderizarTodo();
   }
 
-  function limpiarDiaActual(){
-    var dia=el.inputDia.value||estado.diaActivo;
-    estado.diaActivo=dia;
-    estado.dias=estado.dias.filter(function(item){return item.dia!==dia;});
-    estado.dias=normalizarDias(estado.dias);
+  function limpiarSemanaCompleta(){
+    estado.semana='Semana actual';
+    estado.dias=normalizarDias([]);
+    estado.diaActivo='Lunes';
     el.inputRutina.value='';
     guardarLocal();
-    mostrarMensaje('Día limpiado correctamente.',false);
+    mostrarMensaje('Semana limpiada correctamente.',false);
     renderizarTodo();
   }
 
-  function cargarTextoDelDia(dia){
-    var registro=buscarDia(dia);
-    el.inputRutina.value=registro&&registro.rutinaCargada?formatearRutinaParaTexto(registro):'';
+  function parsearSemana(texto){
+    var lineas=texto.split(/\r?\n/);
+    var semana='Semana actual';
+    var bloques=[];
+    var actual=[];
+
+    lineas.forEach(function(linea){
+      var limpia=linea.trim();
+      if(/^Semana\s*:/i.test(limpia)){
+        semana=limpia.split(':').slice(1).join(':').trim()||'Semana actual';
+        return;
+      }
+      if(/^D[ií]a\s*:/i.test(limpia)){
+        if(actual.length){bloques.push(actual.join('\n'));}
+        actual=[linea];
+        return;
+      }
+      if(actual.length){actual.push(linea);}
+    });
+    if(actual.length){bloques.push(actual.join('\n'));}
+
+    if(!bloques.length){return{error:'No encontré bloques de día. Cada rutina debe iniciar con Día: Lunes, Día: Martes, etc.'};}
+
+    var rutinas=[];
+    var errores=[];
+    bloques.forEach(function(bloque,indice){
+      var rutina=parsearRutina(bloque);
+      if(!rutina.dia){errores.push('Bloque '+(indice+1)+': falta un día válido.');return;}
+      if(!rutina.nombre){errores.push(rutina.dia+': falta Nombre.');return;}
+      rutinas.push(rutina);
+    });
+    if(errores.length){return{error:errores.join(' ')};}
+
+    var vistos={};
+    rutinas.forEach(function(rutina){vistos[rutina.dia]=(vistos[rutina.dia]||0)+1;});
+    var duplicados=Object.keys(vistos).filter(function(dia){return vistos[dia]>1;});
+    if(duplicados.length){return{error:'Hay días duplicados: '+duplicados.join(', ')+'. Deja un solo bloque por día.'};}
+
+    var faltantes=DIAS.filter(function(dia){return !vistos[dia];});
+    if(faltantes.length){return{error:'Faltan estos días para cargar la semana completa: '+faltantes.join(', ')+'.'};}
+
+    return{semana:semana,rutinas:rutinas};
   }
 
   function parsearRutina(texto){
@@ -247,14 +269,12 @@ Con qué se conecta:
     var tipo=tieneRutina?item.tipo:'Libre';
     var duracion=tieneRutina&&item.duracionMin?item.duracionMin+' min':'Sin duración';
     var objetivo=tieneRutina&&item.objetivo?'<p class="enru-goal">'+esc(item.objetivo)+'</p>':'';
-    var ejercicios=tieneRutina&&item.ejercicios.length?'<ol>'+item.ejercicios.slice(0,4).map(function(e){return'<li>'+esc(e.nombre)+' <span>'+esc(e.series||'')+'</span></li>';}).join('')+'</ol>':'<p class="enru-empty">Clic para cargar.</p>';
+    var ejercicios=tieneRutina&&item.ejercicios.length?'<ol>'+item.ejercicios.slice(0,4).map(function(e){return'<li>'+esc(e.nombre)+' <span>'+esc(e.series||'')+'</span></li>';}).join('')+'</ol>':'<p class="enru-empty">Semana sin cargar.</p>';
     return '<h3>'+esc(item.dia)+'</h3><p><span class="enru-pill">'+esc(tipo)+'</span></p><p><strong>'+esc(nombre)+'</strong></p><p class="enru-duration">'+esc(duracion)+'</p>'+objetivo+ejercicios;
   }
 
   function seleccionarDia(dia){
     estado.diaActivo=dia;
-    el.inputDia.value=dia;
-    cargarTextoDelDia(dia);
     renderizarCalendario();
   }
 
@@ -262,7 +282,7 @@ Con qué se conecta:
     el.rutinas.innerHTML='';
     var cargadas=estado.dias.filter(function(item){return item.rutinaCargada;});
     if(!cargadas.length){
-      el.rutinas.innerHTML='<p class="enru-empty-wide">Todavía no hay rutinas cargadas. Usa el formato rápido para crear la primera.</p>';
+      el.rutinas.innerHTML='<p class="enru-empty-wide">Todavía no hay semana cargada. Copia el formato semanal, completa los siete días y carga el plan.</p>';
       return;
     }
     cargadas.forEach(function(rutina){
@@ -293,6 +313,17 @@ Con qué se conecta:
   function crearNotas(notas){
     if(!notas||!notas.length){return '';}
     return '<h4>Notas</h4><p>'+esc(notas.join(' '))+'</p>';
+  }
+
+  function formatearSemanaParaTexto(){
+    var bloques=['Semana: '+estado.semana,''];
+    estado.dias.forEach(function(rutina){
+      if(rutina.rutinaCargada){
+        bloques.push(formatearRutinaParaTexto(rutina));
+        bloques.push('');
+      }
+    });
+    return bloques.join('\n').trim();
   }
 
   function formatearRutinaParaTexto(rutina){
