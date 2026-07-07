@@ -1,27 +1,31 @@
-# Revisión final de procesos y subprocesos - Fitness Jeff
+# Revisión global de procesos y subprocesos - Fitness Jeff
 
-## Resultado final
+## Resultado de revisión estática
 
-Estado de revisión estática: **apto para prueba local completa**.
+Estado: **apto para prueba local completa**.
 
-No se puede confirmar ejecución real hasta correr la app en el equipo con `npm install`, `npm start`, Live Server y credenciales reales. Sin embargo, la revisión de estructura, rutas, procesos, subprocesos, variables locales e integraciones queda cerrada.
+La revisión confirma estructura, rutas principales, flujo local-first, carga en Electron, navegación por iframe, variables locales actuales e integraciones base. La ejecución real debe validarse en el equipo con `npm install`, `npm start` y credenciales reales de Google Sheets, Firebase y Gemini.
 
-## Corrección aplicada en esta última revisión
+## Correcciones aplicadas durante la revisión global
 
-Se corrigió el cliente Gemini para que también use la variable `maxTokens` configurada en `Ajustes / Gemini`. Antes el formulario guardaba ese valor, pero el cliente solo enviaba temperatura. Ahora el cliente arma `generation_config` con:
+1. Se alineó `Progreso / Registrar datos` con la nueva variable local:
 
 ```text
-temperature
-max_output_tokens
+fitness-jeff-prrd-datos-base
 ```
+
+2. Se corrigió la sincronización de Google Sheets para que lea `datos-base` y las rutinas semanales desde `dias`.
+3. Se corrigió la sincronización de Firebase para que respalde `datosBase` y las rutinas semanales desde `dias`.
+4. Se actualizó Gemini para que use datos actuales: perfil, datos base, peso, medidas, sesión de hoy, rutinas semanales, agua y hábitos.
+5. Se actualizó el esquema de Google Sheets con tabla `DatosBase` y columnas más acordes al estado actual de la app.
 
 ## Procesos principales revisados
 
 | Proceso | Subprocesos | Estado |
 |---|---|---|
-| Shell principal | Menú superior, submenús, iframe, estado visual | OK |
-| Progreso | Peso, medidas, registro diario | OK |
-| Entrenamiento | Sesión de hoy, HIIT, rutinas | OK |
+| Shell principal | Menú superior, submenús, iframe, tema visual global | OK |
+| Progreso | Peso, medidas, datos físicos base | OK |
+| Entrenamiento | Sesión de hoy, HIIT, carga semanal de rutinas | OK |
 | Horarios | Registro de horarios, agua | OK funcional |
 | Recomendaciones | Análisis general, entrenamiento, alimentación, hábitos | OK local |
 | Ajustes | Perfil, Google Sheets, Firebase, Gemini | OK |
@@ -30,18 +34,20 @@ max_output_tokens
 | Firebase | Configuración, prueba, respaldo por colecciones | OK, requiere reglas y credenciales válidas |
 | Gemini | Configuración, prueba, generación de recomendaciones | OK, requiere API Key y modelo válido |
 | Electron | package.json, main, preload, carga de src/index.html | OK |
-| Android | capacitor.config.json, scripts de sincronización Android | OK base |
+| Android | Capacitor base y scripts Android | OK base |
 
 ## Flujo general revisado
 
 ```text
-src/index.html
-  -> src/app/fit-shell-main.js
-    -> iframe
-      -> src/pantallas/**/**-index.html
-        -> CSS propio
-        -> JS propio
-        -> data/demo JSON cuando corresponde
+package.json
+  -> electron/fit-electron-main.cjs
+    -> src/index.html
+      -> src/app/fit-shell-main.js
+        -> iframe
+          -> src/pantallas/**/**-index.html
+            -> CSS propio
+            -> JS propio
+            -> localStorage por módulo
 ```
 
 ## Flujo de datos local-first
@@ -54,15 +60,13 @@ Pantallas
     -> Gemini Recommendations
 ```
 
-## Variables locales revisadas
-
-Las variables principales quedan conectadas a procesos de sincronización:
+## Variables locales actuales conectadas
 
 ```text
 fitness-jeff-ajpe-perfil
+fitness-jeff-prrd-datos-base
 fitness-jeff-prpe-registros
 fitness-jeff-prme-registros
-fitness-jeff-prrd-registros
 fitness-jeff-enho-sesion
 fitness-jeff-enhi-datos
 fitness-jeff-enru-plan
@@ -85,7 +89,7 @@ Ajustes / Google Sheets
   -> valida URL Apps Script
   -> prueba conexión
   -> crea tablas
-  -> lee variables locales
+  -> lee variables locales actuales
   -> envía lotes a Apps Script
   -> Apps Script escribe por encabezados
 ```
@@ -97,7 +101,7 @@ Ajustes / Firebase
   -> guarda configuración local
   -> carga SDK Firebase desde CDN
   -> prueba Firestore
-  -> lee variables locales
+  -> lee variables locales actuales
   -> agrupa por colección
   -> respalda documentos por lotes
 ```
@@ -109,14 +113,14 @@ Ajustes / Gemini
   -> guarda API Key, modelo, temperatura y maxTokens
   -> construye prompts seguros
   -> prueba conexión real
-  -> reúne datos locales
+  -> reúne datos locales actuales
   -> solicita recomendaciones
   -> guarda última respuesta en localStorage
 ```
 
 ## Límite de 600 líneas
 
-Se agregó y mantiene el script:
+Se mantiene el script:
 
 ```text
 scripts/fit-auditoria-lineas.ps1
@@ -156,4 +160,4 @@ npm run cap:open:android
 
 ## Conclusión
 
-La revisión final deja el proyecto organizado por procesos y subprocesos. No se detectan errores estructurales evidentes en la revisión estática. La siguiente validación obligatoria es ejecutar la app en el equipo y revisar consola/pantallas con datos reales.
+La revisión global deja el proyecto organizado por procesos y subprocesos. No se detectan errores estructurales evidentes en la revisión estática. La siguiente validación obligatoria es ejecutar la app en el equipo y revisar consola/pantallas con datos reales.
