@@ -4,6 +4,7 @@ Ruta o ubicación: src/app/fit-shell-main.js
 Función o funciones:
 - Manejar el menú superior de la app.
 - Abrir subpantallas independientes dentro del iframe principal.
+- Compactar los títulos superiores de todas las subpantallas.
 - Limpiar textos de prueba para que la app se vea en modo funcional.
 Con qué se conecta:
 - src/index.html
@@ -21,7 +22,7 @@ Con qué se conecta:
   function iniciarShell(){
     conectarMenus();
     conectarOpcionesSubmenu();
-    conectarSanitizadorVisual();
+    conectarAjustesVisualesIframe();
     marcarMenuActivo('progreso');
   }
 
@@ -60,27 +61,80 @@ Con qué se conecta:
     });
   }
 
-  function conectarSanitizadorVisual(){
+  function conectarAjustesVisualesIframe(){
     if(!frame){
       return;
     }
     frame.addEventListener('load',function(){
-      limpiarTextosPruebaEnIframe();
+      aplicarAjustesVisualesIframe();
     });
   }
 
-  function limpiarTextosPruebaEnIframe(){
+  function aplicarAjustesVisualesIframe(){
     try{
       var doc=frame.contentDocument||frame.contentWindow.document;
-      if(!doc||!doc.body||doc.__fitnessJeffSinTextosPrueba){
+      if(!doc||!doc.body||doc.__fitnessJeffAjustesVisuales){
         return;
       }
-      doc.__fitnessJeffSinTextosPrueba=true;
+      doc.__fitnessJeffAjustesVisuales=true;
+      inyectarEstiloCompacto(doc);
+      compactarTitulosSuperiores(doc);
       limpiarTextosEnNodo(doc.body);
       observarCambiosDeTexto(doc);
     }catch(error){
-      console.warn('No se pudo limpiar textos de prueba:',error);
+      console.warn('No se pudieron aplicar ajustes visuales:',error);
     }
+  }
+
+  function inyectarEstiloCompacto(doc){
+    if(doc.getElementById('fitness-jeff-titulos-compactos')){
+      return;
+    }
+    var style=doc.createElement('style');
+    style.id='fitness-jeff-titulos-compactos';
+    style.textContent=[
+      'section[class*="-hero"]{padding:10px 14px!important;margin-bottom:12px!important;min-height:0!important;align-items:center!important;gap:10px!important;border-radius:16px!important;box-shadow:0 8px 20px rgba(15,23,42,.05)!important;}',
+      'section[class*="-hero"]>div:first-child{min-width:0!important;}',
+      'section[class*="-hero"] h1{margin:0!important;font-size:15px!important;line-height:1.2!important;font-weight:800!important;color:#2563eb!important;letter-spacing:.01em!important;}',
+      'section[class*="-hero"] [class$="-eyebrow"],section[class*="-hero"] [class$="-subtitle"],section[class*="-hero"] [class$="-mode"]{display:none!important;}',
+      'section[class*="-hero"] p{margin:0!important;}',
+      '@media(max-width:900px){section[class*="-hero"]{padding:10px 12px!important;margin-bottom:10px!important;}}'
+    ].join('\n');
+    doc.head.appendChild(style);
+  }
+
+  function compactarTitulosSuperiores(doc){
+    var heroes=Array.prototype.slice.call(doc.querySelectorAll('section[class*="-hero"]'));
+    heroes.forEach(function(hero){
+      var h1=hero.querySelector('h1');
+      if(h1){
+        return;
+      }
+      var titulo=obtenerTituloCompacto(hero,doc);
+      if(!titulo){
+        return;
+      }
+      var contenedor=hero.querySelector('div')||hero;
+      h1=doc.createElement('h1');
+      h1.textContent=titulo;
+      contenedor.insertBefore(h1,contenedor.firstChild);
+    });
+  }
+
+  function obtenerTituloCompacto(hero,doc){
+    var texto='';
+    var etiqueta=hero.querySelector('[class$="-eyebrow"]');
+    if(etiqueta){
+      texto=etiqueta.textContent||'';
+    }
+    if(!texto&&doc.title){
+      texto=doc.title;
+    }
+    if(texto.indexOf('/')!==-1){
+      var partes=texto.split('/');
+      texto=partes[partes.length-1];
+    }
+    return texto.trim();
   }
 
   function observarCambiosDeTexto(doc){
@@ -100,6 +154,7 @@ Con qué se conecta:
           limpiarTextosEnNodo(nodo);
         });
       });
+      compactarTitulosSuperiores(doc);
     });
     observador.observe(doc.body,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:['placeholder','value','title','aria-label']});
   }
