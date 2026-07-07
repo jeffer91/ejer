@@ -11,10 +11,11 @@ Con qué se conecta:
   'use strict';
   var tables={
     Perfil:['id','nombre','actualizadoEn'],
-    RegistrosDiarios:['id','fecha','energia','nota','actualizadoEn'],
-    Entrenamientos:['id','fecha','tipo','nota','actualizadoEn'],
+    DatosBase:['id','fecha','edad','alturaCm','sexo','complexion','actividadSemanal','origen','actualizadoEn'],
+    RegistrosDiarios:['id','fecha','valorKg','cinturaCm','actividad','origen','nota','actualizadoEn'],
+    Entrenamientos:['id','fecha','dia','tipo','nombre','objetivo','duracionMin','nivel','equipo','origen','nota','actualizadoEn'],
     Hidratacion:['id','fecha','cantidadMl','nota','actualizadoEn'],
-    Recomendaciones:['id','fecha','titulo','estado','actualizadoEn'],
+    Recomendaciones:['id','fecha','titulo','estado','texto','origen','actualizadoEn'],
     SyncLog:['id','fecha','accion','estado','mensaje']
   };
   function getTables(){return JSON.parse(JSON.stringify(tables));}
