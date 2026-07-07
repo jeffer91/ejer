@@ -93,12 +93,15 @@ Con qué se conecta:
         if(mutation.type==='characterData'){
           limpiarNodoTexto(mutation.target);
         }
+        if(mutation.type==='attributes'){
+          limpiarAtributosElemento(mutation.target);
+        }
         Array.prototype.slice.call(mutation.addedNodes||[]).forEach(function(nodo){
           limpiarTextosEnNodo(nodo);
         });
       });
     });
-    observador.observe(doc.body,{childList:true,subtree:true,characterData:true});
+    observador.observe(doc.body,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:['placeholder','value','title','aria-label']});
   }
 
   function limpiarTextosEnNodo(nodo){
@@ -114,12 +117,29 @@ Con qué se conecta:
     if(nodo.nodeType!==win.Node.ELEMENT_NODE&&nodo.nodeType!==win.Node.DOCUMENT_FRAGMENT_NODE){
       return;
     }
+    if(nodo.nodeType===win.Node.ELEMENT_NODE){
+      limpiarAtributosElemento(nodo);
+    }
+    var elementos=nodo.querySelectorAll?Array.prototype.slice.call(nodo.querySelectorAll('*')):[];
+    elementos.forEach(limpiarAtributosElemento);
     var walker=doc.createTreeWalker(nodo,win.NodeFilter.SHOW_TEXT,null);
     var textos=[];
     while(walker.nextNode()){
       textos.push(walker.currentNode);
     }
     textos.forEach(limpiarNodoTexto);
+  }
+
+  function limpiarAtributosElemento(elemento){
+    ['placeholder','value','title','aria-label'].forEach(function(atributo){
+      if(elemento.hasAttribute&&elemento.hasAttribute(atributo)){
+        var actual=elemento.getAttribute(atributo);
+        var limpio=normalizarTextoPrueba(actual);
+        if(limpio!==actual){
+          elemento.setAttribute(atributo,limpio);
+        }
+      }
+    });
   }
 
   function limpiarNodoTexto(nodoTexto){
