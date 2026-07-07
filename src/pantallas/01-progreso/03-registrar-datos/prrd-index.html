@@ -2,13 +2,12 @@
 Nombre completo: prrd-index.html
 Ruta o ubicación: src/pantallas/01-progreso/03-registrar-datos/prrd-index.html
 Función o funciones:
-- Mostrar una subpantalla independiente de registro diario general.
-- Guardar peso opcional, medidas básicas opcionales, energía, agua, sueño, actividad y nota.
-- Funcionar sola con Live Server usando datos demo y localStorage.
+- Mostrar una subpantalla independiente de datos personales de progreso.
+- Guardar fecha de actualización, edad, altura, sexo, complexión aproximada y actividad semanal.
+- Evitar duplicar el peso porque se registra en Progreso / Peso.
 Con qué se conecta:
 - prrd.css
 - prrd-main.js
-- data/prrd-demo-data.json
 ========================================================= -->
 <!doctype html>
 <html lang="es">
@@ -23,53 +22,56 @@ Con qué se conecta:
     <section class="prrd-hero">
       <div>
         <p class="prrd-eyebrow">Progreso / Registrar datos</p>
-        <h1>Registro diario rápido</h1>
-        <p class="prrd-subtitle">Guarda lo importante del día en un solo lugar: energía, agua, descanso, actividad y datos opcionales.</p>
+        <h1>Datos físicos base</h1>
+        <p class="prrd-subtitle">Registra información estable para que la app pueda interpretar mejor tu progreso sin repetir el peso.</p>
       </div>
-      <div class="prrd-mode" id="prrd-modo-datos">Modo demo</div>
     </section>
 
     <section class="prrd-grid prrd-grid-summary">
-      <article class="prrd-card prrd-card-main"><span class="prrd-label">Último día</span><strong id="prrd-fecha-actual">--</strong><small>Registro más reciente</small></article>
-      <article class="prrd-card"><span class="prrd-label">Energía</span><strong id="prrd-energia-actual">--/5</strong><small>Promedio personal del día</small></article>
-      <article class="prrd-card"><span class="prrd-label">Agua</span><strong id="prrd-agua-actual">-- ml</strong><small>Hidratación registrada</small></article>
-      <article class="prrd-card"><span class="prrd-label">Actividad</span><strong id="prrd-actividad-actual">--</strong><small>Movimiento del día</small></article>
+      <article class="prrd-card prrd-card-main"><span class="prrd-label">Actualizado</span><strong id="prrd-fecha-actual">--</strong><small>Último registro base</small></article>
+      <article class="prrd-card"><span class="prrd-label">Edad</span><strong id="prrd-edad-actual">--</strong><small>Años</small></article>
+      <article class="prrd-card"><span class="prrd-label">Altura</span><strong id="prrd-altura-actual">-- cm</strong><small>Dato corporal base</small></article>
+      <article class="prrd-card"><span class="prrd-label">Actividad</span><strong id="prrd-actividad-actual">--</strong><small>Frecuencia semanal</small></article>
     </section>
 
     <section class="prrd-layout">
       <article class="prrd-card prrd-form-card">
-        <div class="prrd-card-header"><div><h2>Nuevo registro</h2><p>Los campos físicos son opcionales. Lo más importante es registrar hábitos de forma constante y saludable.</p></div></div>
+        <div class="prrd-card-header"><div><h2>Actualizar datos base</h2><p>Estos datos sirven como perfil de referencia. El peso se registra en la pantalla Peso.</p></div></div>
         <form id="prrd-form" class="prrd-form">
-          <label for="prrd-input-fecha">Fecha</label>
+          <label for="prrd-input-fecha">Fecha de actualización</label>
           <input id="prrd-input-fecha" type="date" required>
 
           <div class="prrd-form-grid">
-            <div><label for="prrd-input-peso">Peso opcional en kg</label><input id="prrd-input-peso" type="number" step="0.1" min="30" max="250" placeholder="Opcional"></div>
-            <div><label for="prrd-input-cintura">Cintura opcional en cm</label><input id="prrd-input-cintura" type="number" step="0.1" min="30" max="200" placeholder="Opcional"></div>
-            <div><label for="prrd-input-energia">Energía 1 a 5</label><input id="prrd-input-energia" type="number" min="1" max="5" step="1" placeholder="Ej. 4" required></div>
-            <div><label for="prrd-input-agua">Agua en ml</label><input id="prrd-input-agua" type="number" min="0" max="6000" step="50" placeholder="Ej. 2000"></div>
-            <div><label for="prrd-input-sueno">Sueño en horas</label><input id="prrd-input-sueno" type="number" min="0" max="16" step="0.25" placeholder="Ej. 7.5"></div>
-            <div><label for="prrd-input-actividad">Actividad</label><select id="prrd-input-actividad"><option value="Descanso">Descanso</option><option value="Caminata">Caminata</option><option value="Entrenamiento">Entrenamiento</option><option value="HIIT">HIIT</option><option value="Mixto">Mixto</option></select></div>
+            <div><label for="prrd-input-edad">Edad</label><input id="prrd-input-edad" type="number" min="10" max="100" step="1" placeholder="Ej. 33" required></div>
+            <div><label for="prrd-input-altura">Altura en cm</label><input id="prrd-input-altura" type="number" min="100" max="230" step="1" placeholder="Ej. 175" required></div>
+            <div><label for="prrd-input-sexo">Sexo</label><select id="prrd-input-sexo" required><option value="">Selecciona</option><option value="Hombre">Hombre</option><option value="Mujer">Mujer</option></select></div>
+            <div><label for="prrd-input-actividad">Actividad semanal</label><select id="prrd-input-actividad" required><option value="">Selecciona</option><option value="Baja">Baja: 0 a 1 días</option><option value="Ligera">Ligera: 2 días</option><option value="Moderada">Moderada: 3 a 4 días</option><option value="Alta">Alta: 5 a 6 días</option><option value="Muy alta">Muy alta: 7 días</option></select></div>
           </div>
 
-          <label for="prrd-input-nota">Nota del día</label>
-          <textarea id="prrd-input-nota" rows="4" placeholder="Ej. Entrené tranquilo, tomé agua y dormí mejor."></textarea>
+          <fieldset class="prrd-bodyset">
+            <legend>Complexión corporal aproximada</legend>
+            <p>Elige la opción que más se acerque a tu estructura corporal. No es una calificación; solo ayuda a personalizar la lectura de datos.</p>
+            <div class="prrd-body-options" role="radiogroup" aria-label="Complexión corporal aproximada">
+              <label class="prrd-body-option"><input type="radio" name="prrd-complexion" value="Ligera" required><span class="prrd-body-icon prrd-body-light"><i></i></span><strong>Ligera</strong><small>Estructura más estrecha</small></label>
+              <label class="prrd-body-option"><input type="radio" name="prrd-complexion" value="Media" required><span class="prrd-body-icon prrd-body-medium"><i></i></span><strong>Media</strong><small>Estructura intermedia</small></label>
+              <label class="prrd-body-option"><input type="radio" name="prrd-complexion" value="Amplia" required><span class="prrd-body-icon prrd-body-wide"><i></i></span><strong>Amplia</strong><small>Estructura más ancha</small></label>
+            </div>
+          </fieldset>
 
-          <button type="submit">Guardar registro diario</button>
-          <button id="prrd-btn-restaurar-demo" type="button" class="prrd-btn-secondary">Restaurar demo</button>
+          <button type="submit">Guardar datos base</button>
         </form>
         <p id="prrd-mensaje" class="prrd-message" aria-live="polite"></p>
       </article>
 
       <article class="prrd-card prrd-info-card">
-        <div class="prrd-card-header"><div><h2>Resumen útil</h2><p>Esta tarjeta ayuda a revisar patrones sin saturar la pantalla.</p></div></div>
+        <div class="prrd-card-header"><div><h2>Resumen del perfil</h2><p>Vista rápida de los datos que usará la app para interpretar el progreso.</p></div></div>
         <ul class="prrd-insights" id="prrd-insights"></ul>
       </article>
     </section>
 
     <section class="prrd-card prrd-history-card">
-      <div class="prrd-card-header"><div><h2>Historial diario</h2><p>Registros guardados localmente para pruebas independientes.</p></div></div>
-      <div class="prrd-table-wrap"><table class="prrd-table"><thead><tr><th>Fecha</th><th>Energía</th><th>Agua</th><th>Sueño</th><th>Actividad</th><th>Nota</th></tr></thead><tbody id="prrd-tabla-body"></tbody></table></div>
+      <div class="prrd-card-header"><div><h2>Historial de datos base</h2><p>Últimas actualizaciones guardadas localmente.</p></div></div>
+      <div class="prrd-table-wrap"><table class="prrd-table"><thead><tr><th>Fecha</th><th>Edad</th><th>Altura</th><th>Sexo</th><th>Complexión</th><th>Actividad semanal</th></tr></thead><tbody id="prrd-tabla-body"></tbody></table></div>
     </section>
   </main>
   <script src="./prrd-main.js"></script>
