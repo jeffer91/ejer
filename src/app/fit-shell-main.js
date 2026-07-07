@@ -105,14 +105,16 @@ Con qué se conecta:
     if(!nodo){
       return;
     }
-    if(nodo.nodeType===Node.TEXT_NODE){
+    var doc=nodo.ownerDocument||document;
+    var win=doc.defaultView||window;
+    if(nodo.nodeType===win.Node.TEXT_NODE){
       limpiarNodoTexto(nodo);
       return;
     }
-    if(nodo.nodeType!==Node.ELEMENT_NODE&&nodo.nodeType!==Node.DOCUMENT_FRAGMENT_NODE){
+    if(nodo.nodeType!==win.Node.ELEMENT_NODE&&nodo.nodeType!==win.Node.DOCUMENT_FRAGMENT_NODE){
       return;
     }
-    var walker=document.createTreeWalker(nodo,NodeFilter.SHOW_TEXT,null);
+    var walker=doc.createTreeWalker(nodo,win.NodeFilter.SHOW_TEXT,null);
     var textos=[];
     while(walker.nextNode()){
       textos.push(walker.currentNode);
