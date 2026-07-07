@@ -2,13 +2,12 @@
 Nombre completo: prpe-index.html
 Ruta o ubicación: src/pantallas/01-progreso/01-peso/prpe-index.html
 Función o funciones:
-- Mostrar la vista inicial de Progreso / Peso.
-- Permitir registrar el valor corporal del día de forma local.
-- Mostrar tendencia, IMC referencial y energía diaria.
+- Mostrar la vista funcional de Progreso / Peso.
+- Permitir registrar el peso corporal del día de forma local.
+- Mostrar tendencia, IMC referencial y total de registros.
 Con qué se conecta:
 - prpe.css
 - prpe-main.js
-- data/prpe-demo-data.json
 ========================================================= -->
 <!doctype html>
 <html lang="es">
@@ -23,24 +22,22 @@ Con qué se conecta:
     <section class="prpe-hero">
       <div>
         <p class="prpe-eyebrow">Progreso / Peso</p>
-        <p class="prpe-subtitle">Registra tu dato del día, revisa tu tendencia y acompaña el progreso con energía y hábitos.</p>
+        <p class="prpe-subtitle">Registra tu peso del día y revisa tu tendencia de forma simple.</p>
       </div>
-      <div class="prpe-mode" id="prpe-modo-datos">Modo demo</div>
     </section>
 
     <section class="prpe-grid prpe-grid-summary">
       <article class="prpe-card prpe-card-main"><span class="prpe-label">Registro actual</span><strong id="prpe-peso-actual">-- kg</strong><small id="prpe-fecha-actual">Sin registro</small></article>
-      <article class="prpe-card"><span class="prpe-label">Energía</span><strong id="prpe-energia">--/5</strong><small>Cómo te sentiste hoy</small></article>
       <article class="prpe-card"><span class="prpe-label">IMC</span><strong id="prpe-imc">--</strong><small id="prpe-imc-categoria">Referencia general</small></article>
       <article class="prpe-card"><span class="prpe-label">Registros</span><strong id="prpe-total-registros">0</strong><small>Guardados localmente</small></article>
     </section>
 
     <section class="prpe-layout">
       <article class="prpe-card prpe-chart-card"><div class="prpe-card-header"><div><h2>Tendencia</h2><p>Historial de tus últimos registros.</p></div></div><div class="prpe-chart"><svg id="prpe-chart-svg" viewBox="0 0 640 260" role="img" aria-label="Tendencia"></svg></div></article>
-      <article class="prpe-card prpe-form-card"><div class="prpe-card-header"><div><h2>Registrar hoy</h2><p>Primero se guarda en este dispositivo. Luego se sincronizará con Google Sheets y Firebase.</p></div></div><form id="prpe-form" class="prpe-form"><label for="prpe-input-fecha">Fecha</label><input id="prpe-input-fecha" type="date" required><label for="prpe-input-peso">Valor en kg</label><input id="prpe-input-peso" type="number" step="0.1" min="30" max="250" placeholder="Ej. 90.0" required><label for="prpe-input-energia">Energía del día</label><input id="prpe-input-energia" type="number" min="1" max="5" step="1" placeholder="1 a 5"><label for="prpe-input-nota">Nota rápida</label><textarea id="prpe-input-nota" rows="3" placeholder="Ej. Entrené, caminé o descansé mejor."></textarea><button type="submit">Guardar registro</button><button id="prpe-btn-restaurar-demo" type="button" class="prpe-btn-secondary">Restaurar demo</button></form><p id="prpe-mensaje" class="prpe-message" aria-live="polite"></p></article>
+      <article class="prpe-card prpe-form-card"><div class="prpe-card-header"><div><h2>Registrar peso</h2><p>El dato se guarda en este dispositivo y queda listo para sincronizarse después.</p></div></div><form id="prpe-form" class="prpe-form"><label for="prpe-input-fecha">Fecha</label><input id="prpe-input-fecha" type="date" required><label for="prpe-input-peso">Valor en kilogramos</label><input id="prpe-input-peso" type="number" step="0.1" min="30" max="250" placeholder="Ej. 90.0" required><button type="submit">Guardar registro</button></form><p id="prpe-mensaje" class="prpe-message" aria-live="polite"></p></article>
     </section>
 
-    <section class="prpe-card prpe-history-card"><div class="prpe-card-header"><div><h2>Últimos registros</h2><p>Esta tabla funciona sola con Live Server.</p></div></div><div class="prpe-table-wrap"><table class="prpe-table"><thead><tr><th>Fecha</th><th>Kg</th><th>Energía</th><th>Nota</th></tr></thead><tbody id="prpe-tabla-body"></tbody></table></div></section>
+    <section class="prpe-card prpe-history-card"><div class="prpe-card-header"><div><h2>Últimos registros</h2><p>Registros guardados en este dispositivo.</p></div></div><div class="prpe-table-wrap"><table class="prpe-table"><thead><tr><th>Fecha</th><th>Kg</th></tr></thead><tbody id="prpe-tabla-body"></tbody></table></div></section>
   </main>
   <script src="./prpe-main.js"></script>
 </body>
