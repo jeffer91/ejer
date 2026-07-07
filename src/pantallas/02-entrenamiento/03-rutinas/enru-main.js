@@ -5,6 +5,7 @@ Función o funciones:
 - Cargar planificación semanal guardada localmente.
 - Mostrar calendario semanal de ancho completo.
 - Importar rutinas rápidas desde texto estructurado.
+- Copiar el formato guía para completar rutinas.
 - Dividir rutinas en calentamiento, ejercicios, cierre y notas.
 Con qué se conecta:
 - enru-index.html
@@ -38,6 +39,8 @@ Con qué se conecta:
     el.inputDia=document.getElementById('enru-input-dia');
     el.inputRutina=document.getElementById('enru-input-rutina');
     el.btnLimpiarDia=document.getElementById('enru-btn-limpiar-dia');
+    el.btnCopiarFormato=document.getElementById('enru-btn-copiar-formato');
+    el.formatoRutina=document.getElementById('enru-formato-rutina');
     el.mensaje=document.getElementById('enru-mensaje');
     el.rutinas=document.getElementById('enru-rutinas-base');
   }
@@ -58,9 +61,10 @@ Con qué se conecta:
       cargarTextoDelDia(estado.diaActivo);
       renderizarCalendario();
     });
-    el.btnLimpiarDia.addEventListener('click',function(){
-      limpiarDiaActual();
-    });
+    el.btnLimpiarDia.addEventListener('click',limpiarDiaActual);
+    if(el.btnCopiarFormato){
+      el.btnCopiarFormato.addEventListener('click',copiarFormatoRutina);
+    }
   }
 
   function llenarSelectorDias(){
@@ -73,6 +77,35 @@ Con qué se conecta:
     });
     el.inputDia.value=estado.diaActivo;
     cargarTextoDelDia(estado.diaActivo);
+  }
+
+  function copiarFormatoRutina(){
+    var texto=el.formatoRutina?el.formatoRutina.textContent:'';
+    if(!texto){mostrarMensaje('No se encontró el formato para copiar.',true);return;}
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(texto).then(function(){
+        mostrarMensaje('Formato copiado. Ahora pégalo en la caja y edítalo.',false);
+      }).catch(function(){copiarConFallback(texto);});
+      return;
+    }
+    copiarConFallback(texto);
+  }
+
+  function copiarConFallback(texto){
+    var area=document.createElement('textarea');
+    area.value=texto;
+    area.setAttribute('readonly','readonly');
+    area.style.position='fixed';
+    area.style.left='-9999px';
+    document.body.appendChild(area);
+    area.select();
+    try{
+      document.execCommand('copy');
+      mostrarMensaje('Formato copiado. Ahora pégalo en la caja y edítalo.',false);
+    }catch(error){
+      mostrarMensaje('No se pudo copiar automáticamente. Selecciona el formato y cópialo manualmente.',true);
+    }
+    document.body.removeChild(area);
   }
 
   function cargarRutinaRapida(){
@@ -110,7 +143,7 @@ Con qué se conecta:
   }
 
   function parsearRutina(texto){
-    var rutina={dia:'',nombre:'',tipo:'Entrenamiento',duracionMin:0,calentamiento:[],ejercicios:[],cierre:[],notas:[],rutinaCargada:true};
+    var rutina={dia:'',nombre:'',tipo:'Entrenamiento',objetivo:'',duracionMin:0,nivel:'',equipo:'',calentamiento:[],ejercicios:[],cierre:[],notas:[],rutinaCargada:true};
     var seccion='';
     texto.split(/\r?\n/).forEach(function(lineaOriginal){
       var linea=lineaOriginal.trim();
@@ -129,9 +162,7 @@ Con qué se conecta:
         rutina.notas.push(linea);
       }
     });
-    if(!rutina.duracionMin){
-      rutina.duracionMin=estimarDuracion(rutina);
-    }
+    if(!rutina.duracionMin){rutina.duracionMin=estimarDuracion(rutina);}
     return rutina;
   }
 
@@ -142,7 +173,7 @@ Con qué se conecta:
     var valor=partes.join(':').trim();
     var secciones=['calentamiento','ejercicios','cierre','notas'];
     if(secciones.indexOf(clave)!==-1){return{clave:clave,valor:valor,esSeccion:true};}
-    if(['dia','nombre','tipo','duracion'].indexOf(clave)!==-1){return{clave:clave,valor:valor,esSeccion:false};}
+    if(['dia','nombre','tipo','objetivo','duracion','nivel','equipo'].indexOf(clave)!==-1){return{clave:clave,valor:valor,esSeccion:false};}
     return null;
   }
 
@@ -150,6 +181,8 @@ Con qué se conecta:
     return String(clave).trim().toLowerCase()
       .replace('día','dia')
       .replace('duración','duracion')
+      .replace('materiales','equipo')
+      .replace('equipamiento','equipo')
       .replace('vuelta a la calma','cierre')
       .replace('enfriamiento','cierre');
   }
@@ -158,7 +191,10 @@ Con qué se conecta:
     if(clave==='dia'){rutina.dia=normalizarDia(valor);}
     if(clave==='nombre'){rutina.nombre=valor;}
     if(clave==='tipo'){rutina.tipo=valor||'Entrenamiento';}
+    if(clave==='objetivo'){rutina.objetivo=valor;}
     if(clave==='duracion'){rutina.duracionMin=numero(String(valor).replace(/[^0-9.]/g,''))||0;}
+    if(clave==='nivel'){rutina.nivel=valor;}
+    if(clave==='equipo'){rutina.equipo=valor;}
   }
 
   function agregarItemSeccion(rutina,seccion,texto){
@@ -175,7 +211,7 @@ Con qué se conecta:
 
   function parsearEjercicio(texto){
     var partes=texto.split('|').map(limpiarTexto).filter(Boolean);
-    return{nombre:partes[0]||texto,series:partes[1]||'',descanso:partes[2]||''};
+    return{nombre:partes[0]||texto,series:partes[1]||'',carga:partes[2]||'',descanso:partes[3]||'',indicacion:partes[4]||''};
   }
 
   function renderizarTodo(){
@@ -210,8 +246,9 @@ Con qué se conecta:
     var nombre=tieneRutina?item.nombre:'Sin rutina';
     var tipo=tieneRutina?item.tipo:'Libre';
     var duracion=tieneRutina&&item.duracionMin?item.duracionMin+' min':'Sin duración';
+    var objetivo=tieneRutina&&item.objetivo?'<p class="enru-goal">'+esc(item.objetivo)+'</p>':'';
     var ejercicios=tieneRutina&&item.ejercicios.length?'<ol>'+item.ejercicios.slice(0,4).map(function(e){return'<li>'+esc(e.nombre)+' <span>'+esc(e.series||'')+'</span></li>';}).join('')+'</ol>':'<p class="enru-empty">Clic para cargar.</p>';
-    return '<h3>'+esc(item.dia)+'</h3><p><span class="enru-pill">'+esc(tipo)+'</span></p><p><strong>'+esc(nombre)+'</strong></p><p class="enru-duration">'+esc(duracion)+'</p>'+ejercicios;
+    return '<h3>'+esc(item.dia)+'</h3><p><span class="enru-pill">'+esc(tipo)+'</span></p><p><strong>'+esc(nombre)+'</strong></p><p class="enru-duration">'+esc(duracion)+'</p>'+objetivo+ejercicios;
   }
 
   function seleccionarDia(dia){
@@ -231,16 +268,22 @@ Con qué se conecta:
     cargadas.forEach(function(rutina){
       var card=document.createElement('article');
       card.className='enru-routine';
-      card.innerHTML='<h3>'+esc(rutina.dia+' · '+rutina.nombre)+'</h3><p>'+esc(rutina.tipo+' · '+(rutina.duracionMin||0)+' min')+'</p>'+crearBloque('Calentamiento',rutina.calentamiento,'actividad')+crearBloque('Ejercicios',rutina.ejercicios,'ejercicio')+crearBloque('Cierre',rutina.cierre,'actividad')+crearNotas(rutina.notas);
+      card.innerHTML='<h3>'+esc(rutina.dia+' · '+rutina.nombre)+'</h3>'+crearMeta(rutina)+crearBloque('Calentamiento',rutina.calentamiento,'actividad')+crearBloque('Ejercicios',rutina.ejercicios,'ejercicio')+crearBloque('Cierre',rutina.cierre,'actividad')+crearNotas(rutina.notas);
       el.rutinas.appendChild(card);
     });
+  }
+
+  function crearMeta(rutina){
+    var datos=[rutina.tipo,(rutina.duracionMin||0)+' min',rutina.nivel,rutina.equipo].filter(Boolean).join(' · ');
+    return '<p>'+esc(datos)+'</p>'+(rutina.objetivo?'<p><strong>Objetivo:</strong> '+esc(rutina.objetivo)+'</p>':'');
   }
 
   function crearBloque(titulo,items,tipo){
     if(!items||!items.length){return '';}
     var lis=items.map(function(item){
       if(tipo==='ejercicio'){
-        return '<li><strong>'+esc(item.nombre)+'</strong> '+esc(item.series||'')+' '+esc(item.descanso||'')+'</li>';
+        var detalle=[item.series,item.carga,item.descanso,item.indicacion].filter(Boolean).join(' · ');
+        return '<li><strong>'+esc(item.nombre)+'</strong> '+esc(detalle)+'</li>';
       }
       return '<li><strong>'+esc(item.nombre)+'</strong> '+esc(item.duracion||'')+'</li>';
     }).join('');
@@ -253,10 +296,10 @@ Con qué se conecta:
   }
 
   function formatearRutinaParaTexto(rutina){
-    return ['Día: '+rutina.dia,'Nombre: '+rutina.nombre,'Tipo: '+rutina.tipo,'Duración: '+(rutina.duracionMin||0),'','Calentamiento:'].concat(
+    return ['Día: '+rutina.dia,'Nombre: '+rutina.nombre,'Tipo: '+rutina.tipo,'Objetivo: '+(rutina.objetivo||''),'Duración: '+(rutina.duracionMin||0),'Nivel: '+(rutina.nivel||''),'Equipo: '+(rutina.equipo||''),'','Calentamiento:'].concat(
       rutina.calentamiento.map(function(item){return '- '+item.nombre+(item.duracion?' | '+item.duracion:'');}),
       ['','Ejercicios:'],
-      rutina.ejercicios.map(function(item){return '- '+item.nombre+(item.series?' | '+item.series:'')+(item.descanso?' | '+item.descanso:'');}),
+      rutina.ejercicios.map(function(item){return '- '+item.nombre+(item.series?' | '+item.series:'')+(item.carga?' | '+item.carga:'')+(item.descanso?' | '+item.descanso:'')+(item.indicacion?' | '+item.indicacion:'');}),
       ['','Cierre:'],
       rutina.cierre.map(function(item){return '- '+item.nombre+(item.duracion?' | '+item.duracion:'');}),
       ['','Notas:',(rutina.notas||[]).join(' ')]
@@ -265,17 +308,15 @@ Con qué se conecta:
 
   function normalizarDias(dias){
     var mapa={};
-    dias.forEach(function(item){
-      if(item&&item.dia){mapa[item.dia]=normalizarDiaRegistro(item);}
-    });
+    dias.forEach(function(item){if(item&&item.dia){mapa[item.dia]=normalizarDiaRegistro(item);}});
     return DIAS.map(function(dia){return mapa[dia]||crearDiaVacio(dia);});
   }
 
   function normalizarDiaRegistro(item){
-    return{dia:item.dia,tipo:item.tipo||'Libre',nombre:item.nombre||item.enfoque||'',duracionMin:numero(item.duracionMin)||0,calentamiento:Array.isArray(item.calentamiento)?item.calentamiento:[],ejercicios:Array.isArray(item.ejercicios)?item.ejercicios:[],cierre:Array.isArray(item.cierre)?item.cierre:[],notas:Array.isArray(item.notas)?item.notas:(item.nota?[item.nota]:[]),rutinaCargada:Boolean(item.rutinaCargada||item.nombre)};
+    return{dia:item.dia,tipo:item.tipo||'Libre',nombre:item.nombre||item.enfoque||'',objetivo:item.objetivo||'',duracionMin:numero(item.duracionMin)||0,nivel:item.nivel||'',equipo:item.equipo||'',calentamiento:Array.isArray(item.calentamiento)?item.calentamiento:[],ejercicios:Array.isArray(item.ejercicios)?item.ejercicios:[],cierre:Array.isArray(item.cierre)?item.cierre:[],notas:Array.isArray(item.notas)?item.notas:(item.nota?[item.nota]:[]),rutinaCargada:Boolean(item.rutinaCargada||item.nombre)};
   }
 
-  function crearDiaVacio(dia){return{dia:dia,tipo:'Libre',nombre:'',duracionMin:0,calentamiento:[],ejercicios:[],cierre:[],notas:[],rutinaCargada:false};}
+  function crearDiaVacio(dia){return{dia:dia,tipo:'Libre',nombre:'',objetivo:'',duracionMin:0,nivel:'',equipo:'',calentamiento:[],ejercicios:[],cierre:[],notas:[],rutinaCargada:false};}
   function buscarDia(dia){return estado.dias.find(function(item){return item.dia===dia;});}
   function contarTipo(tipo){return estado.dias.filter(function(item){return item.rutinaCargada&&item.tipo===tipo;}).length;}
   function guardarLocal(){localStorage.setItem(STORAGE_KEY,JSON.stringify({semana:estado.semana,dias:estado.dias}));}
