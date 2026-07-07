@@ -3,12 +3,11 @@ Nombre completo: enru-index.html
 Ruta o ubicación: src/pantallas/02-entrenamiento/03-rutinas/enru-index.html
 Función o funciones:
 - Mostrar la subpantalla independiente de Entrenamiento / Rutinas.
-- Gestionar planificación semanal de entrenamiento, HIIT y descanso.
-- Guardar rutinas y días de la semana en localStorage con datos demo.
+- Planificar rutinas semanales en calendario de ancho completo.
+- Cargar rutinas rápidamente desde un formato de texto estructurado.
 Con qué se conecta:
 - enru.css
 - enru-main.js
-- data/enru-demo-data.json
 ========================================================= -->
 <!doctype html>
 <html lang="es">
@@ -22,59 +21,74 @@ Con qué se conecta:
   <main class="enru-page">
     <section class="enru-hero">
       <div>
-        <p class="enru-eyebrow">Entrenamiento / Rutinas</p>
         <h1>Plan semanal</h1>
-        <p class="enru-subtitle">Organiza entrenamiento, HIIT y descanso. La idea es constancia, recuperación y progreso sostenible.</p>
       </div>
-      <div class="enru-mode" id="enru-modo-datos">Modo demo</div>
     </section>
 
     <section class="enru-grid enru-grid-summary">
-      <article class="enru-card enru-card-main"><span class="enru-label">Semana</span><strong id="enru-semana">--</strong><small>Plan activo</small></article>
+      <article class="enru-card enru-card-main"><span class="enru-label">Semana</span><strong id="enru-semana">Semana actual</strong><small>Plan activo</small></article>
       <article class="enru-card"><span class="enru-label">Entrenos</span><strong id="enru-total-entrenos">0</strong><small>Días de fuerza o rutina</small></article>
       <article class="enru-card"><span class="enru-label">HIIT</span><strong id="enru-total-hiit">0</strong><small>Días de intervalos</small></article>
       <article class="enru-card"><span class="enru-label">Descanso</span><strong id="enru-total-descanso">0</strong><small>Días de recuperación</small></article>
     </section>
 
-    <section class="enru-layout">
-      <article class="enru-card enru-plan-card">
-        <div class="enru-card-header"><div><h2>Calendario semanal</h2><p>Revisa el plan y ajusta sin sobrecargar la semana.</p></div></div>
-        <div id="enru-calendario" class="enru-calendar"></div>
-      </article>
+    <section class="enru-card enru-plan-card">
+      <div class="enru-card-header"><div><h2>Calendario semanal</h2><p>Vista completa de lunes a domingo.</p></div></div>
+      <div id="enru-calendario" class="enru-calendar"></div>
+    </section>
 
-      <article class="enru-card enru-form-card">
-        <div class="enru-card-header"><div><h2>Editar día</h2><p>Selecciona un día y define qué harás.</p></div></div>
+    <section class="enru-card enru-loader-card">
+      <div class="enru-card-header">
+        <div>
+          <h2>Cargar rutina rápida</h2>
+          <p>Pega una rutina usando el formato indicado y se guardará en el día seleccionado.</p>
+        </div>
+      </div>
+
+      <div class="enru-loader-grid">
         <form id="enru-form" class="enru-form">
           <label for="enru-input-dia">Día</label>
           <select id="enru-input-dia" required></select>
 
-          <label for="enru-input-tipo">Tipo</label>
-          <select id="enru-input-tipo" required>
-            <option value="Entrenamiento">Entrenamiento</option>
-            <option value="HIIT">HIIT</option>
-            <option value="Caminata">Caminata</option>
-            <option value="Descanso">Descanso</option>
-            <option value="Movilidad">Movilidad</option>
-          </select>
+          <label for="enru-input-rutina">Rutina en formato rápido</label>
+          <textarea id="enru-input-rutina" rows="13" placeholder="Pega aquí la rutina siguiendo el formato de la derecha." required></textarea>
 
-          <label for="enru-input-enfoque">Enfoque</label>
-          <input id="enru-input-enfoque" type="text" maxlength="80" placeholder="Ej. Tren superior, piernas, core" required>
-
-          <label for="enru-input-duracion">Duración estimada en minutos</label>
-          <input id="enru-input-duracion" type="number" min="5" max="180" step="5" placeholder="Ej. 45">
-
-          <label for="enru-input-nota">Nota</label>
-          <textarea id="enru-input-nota" rows="3" placeholder="Ej. Mantener técnica y descanso suficiente."></textarea>
-
-          <button type="submit">Guardar día</button>
-          <button id="enru-btn-restaurar-demo" type="button" class="enru-btn-light">Restaurar demo</button>
+          <div class="enru-actions-row">
+            <button type="submit">Cargar rutina</button>
+            <button id="enru-btn-limpiar-dia" type="button" class="enru-btn-light">Limpiar día</button>
+          </div>
         </form>
-        <p id="enru-mensaje" class="enru-message" aria-live="polite"></p>
-      </article>
+
+        <article class="enru-format-box">
+          <h3>Formato para pegar</h3>
+          <pre id="enru-formato-rutina">Día: Lunes
+Nombre: Tren superior
+Tipo: Entrenamiento
+Duración: 50
+
+Calentamiento:
+- Movilidad articular | 5 min
+- Caminata suave | 5 min
+
+Ejercicios:
+- Press banca | 4x8 | descanso 90s
+- Remo con mancuerna | 4x10 | descanso 90s
+- Press hombro | 3x10 | descanso 60s
+- Plancha | 3x30s | descanso 45s
+
+Cierre:
+- Estiramiento superior | 5 min
+
+Notas:
+Mantener técnica, controlar respiración y no llegar al fallo.</pre>
+        </article>
+      </div>
+
+      <p id="enru-mensaje" class="enru-message" aria-live="polite"></p>
     </section>
 
     <section class="enru-card enru-history-card">
-      <div class="enru-card-header"><div><h2>Rutinas base</h2><p>Ideas de rutina para usar en la semana.</p></div></div>
+      <div class="enru-card-header"><div><h2>Rutinas cargadas</h2><p>Resumen de las rutinas guardadas en la semana.</p></div></div>
       <div id="enru-rutinas-base" class="enru-routines"></div>
     </section>
   </main>
