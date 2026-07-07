@@ -5,6 +5,7 @@ Función o funciones:
 - Mostrar la subpantalla independiente de Entrenamiento / Rutinas.
 - Planificar rutinas semanales en calendario de ancho completo.
 - Cargar rutinas rápidamente desde un formato de texto estructurado.
+- Permitir copiar el formato guía para pegarlo y completarlo.
 Con qué se conecta:
 - enru.css
 - enru-main.js
@@ -19,10 +20,9 @@ Con qué se conecta:
 </head>
 <body>
   <main class="enru-page">
-    <section class="enru-hero">
-      <div>
-        <h1>Plan semanal</h1>
-      </div>
+    <section class="enru-titlebar">
+      <span>Entrenamiento / Rutinas</span>
+      <h1>Plan semanal de rutinas</h1>
     </section>
 
     <section class="enru-grid enru-grid-summary">
@@ -41,7 +41,7 @@ Con qué se conecta:
       <div class="enru-card-header">
         <div>
           <h2>Cargar rutina rápida</h2>
-          <p>Pega una rutina usando el formato indicado y se guardará en el día seleccionado.</p>
+          <p>Copia el formato, complétalo y pégalo en la caja de carga.</p>
         </div>
       </div>
 
@@ -51,7 +51,7 @@ Con qué se conecta:
           <select id="enru-input-dia" required></select>
 
           <label for="enru-input-rutina">Rutina en formato rápido</label>
-          <textarea id="enru-input-rutina" rows="13" placeholder="Pega aquí la rutina siguiendo el formato de la derecha." required></textarea>
+          <textarea id="enru-input-rutina" rows="14" placeholder="Pega aquí la rutina completada con el formato de la derecha." required></textarea>
 
           <div class="enru-actions-row">
             <button type="submit">Cargar rutina</button>
@@ -60,27 +60,39 @@ Con qué se conecta:
         </form>
 
         <article class="enru-format-box">
-          <h3>Formato para pegar</h3>
+          <div class="enru-format-head">
+            <h3>Formato para pegar</h3>
+            <button id="enru-btn-copiar-formato" type="button">Copiar formato</button>
+          </div>
+          <p class="enru-format-help">Copia este modelo, cambia los datos y pégalo en la caja de carga.</p>
           <pre id="enru-formato-rutina">Día: Lunes
-Nombre: Tren superior
+Nombre: Tren superior completo
 Tipo: Entrenamiento
-Duración: 50
+Objetivo: Fuerza controlada, técnica y resistencia muscular
+Duración: 60
+Nivel: Intermedio
+Equipo: Mancuernas, banco, liga y colchoneta
 
 Calentamiento:
-- Movilidad articular | 5 min
-- Caminata suave | 5 min
+- Movilidad de hombros y escápulas | 5 min
+- Caminata rápida o bicicleta suave | 8 min
+- Activación con liga para espalda | 2x15
 
 Ejercicios:
-- Press banca | 4x8 | descanso 90s
-- Remo con mancuerna | 4x10 | descanso 90s
-- Press hombro | 3x10 | descanso 60s
-- Plancha | 3x30s | descanso 45s
+- Press banca con mancuernas | 4x8-10 | carga moderada | descanso 90s | bajar controlado
+- Remo con mancuerna | 4x10 por lado | carga moderada | descanso 90s | espalda recta
+- Press militar sentado | 3x10 | carga media | descanso 75s | no arquear la espalda
+- Jalón con liga o polea | 3x12 | tensión media | descanso 60s | controlar regreso
+- Curl bíceps | 3x12 | carga media | descanso 60s | sin balanceo
+- Extensión tríceps | 3x12 | carga media | descanso 60s | codos estables
+- Plancha frontal | 3x30-45s | peso corporal | descanso 45s | abdomen firme
 
 Cierre:
-- Estiramiento superior | 5 min
+- Estiramiento de pecho, hombros y espalda | 6 min
+- Respiración y recuperación | 3 min
 
 Notas:
-Mantener técnica, controlar respiración y no llegar al fallo.</pre>
+Mantener técnica antes que peso. No llegar al fallo en todas las series. Registrar si hubo dolor, fatiga o baja energía.</pre>
         </article>
       </div>
 
