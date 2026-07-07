@@ -15,12 +15,12 @@ Con qué se conecta:
   var CONFIG_KEY='fitness-jeff-ajgs-config';
   var LOCAL_SOURCES=[
     {key:'fitness-jeff-ajpe-perfil',tableName:'Perfil',field:'perfil',single:true},
+    {key:'fitness-jeff-prrd-datos-base',tableName:'DatosBase',field:'registros',tag:'datos-base'},
     {key:'fitness-jeff-prpe-registros',tableName:'RegistrosDiarios',field:'registros',tag:'peso'},
     {key:'fitness-jeff-prme-registros',tableName:'RegistrosDiarios',field:'registros',tag:'medidas'},
-    {key:'fitness-jeff-prrd-registros',tableName:'RegistrosDiarios',field:'registros',tag:'registro-diario'},
     {key:'fitness-jeff-enho-sesion',tableName:'Entrenamientos',field:'sesiones',tag:'entrenamiento-hoy'},
     {key:'fitness-jeff-enhi-datos',tableName:'Entrenamientos',field:'sesiones',tag:'hiit'},
-    {key:'fitness-jeff-enru-plan',tableName:'Entrenamientos',field:'plan',tag:'rutinas'},
+    {key:'fitness-jeff-enru-plan',tableName:'Entrenamientos',field:'dias',tag:'rutinas'},
     {key:'fitness-jeff-ayay-datos',tableName:'RegistrosDiarios',field:'registros',tag:'horarios'},
     {key:'fitness-jeff-ayag-datos',tableName:'Hidratacion',field:'registros',tag:'agua'},
     {key:'fitness-jeff-reag-recomendaciones',tableName:'Recomendaciones',field:'recomendaciones',tag:'analisis-general'},
