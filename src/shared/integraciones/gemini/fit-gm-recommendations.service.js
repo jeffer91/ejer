@@ -14,7 +14,16 @@ Con qué se conecta:
   'use strict';
   var CONFIG_KEY='fitness-jeff-ajgm-config';
   var LAST_KEY='fitness-jeff-gemini-ultima-respuesta';
-  var KEYS=['fitness-jeff-ajpe-perfil','fitness-jeff-prrd-registros','fitness-jeff-enho-sesion','fitness-jeff-ayag-datos','fitness-jeff-reha-recomendaciones'];
+  var KEYS=[
+    'fitness-jeff-ajpe-perfil',
+    'fitness-jeff-prrd-datos-base',
+    'fitness-jeff-prpe-registros',
+    'fitness-jeff-prme-registros',
+    'fitness-jeff-enho-sesion',
+    'fitness-jeff-enru-plan',
+    'fitness-jeff-ayag-datos',
+    'fitness-jeff-reha-recomendaciones'
+  ];
   function readJson(key){try{var value=localStorage.getItem(key);return value?JSON.parse(value):null;}catch(error){return null;}}
   function getConfig(){var saved=readJson(CONFIG_KEY);return saved&&saved.configuracion?saved.configuracion:null;}
   function collect(){var data={};KEYS.forEach(function(key){data[key]=readJson(key)||null;});return data;}
