@@ -6,6 +6,7 @@ Función o funciones:
 - Mostrar calendario semanal de ancho completo.
 - Importar la semana completa desde un texto estructurado.
 - Copiar el prompt vacío para generar rutinas personalizadas.
+- Evitar que el prompt de instrucciones se cargue como si fuera rutina final.
 - Dividir cada día en calentamiento, ejercicios, cierre y notas.
 Con qué se conecta:
 - enru-index.html
@@ -73,7 +74,7 @@ Con qué se conecta:
     if(!texto){mostrarMensaje('No se encontró el prompt para copiar.',true);return;}
     if(navigator.clipboard&&navigator.clipboard.writeText){
       navigator.clipboard.writeText(texto).then(function(){
-        mostrarMensaje('Prompt vacío copiado. Completa tus datos, genera la rutina con IA y pega la semana final.',false);
+        mostrarMensaje('Prompt vacío copiado. Complétalo y envíalo a la IA. Aquí pega solo la rutina final generada.',false);
       }).catch(function(){copiarConFallback(texto);});
       return;
     }
@@ -90,7 +91,7 @@ Con qué se conecta:
     area.select();
     try{
       document.execCommand('copy');
-      mostrarMensaje('Prompt vacío copiado. Completa tus datos, genera la rutina con IA y pega la semana final.',false);
+      mostrarMensaje('Prompt vacío copiado. Complétalo y envíalo a la IA. Aquí pega solo la rutina final generada.',false);
     }catch(error){
       mostrarMensaje('No se pudo copiar automáticamente. Selecciona el prompt y cópialo manualmente.',true);
     }
@@ -100,6 +101,10 @@ Con qué se conecta:
   function cargarSemanaCompleta(){
     var texto=el.inputRutina.value.trim();
     if(!texto){mostrarMensaje('Pega el plan semanal completo antes de cargar.',true);return;}
+    if(esPromptDeInstrucciones(texto)){
+      mostrarMensaje('Pegaste el prompt de instrucciones, no la rutina final. Primero envía ese prompt a la IA y luego pega aquí solo la respuesta generada desde Semana: hasta Domingo:.',true);
+      return;
+    }
     var resultado=parsearSemana(texto);
     if(resultado.error){mostrarMensaje(resultado.error,true);return;}
     estado.semana=resultado.semana||'Semana actual';
@@ -108,6 +113,11 @@ Con qué se conecta:
     guardarLocal();
     mostrarMensaje('Semana completa cargada correctamente: '+resultado.rutinas.length+' días guardados.',false);
     renderizarTodo();
+  }
+
+  function esPromptDeInstrucciones(texto){
+    var limpio=String(texto||'').toLowerCase();
+    return limpio.indexOf('prompt para crear rutina')!==-1||limpio.indexOf('objetivo del prompt')!==-1||limpio.indexOf('formato de salida obligatorio')!==-1||limpio.indexOf('datos personales')!==-1&&limpio.indexOf('reglas para crear la rutina')!==-1;
   }
 
   function limpiarSemanaCompleta(){
@@ -151,7 +161,7 @@ Con qué se conecta:
       if(!rutina.nombre){errores.push(rutina.dia+': falta Nombre.');return;}
       rutinas.push(rutina);
     });
-    if(errores.length){return{error:errores.join(' ')}};
+    if(errores.length){return{error:errores.join(' ')};}
 
     var vistos={};
     rutinas.forEach(function(rutina){vistos[rutina.dia]=(vistos[rutina.dia]||0)+1;});
@@ -176,8 +186,8 @@ Con qué se conecta:
         seccion=etiqueta.esSeccion?etiqueta.clave:seccion;
         return;
       }
-      if(linea.charAt(0)==='-'){
-        agregarItemSeccion(rutina,seccion,linea.slice(1).trim());
+      if(/^[-*]\s+/.test(linea)){
+        agregarItemSeccion(rutina,seccion,linea.replace(/^[-*]\s+/,''));
         return;
       }
       if(seccion==='notas'){
