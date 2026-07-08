@@ -4,7 +4,7 @@ Ruta o ubicación: src/pantallas/02-entrenamiento/03-rutinas/enru-index.html
 Función o funciones:
 - Mostrar la subpantalla independiente de Entrenamiento / Rutinas.
 - Planificar rutinas semanales en calendario de ancho completo.
-- Cargar toda la semana de entrenamiento desde un solo formato de texto.
+- Cargar toda la semana de entrenamiento desde un protocolo estructurado para IA.
 - Permitir copiar un prompt vacío con campos para generar rutinas personalizadas.
 Con qué se conecta:
 - enru.css
@@ -41,14 +41,14 @@ Con qué se conecta:
       <div class="enru-card-header">
         <div>
           <h2>Cargar rutina generada</h2>
-          <p>Copia el prompt vacío, complétalo, envíalo a una IA y pega aquí únicamente la rutina final generada.</p>
+          <p>La app entiende mejor el bloque con protocolo. Pega aquí solo el resultado entre INICIO_RUTINA_APP y FIN_RUTINA_APP.</p>
         </div>
       </div>
 
       <div class="enru-loader-grid">
         <form id="enru-form" class="enru-form">
-          <label for="enru-input-rutina">Rutina semanal generada</label>
-          <textarea id="enru-input-rutina" rows="22" placeholder="Aquí NO pegues el prompt. Pega solo la rutina final generada, desde Semana: Semana actual hasta el bloque de Domingo." required></textarea>
+          <label for="enru-input-rutina">Bloque final para cargar en la app</label>
+          <textarea id="enru-input-rutina" rows="22" placeholder="Pega aquí solo el bloque final generado por la IA. Debe iniciar con ===INICIO_RUTINA_APP=== y terminar con ===FIN_RUTINA_APP===." required></textarea>
 
           <div class="enru-actions-row">
             <button type="submit">Cargar semana completa</button>
@@ -58,26 +58,25 @@ Con qué se conecta:
 
         <article class="enru-format-box">
           <div class="enru-format-head">
-            <h3>Prompt vacío para IA</h3>
+            <h3>Prompt con protocolo para IA</h3>
             <button id="enru-btn-copiar-formato" type="button">Copiar prompt</button>
           </div>
-          <p class="enru-format-help">Este texto es para enviarlo a la IA, no para cargarlo directo en la app. La app solo carga la rutina final que la IA genere.</p>
-          <pre id="enru-formato-rutina">PROMPT PARA CREAR RUTINA SEMANAL PERSONALIZADA
+          <p class="enru-format-help">Completa los datos, envía este prompt a la IA y pega en la app únicamente el bloque final generado.</p>
+          <pre id="enru-formato-rutina">PROMPT PARA CREAR RUTINA SEMANAL PERSONALIZADA PARA MI APP
 
-IMPORTANTE:
+IMPORTANTE
 Este prompt NO se pega directamente en la app.
-Primero completa tus datos, envía este prompt a la IA y después pega en la app únicamente la rutina final generada.
+Primero completa tus datos, envía este prompt a la IA y después pega en la app únicamente el bloque generado entre:
+===INICIO_RUTINA_APP===
+y
+===FIN_RUTINA_APP===
 
-Actúa como un asistente de entrenamiento físico prudente, claro y organizado.
-Con la información que voy a completar, crea una rutina semanal personalizada, segura y realista.
-No recomiendes extremos, sobreentrenamiento, retos peligrosos ni cambios bruscos.
-Si falta información importante, adapta la rutina de forma conservadora y moderada.
+OBJETIVO
+Crear una rutina semanal completa, segura y realista, fácil de cargar en mi app.
+La app entiende un protocolo fijo con separadores.
+Debes respetar exactamente el protocolo de salida.
 
-OBJETIVO DEL PROMPT
-Crear una rutina semanal completa que pueda pegar directamente en mi app.
-La salida debe tener los siete días de la semana y respetar exactamente el formato indicado al final.
-
-DATOS PERSONALES
+DATOS PARA COMPLETAR
 Nombre:
 Edad:
 Estatura:
@@ -89,7 +88,6 @@ Energía promedio durante el día: Baja / Media / Alta
 
 OBJETIVO PRINCIPAL
 Objetivo principal:
-Ejemplo: ganar fuerza, mejorar resistencia, bajar grasa de forma saludable, aumentar masa muscular, mejorar movilidad o mantenerme activo.
 
 OBJETIVOS SECUNDARIOS
 Objetivo secundario 1:
@@ -105,27 +103,27 @@ Lugar de entrenamiento: Casa / Gimnasio / Parque / Otro
 
 EQUIPO QUE TENGO
 Tengo:
-- 
-- 
-- 
+-
+-
+-
 
 EQUIPO QUE NO TENGO
 No tengo:
-- 
-- 
-- 
+-
+-
+-
 
 EJERCICIOS QUE PUEDO HACER
 Puedo hacer:
-- 
-- 
-- 
+-
+-
+-
 
 EJERCICIOS QUE NO PUEDO O PREFIERO EVITAR
 No puedo hacer o prefiero evitar:
-- 
-- 
-- 
+-
+-
+-
 
 LIMITACIONES O CUIDADOS
 Lesiones actuales o anteriores:
@@ -136,152 +134,145 @@ Indicaciones médicas importantes:
 
 PREFERENCIAS DE ENTRENAMIENTO
 Me gusta entrenar:
-- 
-- 
-- 
+-
+-
+-
 
 No me gusta entrenar:
-- 
-- 
-- 
+-
+-
+-
 
 INTENSIDAD DESEADA
 Intensidad preferida: Baja / Media / Alta
 Quiero terminar cada sesión sintiéndome:
-Ejemplo: activo, cansado pero bien, exigido, no agotado.
 
-REGLAS PARA CREAR LA RUTINA
-- Adaptar la rutina a mi nivel real.
-- Usar solo el equipo que indiqué que sí tengo.
-- No incluir ejercicios que indiqué que no puedo hacer o prefiero evitar.
-- Respetar mi tiempo disponible por sesión.
-- Incluir calentamiento, ejercicios principales, cierre y notas.
-- Organizar la rutina de lunes a domingo.
-- Incluir descanso o recuperación activa cuando sea necesario.
-- Mantener indicaciones técnicas cortas y fáciles de seguir.
-- Priorizar seguridad, constancia y progreso gradual.
-- No usar Markdown, tablas, numeración ni asteriscos.
-- Usar solo guiones normales para las listas de ejercicios.
+REGLAS PARA LA IA
+Actúa como un asistente de entrenamiento físico prudente, claro y organizado.
+No recomiendes extremos, sobreentrenamiento, retos peligrosos ni cambios bruscos.
+Si falta información importante, asume una opción moderada y segura.
+Usa solo el equipo indicado como disponible.
+No incluyas ejercicios marcados como no disponibles o a evitar.
+Respeta el tiempo disponible por sesión.
+Incluye calentamiento, ejercicios principales, cierre y notas.
+Incluye obligatoriamente siete días: Lunes, Martes, Miércoles, Jueves, Viernes, Sábado y Domingo.
+Incluye descanso, movilidad o recuperación activa cuando sea necesario.
+No uses tablas.
+No uses Markdown fuera del bloque final.
+No expliques nada antes ni después del bloque final.
+No dejes campos vacíos.
 
-FORMATO DE SALIDA OBLIGATORIO
-Devuelve únicamente la rutina semanal, sin explicación antes ni después.
-No devuelvas este prompt, no devuelvas instrucciones y no dejes campos vacíos.
-Incluye obligatoriamente los siete días: Lunes, Martes, Miércoles, Jueves, Viernes, Sábado y Domingo.
-Usa exactamente esta estructura:
+PROTOCOLO DE SALIDA OBLIGATORIO
+Debes responder únicamente con este bloque:
 
-Semana: Semana actual
+===INICIO_RUTINA_APP===
+SEMANA|Semana actual
 
-Día: Lunes
-Nombre: nombre real de la rutina del día
-Tipo: Entrenamiento / HIIT / Caminata / Descanso / Movilidad
-Objetivo: objetivo real del día
-Duración: número en minutos
-Nivel: nivel real
-Equipo: equipo real a usar
-Calentamiento:
+DIA|Lunes
+NOMBRE|nombre real de la rutina del día
+TIPO|Entrenamiento / HIIT / Cardio / Caminata / Movilidad / Descanso
+OBJETIVO|objetivo real del día
+DURACION|número en minutos
+NIVEL|nivel real
+EQUIPO|equipo real a usar
+CALENTAMIENTO|
 - ejercicio | tiempo
-Ejercicios:
-- ejercicio | series x repeticiones o tiempo | carga/intensidad | descanso | indicación técnica
-Cierre:
+EJERCICIOS|
+- ejercicio | series x repeticiones o tiempo | carga o intensidad | descanso | indicación técnica
+CIERRE|
 - ejercicio o estiramiento | tiempo
-Notas:
-texto breve
-
-Día: Martes
-Nombre: nombre real de la rutina del día
-Tipo: Entrenamiento / HIIT / Caminata / Descanso / Movilidad
-Objetivo: objetivo real del día
-Duración: número en minutos
-Nivel: nivel real
-Equipo: equipo real a usar
-Calentamiento:
+NOTAS|nota breve del día
+---
+DIA|Martes
+NOMBRE|nombre real de la rutina del día
+TIPO|Entrenamiento / HIIT / Cardio / Caminata / Movilidad / Descanso
+OBJETIVO|objetivo real del día
+DURACION|número en minutos
+NIVEL|nivel real
+EQUIPO|equipo real a usar
+CALENTAMIENTO|
 - ejercicio | tiempo
-Ejercicios:
-- ejercicio | series x repeticiones o tiempo | carga/intensidad | descanso | indicación técnica
-Cierre:
+EJERCICIOS|
+- ejercicio | series x repeticiones o tiempo | carga o intensidad | descanso | indicación técnica
+CIERRE|
 - ejercicio o estiramiento | tiempo
-Notas:
-texto breve
-
-Día: Miércoles
-Nombre: nombre real de la rutina del día
-Tipo: Entrenamiento / HIIT / Caminata / Descanso / Movilidad
-Objetivo: objetivo real del día
-Duración: número en minutos
-Nivel: nivel real
-Equipo: equipo real a usar
-Calentamiento:
+NOTAS|nota breve del día
+---
+DIA|Miércoles
+NOMBRE|nombre real de la rutina del día
+TIPO|Entrenamiento / HIIT / Cardio / Caminata / Movilidad / Descanso
+OBJETIVO|objetivo real del día
+DURACION|número en minutos
+NIVEL|nivel real
+EQUIPO|equipo real a usar
+CALENTAMIENTO|
 - ejercicio | tiempo
-Ejercicios:
-- ejercicio | series x repeticiones o tiempo | carga/intensidad | descanso | indicación técnica
-Cierre:
+EJERCICIOS|
+- ejercicio | series x repeticiones o tiempo | carga o intensidad | descanso | indicación técnica
+CIERRE|
 - ejercicio o estiramiento | tiempo
-Notas:
-texto breve
-
-Día: Jueves
-Nombre: nombre real de la rutina del día
-Tipo: Entrenamiento / HIIT / Caminata / Descanso / Movilidad
-Objetivo: objetivo real del día
-Duración: número en minutos
-Nivel: nivel real
-Equipo: equipo real a usar
-Calentamiento:
+NOTAS|nota breve del día
+---
+DIA|Jueves
+NOMBRE|nombre real de la rutina del día
+TIPO|Entrenamiento / HIIT / Cardio / Caminata / Movilidad / Descanso
+OBJETIVO|objetivo real del día
+DURACION|número en minutos
+NIVEL|nivel real
+EQUIPO|equipo real a usar
+CALENTAMIENTO|
 - ejercicio | tiempo
-Ejercicios:
-- ejercicio | series x repeticiones o tiempo | carga/intensidad | descanso | indicación técnica
-Cierre:
+EJERCICIOS|
+- ejercicio | series x repeticiones o tiempo | carga o intensidad | descanso | indicación técnica
+CIERRE|
 - ejercicio o estiramiento | tiempo
-Notas:
-texto breve
-
-Día: Viernes
-Nombre: nombre real de la rutina del día
-Tipo: Entrenamiento / HIIT / Caminata / Descanso / Movilidad
-Objetivo: objetivo real del día
-Duración: número en minutos
-Nivel: nivel real
-Equipo: equipo real a usar
-Calentamiento:
+NOTAS|nota breve del día
+---
+DIA|Viernes
+NOMBRE|nombre real de la rutina del día
+TIPO|Entrenamiento / HIIT / Cardio / Caminata / Movilidad / Descanso
+OBJETIVO|objetivo real del día
+DURACION|número en minutos
+NIVEL|nivel real
+EQUIPO|equipo real a usar
+CALENTAMIENTO|
 - ejercicio | tiempo
-Ejercicios:
-- ejercicio | series x repeticiones o tiempo | carga/intensidad | descanso | indicación técnica
-Cierre:
+EJERCICIOS|
+- ejercicio | series x repeticiones o tiempo | carga o intensidad | descanso | indicación técnica
+CIERRE|
 - ejercicio o estiramiento | tiempo
-Notas:
-texto breve
-
-Día: Sábado
-Nombre: nombre real de la rutina del día
-Tipo: Entrenamiento / HIIT / Caminata / Descanso / Movilidad
-Objetivo: objetivo real del día
-Duración: número en minutos
-Nivel: nivel real
-Equipo: equipo real a usar
-Calentamiento:
+NOTAS|nota breve del día
+---
+DIA|Sábado
+NOMBRE|nombre real de la rutina del día
+TIPO|Entrenamiento / HIIT / Cardio / Caminata / Movilidad / Descanso
+OBJETIVO|objetivo real del día
+DURACION|número en minutos
+NIVEL|nivel real
+EQUIPO|equipo real a usar
+CALENTAMIENTO|
 - ejercicio | tiempo
-Ejercicios:
-- ejercicio | series x repeticiones o tiempo | carga/intensidad | descanso | indicación técnica
-Cierre:
+EJERCICIOS|
+- ejercicio | series x repeticiones o tiempo | carga o intensidad | descanso | indicación técnica
+CIERRE|
 - ejercicio o estiramiento | tiempo
-Notas:
-texto breve
-
-Día: Domingo
-Nombre: nombre real de la rutina del día
-Tipo: Entrenamiento / HIIT / Caminata / Descanso / Movilidad
-Objetivo: objetivo real del día
-Duración: número en minutos
-Nivel: nivel real
-Equipo: equipo real a usar
-Calentamiento:
+NOTAS|nota breve del día
+---
+DIA|Domingo
+NOMBRE|nombre real de la rutina del día
+TIPO|Entrenamiento / HIIT / Cardio / Caminata / Movilidad / Descanso
+OBJETIVO|objetivo real del día
+DURACION|número en minutos
+NIVEL|nivel real
+EQUIPO|equipo real a usar
+CALENTAMIENTO|
 - ejercicio | tiempo
-Ejercicios:
-- ejercicio | series x repeticiones o tiempo | carga/intensidad | descanso | indicación técnica
-Cierre:
+EJERCICIOS|
+- ejercicio | series x repeticiones o tiempo | carga o intensidad | descanso | indicación técnica
+CIERRE|
 - ejercicio o estiramiento | tiempo
-Notas:
-texto breve</pre>
+NOTAS|nota breve del día
+===FIN_RUTINA_APP===</pre>
         </article>
       </div>
 
