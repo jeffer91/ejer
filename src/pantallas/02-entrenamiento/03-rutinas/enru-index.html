@@ -41,14 +41,14 @@ Con qué se conecta:
       <div class="enru-card-header">
         <div>
           <h2>Cargar rutina generada</h2>
-          <p>Copia el prompt vacío, completa tus características, genera la rutina con IA y pega aquí la semana final.</p>
+          <p>Copia el prompt vacío, complétalo, envíalo a una IA y pega aquí únicamente la rutina final generada.</p>
         </div>
       </div>
 
       <div class="enru-loader-grid">
         <form id="enru-form" class="enru-form">
           <label for="enru-input-rutina">Rutina semanal generada</label>
-          <textarea id="enru-input-rutina" rows="22" placeholder="Pega aquí la rutina final generada por la IA, con los siete días en el formato Semana / Día / Nombre / Tipo / Objetivo / Duración / Nivel / Equipo." required></textarea>
+          <textarea id="enru-input-rutina" rows="22" placeholder="Aquí NO pegues el prompt. Pega solo la rutina final generada, desde Semana: Semana actual hasta el bloque de Domingo." required></textarea>
 
           <div class="enru-actions-row">
             <button type="submit">Cargar semana completa</button>
@@ -61,8 +61,12 @@ Con qué se conecta:
             <h3>Prompt vacío para IA</h3>
             <button id="enru-btn-copiar-formato" type="button">Copiar prompt</button>
           </div>
-          <p class="enru-format-help">Completa los campos, envíalo a la IA y pega la rutina generada en la caja de la izquierda.</p>
+          <p class="enru-format-help">Este texto es para enviarlo a la IA, no para cargarlo directo en la app. La app solo carga la rutina final que la IA genere.</p>
           <pre id="enru-formato-rutina">PROMPT PARA CREAR RUTINA SEMANAL PERSONALIZADA
+
+IMPORTANTE:
+Este prompt NO se pega directamente en la app.
+Primero completa tus datos, envía este prompt a la IA y después pega en la app únicamente la rutina final generada.
 
 Actúa como un asistente de entrenamiento físico prudente, claro y organizado.
 Con la información que voy a completar, crea una rutina semanal personalizada, segura y realista.
@@ -156,21 +160,24 @@ REGLAS PARA CREAR LA RUTINA
 - Incluir descanso o recuperación activa cuando sea necesario.
 - Mantener indicaciones técnicas cortas y fáciles de seguir.
 - Priorizar seguridad, constancia y progreso gradual.
+- No usar Markdown, tablas, numeración ni asteriscos.
+- Usar solo guiones normales para las listas de ejercicios.
 
 FORMATO DE SALIDA OBLIGATORIO
 Devuelve únicamente la rutina semanal, sin explicación antes ni después.
+No devuelvas este prompt, no devuelvas instrucciones y no dejes campos vacíos.
 Incluye obligatoriamente los siete días: Lunes, Martes, Miércoles, Jueves, Viernes, Sábado y Domingo.
 Usa exactamente esta estructura:
 
 Semana: Semana actual
 
 Día: Lunes
-Nombre:
-Tipo:
-Objetivo:
-Duración:
-Nivel:
-Equipo:
+Nombre: nombre real de la rutina del día
+Tipo: Entrenamiento / HIIT / Caminata / Descanso / Movilidad
+Objetivo: objetivo real del día
+Duración: número en minutos
+Nivel: nivel real
+Equipo: equipo real a usar
 Calentamiento:
 - ejercicio | tiempo
 Ejercicios:
@@ -181,12 +188,12 @@ Notas:
 texto breve
 
 Día: Martes
-Nombre:
-Tipo:
-Objetivo:
-Duración:
-Nivel:
-Equipo:
+Nombre: nombre real de la rutina del día
+Tipo: Entrenamiento / HIIT / Caminata / Descanso / Movilidad
+Objetivo: objetivo real del día
+Duración: número en minutos
+Nivel: nivel real
+Equipo: equipo real a usar
 Calentamiento:
 - ejercicio | tiempo
 Ejercicios:
@@ -197,12 +204,12 @@ Notas:
 texto breve
 
 Día: Miércoles
-Nombre:
-Tipo:
-Objetivo:
-Duración:
-Nivel:
-Equipo:
+Nombre: nombre real de la rutina del día
+Tipo: Entrenamiento / HIIT / Caminata / Descanso / Movilidad
+Objetivo: objetivo real del día
+Duración: número en minutos
+Nivel: nivel real
+Equipo: equipo real a usar
 Calentamiento:
 - ejercicio | tiempo
 Ejercicios:
@@ -213,12 +220,12 @@ Notas:
 texto breve
 
 Día: Jueves
-Nombre:
-Tipo:
-Objetivo:
-Duración:
-Nivel:
-Equipo:
+Nombre: nombre real de la rutina del día
+Tipo: Entrenamiento / HIIT / Caminata / Descanso / Movilidad
+Objetivo: objetivo real del día
+Duración: número en minutos
+Nivel: nivel real
+Equipo: equipo real a usar
 Calentamiento:
 - ejercicio | tiempo
 Ejercicios:
@@ -229,12 +236,12 @@ Notas:
 texto breve
 
 Día: Viernes
-Nombre:
-Tipo:
-Objetivo:
-Duración:
-Nivel:
-Equipo:
+Nombre: nombre real de la rutina del día
+Tipo: Entrenamiento / HIIT / Caminata / Descanso / Movilidad
+Objetivo: objetivo real del día
+Duración: número en minutos
+Nivel: nivel real
+Equipo: equipo real a usar
 Calentamiento:
 - ejercicio | tiempo
 Ejercicios:
@@ -245,12 +252,12 @@ Notas:
 texto breve
 
 Día: Sábado
-Nombre:
-Tipo:
-Objetivo:
-Duración:
-Nivel:
-Equipo:
+Nombre: nombre real de la rutina del día
+Tipo: Entrenamiento / HIIT / Caminata / Descanso / Movilidad
+Objetivo: objetivo real del día
+Duración: número en minutos
+Nivel: nivel real
+Equipo: equipo real a usar
 Calentamiento:
 - ejercicio | tiempo
 Ejercicios:
@@ -261,12 +268,12 @@ Notas:
 texto breve
 
 Día: Domingo
-Nombre:
-Tipo:
-Objetivo:
-Duración:
-Nivel:
-Equipo:
+Nombre: nombre real de la rutina del día
+Tipo: Entrenamiento / HIIT / Caminata / Descanso / Movilidad
+Objetivo: objetivo real del día
+Duración: número en minutos
+Nivel: nivel real
+Equipo: equipo real a usar
 Calentamiento:
 - ejercicio | tiempo
 Ejercicios:
