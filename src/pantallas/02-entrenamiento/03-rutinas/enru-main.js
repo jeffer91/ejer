@@ -4,7 +4,8 @@ Ruta o ubicación: src/pantallas/02-entrenamiento/03-rutinas/enru-main.js
 Función o funciones:
 - Cargar planificación semanal guardada localmente.
 - Mostrar calendario semanal de ancho completo.
-- Importar la semana completa desde un texto estructurado.
+- Importar la semana completa desde un protocolo estructurado para IA.
+- Mantener compatibilidad con el formato anterior de Semana/Día.
 - Copiar el prompt vacío para generar rutinas personalizadas.
 - Evitar que el prompt de instrucciones se cargue como si fuera rutina final.
 - Dividir cada día en calentamiento, ejercicios, cierre y notas.
@@ -17,6 +18,8 @@ Con qué se conecta:
 
   var STORAGE_KEY='fitness-jeff-enru-plan';
   var DIAS=['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
+  var INICIO_PROTOCOLO='===INICIO_RUTINA_APP===';
+  var FIN_PROTOCOLO='===FIN_RUTINA_APP===';
   var estado={semana:'Semana actual',dias:[],diaActivo:'Lunes'};
   var el={};
 
@@ -74,7 +77,7 @@ Con qué se conecta:
     if(!texto){mostrarMensaje('No se encontró el prompt para copiar.',true);return;}
     if(navigator.clipboard&&navigator.clipboard.writeText){
       navigator.clipboard.writeText(texto).then(function(){
-        mostrarMensaje('Prompt vacío copiado. Complétalo y envíalo a la IA. Aquí pega solo la rutina final generada.',false);
+        mostrarMensaje('Prompt con protocolo copiado. Complétalo, envíalo a la IA y pega aquí solo el bloque de rutina generado.',false);
       }).catch(function(){copiarConFallback(texto);});
       return;
     }
@@ -91,7 +94,7 @@ Con qué se conecta:
     area.select();
     try{
       document.execCommand('copy');
-      mostrarMensaje('Prompt vacío copiado. Complétalo y envíalo a la IA. Aquí pega solo la rutina final generada.',false);
+      mostrarMensaje('Prompt con protocolo copiado. Complétalo, envíalo a la IA y pega aquí solo el bloque de rutina generado.',false);
     }catch(error){
       mostrarMensaje('No se pudo copiar automáticamente. Selecciona el prompt y cópialo manualmente.',true);
     }
@@ -102,7 +105,7 @@ Con qué se conecta:
     var texto=el.inputRutina.value.trim();
     if(!texto){mostrarMensaje('Pega el plan semanal completo antes de cargar.',true);return;}
     if(esPromptDeInstrucciones(texto)){
-      mostrarMensaje('Pegaste el prompt de instrucciones, no la rutina final. Primero envía ese prompt a la IA y luego pega aquí solo la respuesta generada desde Semana: hasta Domingo:.',true);
+      mostrarMensaje('Pegaste el prompt de instrucciones, no la rutina final. Primero envíalo a la IA y después pega aquí solo el bloque entre '+INICIO_PROTOCOLO+' y '+FIN_PROTOCOLO+'.',true);
       return;
     }
     var resultado=parsearSemana(texto);
@@ -117,7 +120,7 @@ Con qué se conecta:
 
   function esPromptDeInstrucciones(texto){
     var limpio=String(texto||'').toLowerCase();
-    return limpio.indexOf('prompt para crear rutina')!==-1||limpio.indexOf('objetivo del prompt')!==-1||limpio.indexOf('formato de salida obligatorio')!==-1||limpio.indexOf('datos personales')!==-1&&limpio.indexOf('reglas para crear la rutina')!==-1;
+    return limpio.indexOf('prompt para crear rutina')!==-1||limpio.indexOf('objetivo del prompt')!==-1||limpio.indexOf('datos para completar')!==-1||limpio.indexOf('reglas para la ia')!==-1;
   }
 
   function limpiarSemanaCompleta(){
@@ -131,6 +134,116 @@ Con qué se conecta:
   }
 
   function parsearSemana(texto){
+    var bloqueProtocolo=extraerBloqueProtocolo(texto);
+    if(bloqueProtocolo){
+      return parsearSemanaProtocolo(bloqueProtocolo);
+    }
+    if(pareceProtocoloSinMarcadores(texto)){
+      return parsearSemanaProtocolo(texto);
+    }
+    return parsearSemanaClasica(texto);
+  }
+
+  function extraerBloqueProtocolo(texto){
+    var inicio=texto.indexOf(INICIO_PROTOCOLO);
+    var fin=texto.indexOf(FIN_PROTOCOLO);
+    if(inicio===-1||fin===-1||fin<=inicio){return '';}
+    return texto.slice(inicio+INICIO_PROTOCOLO.length,fin).trim();
+  }
+
+  function pareceProtocoloSinMarcadores(texto){
+    return /^SEMANA\|/mi.test(texto)&&/^DIA\|/mi.test(texto)&&/^NOMBRE\|/mi.test(texto);
+  }
+
+  function parsearSemanaProtocolo(texto){
+    var lineas=texto.split(/\r?\n/);
+    var semana='Semana actual';
+    var bloques=[];
+    var actual=[];
+
+    lineas.forEach(function(lineaOriginal){
+      var linea=lineaOriginal.trim();
+      if(!linea){return;}
+      if(/^SEMANA\|/i.test(linea)){
+        semana=valorDespuesDeSeparador(linea)||'Semana actual';
+        return;
+      }
+      if(/^---+$/.test(linea)){
+        if(actual.length){bloques.push(actual.join('\n'));actual=[];}
+        return;
+      }
+      if(/^DIA\|/i.test(linea)&&actual.length){
+        bloques.push(actual.join('\n'));
+        actual=[];
+      }
+      actual.push(lineaOriginal);
+    });
+    if(actual.length){bloques.push(actual.join('\n'));}
+
+    if(!bloques.length){return{error:'No encontré días en el protocolo. Cada día debe iniciar con DIA|Lunes, DIA|Martes, etc.'};}
+
+    return validarRutinasParseadas(semana,bloques.map(parsearRutinaProtocolo));
+  }
+
+  function parsearRutinaProtocolo(texto){
+    var rutina=crearRutinaBase();
+    var seccion='';
+    texto.split(/\r?\n/).forEach(function(lineaOriginal){
+      var linea=lineaOriginal.trim();
+      if(!linea){return;}
+      var campo=leerCampoProtocolo(linea);
+      if(campo){
+        if(campo.clave==='DIA'){rutina.dia=normalizarDia(campo.valor);seccion='';return;}
+        if(campo.clave==='NOMBRE'){rutina.nombre=campo.valor;seccion='';return;}
+        if(campo.clave==='TIPO'){rutina.tipo=campo.valor||'Entrenamiento';seccion='';return;}
+        if(campo.clave==='OBJETIVO'){rutina.objetivo=campo.valor;seccion='';return;}
+        if(campo.clave==='DURACION'){rutina.duracionMin=numero(String(campo.valor).replace(/[^0-9.]/g,''))||0;seccion='';return;}
+        if(campo.clave==='NIVEL'){rutina.nivel=campo.valor;seccion='';return;}
+        if(campo.clave==='EQUIPO'){rutina.equipo=campo.valor;seccion='';return;}
+        if(campo.clave==='CALENTAMIENTO'){seccion='calentamiento';agregarValorDirecto(rutina,seccion,campo.valor);return;}
+        if(campo.clave==='EJERCICIOS'){seccion='ejercicios';agregarValorDirecto(rutina,seccion,campo.valor);return;}
+        if(campo.clave==='CIERRE'){seccion='cierre';agregarValorDirecto(rutina,seccion,campo.valor);return;}
+        if(campo.clave==='NOTAS'){seccion='notas';if(campo.valor){rutina.notas.push(campo.valor);}return;}
+      }
+      if(/^[-*]\s+/.test(linea)){
+        agregarItemSeccion(rutina,seccion,linea.replace(/^[-*]\s+/,''));
+        return;
+      }
+      if(seccion==='notas'){
+        rutina.notas.push(linea);
+      }
+    });
+    if(!rutina.duracionMin){rutina.duracionMin=estimarDuracion(rutina);}
+    return rutina;
+  }
+
+  function leerCampoProtocolo(linea){
+    var pos=linea.indexOf('|');
+    if(pos===-1){return null;}
+    var clave=normalizarCampoProtocolo(linea.slice(0,pos));
+    var valor=linea.slice(pos+1).trim();
+    var campos=['DIA','NOMBRE','TIPO','OBJETIVO','DURACION','NIVEL','EQUIPO','CALENTAMIENTO','EJERCICIOS','CIERRE','NOTAS'];
+    if(campos.indexOf(clave)===-1){return null;}
+    return{clave:clave,valor:valor};
+  }
+
+  function normalizarCampoProtocolo(valor){
+    return String(valor||'').trim().toUpperCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+      .replace(/\s+/g,'_');
+  }
+
+  function valorDespuesDeSeparador(linea){
+    var pos=linea.indexOf('|');
+    return pos===-1?'':linea.slice(pos+1).trim();
+  }
+
+  function agregarValorDirecto(rutina,seccion,valor){
+    if(!valor){return;}
+    agregarItemSeccion(rutina,seccion,valor);
+  }
+
+  function parsearSemanaClasica(texto){
     var lineas=texto.split(/\r?\n/);
     var semana='Semana actual';
     var bloques=[];
@@ -151,38 +264,20 @@ Con qué se conecta:
     });
     if(actual.length){bloques.push(actual.join('\n'));}
 
-    if(!bloques.length){return{error:'No encontré bloques de día. Cada rutina debe iniciar con Día: Lunes, Día: Martes, etc.'};}
+    if(!bloques.length){return{error:'No encontré bloques de día. Usa el protocolo con DIA|Lunes o el formato clásico Día: Lunes.'};}
 
-    var rutinas=[];
-    var errores=[];
-    bloques.forEach(function(bloque,indice){
-      var rutina=parsearRutina(bloque);
-      if(!rutina.dia){errores.push('Bloque '+(indice+1)+': falta un día válido.');return;}
-      if(!rutina.nombre){errores.push(rutina.dia+': falta Nombre.');return;}
-      rutinas.push(rutina);
-    });
-    if(errores.length){return{error:errores.join(' ')};}
-
-    var vistos={};
-    rutinas.forEach(function(rutina){vistos[rutina.dia]=(vistos[rutina.dia]||0)+1;});
-    var duplicados=Object.keys(vistos).filter(function(dia){return vistos[dia]>1;});
-    if(duplicados.length){return{error:'Hay días duplicados: '+duplicados.join(', ')+'. Deja un solo bloque por día.'};}
-
-    var faltantes=DIAS.filter(function(dia){return !vistos[dia];});
-    if(faltantes.length){return{error:'Faltan estos días para cargar la semana completa: '+faltantes.join(', ')+'.'};}
-
-    return{semana:semana,rutinas:rutinas};
+    return validarRutinasParseadas(semana,bloques.map(parsearRutinaClasica));
   }
 
-  function parsearRutina(texto){
-    var rutina={dia:'',nombre:'',tipo:'Entrenamiento',objetivo:'',duracionMin:0,nivel:'',equipo:'',calentamiento:[],ejercicios:[],cierre:[],notas:[],rutinaCargada:true};
+  function parsearRutinaClasica(texto){
+    var rutina=crearRutinaBase();
     var seccion='';
     texto.split(/\r?\n/).forEach(function(lineaOriginal){
       var linea=lineaOriginal.trim();
       if(!linea){return;}
-      var etiqueta=leerEtiqueta(linea);
+      var etiqueta=leerEtiquetaClasica(linea);
       if(etiqueta){
-        asignarEtiqueta(rutina,etiqueta.clave,etiqueta.valor);
+        asignarEtiquetaClasica(rutina,etiqueta.clave,etiqueta.valor);
         seccion=etiqueta.esSeccion?etiqueta.clave:seccion;
         return;
       }
@@ -198,10 +293,35 @@ Con qué se conecta:
     return rutina;
   }
 
-  function leerEtiqueta(linea){
+  function validarRutinasParseadas(semana,rutinas){
+    var errores=[];
+    var limpias=[];
+    rutinas.forEach(function(rutina,indice){
+      if(!rutina.dia){errores.push('Bloque '+(indice+1)+': falta un día válido.');return;}
+      if(!rutina.nombre){errores.push(rutina.dia+': falta NOMBRE| o Nombre:.');return;}
+      limpias.push(rutina);
+    });
+    if(errores.length){return{error:errores.join(' ')}};
+
+    var vistos={};
+    limpias.forEach(function(rutina){vistos[rutina.dia]=(vistos[rutina.dia]||0)+1;});
+    var duplicados=Object.keys(vistos).filter(function(dia){return vistos[dia]>1;});
+    if(duplicados.length){return{error:'Hay días duplicados: '+duplicados.join(', ')+'. Deja un solo bloque por día.'};}
+
+    var faltantes=DIAS.filter(function(dia){return !vistos[dia];});
+    if(faltantes.length){return{error:'Faltan estos días para cargar la semana completa: '+faltantes.join(', ')+'.'};}
+
+    return{semana:semana,rutinas:limpias};
+  }
+
+  function crearRutinaBase(){
+    return{dia:'',nombre:'',tipo:'Entrenamiento',objetivo:'',duracionMin:0,nivel:'',equipo:'',calentamiento:[],ejercicios:[],cierre:[],notas:[],rutinaCargada:true};
+  }
+
+  function leerEtiquetaClasica(linea){
     var partes=linea.split(':');
     if(partes.length<2){return null;}
-    var clave=normalizarClave(partes.shift());
+    var clave=normalizarClaveClasica(partes.shift());
     var valor=partes.join(':').trim();
     var secciones=['calentamiento','ejercicios','cierre','notas'];
     if(secciones.indexOf(clave)!==-1){return{clave:clave,valor:valor,esSeccion:true};}
@@ -209,7 +329,7 @@ Con qué se conecta:
     return null;
   }
 
-  function normalizarClave(clave){
+  function normalizarClaveClasica(clave){
     return String(clave).trim().toLowerCase()
       .replace('día','dia')
       .replace('duración','duracion')
@@ -219,7 +339,7 @@ Con qué se conecta:
       .replace('enfriamiento','cierre');
   }
 
-  function asignarEtiqueta(rutina,clave,valor){
+  function asignarEtiquetaClasica(rutina,clave,valor){
     if(clave==='dia'){rutina.dia=normalizarDia(valor);}
     if(clave==='nombre'){rutina.nombre=valor;}
     if(clave==='tipo'){rutina.tipo=valor||'Entrenamiento';}
@@ -292,7 +412,7 @@ Con qué se conecta:
     el.rutinas.innerHTML='';
     var cargadas=estado.dias.filter(function(item){return item.rutinaCargada;});
     if(!cargadas.length){
-      el.rutinas.innerHTML='<p class="enru-empty-wide">Todavía no hay semana cargada. Copia el prompt vacío, completa tus datos, genera la rutina y pega el resultado.</p>';
+      el.rutinas.innerHTML='<p class="enru-empty-wide">Todavía no hay semana cargada. Copia el prompt con protocolo, completa tus datos, genera la rutina y pega el bloque final.</p>';
       return;
     }
     cargadas.forEach(function(rutina){
@@ -326,24 +446,25 @@ Con qué se conecta:
   }
 
   function formatearSemanaParaTexto(){
-    var bloques=['Semana: '+estado.semana,''];
+    var bloques=[INICIO_PROTOCOLO,'SEMANA|'+estado.semana,''];
     estado.dias.forEach(function(rutina){
       if(rutina.rutinaCargada){
         bloques.push(formatearRutinaParaTexto(rutina));
-        bloques.push('');
+        bloques.push('---');
       }
     });
+    bloques.push(FIN_PROTOCOLO);
     return bloques.join('\n').trim();
   }
 
   function formatearRutinaParaTexto(rutina){
-    return ['Día: '+rutina.dia,'Nombre: '+rutina.nombre,'Tipo: '+rutina.tipo,'Objetivo: '+(rutina.objetivo||''),'Duración: '+(rutina.duracionMin||0),'Nivel: '+(rutina.nivel||''),'Equipo: '+(rutina.equipo||''),'','Calentamiento:'].concat(
+    return ['DIA|'+rutina.dia,'NOMBRE|'+rutina.nombre,'TIPO|'+rutina.tipo,'OBJETIVO|'+(rutina.objetivo||''),'DURACION|'+(rutina.duracionMin||0),'NIVEL|'+(rutina.nivel||''),'EQUIPO|'+(rutina.equipo||''),'CALENTAMIENTO|'].concat(
       rutina.calentamiento.map(function(item){return '- '+item.nombre+(item.duracion?' | '+item.duracion:'');}),
-      ['','Ejercicios:'],
+      ['EJERCICIOS|'],
       rutina.ejercicios.map(function(item){return '- '+item.nombre+(item.series?' | '+item.series:'')+(item.carga?' | '+item.carga:'')+(item.descanso?' | '+item.descanso:'')+(item.indicacion?' | '+item.indicacion:'');}),
-      ['','Cierre:'],
+      ['CIERRE|'],
       rutina.cierre.map(function(item){return '- '+item.nombre+(item.duracion?' | '+item.duracion:'');}),
-      ['','Notas:',(rutina.notas||[]).join(' ')]
+      ['NOTAS|'+(rutina.notas||[]).join(' ')]
     ).join('\n');
   }
 
