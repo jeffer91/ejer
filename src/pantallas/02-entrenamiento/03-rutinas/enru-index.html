@@ -5,7 +5,7 @@ Función o funciones:
 - Mostrar la subpantalla independiente de Entrenamiento / Rutinas.
 - Planificar rutinas semanales en calendario de ancho completo.
 - Cargar toda la semana de entrenamiento desde un protocolo estructurado para IA.
-- Permitir copiar un prompt vacío con campos para generar rutinas personalizadas.
+- Permitir copiar un prompt con entrevista breve para generar rutinas personalizadas.
 Con qué se conecta:
 - enru.css
 - enru-main.js
@@ -58,112 +58,80 @@ Con qué se conecta:
 
         <article class="enru-format-box">
           <div class="enru-format-head">
-            <h3>Prompt con protocolo para IA</h3>
+            <h3>Prompt con entrevista para IA</h3>
             <button id="enru-btn-copiar-formato" type="button">Copiar prompt</button>
           </div>
-          <p class="enru-format-help">Completa los datos, envía este prompt a la IA y pega en la app únicamente el bloque final generado.</p>
-          <pre id="enru-formato-rutina">PROMPT PARA CREAR RUTINA SEMANAL PERSONALIZADA PARA MI APP
+          <p class="enru-format-help">La IA primero hace 5 preguntas de opción múltiple y 1 abierta. Luego genera el bloque final que sí se pega en la app.</p>
+          <pre id="enru-formato-rutina">PROMPT PARA CREAR RUTINA SEMANAL COMPATIBLE CON MI APP
 
 IMPORTANTE
 Este prompt NO se pega directamente en la app.
-Primero completa tus datos, envía este prompt a la IA y después pega en la app únicamente el bloque generado entre:
+Este prompt se envía a la IA para que primero haga una entrevista corta y después genere una rutina en el protocolo exacto de la app.
+En la app se pega únicamente el bloque final generado entre:
 ===INICIO_RUTINA_APP===
 y
 ===FIN_RUTINA_APP===
 
-OBJETIVO
-Crear una rutina semanal completa, segura y realista, fácil de cargar en mi app.
-La app entiende un protocolo fijo con separadores.
-Debes respetar exactamente el protocolo de salida.
-
-DATOS PARA COMPLETAR
-Nombre:
-Edad:
-Estatura:
-Peso actual:
-Nivel de entrenamiento: Principiante / Intermedio / Avanzado
-Experiencia entrenando:
-Condición física actual:
-Energía promedio durante el día: Baja / Media / Alta
-
-OBJETIVO PRINCIPAL
-Objetivo principal:
-
-OBJETIVOS SECUNDARIOS
-Objetivo secundario 1:
-Objetivo secundario 2:
-Objetivo secundario 3:
-
-DISPONIBILIDAD
-Días disponibles por semana:
-Días específicos disponibles:
-Tiempo disponible por sesión:
-Horario preferido:
-Lugar de entrenamiento: Casa / Gimnasio / Parque / Otro
-
-EQUIPO QUE TENGO
-Tengo:
--
--
--
-
-EQUIPO QUE NO TENGO
-No tengo:
--
--
--
-
-EJERCICIOS QUE PUEDO HACER
-Puedo hacer:
--
--
--
-
-EJERCICIOS QUE NO PUEDO O PREFIERO EVITAR
-No puedo hacer o prefiero evitar:
--
--
--
-
-LIMITACIONES O CUIDADOS
-Lesiones actuales o anteriores:
-Dolores frecuentes:
-Zonas que debo cuidar:
-Movimientos que me molestan:
-Indicaciones médicas importantes:
-
-PREFERENCIAS DE ENTRENAMIENTO
-Me gusta entrenar:
--
--
--
-
-No me gusta entrenar:
--
--
--
-
-INTENSIDAD DESEADA
-Intensidad preferida: Baja / Media / Alta
-Quiero terminar cada sesión sintiéndome:
-
-REGLAS PARA LA IA
+ROL DE LA IA
 Actúa como un asistente de entrenamiento físico prudente, claro y organizado.
+Crea rutinas seguras, realistas y sostenibles.
 No recomiendes extremos, sobreentrenamiento, retos peligrosos ni cambios bruscos.
-Si falta información importante, asume una opción moderada y segura.
-Usa solo el equipo indicado como disponible.
-No incluyas ejercicios marcados como no disponibles o a evitar.
-Respeta el tiempo disponible por sesión.
-Incluye calentamiento, ejercicios principales, cierre y notas.
-Incluye obligatoriamente siete días: Lunes, Martes, Miércoles, Jueves, Viernes, Sábado y Domingo.
+No prometas resultados irreales.
+Si falta información, usa una opción moderada y segura.
+
+PASO 1: ENTREVISTA OBLIGATORIA
+Antes de crear la rutina, haz exactamente estas 6 preguntas.
+Las preguntas 1 a 5 son de opción múltiple con solo tres opciones: A, B o C.
+La pregunta 6 es abierta para que el usuario escriba recursos, equipo y cuidados importantes.
+Después de hacer estas preguntas, espera la respuesta del usuario. No generes la rutina todavía.
+
+1. Objetivo principal
+A) Bajar grasa de forma saludable y mejorar tono muscular
+B) Ganar fuerza y masa muscular de forma progresiva
+C) Mejorar resistencia, movilidad y condición general
+
+2. Nivel actual de entrenamiento
+A) Principiante o retomando después de una pausa
+B) Intermedio, entreno con cierta constancia
+C) Avanzado, tolero rutinas más exigentes
+
+3. Disponibilidad semanal
+A) 3 días por semana, 30 a 40 minutos por sesión
+B) 4 días por semana, 40 a 50 minutos por sesión
+C) 5 a 7 días por semana, combinando días fuertes y suaves
+
+4. Lugar principal de entrenamiento
+A) Casa con poco o ningún equipo
+B) Casa con equipo básico
+C) Gimnasio o espacio con más máquinas/equipo
+
+5. Enfoque preferido de la rutina
+A) Tren superior y core
+B) Cuerpo completo equilibrado
+C) Cardio, resistencia y movilidad
+
+6. Pregunta abierta
+Escribe los recursos reales que tienes y cualquier cuidado importante: equipo disponible, pesos aproximados, espacio, bicicleta, mancuernas, ligas, banco, máquinas, ejercicios que no puedes hacer, molestias, lesiones o movimientos que prefieres evitar.
+
+PASO 2: CREACIÓN DE LA RUTINA
+Cuando el usuario responda las 6 preguntas, crea una rutina semanal completa de 7 días.
+Usa solo la información entregada por el usuario.
+Usa solo equipo disponible.
+No incluyas ejercicios que el usuario no pueda hacer o prefiera evitar.
+Ajusta la intensidad al nivel, objetivo y disponibilidad indicados.
+Incluye calentamiento, ejercicios, cierre y notas.
 Incluye descanso, movilidad o recuperación activa cuando sea necesario.
 No uses tablas.
-No uses Markdown fuera del bloque final.
-No expliques nada antes ni después del bloque final.
+No uses explicación antes ni después del bloque final.
 No dejes campos vacíos.
 
 PROTOCOLO DE SALIDA OBLIGATORIO
-Debes responder únicamente con este bloque:
+La respuesta final debe tener únicamente este bloque.
+Respeta exactamente estos separadores:
+- Inicio: ===INICIO_RUTINA_APP===
+- Fin: ===FIN_RUTINA_APP===
+- Campo y valor: CAMPO|valor
+- Separador de días: ---
 
 ===INICIO_RUTINA_APP===
 SEMANA|Semana actual
