@@ -5,7 +5,7 @@ Función o funciones:
 - Cargar planificación semanal guardada localmente.
 - Mostrar calendario semanal de ancho completo.
 - Importar la semana completa desde un texto estructurado.
-- Copiar el formato guía semanal para completar rutinas.
+- Copiar el prompt vacío para generar rutinas personalizadas.
 - Dividir cada día en calentamiento, ejercicios, cierre y notas.
 Con qué se conecta:
 - enru-index.html
@@ -70,10 +70,10 @@ Con qué se conecta:
 
   function copiarFormatoRutina(){
     var texto=el.formatoRutina?el.formatoRutina.textContent:'';
-    if(!texto){mostrarMensaje('No se encontró el formato para copiar.',true);return;}
+    if(!texto){mostrarMensaje('No se encontró el prompt para copiar.',true);return;}
     if(navigator.clipboard&&navigator.clipboard.writeText){
       navigator.clipboard.writeText(texto).then(function(){
-        mostrarMensaje('Formato semanal copiado. Pégalo en la caja y edita los siete días.',false);
+        mostrarMensaje('Prompt vacío copiado. Completa tus datos, genera la rutina con IA y pega la semana final.',false);
       }).catch(function(){copiarConFallback(texto);});
       return;
     }
@@ -90,9 +90,9 @@ Con qué se conecta:
     area.select();
     try{
       document.execCommand('copy');
-      mostrarMensaje('Formato semanal copiado. Pégalo en la caja y edita los siete días.',false);
+      mostrarMensaje('Prompt vacío copiado. Completa tus datos, genera la rutina con IA y pega la semana final.',false);
     }catch(error){
-      mostrarMensaje('No se pudo copiar automáticamente. Selecciona el formato y cópialo manualmente.',true);
+      mostrarMensaje('No se pudo copiar automáticamente. Selecciona el prompt y cópialo manualmente.',true);
     }
     document.body.removeChild(area);
   }
@@ -151,7 +151,7 @@ Con qué se conecta:
       if(!rutina.nombre){errores.push(rutina.dia+': falta Nombre.');return;}
       rutinas.push(rutina);
     });
-    if(errores.length){return{error:errores.join(' ')};}
+    if(errores.length){return{error:errores.join(' ')}};
 
     var vistos={};
     rutinas.forEach(function(rutina){vistos[rutina.dia]=(vistos[rutina.dia]||0)+1;});
@@ -282,7 +282,7 @@ Con qué se conecta:
     el.rutinas.innerHTML='';
     var cargadas=estado.dias.filter(function(item){return item.rutinaCargada;});
     if(!cargadas.length){
-      el.rutinas.innerHTML='<p class="enru-empty-wide">Todavía no hay semana cargada. Copia el formato semanal, completa los siete días y carga el plan.</p>';
+      el.rutinas.innerHTML='<p class="enru-empty-wide">Todavía no hay semana cargada. Copia el prompt vacío, completa tus datos, genera la rutina y pega el resultado.</p>';
       return;
     }
     cargadas.forEach(function(rutina){
