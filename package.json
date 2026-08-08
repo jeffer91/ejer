@@ -1,21 +1,43 @@
 {
   "name": "fitness-jeff",
-  "version": "0.1.0",
-  "description": "App personal de bienestar, entrenamiento, hábitos, voz e integraciones.",
-  "main": "electron/fit-electron-main.cjs",
+  "version": "1.0.0",
   "private": true,
+  "type": "module",
+  "description": "Fitness Jeff: app personal de progreso, entrenamiento, hidratación y recomendaciones.",
   "scripts": {
-    "start": "electron .",
-    "dev": "electron .",
-    "cap:init": "npx cap init FitnessJeff com.jeff.fitness --web-dir src",
-    "cap:add:android": "npx cap add android",
-    "cap:sync": "npx cap sync android",
-    "cap:open:android": "npx cap open android"
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "check": "npm run typecheck && npm run test && npm run build",
+    "tauri": "tauri",
+    "tauri:dev": "tauri dev",
+    "tauri:build": "tauri build",
+    "android:init": "tauri android init",
+    "android:dev": "tauri android dev",
+    "android:build": "tauri android build",
+    "cloudflare:dev": "wrangler pages dev dist",
+    "cloudflare:deploy": "npm run build && wrangler pages deploy dist"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "2.110.8",
+    "@tauri-apps/api": "2.11.1",
+    "@tauri-apps/plugin-deep-link": "2.4.9",
+    "@tauri-apps/plugin-opener": "2.5.4",
+    "react": "19.2.7",
+    "react-dom": "19.2.7"
   },
   "devDependencies": {
-    "@capacitor/android": "latest",
-    "@capacitor/cli": "latest",
-    "@capacitor/core": "latest",
-    "electron": "latest"
+    "@tauri-apps/cli": "2.11.4",
+    "@types/react": "19.2.17",
+    "@types/react-dom": "19.2.3",
+    "typescript": "7.0.2",
+    "vite": "8.1.5",
+    "vitest": "4.1.10",
+    "wrangler": "4.114.0"
+  },
+  "engines": {
+    "node": ">=22.0.0"
   }
 }

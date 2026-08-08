@@ -1,104 +1,38 @@
 # Fitness Jeff
 
-App personal de bienestar, entrenamiento, hábitos, recomendaciones con IA, voz e integraciones.
+Fitness Jeff es una app personal, rápida y multiplataforma para registrar progreso, entrenamiento, hidratación y recibir recomendaciones breves.
 
-## Estado final de construcción
+## v1
 
-La app quedó organizada por pantallas independientes y módulos. Cada subpantalla tiene su propia carpeta, HTML, CSS, JS y datos demo cuando corresponde.
+La nueva arquitectura usa una sola base de código para:
 
-## Módulos construidos
+- Web y PWA en Cloudflare Pages.
+- Windows con Tauri 2.
+- Android APK/AAB con Tauri 2.
 
-```text
-Progreso
-- Peso
-- Medidas
-- Registrar datos
+### Stack
 
-Entrenamiento
-- Hoy
-- HIIT
-- Rutinas
+React 19 + TypeScript + Vite + IndexedDB + Supabase + Cloudflare + Tauri.
 
-Horarios
-- Registro de horarios
-- Agua
-
-Recomendaciones
-- Análisis general
-- Entrenamiento
-- Alimentación
-- Hábitos
-
-Ajustes
-- Perfil
-- Google Sheets
-- Firebase
-- Gemini
-
-Voz
-- Asistente
-- Historial
-```
-
-## Integraciones incluidas
-
-```text
-Google Sheets
-- Cliente compartido
-- Servicio de sincronización
-- Esquema de tablas
-- Apps Script Web App
-
-Firebase
-- Esquema de colecciones
-- Cliente base
-- Servicio de respaldo
-
-Gemini
-- Prompts seguros
-- Cliente REST
-- Servicio de recomendaciones
-```
-
-## Ejecutar en Electron
-
-Desde la raíz del proyecto:
+### Uso local
 
 ```bash
-npm install
-npm start
+npm ci
+npm run dev
 ```
 
-## Ejecutar con Live Server
+La app funciona en **modo invitado** aunque Supabase no esté configurado. Para habilitar cuenta Google, nube e IA, copia `.env.example` a `.env` y completa las variables públicas de Supabase. La API de IA se configura como Function de Cloudflare con secretos del servidor.
 
-Abrir:
-
-```text
-src/index.html
-```
-
-También se puede probar cada subpantalla directamente desde su carpeta.
-
-## Preparar Android con Capacitor
+### Verificación
 
 ```bash
-npm install
-npm run cap:add:android
-npm run cap:sync
-npm run cap:open:android
+npm run check
 ```
 
-## Archivos importantes
+Ejecuta typecheck, pruebas y build de producción.
 
-```text
-package.json
-capacitor.config.json
-electron/fit-electron-main.cjs
-electron/fit-electron-preload.cjs
-src/index.html
-docs/01-PRUEBAS-FINALES.md
-```
+### Más información
 
-## Notas de seguridad de la app
+Consulta `docs/V1-ARQUITECTURA.md`.
 
-Las recomendaciones son prudentes y orientadas a hábitos sostenibles. La app no reemplaza una consulta profesional ni promueve extremos.
+> La versión HTML/Electron anterior se mantiene temporalmente en el historial y en los archivos legacy del repositorio mientras se valida la migración v1.

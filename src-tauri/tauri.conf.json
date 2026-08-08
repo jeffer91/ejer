@@ -1,0 +1,51 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Fitness Jeff",
+  "version": "1.0.0",
+  "identifier": "com.jeff.fitness",
+  "build": {
+    "beforeDevCommand": "npm run dev",
+    "devUrl": "http://localhost:5173",
+    "beforeBuildCommand": "npm run build",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "Fitness Jeff",
+        "width": 1100,
+        "height": 780,
+        "minWidth": 360,
+        "minHeight": 600,
+        "resizable": true
+      }
+    ],
+    "security": {
+      "csp": "default-src 'self'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self' https://*.supabase.co https://*.pages.dev https://*.workers.dev"
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all"
+  },
+  "plugins": {
+    "deep-link": {
+      "mobile": [
+        {
+          "scheme": [
+            "fitnessjeff"
+          ],
+          "appLink": false
+        }
+      ],
+      "desktop": {
+        "schemes": [
+          "fitnessjeff"
+        ]
+      }
+    },
+    "opener": {
+      "open": "^https://.*"
+    }
+  }
+}

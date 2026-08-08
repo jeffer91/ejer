@@ -1,0 +1,18 @@
+{
+  "name": "Fitness Jeff",
+  "short_name": "Fitness Jeff",
+  "description": "Entrenamiento, progreso e hidratación en una app simple y rápida.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
