@@ -46,7 +46,7 @@ export function App() {
       setSession(value);
       void performSync(value);
     });
-    let removeNative = () => undefined;
+    let removeNative: () => void = () => {};
     void setupNativeAuthListener((value) => {
       setSession(value);
       void performSync(value);
