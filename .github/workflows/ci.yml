@@ -41,6 +41,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install web dependencies
+        run: npm ci
+      - name: Generate Tauri icons
+        run: npm run icons:generate
       - name: Install Linux dependencies for Tauri
         run: |
           sudo apt-get update
