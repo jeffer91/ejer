@@ -7,9 +7,6 @@ coverage/
 *.log
 .DS_Store
 .wrangler/
-playwright-report/
-test-results/
-blob-report/
 src-tauri/target/
 src-tauri/gen/
 src-tauri/icons/
