@@ -9,22 +9,24 @@ export function AiScreen({ userId, session }: { userId: string | null; session: 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const loadLast = useCallback(async () => {
-    const items = await listRows<Recommendation>('recommendations');
+    const items = await listRows<Recommendation>('recommendations', userId);
     const last = [...items].sort((a, b) => b.updated_at.localeCompare(a.updated_at))[0];
-    if (last) setText(last.content);
-  }, []);
+    setText(last?.content ?? '');
+  }, [userId]);
   useEffect(() => { void loadLast(); }, [loadLast]);
 
   const generate = async () => {
     setError(''); setLoading(true);
     try {
       const [weights, water, workouts] = await Promise.all([
-        listRows<BodyRecord>('body_records'), listRows<HydrationLog>('hydration_logs'), listRows<WorkoutSession>('workout_sessions'),
+        listRows<BodyRecord>('body_records', userId),
+        listRows<HydrationLog>('hydration_logs', userId),
+        listRows<WorkoutSession>('workout_sessions', userId),
       ]);
       const recommendation = await requestRecommendation({
         latestWeight: [...weights].sort((a,b)=>b.updated_at.localeCompare(a.updated_at))[0]?.weight_kg ?? null,
-        recentHydrationLogs: water.slice(-10),
-        recentWorkouts: workouts.slice(-5).map((item)=>({ title:item.title, completed_at:item.completed_at, duration_minutes:item.duration_minutes })),
+        recentHydrationLogs: [...water].sort((a,b)=>a.logged_at.localeCompare(b.logged_at)).slice(-10),
+        recentWorkouts: [...workouts].sort((a,b)=>a.completed_at.localeCompare(b.completed_at)).slice(-5).map((item)=>({ title:item.title, completed_at:item.completed_at, duration_minutes:item.duration_minutes })),
       });
       await saveRow<Recommendation>('recommendations', { ...newBaseRow(userId), category: 'general', content: recommendation });
       setText(recommendation);
