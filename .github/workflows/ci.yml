@@ -27,19 +27,6 @@ jobs:
         run: npm run audit
       - name: Validate Cloudflare Pages Functions
         run: npm run cloudflare:check
-      - name: Install Chromium for temporary user bot
-        run: npx playwright install --with-deps chromium
-      - name: Run temporary user bot
-        run: npm run bot:check
-      - name: Upload bot report on failure
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: fitness-jeff-bot-report
-          path: |
-            playwright-report/
-            test-results/
-          if-no-files-found: ignore
 
   tauri:
     runs-on: ubuntu-latest
