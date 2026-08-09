@@ -10,8 +10,6 @@
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "test:e2e": "playwright test",
-    "bot:check": "playwright test tests/e2e/temporary-user-bot.spec.ts",
     "audit": "npm audit --audit-level=high",
     "cloudflare:check": "wrangler pages functions build functions --outfile .wrangler/pages-functions.js",
     "check": "npm run typecheck && npm run test && npm run build",
@@ -34,7 +32,6 @@
     "react-dom": "19.2.7"
   },
   "devDependencies": {
-    "@playwright/test": "1.62.0",
     "@tauri-apps/cli": "2.11.4",
     "@types/react": "19.2.17",
     "@types/react-dom": "19.2.3",
