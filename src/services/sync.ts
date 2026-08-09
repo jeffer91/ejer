@@ -28,6 +28,8 @@ export async function syncAll(userId: string): Promise<{ pushed: number; pulled:
   let pushed = 0;
   let pulled = 0;
 
+  // Solo sincroniza operaciones que pertenecen al usuario activo. Esto evita
+  // que una cola pendiente de otra sesión termine asociándose a otra cuenta.
   const queue = await getQueue();
   for (const operation of queue) {
     const record = await getLocalById<BaseRow>(operation.table, operation.recordId);
@@ -35,20 +37,25 @@ export async function syncAll(userId: string): Promise<{ pushed: number; pulled:
       await removeQueueItem(operation.id);
       continue;
     }
-    const payload = { ...record, user_id: userId };
-    const { error } = await supabase.from(operation.table).upsert(payload, { onConflict: 'id' });
+    if (record.user_id !== userId) continue;
+
+    const { error } = await supabase.from(operation.table).upsert(record, { onConflict: 'id' });
     if (!error) {
-      await putLocal(operation.table, payload);
       await removeQueueItem(operation.id);
       pushed += 1;
     }
   }
 
+  // La nube se mezcla con la copia local sin pisar cambios locales más nuevos.
   for (const table of TABLES) {
     const { data, error } = await supabase.from(table).select('*').eq('user_id', userId).is('deleted_at', null);
     if (error || !data) continue;
-    for (const row of data) {
-      await putLocal(table, row as BaseRow);
+    for (const raw of data) {
+      const remote = raw as BaseRow;
+      const local = await getLocalById<BaseRow>(table, remote.id);
+      if (local && local.user_id !== userId) continue;
+      if (local && local.updated_at.localeCompare(remote.updated_at) > 0) continue;
+      await putLocal(table, remote);
       pulled += 1;
     }
   }
