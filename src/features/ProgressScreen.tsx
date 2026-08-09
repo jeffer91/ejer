@@ -8,9 +8,9 @@ export function ProgressScreen({ userId }: { userId: string | null }) {
   const [weights, setWeights] = useState<BodyRecord[]>([]);
   const [measurements, setMeasurements] = useState<Measurement[]>([]);
   const reload = useCallback(async () => {
-    setWeights(await listRows<BodyRecord>('body_records'));
-    setMeasurements(await listRows<Measurement>('measurements'));
-  }, []);
+    setWeights(await listRows<BodyRecord>('body_records', userId));
+    setMeasurements(await listRows<Measurement>('measurements', userId));
+  }, [userId]);
   useEffect(() => { void reload(); }, [reload]);
 
   const latest = useMemo(() => [...weights].sort((a, b) => b.updated_at.localeCompare(a.updated_at))[0], [weights]);
@@ -41,8 +41,8 @@ export function ProgressScreen({ userId }: { userId: string | null }) {
         <article className="metric-card"><span>Registros</span><strong>{weights.length}</strong><small>{measurements.length} mediciones corporales</small></article>
       </div>
       <article className="card two-forms">
-        <form onSubmit={saveWeight}><label>Peso actual (kg)<input inputMode="decimal" value={weight} onChange={(e) => setWeight(e.target.value)} placeholder="Ej. 82.5" /></label><button className="primary full">Guardar peso</button></form>
-        <form onSubmit={saveMeasurement}><label>Cintura (cm)<input inputMode="decimal" value={waist} onChange={(e) => setWaist(e.target.value)} placeholder="Ej. 90" /></label><button className="secondary full">Guardar medida</button></form>
+        <form onSubmit={saveWeight}><label>Peso actual (kg)<input inputMode="decimal" value={weight} onChange={(e) => setWeight(e.target.value)} placeholder="Ej. 70.5" /></label><button className="primary full">Guardar peso</button></form>
+        <form onSubmit={saveMeasurement}><label>Cintura (cm)<input inputMode="decimal" value={waist} onChange={(e) => setWaist(e.target.value)} placeholder="Ej. 80" /></label><button className="secondary full">Guardar medida</button></form>
       </article>
       <article className="card"><h2>Historial reciente</h2><div className="history-list">{[...weights].sort((a,b)=>b.updated_at.localeCompare(a.updated_at)).slice(0,6).map((item)=><div key={item.id}><span>{new Date(item.created_at).toLocaleDateString()}</span><strong>{item.weight_kg.toFixed(1)} kg</strong></div>)}{weights.length===0 && <p className="muted">Todavía no hay registros.</p>}</div></article>
     </section>
