@@ -14,6 +14,12 @@ test('bot temporal recorre el flujo principal como usuario invitado', async ({ p
   await expect(page.getByRole('navigation', { name: 'Navegación principal' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Tu día, sin complicaciones' })).toBeVisible();
 
+  const manifestResponse = await page.request.get('/manifest.webmanifest');
+  expect(manifestResponse.ok()).toBeTruthy();
+  await page.evaluate(async () => {
+    if ('serviceWorker' in navigator) await navigator.serviceWorker.ready;
+  });
+
   // Registro rápido de agua.
   await page.getByRole('button', { name: '+ 250 ml' }).click();
   await expect(page.getByText('1 vasos', { exact: true })).toBeVisible();
@@ -41,14 +47,19 @@ test('bot temporal recorre el flujo principal como usuario invitado', async ({ p
   for (let i = 0; i < count; i += 1) await exercises.nth(i).click();
   await page.getByRole('button', { name: 'Finalizar entrenamiento' }).click();
   await expect(page.getByRole('button', { name: 'Guardado ✓' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Guardado ✓' })).toBeDisabled();
 
   await page.getByRole('button', { name: 'Inicio', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Entrenamiento completado' })).toBeVisible();
 
-  // La app debe seguir registrando localmente sin Internet.
+  // La app debe seguir funcionando y recargando sin Internet gracias a PWA + IndexedDB.
   await context.setOffline(true);
   await expect(page.getByText('Sin conexión', { exact: true })).toBeVisible();
   await page.getByRole('button', { name: '+ 250 ml' }).click();
+  await expect(page.getByText('2 vasos', { exact: true })).toBeVisible();
+  await page.reload();
+  await expect(page.getByText('Fitness Jeff', { exact: true })).toBeVisible();
+  await expect(page.getByText('Sin conexión', { exact: true })).toBeVisible();
   await expect(page.getByText('2 vasos', { exact: true })).toBeVisible();
   await context.setOffline(false);
   await expect(page.getByText('En línea', { exact: true })).toBeVisible();
