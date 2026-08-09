@@ -14,8 +14,12 @@ export function TrainingScreen({ userId }: { userId: string | null }) {
   const [exercises, setExercises] = useState(DEFAULT);
   const [saved, setSaved] = useState(false);
 
-  const toggle = (index: number) => setExercises((items) => items.map((item, i) => i === index ? { ...item, done: !item.done } : item));
+  const toggle = (index: number) => {
+    if (saved) return;
+    setExercises((items) => items.map((item, i) => i === index ? { ...item, done: !item.done } : item));
+  };
   const complete = async () => {
+    if (saved) return;
     const base = newBaseRow(userId);
     await saveRow<WorkoutSession>('workout_sessions', { ...base, title: 'Rutina completa', duration_minutes: 35, completed_at: nowIso(), exercises });
     setSaved(true);
@@ -28,13 +32,13 @@ export function TrainingScreen({ userId }: { userId: string | null }) {
         <div className="section-heading"><div><h2>35 minutos</h2><p>4 bloques · descansos breves</p></div><span className="pill">Completa</span></div>
         <div className="exercise-list">
           {exercises.map((exercise, index) => (
-            <button key={exercise.name} className={`exercise ${exercise.done ? 'done' : ''}`} onClick={() => toggle(index)}>
+            <button key={exercise.name} className={`exercise ${exercise.done ? 'done' : ''}`} onClick={() => toggle(index)} disabled={saved}>
               <span className="check">{exercise.done ? '✓' : index + 1}</span>
               <span><strong>{exercise.name}</strong><small>{exercise.detail}</small></span>
             </button>
           ))}
         </div>
-        <button className="primary full" onClick={complete}>{saved ? 'Guardado ✓' : 'Finalizar entrenamiento'}</button>
+        <button className="primary full" onClick={complete} disabled={saved}>{saved ? 'Guardado ✓' : 'Finalizar entrenamiento'}</button>
       </article>
     </section>
   );
