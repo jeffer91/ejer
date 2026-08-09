@@ -27,29 +27,59 @@ export async function syncAll(userId: string): Promise<{ pushed: number; pulled:
   if (!supabase) return { pushed: 0, pulled: 0 };
   let pushed = 0;
   let pulled = 0;
+  const failures: string[] = [];
 
-  // Solo sincroniza operaciones que pertenecen al usuario activo. Esto evita
-  // que una cola pendiente de otra sesión termine asociándose a otra cuenta.
+  // Solo procesa operaciones del usuario activo. Antes de escribir, compara
+  // updated_at: el cambio con fecha más reciente prevalece.
   const queue = await getQueue();
   for (const operation of queue) {
-    const record = await getLocalById<BaseRow>(operation.table, operation.recordId);
-    if (!record) {
+    const local = await getLocalById<BaseRow>(operation.table, operation.recordId);
+    if (!local) {
       await removeQueueItem(operation.id);
       continue;
     }
-    if (record.user_id !== userId) continue;
+    if (local.user_id !== userId) continue;
 
-    const { error } = await supabase.from(operation.table).upsert(record, { onConflict: 'id' });
-    if (!error) {
-      await removeQueueItem(operation.id);
-      pushed += 1;
+    const { data: remote, error: readError } = await supabase
+      .from(operation.table)
+      .select('*')
+      .eq('id', local.id)
+      .eq('user_id', userId)
+      .maybeSingle();
+
+    if (readError) {
+      failures.push(`${operation.table}:read`);
+      continue;
     }
+
+    const remoteRow = remote as BaseRow | null;
+    if (remoteRow && remoteRow.updated_at.localeCompare(local.updated_at) > 0) {
+      await putLocal(operation.table, remoteRow);
+      await removeQueueItem(operation.id);
+      pulled += 1;
+      continue;
+    }
+
+    const { error: writeError } = await supabase.from(operation.table).upsert(local, { onConflict: 'id' });
+    if (writeError) {
+      failures.push(`${operation.table}:write`);
+      continue;
+    }
+
+    await removeQueueItem(operation.id);
+    pushed += 1;
   }
 
-  // La nube se mezcla con la copia local sin pisar cambios locales más nuevos.
+  // Mezcla la nube con la copia local sin pisar cambios locales más nuevos.
+  // También conserva tombstones para que un registro borrado no reaparezca localmente.
   for (const table of TABLES) {
-    const { data, error } = await supabase.from(table).select('*').eq('user_id', userId).is('deleted_at', null);
-    if (error || !data) continue;
+    const { data, error } = await supabase.from(table).select('*').eq('user_id', userId);
+    if (error) {
+      failures.push(`${table}:pull`);
+      continue;
+    }
+    if (!data) continue;
+
     for (const raw of data) {
       const remote = raw as BaseRow;
       const local = await getLocalById<BaseRow>(table, remote.id);
@@ -61,5 +91,16 @@ export async function syncAll(userId: string): Promise<{ pushed: number; pulled:
   }
 
   window.dispatchEvent(new CustomEvent('fitness-data-changed', { detail: { table: 'all' } }));
+
+  let activePending = 0;
+  for (const operation of await getQueue()) {
+    const record = await getLocalById<BaseRow>(operation.table, operation.recordId);
+    if (record?.user_id === userId) activePending += 1;
+  }
+
+  if (failures.length || activePending > 0) {
+    throw new Error(`Sincronización incompleta: ${activePending} pendiente(s).`);
+  }
+
   return { pushed, pulled };
 }
