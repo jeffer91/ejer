@@ -8,8 +8,9 @@ export async function saveRow<T extends BaseRow>(table: TableName, row: T): Prom
   window.dispatchEvent(new CustomEvent('fitness-data-changed', { detail: { table } }));
 }
 
-export async function listRows<T>(table: TableName): Promise<T[]> {
-  return getLocal<T>(table);
+export async function listRows<T extends BaseRow>(table: TableName, userId: string | null): Promise<T[]> {
+  const rows = await getLocal<T>(table);
+  return rows.filter((row) => row.user_id === userId && !row.deleted_at);
 }
 
 export function newBaseRow(userId: string | null): BaseRow {
