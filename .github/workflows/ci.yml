@@ -20,7 +20,9 @@ jobs:
       - name: Typecheck, unit tests and production build
         run: npm run check
       - name: Security audit
-        run: npm audit --audit-level=high
+        run: npm run audit
+      - name: Validate Cloudflare Pages Functions
+        run: npm run cloudflare:check
       - name: Install Chromium for temporary user bot
         run: npx playwright install --with-deps chromium
       - name: Run temporary user bot
