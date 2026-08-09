@@ -39,6 +39,34 @@ test('bot temporal recorre el flujo principal como usuario invitado', async ({ p
   await page.getByRole('button', { name: 'Progreso', exact: true }).click();
   await expect(page.getByText('70.5 kg', { exact: true }).first()).toBeVisible();
 
+  // Aislamiento: un registro local perteneciente a otro UID no debe mostrarse.
+  await page.evaluate(async () => {
+    const db = await new Promise<IDBDatabase>((resolve, reject) => {
+      const request = indexedDB.open('fitness-jeff-v1', 1);
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+    const now = new Date().toISOString();
+    const id = '11111111-1111-4111-8111-111111111111';
+    await new Promise<void>((resolve, reject) => {
+      const tx = db.transaction('records', 'readwrite');
+      tx.objectStore('records').put({
+        key: `body_records:${id}`,
+        table: 'body_records',
+        data: { id, user_id: '22222222-2222-4222-8222-222222222222', weight_kg: 99.9, created_at: now, updated_at: now, deleted_at: null },
+        updatedAt: now,
+      });
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+      tx.onabort = () => reject(tx.error);
+    });
+    db.close();
+  });
+  await page.reload();
+  await page.getByRole('button', { name: 'Progreso', exact: true }).click();
+  await expect(page.getByText('70.5 kg', { exact: true }).first()).toBeVisible();
+  await expect(page.getByText('99.9 kg', { exact: true })).toHaveCount(0);
+
   // Entrenamiento: completar la sesión y comprobar que Inicio se actualiza.
   await page.getByRole('button', { name: 'Entrenar', exact: true }).click();
   const exercises = page.locator('.exercise');
