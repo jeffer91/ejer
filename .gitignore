@@ -6,6 +6,10 @@ coverage/
 !.env.example
 *.log
 .DS_Store
+.wrangler/
+playwright-report/
+test-results/
+blob-report/
 src-tauri/target/
 src-tauri/gen/
 android/
