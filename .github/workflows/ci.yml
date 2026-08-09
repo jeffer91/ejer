@@ -59,3 +59,49 @@ jobs:
           rustup default stable
       - name: Validate Tauri Rust project
         run: cargo check --manifest-path src-tauri/Cargo.toml --locked
+
+  windows-installer:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install web dependencies
+        run: npm ci
+      - name: Use stable Rust
+        run: |
+          rustup update stable
+          rustup default stable
+      - name: Build Windows NSIS installer
+        run: npm run tauri:build -- --bundles nsis
+
+  android-apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Install web dependencies
+        run: npm ci
+      - name: Use stable Rust and Android targets
+        run: |
+          rustup update stable
+          rustup default stable
+          rustup target add aarch64-linux-android armv7-linux-androideabi i686-linux-android x86_64-linux-android
+      - name: Select Android NDK
+        run: |
+          NDK_PATH=$(find "$ANDROID_HOME/ndk" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -1)
+          test -n "$NDK_PATH"
+          echo "NDK_HOME=$NDK_PATH" >> "$GITHUB_ENV"
+      - name: Initialize Android project
+        run: npm run android:init
+      - name: Build Android APK
+        run: npm run android:build -- --apk
