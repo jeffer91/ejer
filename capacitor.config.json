@@ -1,8 +1,0 @@
-{
-  "appId": "com.jeff.fitness",
-  "appName": "Fitness Jeff",
-  "webDir": "src",
-  "server": {
-    "androidScheme": "https"
-  }
-}
